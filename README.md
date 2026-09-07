@@ -27,11 +27,11 @@ Early. Building in this order:
 
 | | Milestone | State |
 | --- | --- | --- |
-| M0 | Schema and skeleton | in progress |
-| M1 | Fetch layer — aviationweather.gov, FAA | |
-| M2 | METAR / TAF decoders | |
-| M3 | Route and time resolution | |
-| M4 | Rules engine — personal minimums, FAR 91.155 | |
+| M0 | Schema and skeleton | done |
+| M1 | Fetch layer — aviationweather.gov, FAA | **done** — NOTAM client awaits API credentials |
+| M2 | METAR / TAF decoders | **done** — 8,000 real reports in the corpus, <0.3 % unparsed |
+| M3 | Route and time resolution | **done** — ETA per waypoint, TAF period selection with overlays |
+| M4 | Rules engine — personal minimums, CARs 602.114/115, FAR 91.155 | **done** — airport-only; every finding cited |
 | M5 | Briefing assembly and UI | |
 | M6 | NOTAM relevance pipeline | |
 | M7 | Evaluation harness | |
@@ -45,6 +45,10 @@ above works end to end.
   build order, conventions, environment, how work is done.
 - **[`docs/spec.md`](docs/spec.md)** — the full build plan: hard parts in depth,
   hour estimates, data sources.
+- **[`docs/plan.md`](docs/plan.md)** — the build sequence: decisions taken,
+  what each step builds, and what "done" means for it.
+- **[`docs/worklog.md`](docs/worklog.md)** — chronological log of everything
+  done so far, wrong turns included. Append an entry every session.
 
 ## Design rules
 
@@ -66,9 +70,20 @@ Requires **Node 20+** and Docker.
 
 ```bash
 npm install
-npm run db:up        # Postgres + PostGIS on localhost:5433
-npm test
+cp .env.example .env # then put a contact address in HOLDSHORT_USER_AGENT
+npm run db:up        # Postgres + PostGIS on localhost:5433 (Docker Desktop must be running)
+npm test             # passes without Docker; includes the Postgres tests when it is up
 npm run typecheck
+npm run corpus:metar # what the METAR decoder does not yet understand, by frequency
+npm run corpus:taf   # same for TAF; add --us to restrict to US stations
+
+npm run holdshort -- fetch KJFK KTEB      # store + decode the current METAR/TAF
+npm run holdshort -- nasr <dir>           # load a NASR cycle's APT CSV files — US airports (see src/fetch/nasr.ts)
+npm run holdshort -- ourairports <dir> --country CA   # OurAirports snapshot — everywhere else (see src/fetch/ourairports.ts)
+npm run holdshort -- airport CYSN         # runways with true headings (and magnetic variation where the source has it)
+npm run holdshort -- resolve flights/demo-cysn-cykf.json --fetch   # conditions at each waypoint at its ETA, cited
+npm run holdshort -- brief flights/demo-cysn-cykf.json --fetch     # go / marginal / no-go per waypoint against profiles/default.json
+npm run holdshort -- decode "METAR KJFK 071151Z 34007KT 10SM CLR 19/11 A3015"
 ```
 
 ## Data sources
@@ -77,7 +92,8 @@ All public domain or free, with no redistribution restrictions:
 
 - [aviationweather.gov](https://aviationweather.gov/) (NOAA/AWC) — METAR, TAF, PIREP, AIRMET/SIGMET
 - FAA NOTAM API — NOTAMs by location and time
-- FAA NASR — airports, runways, magnetic variation
+- FAA NASR — US airports, runways, magnetic variation
+- OurAirports — airports and runways outside the US (public domain)
 - USGS — terrain elevation
 
 Fetched data is cached locally and not committed. Requests send a real

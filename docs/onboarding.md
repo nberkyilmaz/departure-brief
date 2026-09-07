@@ -60,19 +60,44 @@ is wrong regardless of how good it looks.
 
 ## 3. Current state
 
-The repo is scaffolded and nothing is implemented yet. Exactly this exists:
+The deterministic pipeline is complete end to end on the CLI — decoders,
+store, fetch, route/time resolution, rules engine — and `holdshort brief`
+produces a cited verdict. Step 5 (briefing storage + web UI) is next.
+Exactly this exists:
 
 | Path | What |
 | --- | --- |
-| `package.json` | Node ≥20, TypeScript, Vitest. **No runtime dependencies yet** — the decoders need none. |
+| `package.json` | Node ≥20, TypeScript, Vitest, `tsx` for scripts. **No runtime dependencies** — the decoders need none. |
 | `tsconfig.json` | Strict, plus `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes` |
 | `docker-compose.yml` | `postgis/postgis:16-3.4` on **port 5433** (avoids colliding with an existing 5432) |
 | `README.md` | Safety framing, status, design rules |
 | `docs/spec.md` | Full build plan — milestones, hours, hard parts, interview material |
-| `src/` | Empty directories: `decode/metar`, `decode/taf`, `fetch`, `domain` |
-| `test/fixtures/` | Empty |
+| `docs/plan.md` | Build sequence, decisions taken (web app, repo layout, conventions), definition of done per step |
+| `src/domain/` | `units.ts` (branded unit types), `time.ts` (Zulu-only day/time resolution) |
+| `src/decode/` | `span.ts`, `tokenizer.ts`, `unparsed.ts`, `groups/*` (wind, visibility, RVR, weather, sky, temperature, pressure, time, runway state), `conditions.ts` (the forecast-conditions parser shared by TAF periods and METAR trends) |
+| `src/decode/metar/` | `decode.ts` (state machine incl. ICAO `TEMPO`/`BECMG` trends with `FM`/`TL`/`AT`), `remarks.ts` (30 remark kinds), `derive.ts` (ceiling, flight category, wind in knots, observation instant), `types.ts` |
+| `src/decode/taf/` | `decode.ts` (header, periods: `base`/`FM`/`BECMG`/`TEMPO`/`INTER`/`PROB`, TAF-wide `TX`/`TN`, US and military trailer notices, `RMK`), `types.ts` |
+| `src/domain/airport.ts` | `Airport`/`Runway`/`RunwayEnd` as NASR describes them (true headings); `toMagnetic`/`toTrue` |
+| `src/store/` | `types.ts` (`ReportStore` + `AirportStore`, content-addressed `RawReport`), `memory.ts`, `postgres.ts` (+ plain-SQL `migrations/`, applied on connect) |
+| `src/fetch/` | `http.ts` (User-Agent, serialised rate limit, retry/backoff, optional disk cache), `awc.ts`, `notam.ts` (request shape only — see plan), `nasr.ts` (US airports) + `ourairports.ts` (everywhere else, incl. Canada) + `csv.ts`, `ingest.ts` (fetch → store raw → decode once per decoder version) |
+| `flights/`, `profiles/`, `aircraft/` | The owner's flight `demo-cysn-cykf.json` (CYSN → CYKF, alt CYHM); personal minimums `default.json`; `c172.json` (POH figures pending) |
+| `src/domain/geo.ts`, `flight.ts` | Great-circle distance/course, `lat,lon` parsing; `FlightPlan` + validating parser |
+| `src/resolve/` | `taf.ts` (period selection: prevailing vs overlays, element merge), `route.ts` (waypoints, legs, ETAs at planned TAS), `forecast.ts` (latest TAF known as of a time; nearest TAF within 60 NM for fields without one), `flight.ts` (all of it per waypoint), `describe.ts` (text rendering from spans) |
+| `flights/demo-kteb-khpn.json` | US test fixture (all four fields in the recorded AWC responses; N07 has no TAF) |
+| `src/domain/profile.ts`, `sun.ts` | `PilotProfile`/`AircraftLimits` + parsers; solar elevation and civil-twilight night test |
+| `src/rules/` | `vfrMinima.ts` (CARs + FAR tables), `crosswind.ts` (components, best runway), `checks.ts` (ceiling, visibility, crosswind, regulatory, night — each cites), `evaluate.ts` (resolved flight + profile → `Briefing`), `describe.ts`, `types.ts` (`Finding`, `Citation`, `Verdict`) |
+| `src/cli/main.ts` | `npm run holdshort -- fetch KJFK`, `nasr <dir>`, `ourairports <dir>`, `airport KJFK`, `resolve` / `brief <flight.json> [--fetch] [--as-of ISO] [--json]`, `decode "<report>"`; `--memory` runs without Postgres |
+| `.env.example` | `DATABASE_URL`, `HOLDSHORT_USER_AGENT`, FAA NOTAM credentials, optional HTTP cache dir |
+| `scripts/corpus-report.ts` | `npm run corpus:metar` / `corpus:taf` — unparsed tokens across a corpus by frequency; how the long tail is worked down |
+| `test/fixtures/fetch/` | Recorded AWC responses (2026-09-07) and a verbatim four-airport slice of the 2026-09-03 NASR cycle |
+| `test/fixtures/metar/`, `test/fixtures/taf/` | 5,060 METARs and 2,957 TAFs, all real, from AWC on 2026-09-07 (worldwide bulk caches plus a US METAR sample) |
+| `test/decode/` | Group tables, remark cases, hand-decoded full METARs and TAFs, derived values, corpus invariants (total, deterministic, every token claimed exactly once) |
 
-`npm install` has not been run yet.
+Decoder status on the corpus (share of body tokens the decoder did not
+recognise): METAR — US 0.13 %, worldwide 0.46 %; TAF — US 0.16 %, worldwide
+0.26 %. What remains is upstream typos (`BKT100`, `COVOK`, `TEMP0`), ASOS `M`
+missing-element markers, NATO colour states, and sea-state groups. Nothing is
+silently dropped: it is all in `unparsed` with spans.
 
 ---
 
@@ -85,11 +110,11 @@ build order.
 | Step | Work | spec | Hours | State |
 | --- | --- | --- | --- | --- |
 | 0 | Schema and skeleton | M0 | 8–12 | scaffold done, schema pending |
-| **1** | **METAR / TAF decoders** | M2 | 20–28 | **next** |
-| 2 | Fetch layer — AWC, FAA NOTAM, NASR | M1 | 12–16 | |
-| 3 | Route and time resolution | M3 | 20–28 | |
-| 4 | Rules engine — personal minimums, FAR 91.155 | M4 | 20–28 | |
-| 5 | Briefing assembly and UI | M5 | 25–35 | ← first end-to-end usable build |
+| 1 | METAR / TAF decoders | M2 | 20–28 | done |
+| 2 | Fetch layer — AWC, FAA NOTAM, NASR | M1 | 12–16 | done (NOTAM client unverified: no credentials yet) |
+| 3 | Route and time resolution | M3 | 20–28 | done (no winds aloft; nearest-station for fields without a TAF) |
+| 4 | Rules engine — personal minimums, CARs 602.114/115 + FAR 91.155 | M4 | 20–28 | done (airport-only; alternate rules, currency, W&B deferred) |
+| **5** | **Briefing assembly and UI** | M5 | 25–35 | **next** ← first end-to-end usable build |
 | 6 | NOTAM relevance **+ eval harness** | M6, M7 | 32–44 | first LLM work |
 | 7 | Aircraft document ingestion | M6b | 25–35 | second LLM work |
 | 8 | Airspace transit analysis (PostGIS) | M4b | 25–35 | |
@@ -121,12 +146,39 @@ happens.
 
 ---
 
-## 5. The immediate next task — M2, decoders
+## 5. The immediate next task — M5, briefing storage and UI
 
-Write a real parser for METAR, then TAF. **Not regex soup.** A tokenizer plus a
-state machine over group types — the same shape as a log-format parser.
+**The owner flies in Canada** (CYSN home field, C172). Treat Canada as the
+primary case; the spec's US wording is the second case.
 
-Groups that must be handled:
+See `docs/plan.md` step 5. The whole deterministic pipeline now runs on the
+CLI (`holdshort brief`); this step makes it a product surface. In order:
+(1) `src/brief/` — a `Briefing` record that is immutable and
+content-addressed (SHA-256 of canonical JSON), referencing the raw report
+hashes it was judged on, stored append-only with the flight plan, profile
+version and `asOf`; (2) convert to npm workspaces (`packages/core`,
+`apps/api`, `apps/web`); (3) Fastify API — `POST /flights`,
+`POST /flights/:id/brief`, `GET /briefings/:hash` — serving the built SPA;
+(4) React briefing view: per-point verdicts, each finding expandable to the
+raw report with the cited span highlighted, the safety banner always
+visible, Zulu shown with local beside it never instead of it. The CLI
+stays as the smoke test. Done when the owner's flight can be entered in a
+browser and yields the same cited verdict the CLI gives.
+
+Everything the UI needs already exists as data: `holdshort brief
+flights/demo-cysn-cykf.json --json` is the briefing shape (`src/rules/types.ts`).
+
+```bash
+npm run db:up                                                        # Docker Desktop must be running
+npm run holdshort -- ourairports data/raw/ourairports/2026-09-07 --country CA   # see src/fetch/ourairports.ts for the download
+npm run holdshort -- nasr data/raw/nasr/2026-09-03                   # US fields; see src/fetch/nasr.ts
+npm run holdshort -- brief flights/demo-cysn-cykf.json --fetch
+```
+
+### The decoders, for reference
+
+Both are a tokenizer plus a forward-only state machine over group types —
+**not regex soup**. Groups handled:
 
 ```
 KJFK 141851Z 28016G24KT 10SM FEW045 SCT250 09/M04 A3012 RMK AO2 SLP198
@@ -140,9 +192,11 @@ KJFK 141851Z 28016G24KT 10SM FEW045 SCT250 09/M04 A3012 RMK AO2 SLP198
 - Temp/dewpoint: `09/M04` — `M` prefix is negative
 - Altimeter: `A3012` (inHg), `Q1013` (hPa)
 - `AUTO`, `COR`, `NOSIG`, `RMK` section
-- TAF adds: validity period, `FM`, `BECMG`, `TEMPO`, `PROB30`/`PROB40`
+- TAF adds: validity period, `FM`, `BECMG`, `TEMPO`, `INTER`, `PROB30`/`PROB40`
+  (alone or qualifying `TEMPO`), `NSW`, `WS020/24045KT`, `TX`/`TN`, military
+  icing/turbulence/`QNH` groups, trailer notices, `RMK`
 
-### Requirements
+### Requirements (all met; keep them met)
 
 1. **Every decoded field keeps a source span** — the substring offsets it came
    from. This is the grounding used everywhere downstream; retrofitting it is
@@ -326,8 +380,10 @@ Listed because each is a tempting detour that adds no value here:
 | | |
 | --- | --- |
 | `docs/spec.md` | Full build plan — hard parts in depth, hour estimates, data sources, interview framing |
+| `docs/plan.md` | The build sequence ahead: decisions, per-step deliverables, definition of done |
+| `docs/worklog.md` | The sequence behind: every action taken, in order, mishaps included. **Append at the end of each session.** |
 | `docs/onboarding.md` | This file |
 | `README.md` | Public-facing description and safety framing |
 
 The spec is the authority on *what to build and why*. This file is the authority
-on *how work is done here*.
+on *how work is done here*. The work log is the authority on *what happened*.
