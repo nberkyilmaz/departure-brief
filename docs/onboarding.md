@@ -78,31 +78,46 @@ The repo is scaffolded and nothing is implemented yet. Exactly this exists:
 
 ## 4. Build order
 
-Strictly sequential. Each milestone should leave the system working end to end.
+Strictly sequential. Steps are numbered in build order; the `spec` column
+cross-references the milestone IDs in `docs/spec.md`, which are **not** in
+build order.
 
-| | Milestone | Hours | State |
-| --- | --- | --- | --- |
-| M0 | Schema and skeleton | 8–12 | scaffold done, schema pending |
-| **M2** | **METAR / TAF decoders** | **20–28** | **next** |
-| M1 | Fetch layer — AWC, FAA NOTAM, NASR | 12–16 | |
-| M3 | Route and time resolution | 20–28 | |
-| M4 | Rules engine — personal minimums, FAR 91.155 | 20–28 | |
-| M5 | Briefing assembly and UI | 25–35 | |
-| M6 | NOTAM relevance pipeline | 20–28 | |
-| M6b | Aircraft document ingestion | 25–35 | |
-| M7 | Evaluation harness | 12–16 | |
-| M4b | Airspace transit analysis (PostGIS) | 25–35 | |
-| M8 | Briefing diff | 10–14 | |
-| M9 | Forecast verification | 12–16 | |
-| M10 | Polish, README, demo | 8–12 | |
+| Step | Work | spec | Hours | State |
+| --- | --- | --- | --- | --- |
+| 0 | Schema and skeleton | M0 | 8–12 | scaffold done, schema pending |
+| **1** | **METAR / TAF decoders** | M2 | 20–28 | **next** |
+| 2 | Fetch layer — AWC, FAA NOTAM, NASR | M1 | 12–16 | |
+| 3 | Route and time resolution | M3 | 20–28 | |
+| 4 | Rules engine — personal minimums, FAR 91.155 | M4 | 20–28 | |
+| 5 | Briefing assembly and UI | M5 | 25–35 | ← first end-to-end usable build |
+| 6 | NOTAM relevance **+ eval harness** | M6, M7 | 32–44 | first LLM work |
+| 7 | Aircraft document ingestion | M6b | 25–35 | second LLM work |
+| 8 | Airspace transit analysis (PostGIS) | M4b | 25–35 | |
+| 9 | Briefing diff | M8 | 10–14 | |
+| 10 | Forecast verification | M9 | 12–16 | |
+| 11 | Polish, README, demo | M10 | 8–12 | |
 
-**Decoders come before the fetch layer deliberately.** Decoding is pure,
-testable, and needs no network. Building it first means the fetch layer has
-something to hand its output to, and the test corpus can be pasted-in real
-reports rather than live calls.
+### Why this order
+
+**Decoders before the fetch layer.** Decoding is pure and testable and needs no
+network. Building it first means the fetch layer has something to hand its
+output to, and the test corpus is pasted-in real reports rather than live calls.
 
 **The deterministic pipeline must produce a useful briefing before any LLM
-enters it.** M6 comes after M5 for that reason.
+enters it.** Step 5 is the first point where the tool is genuinely usable —
+weather in, verdict out, no model involved. Everything after that is
+enhancement to a working system.
+
+**Both LLM workloads get built** — NOTAM ranking at step 6, aircraft document
+extraction at step 7. Document extraction is deferred not because it matters
+less, but because it produces facts (inspection dates, W&B figures) that only
+the rules engine can consume. Building it before step 4 would mean a producer
+with no consumer and nothing to test against.
+
+**The eval harness ships *with* the first LLM feature, not after it.** Build
+the labelled corpus and scorer as part of step 6 — tuning a prompt without a
+scorer is guesswork, and retrofitting measurement onto a shipped feature never
+happens.
 
 ---
 
