@@ -6,7 +6,8 @@
  *   npx tsx scripts/corpus-report.ts --kind metar|taf [--section body|trend|remarks] [--top N] [--us]
  */
 import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { decodeMetar } from '../src/decode/metar/index.js';
 import { decodeTaf } from '../src/decode/taf/index.js';
 import { tokenize } from '../src/decode/tokenizer.js';
@@ -33,7 +34,7 @@ if (!decode) {
 }
 
 const US = /^(?:METAR |SPECI |TAF (?:AMD |COR )?)?[KP][A-Z0-9]{3} /;
-const dir = join(process.cwd(), 'test', 'fixtures', kind);
+const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'test', 'fixtures', kind);
 const raws = readdirSync(dir)
   .filter((f) => f.endsWith('.txt'))
   .flatMap((f) => readFileSync(join(dir, f), 'utf8').split(/\r?\n/))

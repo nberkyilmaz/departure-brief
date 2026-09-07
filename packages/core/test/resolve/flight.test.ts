@@ -37,7 +37,7 @@ async function seededStore(): Promise<MemoryStore> {
   return store;
 }
 
-const plan = parseFlightPlan(JSON.parse(readFileSync(join(__dirname, '..', '..', 'flights', 'demo-kteb-khpn.json'), 'utf8')));
+const plan = parseFlightPlan(JSON.parse(readFileSync(join(__dirname, '..', '..', '..', '..', 'flights', 'demo-kteb-khpn.json'), 'utf8')));
 
 describe('geo', () => {
   it('KJFK–KTEB is about 18 nm on a north-westerly course', () => {

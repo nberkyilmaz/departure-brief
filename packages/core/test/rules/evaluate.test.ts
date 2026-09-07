@@ -18,7 +18,7 @@ import { evaluateFlight } from '../../src/rules/evaluate.js';
 import { MemoryStore } from '../../src/store/memory.js';
 import { FIXTURES, replayHttp } from '../helpers/http.js';
 
-const root = join(__dirname, '..', '..');
+const root = join(__dirname, '..', '..', '..', '..');
 const plan = parseFlightPlan(JSON.parse(readFileSync(join(root, 'flights', 'demo-kteb-khpn.json'), 'utf8')));
 const profile = parsePilotProfile(JSON.parse(readFileSync(join(root, 'profiles', 'default.json'), 'utf8')));
 const aircraft = parseAircraftLimits(JSON.parse(readFileSync(join(root, 'aircraft', 'c172.json'), 'utf8')));

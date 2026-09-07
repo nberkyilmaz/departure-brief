@@ -1,0 +1,26 @@
+{
+  "name": "@holdshort/core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Decoders, store, fetch, resolution and rules — the deterministic pipeline. No runtime dependencies beyond pg.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.23.13",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
