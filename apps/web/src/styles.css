@@ -1,0 +1,75 @@
+:root {
+  --bg: #f7f7f5;
+  --fg: #1c1c1a;
+  --muted: #5c5c58;
+  --line: #d8d8d2;
+  --ok: #2e7d32;
+  --advisory: #4a6fa5;
+  --marginal: #b26a00;
+  --nogo: #b71c1c;
+  --mark: #fff59d;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+}
+body { margin: 0; }
+.banner {
+  background: var(--nogo); color: #fff; padding: 0.6rem 1rem; font-size: 0.95rem;
+  position: sticky; top: 0; z-index: 10;
+}
+main { max-width: 64rem; margin: 0 auto; padding: 1rem 1rem 4rem; }
+header h1 { margin: 0.4rem 0 0; font-size: 1.8rem; }
+.tagline { margin: 0 0 1rem; color: var(--muted); }
+fieldset { border: 1px solid var(--line); border-radius: 6px; margin: 0 0 1rem; background: #fff; }
+legend { padding: 0 0.4rem; color: var(--muted); font-size: 0.9rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 0.6rem 1rem; }
+label { display: flex; flex-direction: column; font-size: 0.85rem; color: var(--muted); gap: 0.2rem; }
+label.check { flex-direction: row; align-items: center; gap: 0.5rem; align-self: end; }
+label.inline { flex-direction: row; align-items: center; gap: 0.4rem; margin-right: 1rem; }
+input, select { font: inherit; padding: 0.35rem 0.5rem; border: 1px solid var(--line); border-radius: 4px; color: var(--fg); }
+.airspace { margin-top: 0.7rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; }
+.hint { font-size: 0.8rem; color: var(--muted); width: 100%; }
+.actions { display: flex; align-items: center; gap: 1rem; }
+button { font: inherit; padding: 0.55rem 1rem; border-radius: 6px; border: 1px solid var(--fg); background: var(--fg); color: #fff; cursor: pointer; }
+button:disabled { opacity: 0.6; cursor: wait; }
+.error { color: var(--nogo); margin: 0; }
+
+.briefing h2 { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; font-size: 1.2rem; }
+.meta { font-weight: normal; font-size: 0.85rem; color: var(--muted); }
+.explain { color: var(--muted); font-size: 0.9rem; }
+.verdict { padding: 0.15rem 0.5rem; border-radius: 4px; color: #fff; font-size: 0.85rem; letter-spacing: 0.04em; }
+.verdict.big { font-size: 1.3rem; padding: 0.3rem 0.8rem; }
+.verdict.go { background: var(--ok); }
+.verdict.marginal { background: var(--marginal); }
+.verdict.no-go { background: var(--nogo); }
+.point { border: 1px solid var(--line); border-left-width: 6px; border-radius: 6px; background: #fff; margin: 0.8rem 0; padding: 0.4rem 0.8rem; }
+.point.go { border-left-color: var(--ok); }
+.point.marginal { border-left-color: var(--marginal); }
+.point.no-go { border-left-color: var(--nogo); }
+.point h3 { font-size: 1rem; margin: 0.4rem 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.at { color: var(--muted); font-weight: normal; }
+.time small { color: var(--muted); font-weight: normal; }
+.night { background: #333; color: #fff; font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 3px; }
+.findings { list-style: none; margin: 0; padding: 0; }
+.finding { border-top: 1px solid var(--line); }
+.finding .row { all: unset; display: grid; grid-template-columns: 5.5rem 11rem 1fr; gap: 0.6rem; width: 100%; padding: 0.4rem 0; cursor: pointer; align-items: baseline; }
+.finding .row:hover { background: #fafaf7; }
+.badge { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.1rem 0.4rem; border-radius: 3px; color: #fff; text-align: center; }
+.badge.ok { background: var(--ok); }
+.badge.advisory { background: var(--advisory); }
+.badge.marginal { background: var(--marginal); }
+.badge.no-go { background: var(--nogo); }
+.basis { color: var(--muted); font-size: 0.85rem; }
+.detail { padding: 0.2rem 0 0.6rem 6.1rem; }
+.source-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+.raw { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85rem; white-space: pre-wrap; word-break: break-word; background: #f2f2ee; padding: 0.5rem; border-radius: 4px; margin: 0.2rem 0; }
+mark { background: var(--mark); padding: 0 0.1rem; }
+.also { font-size: 0.8rem; color: var(--muted); }
+.inputs-used { margin-top: 1rem; font-size: 0.85rem; color: var(--muted); }
+code { font-size: 0.8rem; background: #eee; padding: 0 0.25rem; border-radius: 3px; }
+@media (max-width: 40rem) {
+  .finding .row { grid-template-columns: 5rem 1fr; }
+  .finding .basis { grid-column: 2; }
+  .finding .summary { grid-column: 1 / -1; }
+  .detail { padding-left: 0; }
+}

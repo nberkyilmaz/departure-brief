@@ -32,7 +32,7 @@ Early. Building in this order:
 | M2 | METAR / TAF decoders | **done** — 8,000 real reports in the corpus, <0.3 % unparsed |
 | M3 | Route and time resolution | **done** — ETA per waypoint, TAF period selection with overlays |
 | M4 | Rules engine — personal minimums, CARs 602.114/115, FAR 91.155 | **done** — airport-only; every finding cited |
-| M5 | Briefing assembly and UI | |
+| M5 | Briefing assembly and UI | **done** — API + web app; briefings immutable and content-addressed |
 | M6 | NOTAM relevance pipeline | |
 | M7 | Evaluation harness | |
 
@@ -84,7 +84,13 @@ npm run holdshort -- airport CYSN         # runways with true headings (and magn
 npm run holdshort -- resolve flights/demo-cysn-cykf.json --fetch   # conditions at each waypoint at its ETA, cited
 npm run holdshort -- brief flights/demo-cysn-cykf.json --fetch     # go / marginal / no-go per waypoint against profiles/default.json
 npm run holdshort -- decode "METAR KJFK 071151Z 34007KT 10SM CLR 19/11 A3015"
+
+npm run build -w apps/web && npm start   # the web app and API on http://127.0.0.1:3000
+npm run dev:api & npm run dev:web        # development: Vite on :5173 proxying /api to :3000
 ```
+
+The repo is an npm workspace: `packages/core` (the pipeline; no runtime
+dependency but `pg`), `apps/api` (Fastify), `apps/web` (Vite + React).
 
 ## Data sources
 

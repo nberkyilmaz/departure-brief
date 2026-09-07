@@ -346,7 +346,40 @@ with citations.
 **Done when.** The demo flight yields a verdict per leg with each finding
 citing its source, and the 91.155 table is exhaustively tested.
 
-### Step 5 — Briefing assembly and UI (M5) — first usable build — **next**
+### Step 5 — Briefing assembly and UI (M5) — first usable build — **done 2026-09-07**
+
+Outcome: `npm start` serves the API and the built web app on
+http://127.0.0.1:3000; entering the owner's flight in the browser yields
+the same cited verdict the CLI gives, stored as an immutable
+content-addressed briefing. Verified live against Postgres: `POST
+/api/briefings` → 201 with the briefing hash, `GET /api/briefings/:sha`,
+`GET /api/briefings?flightKey=`, SPA at `/`. 527 tests across workspaces.
+
+What was built:
+
+- `packages/core/src/brief/` — canonical JSON + SHA-256; `assembleBriefing`
+  wraps the rules output with the plan, profile, aircraft, `asOf`, code
+  versions, and every report hash it was judged on. `flightKey` (route,
+  time, cruise) groups briefings of one flight for the diff.
+  `BriefingStore` on both stores; migration 0005.
+- npm workspaces: `packages/core`, `apps/api`, `apps/web`.
+- `apps/api` — Fastify. `POST /api/briefings` (plan, profile?, aircraft?,
+  asOf?, fetch?), `GET /api/briefings/:sha256`, `GET /api/briefings?flightKey`,
+  `GET /api/airports/:id`, `GET /api/health`; serves `apps/web/dist` with SPA
+  fallback. Tested with `fastify.inject` over a memory store and recorded
+  responses; no network. No model is ever called in a request.
+- `apps/web` — Vite + React. Flight form (defaults to the owner's flight),
+  personal-minimums and aircraft form, briefing view: verdict, per-point
+  cards, every finding expandable to the raw report with the cited span
+  highlighted, Zulu with local beside it, the safety banner sticky at the
+  top, and the list of report hashes the briefing was made from. The
+  browser bundle keeps its own copy of the API types so it never imports
+  the Node side of core.
+
+Not done, deliberately: no Playwright smoke test yet (the view was
+exercised through the API, not visually — the owner should open it); no
+hosting decision (local-first; `HOST`/`PORT` env for anything else); no
+briefing history UI (the data is there; that is step 9's surface).
 
 **Goal.** Weather in, verdict out, no model involved, on a screen.
 
@@ -366,7 +399,12 @@ citing its source, and the 91.155 table is exhaustively tested.
 **Done when.** You can enter the demo flight in the browser and get a cited
 verdict, and the same verdict from the CLI, with no LLM in the process.
 
-### Step 6 — NOTAM relevance + eval harness (M6, M7) — first LLM work
+### Step 6 — NOTAM relevance + eval harness (M6, M7) — first LLM work — **next**
+
+Blockers to clear first: FAA NOTAM API credentials (US NOTAMs), and a
+source for **Canadian NOTAMs** — the FAA API does not carry them; NAV
+CANADA's NOTAM search has no public API, so the first Canadian corpus will
+be pasted text. Both corpora must be real; nothing is fabricated.
 
 - `src/llm/` — `LLMProvider` interface; **`FixtureProvider` first**, then
   `OllamaProvider` (Qwen 2.5 7B), then a hosted provider. Cache on

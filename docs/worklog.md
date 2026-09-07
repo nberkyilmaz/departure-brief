@@ -473,3 +473,52 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
   resolve → evaluate → cited verdict, for the owner's real flight.
 - Open: C172 POH; FAA NOTAM credentials and a Canadian NOTAM source;
   hosting decision before step 5's API.
+
+---
+
+## Session 7 — 2026-09-07 — Commits; briefing store, API and web app (step 5)
+
+84. Committed six sessions of work as five step-ordered commits (decoders;
+    store + fetch; resolution; rules; CLI + docs), each buildable, no
+    attribution trailers, then the workspace conversion as a sixth.
+85. `git mv` of `src/`, `test/`, `scripts/`, `tsconfig.json` into
+    `packages/core`; root `package.json` became the workspace root with
+    scripts delegating to `packages/*` and `apps/*`; `.gitattributes`
+    normalises line endings. Two test paths and the corpus script's fixture
+    path adjusted. 513 tests still green after the move.
+86. `packages/core/src/brief/`: canonical JSON + SHA-256 (`contentHash`),
+    `assembleBriefing` (rules output + plan + profile + aircraft + `asOf` +
+    code versions + every report hash judged on → `StoredBriefing`),
+    `flightKey`. `BriefingStore` on memory and Postgres, migration 0005,
+    contract and assembly tests (hash stable across `createdAt`, differs by
+    profile, round-trips).
+87. `apps/api`: Fastify `buildServer` (health, airports, briefings POST/GET/
+    list, static SPA with fallback; 400 on bad input, 422 on unknown
+    waypoint); `main.ts` over Postgres with `.env`; tests via
+    `fastify.inject` over a memory store and recorded responses.
+88. `apps/web`: Vite + React — flight form defaulting to the owner's
+    flight, minimums/aircraft form, briefing view with per-point cards,
+    findings expandable to the raw report with the cited span highlighted
+    (`<mark>`), Zulu with local beside it, sticky safety banner, report
+    hash list. Local copy of the API types so the bundle never imports the
+    Node side of core.
+89. Fixes: a duplicated `vite` install made `vite.config.ts` fail
+    `tsc` under `exactOptionalPropertyTypes` — excluded from the web
+    tsconfig (Vite loads it itself); a fixture path slip in the API test.
+90. Verified live: API on :3111 over the Compose Postgres — `POST
+    /api/briefings` for the owner's flight → 201, hash, verdict GO, 6
+    reports; GET and list; SPA served at `/`; migration 0005 applied. Web
+    view exercised through the API and the build only — **not yet opened
+    in a browser**. Stopped the server with a broad `taskkill` on node.exe
+    with a filter — sloppier than it should have been; a PID file or
+    `kill $!` next time.
+91. Docs: plan step 5 done, step 6 next with its blockers (NOTAM
+    credentials; a Canadian NOTAM source); onboarding §3 (workspace
+    layout), §4, §5; README.
+
+### State at end of session 7
+
+- 527 tests across workspaces, typecheck clean. Committed through the
+  workspace conversion; step 5 files pending commit.
+- Open: C172 POH; FAA NOTAM credentials; Canadian NOTAM source; hosting;
+  a visual check of the web app by the owner.

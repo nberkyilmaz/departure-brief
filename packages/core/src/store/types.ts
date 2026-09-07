@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import type { StoredBriefing } from '../brief/types.js';
 import type { Airport } from '../domain/airport.js';
 
 export type ReportKind = 'metar' | 'taf' | 'notam';
@@ -70,7 +71,15 @@ export interface AirportStore {
   listAirportsNear(lat: number, lon: number, radiusNm: number): Promise<Airport[]>;
 }
 
-export type Store = ReportStore & AirportStore;
+/** Briefings are immutable and content-addressed; `put` of a known hash is a no-op. */
+export interface BriefingStore {
+  putBriefing(briefing: StoredBriefing): Promise<{ inserted: boolean }>;
+  getBriefing(sha256: string): Promise<StoredBriefing | null>;
+  /** Briefings of one flight, newest `asOf` first. */
+  listBriefings(flightKey: string, limit?: number): Promise<StoredBriefing[]>;
+}
+
+export type Store = ReportStore & AirportStore & BriefingStore;
 
 export function sha256Hex(text: string): string {
   return createHash('sha256').update(text, 'utf8').digest('hex');

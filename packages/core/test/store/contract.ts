@@ -2,6 +2,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { readNasrDirectory } from '../../src/fetch/nasr.js';
 import { readOurAirportsDirectory } from '../../src/fetch/ourairports.js';
+import type { StoredBriefing } from '../../src/brief/types.js';
 import { rawReport, type Store } from '../../src/store/types.js';
 import { FIXTURES } from '../helpers/http.js';
 
@@ -109,6 +110,28 @@ export function storeContract(name: string, make: () => Promise<Store>): void {
         const near = await store.listAirportsNear(43.19, -79.17, 40);
         expect(near[0]?.icaoId).toBe('CYSN');
         expect(near.map((a) => a.icaoId)).toContain('CYHM');
+      } finally {
+        await store.close();
+      }
+    });
+
+    it('stores briefings immutably by content hash and lists a flight\'s briefings newest first', async () => {
+      const store = await make();
+      try {
+        const doc = { format: 1, plan: { departure: 'CYSN' }, briefing: { verdict: 'go' } } as unknown as StoredBriefing['document'];
+        const a: StoredBriefing = { sha256: 'a'.repeat(64), flightKey: 'f1', asOf: t0, createdAt: t0, document: doc };
+        const b: StoredBriefing = { sha256: 'b'.repeat(64), flightKey: 'f1', asOf: t1, createdAt: t1, document: doc };
+        const other: StoredBriefing = { sha256: 'c'.repeat(64), flightKey: 'f2', asOf: t1, createdAt: t1, document: doc };
+        expect(await store.putBriefing(a)).toEqual({ inserted: true });
+        expect(await store.putBriefing(a)).toEqual({ inserted: false });
+        await store.putBriefing(b);
+        await store.putBriefing(other);
+        expect((await store.getBriefing(a.sha256))?.document).toEqual(doc);
+        expect((await store.getBriefing(a.sha256))?.asOf).toEqual(t0);
+        expect(await store.getBriefing('0'.repeat(64))).toBeNull();
+        expect((await store.listBriefings('f1')).map((x) => x.sha256)).toEqual([b.sha256, a.sha256]);
+        expect(await store.listBriefings('f1', 1)).toHaveLength(1);
+        expect(await store.listBriefings('none')).toEqual([]);
       } finally {
         await store.close();
       }

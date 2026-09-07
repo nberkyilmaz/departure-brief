@@ -36,7 +36,7 @@ if (available) {
     const pool = new pg.Pool({ connectionString: testUrl });
     pools.push(pool);
     await migrate(pool);
-    await pool.query('truncate report_fetches, decoded_reports, raw_reports, airports');
+    await pool.query('truncate report_fetches, decoded_reports, raw_reports, airports, briefings');
     // Sanity check on the JSON backfill migration: a row inserted with no
     // `source` in its document must come back with one.
     await pool.query(
@@ -51,7 +51,7 @@ if (available) {
   });
   afterAll(async () => {
     const pool = new pg.Pool({ connectionString: testUrl });
-    await pool.query('truncate report_fetches, decoded_reports, raw_reports, airports');
+    await pool.query('truncate report_fetches, decoded_reports, raw_reports, airports, briefings');
     await pool.end();
   });
 } else {

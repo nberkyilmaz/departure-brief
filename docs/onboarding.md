@@ -60,10 +60,18 @@ is wrong regardless of how good it looks.
 
 ## 3. Current state
 
-The deterministic pipeline is complete end to end on the CLI — decoders,
-store, fetch, route/time resolution, rules engine — and `holdshort brief`
-produces a cited verdict. Step 5 (briefing storage + web UI) is next.
-Exactly this exists:
+The deterministic pipeline is complete and usable: `npm start` serves an
+API and a web app that brief a flight to a cited verdict, stored as an
+immutable content-addressed document. Step 6 (NOTAMs + eval harness, the
+first LLM work) is next. The repo is an npm workspace:
+
+| Path | What |
+| --- | --- |
+| `packages/core` | The pipeline. Everything below under `src/` and `test/` lives here. |
+| `apps/api` | Fastify: `POST /api/briefings`, `GET /api/briefings/:sha256`, `GET /api/briefings?flightKey`, `GET /api/airports/:id`, `GET /api/health`; serves `apps/web/dist`. `npm run dev:api` / `npm start`. |
+| `apps/web` | Vite + React briefing view. `npm run dev:web` (proxies `/api` to :3000), `npm run build -w apps/web`. Keeps its own copy of the API types (`src/types.ts`) — never imports core at runtime. |
+
+Inside `packages/core`:
 
 | Path | What |
 | --- | --- |
@@ -86,6 +94,7 @@ Exactly this exists:
 | `flights/demo-kteb-khpn.json` | US test fixture (all four fields in the recorded AWC responses; N07 has no TAF) |
 | `src/domain/profile.ts`, `sun.ts` | `PilotProfile`/`AircraftLimits` + parsers; solar elevation and civil-twilight night test |
 | `src/rules/` | `vfrMinima.ts` (CARs + FAR tables), `crosswind.ts` (components, best runway), `checks.ts` (ceiling, visibility, crosswind, regulatory, night — each cites), `evaluate.ts` (resolved flight + profile → `Briefing`), `describe.ts`, `types.ts` (`Finding`, `Citation`, `Verdict`) |
+| `src/brief/` | `canonical.ts` (canonical JSON, content hash), `assemble.ts` (`assembleBriefing`: rules output + plan + profile + report hashes + code versions → `StoredBriefing`; `flightKey`), `types.ts` |
 | `src/cli/main.ts` | `npm run holdshort -- fetch KJFK`, `nasr <dir>`, `ourairports <dir>`, `airport KJFK`, `resolve` / `brief <flight.json> [--fetch] [--as-of ISO] [--json]`, `decode "<report>"`; `--memory` runs without Postgres |
 | `.env.example` | `DATABASE_URL`, `HOLDSHORT_USER_AGENT`, FAA NOTAM credentials, optional HTTP cache dir |
 | `scripts/corpus-report.ts` | `npm run corpus:metar` / `corpus:taf` — unparsed tokens across a corpus by frequency; how the long tail is worked down |
@@ -114,8 +123,8 @@ build order.
 | 2 | Fetch layer — AWC, FAA NOTAM, NASR | M1 | 12–16 | done (NOTAM client unverified: no credentials yet) |
 | 3 | Route and time resolution | M3 | 20–28 | done (no winds aloft; nearest-station for fields without a TAF) |
 | 4 | Rules engine — personal minimums, CARs 602.114/115 + FAR 91.155 | M4 | 20–28 | done (airport-only; alternate rules, currency, W&B deferred) |
-| **5** | **Briefing assembly and UI** | M5 | 25–35 | **next** ← first end-to-end usable build |
-| 6 | NOTAM relevance **+ eval harness** | M6, M7 | 32–44 | first LLM work |
+| 5 | Briefing assembly and UI | M5 | 25–35 | done — first end-to-end usable build |
+| **6** | **NOTAM relevance + eval harness** | M6, M7 | 32–44 | **next** — first LLM work; needs NOTAM credentials and a Canadian NOTAM source |
 | 7 | Aircraft document ingestion | M6b | 25–35 | second LLM work |
 | 8 | Airspace transit analysis (PostGIS) | M4b | 25–35 | |
 | 9 | Briefing diff | M8 | 10–14 | |
@@ -146,27 +155,31 @@ happens.
 
 ---
 
-## 5. The immediate next task — M5, briefing storage and UI
+## 5. The immediate next task — M6 + M7, NOTAMs and the eval harness
 
 **The owner flies in Canada** (CYSN home field, C172). Treat Canada as the
 primary case; the spec's US wording is the second case.
 
-See `docs/plan.md` step 5. The whole deterministic pipeline now runs on the
-CLI (`holdshort brief`); this step makes it a product surface. In order:
-(1) `src/brief/` — a `Briefing` record that is immutable and
-content-addressed (SHA-256 of canonical JSON), referencing the raw report
-hashes it was judged on, stored append-only with the flight plan, profile
-version and `asOf`; (2) convert to npm workspaces (`packages/core`,
-`apps/api`, `apps/web`); (3) Fastify API — `POST /flights`,
-`POST /flights/:id/brief`, `GET /briefings/:hash` — serving the built SPA;
-(4) React briefing view: per-point verdicts, each finding expandable to the
-raw report with the cited span highlighted, the safety banner always
-visible, Zulu shown with local beside it never instead of it. The CLI
-stays as the smoke test. Done when the owner's flight can be entered in a
-browser and yields the same cited verdict the CLI gives.
+See `docs/plan.md` step 6 and onboarding §10 (LLM policy). This is the first
+LLM work, and the eval harness ships *with* it. In order: (1) obtain real
+NOTAMs — FAA API credentials for US fields, and pasted NAV CANADA text for
+CYSN/CYKF/CYHM, stored verbatim like every other report; (2) deterministic
+parse (location, effective window, category) and time-window filtering
+before any token is spent; (3) fingerprint dedupe; (4) `LLMProvider` with
+`FixtureProvider` **first**, then `OllamaProvider` (Qwen 2.5 7B); (5) the
+`NotamAssessment` schema from the spec with **citation verification** —
+`cited_span` must be a verbatim substring or the assessment is demoted;
+(6) a hand-labelled set and a scorer that gates CI. **Nothing is ever
+dropped**: relevance orders and collapses only.
 
-Everything the UI needs already exists as data: `holdshort brief
-flights/demo-cysn-cykf.json --json` is the briefing shape (`src/rules/types.ts`).
+Running the product today:
+
+```bash
+npm run db:up                       # Docker Desktop must be running
+npm run build -w apps/web           # once, or after web changes
+npm start                           # API + web app on http://127.0.0.1:3000
+# development: npm run dev:api and npm run dev:web (Vite on :5173, proxies /api)
+```
 
 ```bash
 npm run db:up                                                        # Docker Desktop must be running

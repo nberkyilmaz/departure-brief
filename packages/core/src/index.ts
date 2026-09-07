@@ -14,3 +14,4 @@ export * from './store/index.js';
 export * from './fetch/index.js';
 export * from './resolve/index.js';
 export * from './rules/index.js';
+export * from './brief/index.js';

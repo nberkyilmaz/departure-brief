@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
+import type { BriefingDocument, StoredBriefing } from '../brief/types.js';
 import type { Airport } from '../domain/airport.js';
 import { distanceNm } from '../domain/geo.js';
 import type { DecodedRow, FetchEvent, ListRawQuery, RawReport, ReportKind, Store } from './types.js';
@@ -212,9 +213,45 @@ export class PostgresStore implements Store {
       .map((x) => x.a);
   }
 
+  async putBriefing(b: StoredBriefing): Promise<{ inserted: boolean }> {
+    const res = await this.pool.query(
+      `insert into briefings (sha256, flight_key, as_of, created_at, document)
+       values ($1, $2, $3, $4, $5)
+       on conflict (sha256) do nothing`,
+      [b.sha256, b.flightKey, b.asOf, b.createdAt, JSON.stringify(b.document)],
+    );
+    return { inserted: (res.rowCount ?? 0) > 0 };
+  }
+
+  async getBriefing(sha256: string): Promise<StoredBriefing | null> {
+    const res = await this.pool.query<BriefingRow>('select sha256, flight_key, as_of, created_at, document from briefings where sha256 = $1', [sha256]);
+    const row = res.rows[0];
+    return row ? toBriefing(row) : null;
+  }
+
+  async listBriefings(flightKey: string, limit = 20): Promise<StoredBriefing[]> {
+    const res = await this.pool.query<BriefingRow>(
+      'select sha256, flight_key, as_of, created_at, document from briefings where flight_key = $1 order by as_of desc, created_at desc limit $2',
+      [flightKey, limit],
+    );
+    return res.rows.map(toBriefing);
+  }
+
   async close(): Promise<void> {
     await this.pool.end();
   }
+}
+
+interface BriefingRow {
+  sha256: string;
+  flight_key: string;
+  as_of: Date;
+  created_at: Date;
+  document: BriefingDocument;
+}
+
+function toBriefing(row: BriefingRow): StoredBriefing {
+  return { sha256: row.sha256, flightKey: row.flight_key, asOf: row.as_of, createdAt: row.created_at, document: row.document };
 }
 
 function toRawReport(row: RawRow): RawReport {

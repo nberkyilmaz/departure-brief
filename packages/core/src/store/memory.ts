@@ -1,3 +1,4 @@
+import type { StoredBriefing } from '../brief/types.js';
 import { airportPreference, type Airport } from '../domain/airport.js';
 import { distanceNm } from '../domain/geo.js';
 import type { DecodedRow, FetchEvent, ListRawQuery, RawReport, Store } from './types.js';
@@ -11,6 +12,7 @@ export class MemoryStore implements Store {
   private readonly fetches: { sha256: string; event: FetchEvent }[] = [];
   private readonly decoded = new Map<string, DecodedRow>();
   private readonly airports = new Map<string, Airport>();
+  private readonly briefings = new Map<string, StoredBriefing>();
 
   async putRaw(report: RawReport, fetch: FetchEvent): Promise<{ inserted: boolean }> {
     this.fetches.push({ sha256: report.sha256, event: fetch });
@@ -77,6 +79,23 @@ export class MemoryStore implements Store {
       .filter((x) => x.d <= radiusNm)
       .sort((x, y) => x.d - y.d)
       .map((x) => x.a);
+  }
+
+  async putBriefing(briefing: StoredBriefing): Promise<{ inserted: boolean }> {
+    if (this.briefings.has(briefing.sha256)) return { inserted: false };
+    this.briefings.set(briefing.sha256, briefing);
+    return { inserted: true };
+  }
+
+  async getBriefing(sha256: string): Promise<StoredBriefing | null> {
+    return this.briefings.get(sha256) ?? null;
+  }
+
+  async listBriefings(flightKey: string, limit = 20): Promise<StoredBriefing[]> {
+    return [...this.briefings.values()]
+      .filter((b) => b.flightKey === flightKey)
+      .sort((a, b) => b.asOf.getTime() - a.asOf.getTime() || b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit);
   }
 
   async close(): Promise<void> {}
