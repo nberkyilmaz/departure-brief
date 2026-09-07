@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local environment
+.env
+.env.local
+
+# Cached upstream data. Aviation weather and FAA data are public domain, but
+# there is no reason to commit fetched snapshots — refetch instead.
+cache/
+data/raw/
+
+.DS_Store
+Thumbs.db
