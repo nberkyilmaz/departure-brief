@@ -39,6 +39,13 @@ Early. Building in this order:
 Airspace transit analysis, nav logs and forecast verification come after the
 above works end to end.
 
+## Documentation
+
+- **[`docs/onboarding.md`](docs/onboarding.md)** — start here. Current state,
+  build order, conventions, environment, how work is done.
+- **[`docs/spec.md`](docs/spec.md)** — the full build plan: hard parts in depth,
+  hour estimates, data sources.
+
 ## Design rules
 
 These are load-bearing, not preferences:
