@@ -1,0 +1,49 @@
+import { decodeMetar, METAR_DECODER_VERSION, type DecodedMetar } from '../decode/metar/index.js';
+import type { FlightPlan } from '../domain/flight.js';
+import type { RawReport, Store } from '../store/types.js';
+import { forecastAt, type WaypointForecast } from './forecast.js';
+import { resolveRoute, type Route, type RoutePoint } from './route.js';
+
+export interface ResolvedPoint {
+  readonly point: RoutePoint;
+  /** The forecast governing this point at its ETA, or `null` with the reason visible to the user. */
+  readonly forecast: WaypointForecast | null;
+  /** Latest observation at the field itself, when it reports; for the departure this is "now". */
+  readonly metar: { readonly report: RawReport; readonly decoded: DecodedMetar } | null;
+}
+
+export interface ResolvedFlight {
+  readonly plan: FlightPlan;
+  /** The briefing instant: only reports known by then are used. */
+  readonly asOf: Date;
+  readonly route: Route;
+  readonly points: readonly ResolvedPoint[];
+  readonly alternate: ResolvedPoint | null;
+}
+
+async function latestMetar(store: Store, station: string, asOf: Date): Promise<ResolvedPoint['metar']> {
+  const candidates = await store.listRaw({ station, kind: 'metar', limit: 10 });
+  const report = candidates.find((r) => r.issuedAt !== null && r.issuedAt.getTime() <= asOf.getTime());
+  if (!report) return null;
+  const stored = await store.getDecoded(report.sha256, METAR_DECODER_VERSION);
+  return { report, decoded: stored ? (stored.decoded as DecodedMetar) : decodeMetar(report.body) };
+}
+
+async function resolvePoint(store: Store, point: RoutePoint, asOf: Date): Promise<ResolvedPoint> {
+  const station = point.waypoint.airport?.icaoId ?? null;
+  const forecast = await forecastAt(store, point.waypoint.position, station, point.eta, asOf);
+  const metar = station ? await latestMetar(store, station, asOf) : null;
+  return { point, forecast, metar };
+}
+
+/**
+ * Resolve a flight plan to conditions at each point at the time the aircraft
+ * will be there, using only what the store knew at `asOf`.
+ */
+export async function resolveFlight(store: Store, plan: FlightPlan, asOf: Date): Promise<ResolvedFlight> {
+  const route = await resolveRoute(store, plan);
+  const points = [];
+  for (const p of route.points) points.push(await resolvePoint(store, p, asOf));
+  const alternate = route.alternate ? await resolvePoint(store, route.alternate.point, asOf) : null;
+  return { plan, asOf, route, points, alternate };
+}
