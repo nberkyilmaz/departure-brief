@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "name": "default",
+  "ceilingAglFt": 2500,
+  "visibilitySm": 5,
+  "crosswindKt": 15,
+  "crosswindIncludesGust": true
+}
