@@ -1,0 +1,81 @@
+import { createHash } from 'node:crypto';
+import type { Airport } from '../domain/airport.js';
+
+export type ReportKind = 'metar' | 'taf' | 'notam';
+
+/**
+ * One upstream report, stored verbatim. Content-addressed: `sha256` is the
+ * hash of `body`'s UTF-8 bytes, so the same report fetched twice is one row,
+ * and a row can never be changed without changing its key.
+ */
+export interface RawReport {
+  readonly sha256: string;
+  readonly kind: ReportKind;
+  /** Which upstream it came from: `awc`, `faa-notam`. */
+  readonly source: string;
+  /** ICAO identifier when the report is about one station. */
+  readonly station: string | null;
+  /** The report text exactly as the upstream gave it. */
+  readonly body: string;
+  /** When the upstream says it was issued/observed. Zulu. */
+  readonly issuedAt: Date | null;
+  /** The upstream's own metadata record, verbatim; never used for decisions. */
+  readonly upstream: unknown;
+}
+
+/** One occasion on which a report was fetched. Recorded even when the content was already known. */
+export interface FetchEvent {
+  readonly fetchedAt: Date;
+  /** The request that produced it, normally the URL. */
+  readonly request: string;
+}
+
+export interface DecodedRow {
+  readonly sha256: string;
+  readonly kind: ReportKind;
+  readonly decoderVersion: number;
+  readonly decoded: unknown;
+  readonly decodedAt: Date;
+}
+
+export interface ListRawQuery {
+  readonly station: string;
+  readonly kind: ReportKind;
+  /** Newest issued first; defaults to 20. */
+  readonly limit?: number;
+}
+
+/**
+ * Append-only storage for raw and decoded reports. Implementations never
+ * update or delete; `put*` return whether a new row was written.
+ */
+export interface ReportStore {
+  putRaw(report: RawReport, fetch: FetchEvent): Promise<{ inserted: boolean }>;
+  getRaw(sha256: string): Promise<RawReport | null>;
+  listRaw(query: ListRawQuery): Promise<RawReport[]>;
+  putDecoded(row: DecodedRow): Promise<{ inserted: boolean }>;
+  getDecoded(sha256: string, decoderVersion: number): Promise<DecodedRow | null>;
+  close(): Promise<void>;
+}
+
+/**
+ * NASR airports by cycle. Loading a cycle already present is a no-op; a
+ * lookup returns the airport from the newest loaded cycle.
+ */
+export interface AirportStore {
+  putAirports(airports: readonly Airport[], loadedAt: Date): Promise<{ inserted: number }>;
+  /** By ICAO id (`KJFK`) or FAA id (`JFK`, `N07`), case-insensitive. */
+  getAirport(id: string): Promise<Airport | null>;
+  /** Airports (newest cycle each) within a great-circle radius, nearest first. */
+  listAirportsNear(lat: number, lon: number, radiusNm: number): Promise<Airport[]>;
+}
+
+export type Store = ReportStore & AirportStore;
+
+export function sha256Hex(text: string): string {
+  return createHash('sha256').update(text, 'utf8').digest('hex');
+}
+
+export function rawReport(fields: Omit<RawReport, 'sha256'>): RawReport {
+  return { ...fields, sha256: sha256Hex(fields.body) };
+}
