@@ -1,6 +1,7 @@
 import fastifyStatic from '@fastify/static';
 import {
   assembleBriefing,
+  diffBriefings,
   ingestStation,
   notamsForFlight,
   parseAircraftLimits,
@@ -110,6 +111,24 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
     const b = await store.getBriefing(req.params.sha256);
     if (!b) return reply.code(404).send({ error: 'no such briefing' });
     return b;
+  });
+
+  /**
+   * What changed between this briefing and an earlier one — by default the
+   * previous briefing of the same flight. 404 when there is nothing to
+   * compare against, so the caller can say "first briefing" rather than
+   * showing an empty diff.
+   */
+  app.get<{ Params: { sha256: string }; Querystring: { against?: string } }>('/api/briefings/:sha256/diff', async (req, reply) => {
+    const after = await store.getBriefing(req.params.sha256);
+    if (!after) return reply.code(404).send({ error: 'no such briefing' });
+    // The newest briefing at or before this one — never a later one, or the
+    // diff would read backwards in time.
+    const before = req.query.against
+      ? await store.getBriefing(req.query.against)
+      : ((await store.listBriefings(after.flightKey, 50)).find((b) => b.sha256 !== after.sha256 && new Date(b.asOf).getTime() <= new Date(after.asOf).getTime()) ?? null);
+    if (!before) return reply.code(404).send({ error: 'no earlier briefing for this flight to compare against' });
+    return diffBriefings(before, after);
   });
 
   app.get<{ Querystring: { flightKey?: string; limit?: string } }>('/api/briefings', async (req, reply) => {

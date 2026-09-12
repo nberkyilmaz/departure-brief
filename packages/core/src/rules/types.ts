@@ -1,7 +1,7 @@
 import type { Span } from '../decode/span.js';
 
 /** Bump when a rule's meaning or a finding's shape changes. */
-export const RULES_VERSION = 1;
+export const RULES_VERSION = 2;
 
 export type Verdict = 'go' | 'marginal' | 'no-go';
 
@@ -25,6 +25,14 @@ export interface Citation {
   readonly sha256: string | null;
 }
 
+/**
+ * What kind of evidence a finding rests on. `basis` carries the readable
+ * detail (`observed 1151Z`, `TEMPO 15:00Z–17:00Z`), which changes between
+ * briefings even when nothing material does; `basisKind` is the stable part,
+ * so the diff can tell "the same check on the same evidence" from a new one.
+ */
+export type BasisKind = 'prevailing' | 'overlay' | 'observed' | 'forecast' | 'time';
+
 export interface Finding {
   /** Stable rule identifier, e.g. `personal.ceiling`, `crosswind.personal`, `vfr.visibility`. */
   readonly rule: string;
@@ -34,6 +42,7 @@ export interface Finding {
   readonly waypoint: string;
   /** Which forecast state produced it: prevailing, a named overlay, or the observation. */
   readonly basis: string;
+  readonly basisKind: BasisKind;
   /** ISO instant the finding applies to. */
   readonly at: string;
   readonly values: Readonly<Record<string, unknown>>;

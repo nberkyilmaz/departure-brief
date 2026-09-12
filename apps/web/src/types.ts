@@ -108,6 +108,34 @@ export interface NotamDocument {
   items: NotamItem[];
 }
 
+export interface FindingChange {
+  kind: 'appeared' | 'resolved' | 'worsened' | 'eased' | 'restated';
+  waypoint: string;
+  rule: string;
+  basisKind: string;
+  before: Finding | null;
+  after: Finding | null;
+  crossesLimit: boolean;
+}
+
+export interface PointDiff {
+  waypoint: string;
+  verdict: { from: Verdict; to: Verdict } | null;
+  changes: FindingChange[];
+}
+
+export interface BriefingDiff {
+  from: { sha256: string; asOf: string; verdict: Verdict };
+  to: { sha256: string; asOf: string; verdict: Verdict };
+  verdict: { from: Verdict; to: Verdict } | null;
+  points: PointDiff[];
+  alternate: PointDiff | null;
+  notams: { kind: 'new' | 'gone' | 'rank-changed'; id: string | null; sha256: string; from: string | null; to: string | null; summary: string; notable: boolean }[];
+  reports: { added: { kind: string; station: string | null; sha256: string }[]; removed: { kind: string; station: string | null; sha256: string }[] };
+  warnings: string[];
+  quiet: boolean;
+}
+
 export interface StoredBriefing {
   sha256: string;
   flightKey: string;

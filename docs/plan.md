@@ -489,7 +489,41 @@ point-in-polygon by altitude band; terrain AGL from USGS; civil twilight for
 day/night; SUA × NOTAM activation join. Upgrades the 91.155 function from
 airport-only to per-segment.
 
-### Step 9 — Briefing diff (M8)
+### Step 9 — Briefing diff (M8) — **done 2026-09-12**
+
+Built out of order, ahead of steps 7 and 8: those are blocked on the C172
+POH and on airspace data, this was not, and the spec calls it the
+differentiator.
+
+The insight that made it small: **the rules engine already encodes every
+threshold in a finding's severity**, so "a value crossed one of your
+personal minimums" is exactly "this finding's severity moved across the ok
+boundary". No second copy of the limits, and it stays true for rules added
+later. A ceiling moving 2,000 → 1,800 ft against a 1,500 ft minimum
+produces a `restated` change and the diff stays quiet; 1,600 → 1,400 is
+`worsened` with `crossesLimit`.
+
+- Findings are matched across briefings on (waypoint, rule, **basisKind**).
+  `basis` carries readable detail — `observed 1151Z` — which changes
+  between briefings even when nothing material does, so `Finding` gained a
+  stable `basisKind` (`RULES_VERSION` → 2). The diff falls back to parsing
+  `basis` for briefings written before that.
+- `src/brief/diff.ts`, `describeDiff.ts`; `holdshort diff <flight.json>`;
+  `GET /api/briefings/:sha256/diff[?against=]`; a web panel above the
+  briefing showing what moved, with crossings highlighted.
+- NOTAM changes are `new` / `gone` / `rank-changed`, each with `notable` —
+  a NOTAM outside the flight's window is listed but is not news, and does
+  not on its own make a diff loud.
+- A diff between briefings of different flights, profiles or rules versions
+  is warned about rather than refused: seeing the comparison with its
+  caveat beats being blocked.
+
+**A bug the live run caught.** "The previous briefing" was "the newest one
+that is not this one", which can be *newer* than the briefing just made —
+the demo printed "Since your 20:01Z briefing (now 13:00Z)". It now means
+the newest briefing at or before this one, in the CLI and the API, with a
+test that stores a later briefing first and checks the earlier one has
+nothing to compare against.
 
 Falls out of content-addressed, immutable briefings. Diff at the **verdict and
 finding level**, not raw text: new NOTAMs, verdict transitions, any value that

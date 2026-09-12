@@ -17,7 +17,7 @@ import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
 import type { FeetAgl, FeetMsl } from '../domain/units.js';
 import { ftAgl } from '../domain/units.js';
 import { analyseCrosswind } from './crosswind.js';
-import type { Citation, Finding, Severity } from './types.js';
+import type { BasisKind, Citation, Finding, Severity } from './types.js';
 import { jurisdictionOf, vfrMinima } from './vfrMinima.js';
 
 /** What every check needs to know about where its conditions came from. */
@@ -25,6 +25,7 @@ export interface CheckContext {
   readonly waypoint: string;
   readonly at: Date;
   readonly basis: string;
+  readonly basisKind: BasisKind;
   /** Severity for a violation in these conditions. */
   readonly violation: Extract<Severity, 'marginal' | 'no-go'>;
   readonly source: { readonly kind: 'taf' | 'metar'; readonly station: string | null; readonly raw: string; readonly sha256: string | null };
@@ -57,7 +58,7 @@ const profileCitation = (p: PilotProfile): Citation => ({
 });
 
 function finding(ctx: CheckContext, rule: string, severity: Severity, summary: string, values: Record<string, unknown>, citations: Citation[]): Finding {
-  return { rule, severity, summary, waypoint: ctx.waypoint, basis: ctx.basis, at: ctx.at.toISOString(), values, citations };
+  return { rule, severity, summary, waypoint: ctx.waypoint, basis: ctx.basis, basisKind: ctx.basisKind, at: ctx.at.toISOString(), values, citations };
 }
 
 /** Lowest BKN/OVC base or vertical visibility, with the group it came from. */

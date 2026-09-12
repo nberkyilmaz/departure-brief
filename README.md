@@ -35,6 +35,7 @@ Early. Building in this order:
 | M5 | Briefing assembly and UI | **done** — API + web app; briefings immutable and content-addressed |
 | M6 | NOTAM relevance pipeline | **done** — decoder, filter, dedupe, ranking with citation checks; needs a local model |
 | M7 | Evaluation harness | **done** — labelled set + scorer; gate skips until the model is recorded |
+| M8 | Briefing diff | **done** — diffs the verdict, not the text; a value that moves without crossing a limit is not news |
 
 Airspace transit analysis, nav logs and forecast verification come after the
 above works end to end.
@@ -84,6 +85,7 @@ npm run holdshort -- airport CYSN         # runways with true headings (and magn
 npm run holdshort -- resolve flights/demo-cysn-cykf.json --fetch   # conditions at each waypoint at its ETA, cited
 npm run holdshort -- brief flights/demo-cysn-cykf.json --fetch     # go / marginal / no-go per waypoint against profiles/default.json
 npm run holdshort -- notams flights/demo-cysn-cykf.json --fetch    # every NOTAM for the flight, classified and (with a model) ranked
+npm run holdshort -- diff flights/demo-cysn-cykf.json --fetch      # brief again and say what changed since last time
 npm run holdshort -- decode "METAR KJFK 071151Z 34007KT 10SM CLR 19/11 A3015"
 
 # NOTAM relevance ranking is the only part that uses a model, and it is optional.

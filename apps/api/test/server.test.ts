@@ -104,6 +104,52 @@ describe('POST /api/briefings', () => {
   });
 });
 
+describe('GET /api/briefings/:sha256/diff', () => {
+  it('404s when there is nothing to compare against, then diffs against the previous briefing of the flight', async () => {
+    const app = await makeApp();
+    const first = (await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan, profile, asOf: '2026-09-07T11:00:00Z' } })).json() as StoredBriefing;
+    const none = await app.inject({ method: 'GET', url: `/api/briefings/${first.sha256}/diff` });
+    expect(none.statusCode).toBe(404);
+    expect(none.json().error).toContain('no earlier briefing');
+
+    // Later, with the TAFs known: marginal → go.
+    const second = (await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan, profile, asOf: '2026-09-07T12:30:00Z' } })).json() as StoredBriefing;
+    const res = await app.inject({ method: 'GET', url: `/api/briefings/${second.sha256}/diff` });
+    expect(res.statusCode).toBe(200);
+    const d = res.json();
+    expect(d.verdict).toEqual({ from: 'marginal', to: 'go' });
+    expect(d.quiet).toBe(false);
+    expect(d.from.sha256).toBe(first.sha256);
+
+    // An explicit `against`, and an unknown one.
+    const explicit = await app.inject({ method: 'GET', url: `/api/briefings/${second.sha256}/diff?against=${first.sha256}` });
+    expect(explicit.json().from.sha256).toBe(first.sha256);
+    expect((await app.inject({ method: 'GET', url: `/api/briefings/${second.sha256}/diff?against=${'0'.repeat(64)}` })).statusCode).toBe(404);
+    expect((await app.inject({ method: 'GET', url: `/api/briefings/${'0'.repeat(64)}/diff` })).statusCode).toBe(404);
+  });
+
+  it('never compares a briefing with a later one, however they were stored', async () => {
+    const app = await makeApp();
+    // Store the later briefing first, then an earlier one.
+    const later = (await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan, profile, asOf: '2026-09-07T12:30:00Z' } })).json() as StoredBriefing;
+    const earlier = (await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan, profile, asOf: '2026-09-07T11:00:00Z' } })).json() as StoredBriefing;
+    // The earlier one has nothing before it, even though a newer briefing exists.
+    expect((await app.inject({ method: 'GET', url: `/api/briefings/${earlier.sha256}/diff` })).statusCode).toBe(404);
+    // The later one compares against the earlier one, forwards in time.
+    const d = (await app.inject({ method: 'GET', url: `/api/briefings/${later.sha256}/diff` })).json();
+    expect(d.from.sha256).toBe(earlier.sha256);
+    expect(new Date(d.from.asOf).getTime()).toBeLessThan(new Date(d.to.asOf).getTime());
+  });
+
+  it('a re-brief of an unchanged situation is the same briefing, so there is nothing to diff', async () => {
+    const app = await makeApp();
+    const a = (await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan, profile, asOf: '2026-09-07T12:30:00Z' } })).json() as StoredBriefing;
+    const b = (await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan, profile, asOf: '2026-09-07T12:30:00Z' } })).json() as StoredBriefing;
+    expect(b.sha256).toBe(a.sha256);
+    expect((await app.inject({ method: 'GET', url: `/api/briefings/${a.sha256}/diff` })).statusCode).toBe(404);
+  });
+});
+
 describe('GET /api/airports/:id', () => {
   it('returns the stored airport or 404', async () => {
     const app = await makeApp();

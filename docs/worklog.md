@@ -594,3 +594,59 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
   on and make the eval gate live (onboarding §5a); **owner review of the
   provisional labelled set**; the C172 POH; FAA NOTAM credentials for US
   fields; a visual pass over the web app.
+
+---
+
+## Session 9 — 2026-09-12 — Fixes, then the briefing diff (step 9 / M8)
+
+106. Picked up the two loose ends from session 8. The API's new NOTAM tests
+     failed and the CLI's live run printed "0 NOTAMs" while the API printed
+     31 — one cause: `notamsForFlight` filtered by "known by the briefing
+     instant" while its own fetch lands *after* that instant, so a live
+     briefing discarded what it had just retrieved. Fixed, with a test
+     pinning both halves (fetch-and-see; reproduce-an-old-instant-and-see-
+     nothing). My first version of that test asserted the wrong thing —
+     re-briefing the *same* instant without fetching correctly sees nothing
+     — and the test was corrected, not the code.
+107. CLI restructured to open the store once (`withFlight`); the Postgres
+     test truncate list was missing `notam_assessments`.
+108. Chose step 9 over steps 7 and 8: the POH has not arrived (step 7) and
+     airspace data is a separate fetch (step 8), while the diff was
+     unblocked and is the feature the spec calls the differentiator.
+109. The insight that made the diff small: the rules engine already encodes
+     every threshold in a finding's severity, so "crossed a personal
+     minimum" is exactly "severity moved across the ok boundary". No second
+     copy of the limits anywhere.
+110. `Finding` gained `basisKind` (`RULES_VERSION` → 2) so findings match
+     across briefings when the readable basis differs (`observed 1051Z` vs
+     `observed 1151Z`). The diff falls back to parsing `basis` for older
+     briefings, with a test that deletes the field.
+111. `src/brief/diff.ts` + `describeDiff.ts`; `holdshort diff`;
+     `GET /api/briefings/:sha256/diff`; a web `DiffPanel`.
+112. Tests built on the recorded six-hour KJFK history so the "weather
+     changed" cases are real: 33005KT → 34007KT is 2.4 → 4.4 kt of
+     crosswind. Against the owner's 15 kt limit that is `restated` and the
+     diff is quiet; against a 3 kt limit the same move is `worsened` and
+     flagged. Three of my expectations were wrong first time (the rules
+     version, a report legitimately *removed* from the inputs, and instants
+     that conflated "forecast arrived" with "wind changed") and were fixed
+     in the tests.
+113. **Bug the live run caught:** "the previous briefing" was "the newest
+     that is not this one", which can be newer than the one just made — the
+     demo read "Since your 20:01Z briefing (now 13:00Z)". Now the newest at
+     or before, in CLI and API, with a test that stores a later briefing
+     first.
+114. Second live pass showed every new NOTAM flagged as crossing a limit,
+     including an out-of-scope runway-surface report. Added `notable` to
+     NOTAM changes: out-of-scope and irrelevant ones are listed but are not
+     news and do not make a diff loud.
+
+### State at end of session 9
+
+- 586 tests across workspaces, typecheck clean, web builds.
+- Verified live against Postgres: two briefings of the owner's flight, the
+  diff reading forwards in time, all 31 NOTAMs reported as new against an
+  earlier briefing that had none.
+- Open, unchanged: install Ollama and record fixtures (onboarding §5a);
+  owner review of the provisional labelled set; the C172 POH (blocks step
+  7); airspace data (step 8); a visual pass over the web app.

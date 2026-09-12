@@ -11,6 +11,8 @@
  *                                                 go / marginal / no-go per waypoint, every finding cited
  *   holdshort notams <flight.json> [--fetch] [--as-of <ISO>] [--json]
  *                                                 every NOTAM for the flight's fields, classified and (with a model) ranked
+ *   holdshort diff <flight.json> [--fetch] [--notams] [--against <sha256>] [--json]
+ *                                                 brief now, store it, and say what changed since the last briefing
  *   holdshort decode "<METAR or TAF text>"         print the decoded JSON
  *
  * Reads `.env` if present. Uses Postgres at DATABASE_URL (default: the
@@ -21,6 +23,9 @@ import { dirname, resolve as resolvePath } from 'node:path';
 import { decodeMetar } from '../decode/metar/index.js';
 import { parseFlightPlan, type FlightPlan } from '../domain/flight.js';
 import { parseAircraftLimits, parsePilotProfile } from '../domain/profile.js';
+import { assembleBriefing } from '../brief/assemble.js';
+import { diffText } from '../brief/describeDiff.js';
+import { diffBriefings } from '../brief/diff.js';
 import { briefingText } from '../rules/describe.js';
 import { evaluateFlight } from '../rules/evaluate.js';
 import { flightText } from '../resolve/describe.js';
@@ -46,7 +51,7 @@ const USER_AGENT = process.env.HOLDSHORT_USER_AGENT ?? 'holdshort/0.1 (+https://
 
 function usage(): never {
   console.error(
-    'usage: holdshort fetch <ICAO...> [--memory] | holdshort nasr <dir> | holdshort ourairports <dir> [--country XX] | holdshort airport <id> | holdshort resolve|brief|notams <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams] | holdshort decode "<report>"',
+    'usage: holdshort fetch <ICAO...> [--memory] | holdshort nasr <dir> | holdshort ourairports <dir> [--country XX] | holdshort airport <id> | holdshort resolve|brief|notams|diff <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams] [--against <sha256>] | holdshort decode "<report>"',
   );
   process.exit(2);
 }
@@ -217,6 +222,30 @@ async function briefCommand(args: string[]): Promise<void> {
   });
 }
 
+async function diffCommand(args: string[]): Promise<void> {
+  await withFlight(args, async ({ file, plan, resolved, store }) => {
+    const profile = parsePilotProfile(readJsonRelative(file, plan.profile, 'profiles/default.json'));
+    const aircraft = aircraftOf(file, plan);
+    const notams = args.includes('--notams') ? await notamsFor(args, store, resolved, aircraft?.type ?? 'unknown') : null;
+    const now = assembleBriefing(resolved, profile, aircraft, new Date(), notams);
+    await store.putBriefing(now);
+
+    const againstSha = option(args, '--against');
+    // The *previous* briefing: newest at or before this one. `listBriefings`
+    // is newest first, and a briefing must never be compared with a later one.
+    const previous = againstSha
+      ? await store.getBriefing(againstSha)
+      : ((await store.listBriefings(now.flightKey, 50)).find((b) => b.sha256 !== now.sha256 && b.asOf.getTime() <= now.asOf.getTime()) ?? null);
+    if (!previous) {
+      console.error(`no earlier briefing for this flight to compare against; this one is stored as ${now.sha256.slice(0, 12)}`);
+      console.log(briefingText(now.document.briefing));
+      return;
+    }
+    const d = diffBriefings(previous, now);
+    console.log(args.includes('--json') ? JSON.stringify(d, null, 2) : diffText(d));
+  });
+}
+
 async function notamsCommand(args: string[]): Promise<void> {
   await withFlight(args, async ({ file, plan, resolved, store }) => {
     const aircraft = aircraftOf(file, plan);
@@ -254,6 +283,9 @@ switch (command) {
     break;
   case 'notams':
     await notamsCommand(rest);
+    break;
+  case 'diff':
+    await diffCommand(rest);
     break;
   case 'decode':
     decodeCommand(rest);

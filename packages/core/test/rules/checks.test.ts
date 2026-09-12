@@ -20,6 +20,7 @@ function ctx(over: Partial<CheckContext> = {}): CheckContext {
     waypoint: 'CYSN',
     at: new Date('2026-09-07T15:00:00Z'),
     basis: 'prevailing',
+    basisKind: 'prevailing',
     violation: 'no-go',
     source: { kind: 'taf', station: 'CYSN', raw: '', sha256: null },
     profile,

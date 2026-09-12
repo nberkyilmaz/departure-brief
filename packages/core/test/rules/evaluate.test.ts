@@ -71,7 +71,7 @@ describe('evaluateFlight', () => {
     const store = await seededStore();
     const resolved = await resolveFlight(store, plan, new Date('2026-09-07T12:30:00Z'));
     const b = evaluateFlight(resolved, profile, aircraft);
-    expect(b.rulesVersion).toBe(1);
+    expect(b.rulesVersion).toBe(2);
     expect(b.profile).toEqual({ name: 'default', version: 1 });
     expect(b.aircraft).toBe('C172');
     expect(b.points.map((p) => p.waypoint)).toEqual(['KTEB', 'N07', 'KHPN']);

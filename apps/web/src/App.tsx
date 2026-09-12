@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { BriefingView } from './BriefingView.js';
+import { DiffPanel } from './DiffPanel.js';
 import { FlightForm, defaultPlan } from './FlightForm.js';
 import { ProfileForm, defaultAircraft, defaultProfile } from './ProfileForm.js';
-import type { AircraftInput, FlightPlanInput, ProfileInput, StoredBriefing } from './types.js';
+import type { AircraftInput, BriefingDiff, FlightPlanInput, ProfileInput, StoredBriefing } from './types.js';
 
 export function App() {
   const [plan, setPlan] = useState<FlightPlanInput>(defaultPlan);
@@ -11,6 +12,7 @@ export function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [briefing, setBriefing] = useState<StoredBriefing | null>(null);
+  const [diff, setDiff] = useState<BriefingDiff | null>(null);
 
   async function brief() {
     setBusy(true);
@@ -24,6 +26,9 @@ export function App() {
       const body = (await res.json()) as StoredBriefing | { error: string };
       if (!res.ok || 'error' in body) throw new Error('error' in body ? body.error : `HTTP ${res.status}`);
       setBriefing(body);
+      // A 404 here just means this is the first briefing of this flight.
+      const d = await fetch(`/api/briefings/${body.sha256}/diff`);
+      setDiff(d.ok ? ((await d.json()) as BriefingDiff) : null);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -52,6 +57,7 @@ export function App() {
             {error && <p className="error">{error}</p>}
           </div>
         </section>
+        {diff && <DiffPanel d={diff} />}
         {briefing && <BriefingView stored={briefing} />}
       </main>
     </>

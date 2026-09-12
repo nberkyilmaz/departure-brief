@@ -45,10 +45,10 @@ function evaluatePoint(p: ResolvedPoint, flight: ResolvedFlight, profile: PilotP
     const source = { kind: 'taf' as const, station: p.forecast.station, raw: f.raw, sha256: p.forecast.report.sha256 };
     const borrowed = p.forecast.source === 'nearby' ? ` (TAF ${p.forecast.station}, ${Math.round(p.forecast.distance)} nm away)` : '';
     if (f.prevailing) {
-      findings.push(...checkConditions({ ...base, basis: `prevailing${borrowed}`, violation: 'no-go', source }, f.prevailing.conditions));
+      findings.push(...checkConditions({ ...base, basis: `prevailing${borrowed}`, basisKind: 'prevailing', violation: 'no-go', source }, f.prevailing.conditions));
       for (const o of f.overlays) {
         const label = `${o.probability ? `PROB${o.probability} ` : ''}${o.kind === 'PROB' ? '' : o.kind} ${hhmm(o.window.from)}–${hhmm(o.window.to)}`.replace(/\s+/g, ' ').trim();
-        findings.push(...checkConditions({ ...base, basis: `${label}${borrowed}`, violation: 'marginal', source }, o.conditions));
+        findings.push(...checkConditions({ ...base, basis: `${label}${borrowed}`, basisKind: 'overlay', violation: 'marginal', source }, o.conditions));
       }
     } else {
       findings.push({
@@ -57,6 +57,7 @@ function evaluatePoint(p: ResolvedPoint, flight: ResolvedFlight, profile: PilotP
         summary: `TAF ${p.forecast.station} does not cover ${toZulu(at)}${f.outsideValidity ? ' (outside its validity)' : ''} — no forecast to evaluate`,
         waypoint: w.id,
         basis: 'forecast',
+        basisKind: 'forecast',
         at: at.toISOString(),
         values: { outsideValidity: f.outsideValidity },
         citations: [{ kind: 'taf', station: p.forecast.station, raw: f.raw, span: null, text: null, sha256: p.forecast.report.sha256 }],
@@ -69,6 +70,7 @@ function evaluatePoint(p: ResolvedPoint, flight: ResolvedFlight, profile: PilotP
         summary: `${w.id} has no TAF; conditions above are from ${p.forecast.station}, ${Math.round(p.forecast.distance)} nm away`,
         waypoint: w.id,
         basis: 'forecast',
+        basisKind: 'forecast',
         at: at.toISOString(),
         values: { station: p.forecast.station, distanceNm: p.forecast.distance },
         citations: [],
@@ -81,6 +83,7 @@ function evaluatePoint(p: ResolvedPoint, flight: ResolvedFlight, profile: PilotP
       summary: `no TAF for ${w.id} and none within reach — nothing to evaluate at ETA`,
       waypoint: w.id,
       basis: 'forecast',
+      basisKind: 'forecast',
       at: at.toISOString(),
       values: {},
       citations: [],
@@ -92,6 +95,7 @@ function evaluatePoint(p: ResolvedPoint, flight: ResolvedFlight, profile: PilotP
     const ctx: CheckContext = {
       ...base,
       basis: `observed ${hhmm(p.metar.report.issuedAt)}`,
+      basisKind: 'observed',
       // A current observation is hard evidence at departure; hours before an ETA it is context.
       violation: Math.abs(age) <= OBSERVATION_WINDOW_MS ? 'no-go' : 'marginal',
       source: { kind: 'metar', station: p.metar.decoded.station?.value ?? null, raw: p.metar.report.body, sha256: p.metar.report.sha256 },
@@ -99,7 +103,7 @@ function evaluatePoint(p: ResolvedPoint, flight: ResolvedFlight, profile: PilotP
     findings.push(...checkConditions(ctx, metarConditions(p.metar.decoded)));
   }
 
-  findings.push(...checkNight({ ...base, basis: 'time', violation: 'no-go', source: { kind: 'taf', station: null, raw: '', sha256: null } }));
+  findings.push(...checkNight({ ...base, basis: 'time', basisKind: 'time', violation: 'no-go', source: { kind: 'taf', station: null, raw: '', sha256: null } }));
 
   return { waypoint: w.id, at: at.toISOString(), verdict: verdictOf(findings), night, findings };
 }

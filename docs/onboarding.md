@@ -132,7 +132,7 @@ build order.
 | 6 | NOTAM relevance + eval harness | M6, M7 | 32–44 | done except the model: install Ollama and record fixtures to close it |
 | **7** | **Aircraft document ingestion** | M6b | 25–35 | **next** — second LLM work; needs the C172 POH |
 | 8 | Airspace transit analysis (PostGIS) | M4b | 25–35 | |
-| 9 | Briefing diff | M8 | 10–14 | |
+| 9 | Briefing diff | M8 | 10–14 | done (built early: steps 7 and 8 are blocked, this was not) |
 | 10 | Forecast verification | M9 | 12–16 | |
 | 11 | Polish, README, demo | M10 | 8–12 | |
 

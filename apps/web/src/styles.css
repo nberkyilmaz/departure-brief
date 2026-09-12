@@ -66,6 +66,13 @@ button:disabled { opacity: 0.6; cursor: wait; }
 mark { background: var(--mark); padding: 0 0.1rem; }
 .also { font-size: 0.8rem; color: var(--muted); }
 .inputs-used { margin-top: 1rem; font-size: 0.85rem; color: var(--muted); }
+.diff { border: 1px solid var(--line); border-left: 6px solid var(--advisory); border-radius: 6px; background: #fff; padding: 0.4rem 0.9rem 0.8rem; margin: 1rem 0; }
+.diff h2 { font-size: 1.05rem; display: flex; gap: 0.6rem; align-items: baseline; flex-wrap: wrap; }
+.verdict-move { margin: 0.3rem 0; display: flex; gap: 0.5rem; align-items: center; }
+.diff-point h4 { margin: 0.7rem 0 0.2rem; font-size: 0.95rem; }
+.change { display: grid; grid-template-columns: 5.5rem 11rem 1fr; gap: 0.6rem; padding: 0.25rem 0; align-items: baseline; border-top: 1px solid var(--line); }
+.change.crosses { background: #fffbe8; }
+.change s { color: var(--muted); }
 .notams { margin-top: 1.5rem; }
 .notam-group { border: 1px solid var(--line); border-radius: 6px; background: #fff; margin: 0.6rem 0; padding: 0.2rem 0.8rem; }
 .notam-group.critical { border-left: 6px solid var(--nogo); }
