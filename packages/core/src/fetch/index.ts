@@ -7,6 +7,8 @@ export type { NotamCredentials, NotamFetch } from './notam.js';
 export { ingestStation, storeAndDecode } from './ingest.js';
 export { parseAirports, parseRunwayEnds, parseRunways, readNasrDirectory } from './nasr.js';
 export { parseOurAirports, parseOurAirportsRunways, readOurAirportsDirectory } from './ourairports.js';
+export { NAVCANADA_CFPS_BASE_URL, NavCanadaClient, NavCanadaError } from './navcanada.js';
+export type { CfpsFetch, CfpsNotamRecord } from './navcanada.js';
 export type { OurAirportsOptions } from './ourairports.js';
 export { parseCsv } from './csv.js';
 export type { IngestCounts, IngestDeps, IngestResult } from './ingest.js';

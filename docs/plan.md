@@ -399,12 +399,71 @@ briefing history UI (the data is there; that is step 9's surface).
 **Done when.** You can enter the demo flight in the browser and get a cited
 verdict, and the same verdict from the CLI, with no LLM in the process.
 
-### Step 6 — NOTAM relevance + eval harness (M6, M7) — first LLM work — **next**
+### Step 6 — NOTAM relevance + eval harness (M6, M7) — **done 2026-09-12 except the model itself**
 
-Blockers to clear first: FAA NOTAM API credentials (US NOTAMs), and a
-source for **Canadian NOTAMs** — the FAA API does not carry them; NAV
-CANADA's NOTAM search has no public API, so the first Canadian corpus will
-be pasted text. Both corpora must be real; nothing is fabricated.
+The blocker resolved better than expected: **NAV CANADA's CFPS endpoint**
+(`plan.navcanada.ca/weather/api/alpha/?site=CYSN&alpha=notam`, the JSON its
+own planning site calls) serves Canadian NOTAMs without a key. Unofficial,
+so the client fails loudly on any shape change and every response is stored
+verbatim. The FAA's own NOTAM search backend is behind Akamai (403) and the
+official API still needs the credentials that have not arrived, so US
+NOTAMs remain unbuilt — `src/fetch/notam.ts` is still the unverified
+client. Nothing was fabricated to fill either gap.
+
+Built:
+
+- `src/notam/decode.ts` — ICAO NOTAM decoder. Fields are found by an
+  order-aware scan (`A)` only after `Q)`), so free text containing `A)`
+  cannot be mistaken for a field. Every field span-annotated; total.
+- `src/notam/qcodes.ts` — 181 subject and 80 condition Q-codes, drafted
+  twice independently, reconciled, and adversarially verified by three
+  reviewers (0 refutations). Every code in the corpus decodes; unknown
+  codes return null rather than a guess. Regenerate with
+  `scratchpad/gen-qcodes.cjs` from the `icao-qcode-tables` workflow.
+- `src/notam/filter.ts` — time and geography classification before any
+  token is spent. Understands `DAILY hhmm-hhmm` and `MON dd dd hhmm-hhmm`
+  schedules; an unreadable schedule or a missing position counts as
+  active/near, never the reverse.
+- `src/notam/dedupe.ts` — folds the FIR-wide NOTAMs that arrive once per
+  site; flags what a later `NOTAMR`/`NOTAMC` supersedes, never removing it.
+- `src/llm/` — `LLMProvider`, `FixtureProvider` (replay; tests and CI),
+  `RecordingProvider`, `OllamaProvider` (schema-constrained, temperature 0),
+  `BudgetedProvider` (the in-code spend cap), `llmFromEnv`.
+- `src/notam/assess.ts` — the one place a model sees a NOTAM. Cached on
+  (NOTAM hash, flight-context hash, prompt version, model). **Citation
+  verification**: a `cited_span` that is not verbatim in the NOTAM demotes
+  the answer to `unverified` rather than trusting it.
+- `src/notam/flight.ts` — the whole pipeline per flight, ranked
+  `critical → advisory → unverified → not-assessed → irrelevant →
+  out-of-scope`. Everything fetched is in the output; rank sets order and
+  collapse state only.
+- `src/notam/eval.ts` + `scripts/notam-eval.ts` + `npm run eval:notam` —
+  agreement, per-class precision and recall, confusion, disagreements.
+- API (`notams` in the briefing document), web (`NotamPanel` with the
+  cited span highlighted in the raw NOTAM), CLI (`notams`, `brief --notams`).
+
+**A bug worth remembering.** `notamsForFlight` filtered by "known by the
+briefing instant", but the fetch it performs lands *after* that instant, so
+a live briefing discarded the NOTAMs it had just retrieved. The API test
+only passed because an earlier run had already stored them. Fixed by
+treating the fetch as part of what this briefing knows; reproducing an
+older briefing without fetching still sees only what was stored by then,
+and a test pins both halves.
+
+**Not done: the model.** Ollama is not installed on this machine (the RTX
+3060 is there; nothing listening on 11434). So the eval gate is *skipped*
+with an explicit message rather than passed, and the pipeline reports
+`not-assessed` for in-scope NOTAMs. To finish: install Ollama, `ollama pull
+qwen2.5:7b`, then `HOLDSHORT_LLM=ollama npm run eval:notam -- --record`,
+which records fixtures and prints agreement against the labelled set. The
+test suite then replays those fixtures and the gate becomes live.
+
+**The labelled set is provisional.** `test/fixtures/notam/labelled/` holds
+31 labels from a three-perspective panel (instructor, safety-minded private
+pilot, flight service specialist) with majority vote — 28 unanimous, 3 at
+2/3. They are marked provisional and **need the owner's review**: they are
+the yardstick the model is measured against, so a wrong label is worse than
+a wrong answer.
 
 - `src/llm/` — `LLMProvider` interface; **`FixtureProvider` first**, then
   `OllamaProvider` (Qwen 2.5 7B), then a hosted provider. Cache on
@@ -417,7 +476,7 @@ be pasted text. Both corpora must be real; nothing is fabricated.
 - Eval: a hand-labelled set in `test/fixtures/notam/labelled/`, a scorer, and
   a CI gate that fails on regression past a threshold.
 
-### Step 7 — Aircraft document ingestion (M6b)
+### Step 7 — Aircraft document ingestion (M6b) — **next**
 
 OCR word boxes → LLM extraction with token-id citations → alignment check →
 review queue for low-confidence fields. Weight-and-balance from the POH is the

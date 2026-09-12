@@ -1,6 +1,7 @@
 import type { StoredBriefing } from '../brief/types.js';
 import { airportPreference, type Airport } from '../domain/airport.js';
 import { distanceNm } from '../domain/geo.js';
+import type { AssessmentRow } from '../notam/assess.js';
 import type { DecodedRow, FetchEvent, ListRawQuery, RawReport, Store } from './types.js';
 
 /**
@@ -13,11 +14,21 @@ export class MemoryStore implements Store {
   private readonly decoded = new Map<string, DecodedRow>();
   private readonly airports = new Map<string, Airport>();
   private readonly briefings = new Map<string, StoredBriefing>();
+  private readonly firstSeen = new Map<string, Date>();
+  private readonly assessments = new Map<string, AssessmentRow>();
+
+  private readonly fetchedFor = new Map<string, Map<string, Date>>();
 
   async putRaw(report: RawReport, fetch: FetchEvent): Promise<{ inserted: boolean }> {
     this.fetches.push({ sha256: report.sha256, event: fetch });
+    if (fetch.station) {
+      const m = this.fetchedFor.get(report.sha256) ?? new Map<string, Date>();
+      if (!m.has(fetch.station)) m.set(fetch.station, fetch.fetchedAt);
+      this.fetchedFor.set(report.sha256, m);
+    }
     if (this.raw.has(report.sha256)) return { inserted: false };
     this.raw.set(report.sha256, report);
+    this.firstSeen.set(report.sha256, fetch.fetchedAt);
     return { inserted: true };
   }
 
@@ -27,8 +38,14 @@ export class MemoryStore implements Store {
 
   async listRaw(query: ListRawQuery): Promise<RawReport[]> {
     const limit = query.limit ?? 20;
+    const knownBy = query.knownBy?.getTime() ?? Number.POSITIVE_INFINITY;
+    const fetchedForStation = (sha: string) => {
+      const at = this.fetchedFor.get(sha)?.get(query.station);
+      return at !== undefined && at.getTime() <= knownBy;
+    };
     return [...this.raw.values()]
-      .filter((r) => r.station === query.station && r.kind === query.kind)
+      .filter((r) => r.kind === query.kind)
+      .filter((r) => (r.station === query.station && (this.firstSeen.get(r.sha256)?.getTime() ?? 0) <= knownBy) || fetchedForStation(r.sha256))
       .sort((a, b) => (b.issuedAt?.getTime() ?? 0) - (a.issuedAt?.getTime() ?? 0))
       .slice(0, limit);
   }
@@ -96,6 +113,17 @@ export class MemoryStore implements Store {
       .filter((b) => b.flightKey === flightKey)
       .sort((a, b) => b.asOf.getTime() - a.asOf.getTime() || b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, limit);
+  }
+
+  async putAssessment(row: AssessmentRow): Promise<{ inserted: boolean }> {
+    const key = `${row.notamSha256}|${row.contextHash}|${row.promptVersion}|${row.model}`;
+    if (this.assessments.has(key)) return { inserted: false };
+    this.assessments.set(key, row);
+    return { inserted: true };
+  }
+
+  async getAssessment(notamSha256: string, contextHash: string, promptVersion: number, model: string): Promise<AssessmentRow | null> {
+    return this.assessments.get(`${notamSha256}|${contextHash}|${promptVersion}|${model}`) ?? null;
   }
 
   async close(): Promise<void> {}

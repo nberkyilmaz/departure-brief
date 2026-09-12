@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import type { BriefingDocument, StoredBriefing } from '../brief/types.js';
 import type { Airport } from '../domain/airport.js';
+import type { AssessmentRow, CitationMatch, NotamAssessment } from '../notam/assess.js';
 import { distanceNm } from '../domain/geo.js';
 import type { DecodedRow, FetchEvent, ListRawQuery, RawReport, ReportKind, Store } from './types.js';
 
@@ -93,10 +94,11 @@ export class PostgresStore implements Store {
           fetch.fetchedAt,
         ],
       );
-      await client.query('insert into report_fetches (sha256, fetched_at, request) values ($1, $2, $3)', [
+      await client.query('insert into report_fetches (sha256, fetched_at, request, station) values ($1, $2, $3, $4)', [
         report.sha256,
         fetch.fetchedAt,
         fetch.request,
+        fetch.station,
       ]);
       await client.query('commit');
       return { inserted: (res.rowCount ?? 0) > 0 };
@@ -119,11 +121,18 @@ export class PostgresStore implements Store {
 
   async listRaw(query: ListRawQuery): Promise<RawReport[]> {
     const res = await this.pool.query<RawRow>(
-      `select sha256, kind, source, station, body, issued_at, upstream from raw_reports
-       where station = $1 and kind = $2
-       order by issued_at desc nulls last, first_seen_at desc
+      `select r.sha256, r.kind, r.source, r.station, r.body, r.issued_at, r.upstream from raw_reports r
+       where r.kind = $2
+         and (
+           (r.station = $1 and ($4::timestamptz is null or r.first_seen_at <= $4))
+           or exists (
+             select 1 from report_fetches f
+             where f.sha256 = r.sha256 and f.station = $1 and ($4::timestamptz is null or f.fetched_at <= $4)
+           )
+         )
+       order by r.issued_at desc nulls last, r.first_seen_at desc
        limit $3`,
-      [query.station, query.kind, query.limit ?? 20],
+      [query.station, query.kind, query.limit ?? 20, query.knownBy ?? null],
     );
     return res.rows.map(toRawReport);
   }
@@ -237,9 +246,53 @@ export class PostgresStore implements Store {
     return res.rows.map(toBriefing);
   }
 
+  async putAssessment(row: AssessmentRow): Promise<{ inserted: boolean }> {
+    const res = await this.pool.query(
+      `insert into notam_assessments (notam_sha256, context_hash, prompt_version, model, assessment, citation, provider, usage_input, usage_output, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       on conflict (notam_sha256, context_hash, prompt_version, model) do nothing`,
+      [row.notamSha256, row.contextHash, row.promptVersion, row.model, JSON.stringify(row.assessment), row.citation, row.provider, row.usage.input, row.usage.output, row.createdAt],
+    );
+    return { inserted: (res.rowCount ?? 0) > 0 };
+  }
+
+  async getAssessment(notamSha256: string, contextHash: string, promptVersion: number, model: string): Promise<AssessmentRow | null> {
+    const res = await this.pool.query<AssessmentDbRow>(
+      `select notam_sha256, context_hash, prompt_version, model, assessment, citation, provider, usage_input, usage_output, created_at
+       from notam_assessments where notam_sha256 = $1 and context_hash = $2 and prompt_version = $3 and model = $4`,
+      [notamSha256, contextHash, promptVersion, model],
+    );
+    const r = res.rows[0];
+    if (!r) return null;
+    return {
+      notamSha256: r.notam_sha256,
+      contextHash: r.context_hash,
+      promptVersion: r.prompt_version,
+      model: r.model,
+      assessment: r.assessment,
+      citation: r.citation,
+      provider: r.provider,
+      usage: { input: r.usage_input, output: r.usage_output },
+      createdAt: r.created_at,
+    };
+  }
+
   async close(): Promise<void> {
     await this.pool.end();
   }
+}
+
+interface AssessmentDbRow {
+  notam_sha256: string;
+  context_hash: string;
+  prompt_version: number;
+  model: string;
+  assessment: NotamAssessment;
+  citation: CitationMatch;
+  provider: string;
+  usage_input: number;
+  usage_output: number;
+  created_at: Date;
 }
 
 interface BriefingRow {

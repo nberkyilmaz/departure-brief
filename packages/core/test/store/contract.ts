@@ -35,8 +35,8 @@ export function storeContract(name: string, make: () => Promise<Store>): void {
       const store = await make();
       try {
         expect(metar.sha256).toMatch(/^[0-9a-f]{64}$/);
-        expect(await store.putRaw(metar, { fetchedAt: t0, request: 'r1' })).toEqual({ inserted: true });
-        expect(await store.putRaw(metar, { fetchedAt: t1, request: 'r2' })).toEqual({ inserted: false });
+        expect(await store.putRaw(metar, { fetchedAt: t0, request: 'r1', station: null })).toEqual({ inserted: true });
+        expect(await store.putRaw(metar, { fetchedAt: t1, request: 'r2', station: null })).toEqual({ inserted: false });
         const got = await store.getRaw(metar.sha256);
         expect(got).toEqual(metar);
         expect(await store.getRaw('0'.repeat(64))).toBeNull();
@@ -45,11 +45,29 @@ export function storeContract(name: string, make: () => Promise<Store>): void {
       }
     });
 
+    it('lists reports fetched *for* a station even when they are about no station, honouring knownBy', async () => {
+      const store = await make();
+      try {
+        const firWide = rawReport({ kind: 'notam', source: 'x', station: null, body: '(G0001/26 NOTAMN Q) CZXX/QGWAU/IV/NBO/E/000/999 A) CZYZ B) 2609140400 C) 2609181059 E) GPS INTERFERENCE)', issuedAt: null, upstream: null });
+        await store.putRaw(firWide, { fetchedAt: t0, request: 'cysn', station: 'CYSN' });
+        await store.putRaw(firWide, { fetchedAt: t1, request: 'cykf', station: 'CYKF' });
+        expect((await store.listRaw({ station: 'CYSN', kind: 'notam' })).map((r) => r.sha256)).toEqual([firWide.sha256]);
+        expect((await store.listRaw({ station: 'CYKF', kind: 'notam' })).map((r) => r.sha256)).toEqual([firWide.sha256]);
+        expect(await store.listRaw({ station: 'CYHM', kind: 'notam' })).toEqual([]);
+        // Known as of t0: only the CYSN association existed.
+        expect(await store.listRaw({ station: 'CYKF', kind: 'notam', knownBy: t0 })).toEqual([]);
+        expect(await store.listRaw({ station: 'CYSN', kind: 'notam', knownBy: t0 })).toHaveLength(1);
+        expect(await store.listRaw({ station: 'CYSN', kind: 'metar' })).toEqual([]);
+      } finally {
+        await store.close();
+      }
+    });
+
     it('lists a station\'s reports newest first', async () => {
       const store = await make();
       try {
-        await store.putRaw(earlier, { fetchedAt: t0, request: 'r' });
-        await store.putRaw(metar, { fetchedAt: t0, request: 'r' });
+        await store.putRaw(earlier, { fetchedAt: t0, request: 'r', station: null });
+        await store.putRaw(metar, { fetchedAt: t0, request: 'r', station: null });
         const list = await store.listRaw({ station: 'KJFK', kind: 'metar' });
         expect(list.map((r) => r.sha256)).toEqual([metar.sha256, earlier.sha256]);
         expect(await store.listRaw({ station: 'KJFK', kind: 'metar', limit: 1 })).toHaveLength(1);
@@ -63,7 +81,7 @@ export function storeContract(name: string, make: () => Promise<Store>): void {
     it('stores one decoding per report per decoder version, never overwriting', async () => {
       const store = await make();
       try {
-        await store.putRaw(metar, { fetchedAt: t0, request: 'r' });
+        await store.putRaw(metar, { fetchedAt: t0, request: 'r', station: null });
         const row = { sha256: metar.sha256, kind: 'metar' as const, decoderVersion: 1, decoded: { a: 1 }, decodedAt: t0 };
         expect(await store.putDecoded(row)).toEqual({ inserted: true });
         expect(await store.putDecoded({ ...row, decoded: { a: 2 } })).toEqual({ inserted: false });

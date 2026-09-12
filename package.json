@@ -22,7 +22,8 @@
     "dev:web": "npm run dev -w apps/web",
     "start": "npm run start -w apps/api",
     "db:up": "docker compose up -d",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "eval:notam": "tsx packages/core/scripts/notam-eval.ts"
   },
   "devDependencies": {
     "tsx": "^4.23.13",

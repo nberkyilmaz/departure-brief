@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { NotamPanel } from './NotamPanel.js';
 import { hhmmZ, local, zulu } from './time.js';
 import type { Citation, Finding, PointVerdict, StoredBriefing } from './types.js';
 
@@ -87,6 +88,7 @@ export function BriefingView({ stored }: { stored: StoredBriefing }) {
         <Point key={p.waypoint + p.at} p={p} />
       ))}
       {b.alternate && <Point p={b.alternate} label="alternate" />}
+      {stored.document.notams && <NotamPanel doc={stored.document.notams} />}
       <details className="inputs-used">
         <summary>Reports this briefing was made from ({stored.document.inputs.reports.length})</summary>
         <ul>

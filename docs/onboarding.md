@@ -60,10 +60,13 @@ is wrong regardless of how good it looks.
 
 ## 3. Current state
 
-The deterministic pipeline is complete and usable: `npm start` serves an
-API and a web app that brief a flight to a cited verdict, stored as an
-immutable content-addressed document. Step 6 (NOTAMs + eval harness, the
-first LLM work) is next. The repo is an npm workspace:
+The pipeline is complete and usable end to end, NOTAMs included: `npm start`
+serves an API and a web app that brief a flight to a cited verdict with its
+NOTAMs classified and ranked, stored as an immutable content-addressed
+document. The one piece not running is the **relevance model itself** —
+Ollama is not installed on this machine, so in-scope NOTAMs come back
+`not-assessed` and the eval gate skips rather than passes (see §5). Step 7
+(aircraft document ingestion) is next. The repo is an npm workspace:
 
 | Path | What |
 | --- | --- |
@@ -95,6 +98,8 @@ Inside `packages/core`:
 | `src/domain/profile.ts`, `sun.ts` | `PilotProfile`/`AircraftLimits` + parsers; solar elevation and civil-twilight night test |
 | `src/rules/` | `vfrMinima.ts` (CARs + FAR tables), `crosswind.ts` (components, best runway), `checks.ts` (ceiling, visibility, crosswind, regulatory, night — each cites), `evaluate.ts` (resolved flight + profile → `Briefing`), `describe.ts`, `types.ts` (`Finding`, `Citation`, `Verdict`) |
 | `src/brief/` | `canonical.ts` (canonical JSON, content hash), `assemble.ts` (`assembleBriefing`: rules output + plan + profile + report hashes + code versions → `StoredBriefing`; `flightKey`), `types.ts` |
+| `src/notam/` | `decode.ts` (ICAO NOTAM, order-aware field scan), `qcodes.ts` (181 subjects / 80 conditions, generated + verified), `filter.ts` (time and geography before any token is spent), `dedupe.ts`, `assess.ts` (the only place a model sees a NOTAM; cache key and citation verification), `flight.ts` (whole pipeline, ranked), `eval.ts` (scorer), `describe.ts` |
+| `src/llm/` | `provider.ts` (one interface, structured output only), `fixture.ts` (replay + record), `ollama.ts`, `budget.ts` (in-code spend cap), `env.ts` (`llmFromEnv`) |
 | `src/cli/main.ts` | `npm run holdshort -- fetch KJFK`, `nasr <dir>`, `ourairports <dir>`, `airport KJFK`, `resolve` / `brief <flight.json> [--fetch] [--as-of ISO] [--json]`, `decode "<report>"`; `--memory` runs without Postgres |
 | `.env.example` | `DATABASE_URL`, `HOLDSHORT_USER_AGENT`, FAA NOTAM credentials, optional HTTP cache dir |
 | `scripts/corpus-report.ts` | `npm run corpus:metar` / `corpus:taf` — unparsed tokens across a corpus by frequency; how the long tail is worked down |
@@ -124,8 +129,8 @@ build order.
 | 3 | Route and time resolution | M3 | 20–28 | done (no winds aloft; nearest-station for fields without a TAF) |
 | 4 | Rules engine — personal minimums, CARs 602.114/115 + FAR 91.155 | M4 | 20–28 | done (airport-only; alternate rules, currency, W&B deferred) |
 | 5 | Briefing assembly and UI | M5 | 25–35 | done — first end-to-end usable build |
-| **6** | **NOTAM relevance + eval harness** | M6, M7 | 32–44 | **next** — first LLM work; needs NOTAM credentials and a Canadian NOTAM source |
-| 7 | Aircraft document ingestion | M6b | 25–35 | second LLM work |
+| 6 | NOTAM relevance + eval harness | M6, M7 | 32–44 | done except the model: install Ollama and record fixtures to close it |
+| **7** | **Aircraft document ingestion** | M6b | 25–35 | **next** — second LLM work; needs the C172 POH |
 | 8 | Airspace transit analysis (PostGIS) | M4b | 25–35 | |
 | 9 | Briefing diff | M8 | 10–14 | |
 | 10 | Forecast verification | M9 | 12–16 | |
@@ -155,22 +160,44 @@ happens.
 
 ---
 
-## 5. The immediate next task — M6 + M7, NOTAMs and the eval harness
+## 5. The immediate next tasks
 
 **The owner flies in Canada** (CYSN home field, C172). Treat Canada as the
 primary case; the spec's US wording is the second case.
 
-See `docs/plan.md` step 6 and onboarding §10 (LLM policy). This is the first
-LLM work, and the eval harness ships *with* it. In order: (1) obtain real
-NOTAMs — FAA API credentials for US fields, and pasted NAV CANADA text for
-CYSN/CYKF/CYHM, stored verbatim like every other report; (2) deterministic
-parse (location, effective window, category) and time-window filtering
-before any token is spent; (3) fingerprint dedupe; (4) `LLMProvider` with
-`FixtureProvider` **first**, then `OllamaProvider` (Qwen 2.5 7B); (5) the
-`NotamAssessment` schema from the spec with **citation verification** —
-`cited_span` must be a verbatim substring or the assessment is demoted;
-(6) a hand-labelled set and a scorer that gates CI. **Nothing is ever
-dropped**: relevance orders and collapses only.
+### 5a. Finish step 6 — turn the relevance model on (small, do it first)
+
+Everything around the model is built and tested; the model is not running.
+Ollama is not installed on this machine (the RTX 3060 is present, nothing
+listening on 11434). To close it:
+
+```bash
+# install Ollama, then
+ollama pull qwen2.5:7b
+HOLDSHORT_LLM=ollama npm run eval:notam -- --record
+```
+
+That ranks the 28 in-scope NOTAMs of the demo flight, writes each answer as
+a fixture under `packages/core/test/fixtures/llm/qwen2.5_7b/`, and prints
+agreement against the labelled set. The skipped test in
+`test/notam/eval.test.ts` then becomes live and gates on ≥75 % agreement.
+If agreement is poor, iterate on the prompt in `src/notam/assess.ts` and
+**bump `PROMPT_VERSION`** — old fixtures and cached assessments stay,
+keyed by the old version.
+
+**Review the labelled set first** (`test/fixtures/notam/labelled/`). It is
+31 provisional labels from a three-perspective panel, 28 unanimous and 3 at
+2/3 (`A9080/26`, `D3729/26`, `S2881/26`). It is the yardstick the model is
+scored against, so a wrong label is worse than a wrong answer.
+
+### 5b. Step 7 — aircraft document ingestion (M6b)
+
+See `docs/plan.md` step 7. OCR word boxes → LLM extraction with token-id
+citations → alignment check → review queue for low-confidence fields.
+Weight and balance from the POH is the demo. **Needs the C172 POH**, which
+the owner has not supplied yet; until it arrives,
+`aircraft/c172.json` carries a null demonstrated crosswind and the
+crosswind rule reports only the personal limit.
 
 Running the product today:
 

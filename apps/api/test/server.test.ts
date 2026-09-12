@@ -3,7 +3,19 @@
  * the NASR fixture slice, driven with fastify.inject. No network, no
  * database.
  */
-import { AWC_BASE_URL, AwcClient, MemoryStore, readNasrDirectory, type HttpClient, type StoredBriefing } from '@holdshort/core';
+import {
+  AWC_BASE_URL,
+  AwcClient,
+  BudgetedProvider,
+  MemoryStore,
+  NAVCANADA_CFPS_BASE_URL,
+  NavCanadaClient,
+  readNasrDirectory,
+  readOurAirportsDirectory,
+  type HttpClient,
+  type LLMProvider,
+  type StoredBriefing,
+} from '@holdshort/core';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -97,6 +109,67 @@ describe('GET /api/airports/:id', () => {
     const app = await makeApp();
     expect((await app.inject({ method: 'GET', url: '/api/airports/kteb' })).json().icaoId).toBe('KTEB');
     expect((await app.inject({ method: 'GET', url: '/api/airports/KZZZ' })).statusCode).toBe(404);
+  });
+});
+
+describe('POST /api/briefings with NOTAMs', () => {
+  const cfps: Record<string, { status: number; file?: string; body?: string }> = {};
+  for (const s of ['CYSN', 'CYKF', 'CYHM']) cfps[`${NAVCANADA_CFPS_BASE_URL}?site=${s}&alpha=notam`] = { status: 200, file: `../notam/navcanada/2026-09-12/${s}.json` };
+  const awcCa: Record<string, { status: number; file?: string; body?: string }> = {};
+  for (const s of ['CYSN', 'CYKF', 'CYHM']) {
+    awcCa[`${AWC_BASE_URL}/metar?ids=${s}&format=json`] = { status: 204 };
+    awcCa[`${AWC_BASE_URL}/taf?ids=${s}&format=json`] = { status: 204 };
+  }
+  const caPlan = JSON.parse(readFileSync(join(ROOT, 'flights', 'demo-cysn-cykf.json'), 'utf8'));
+
+  async function makeCaApp(withModel: boolean) {
+    const store = new MemoryStore();
+    await store.putAirports(readOurAirportsDirectory(join(FIXTURES, 'fetch', 'ourairports', '2026-09-07'), { snapshot: '2026-09-07' }));
+    const stub: LLMProvider = {
+      id: 'stub',
+      async complete(req) {
+        const answer = { relevance: 'advisory', category: 'other', affects: ['departure'], plain_text: 'stub', cited_span: req.prompt.includes('RWY 11/29 CLSD') ? 'RWY 11/29 CLSD' : 'zzz', rationale: 'stub' };
+        return { json: answer, text: JSON.stringify(answer), model: req.model, provider: 'stub', usage: { input: 1, output: 1 } };
+      },
+    };
+    return buildServer({
+      store,
+      awc: new AwcClient(replay(awcCa)),
+      navcanada: new NavCanadaClient(replay(cfps)),
+      llm: withModel ? { provider: new BudgetedProvider(stub, 10_000), model: 'stub-model', description: 'stub' } : null,
+    });
+  }
+
+  it('includes classified NOTAMs in the document and reports the NOTAM source and model on /api/health', async () => {
+    const app = await makeCaApp(false);
+    const health = await app.inject({ method: 'GET', url: '/api/health' });
+    expect(health.json()).toMatchObject({ notams: 'navcanada-cfps', model: null });
+    const res = await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan: caPlan, profile, asOf: '2026-09-12T20:00:00Z' } });
+    expect(res.statusCode).toBe(201);
+    const b = res.json() as StoredBriefing;
+    expect(b.document.format).toBe(2);
+    expect(b.document.notams?.sites).toEqual(['CYSN', 'CYKF', 'CYHM']);
+    expect(b.document.notams?.items.length).toBeGreaterThan(25);
+    expect(b.document.notams?.model).toBeNull();
+    expect(b.document.notams?.counts['not-assessed']).toBeGreaterThan(0);
+    // Every NOTAM is a report the briefing cites by hash.
+    expect(b.document.inputs.reports.filter((r) => r.kind === 'notam').length).toBe(b.document.notams?.items.length);
+  });
+
+  it('ranks with the configured model, marking unverifiable citations, and skips NOTAMs when asked', async () => {
+    const app = await makeCaApp(true);
+    const res = await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan: caPlan, profile, asOf: '2026-09-12T20:00:00Z' } });
+    const b = res.json() as StoredBriefing;
+    expect(b.document.notams?.model).toBe('stub-model');
+    const closure = b.document.notams!.items.find((i) => i.id === 'J5067/26')!;
+    expect(closure.rank).toBe('advisory');
+    expect(closure.assessment?.citation).toBe('exact');
+    expect(b.document.notams!.counts.unverified).toBeGreaterThan(0);
+    expect(b.document.notams!.items[0]!.rank).toBe('advisory');
+
+    const without = await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan: caPlan, profile, asOf: '2026-09-12T20:00:00Z', notams: false } });
+    expect((without.json() as StoredBriefing).document.notams).toBeNull();
+    expect((without.json() as StoredBriefing).sha256).not.toBe(b.sha256);
   });
 });
 

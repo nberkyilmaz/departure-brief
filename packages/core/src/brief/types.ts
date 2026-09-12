@@ -1,5 +1,6 @@
 import type { FlightPlan } from '../domain/flight.js';
 import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
+import type { NotamDocument } from '../notam/describe.js';
 import type { Briefing } from '../rules/types.js';
 import type { ReportKind } from '../store/types.js';
 
@@ -32,7 +33,8 @@ export interface BriefingPointInputs {
  * that each know their sources.
  */
 export interface BriefingDocument {
-  readonly format: 1;
+  /** 2: adds `notams` and the NOTAM decoder / prompt versions. */
+  readonly format: 2;
   readonly plan: FlightPlan;
   readonly profile: PilotProfile;
   readonly aircraft: AircraftLimits | null;
@@ -42,7 +44,11 @@ export interface BriefingDocument {
     readonly rules: number;
     readonly metarDecoder: number;
     readonly tafDecoder: number;
+    readonly notamDecoder: number;
+    readonly notamPrompt: number;
   };
+  /** `null` when NOTAMs were not part of this briefing. */
+  readonly notams: NotamDocument | null;
   readonly inputs: {
     readonly points: readonly BriefingPointInputs[];
     readonly alternate: BriefingPointInputs | null;

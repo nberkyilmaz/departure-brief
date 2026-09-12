@@ -3,7 +3,7 @@
   "route": [],
   "destination": "CYKF",
   "alternate": "CYHM",
-  "departureTime": "2026-09-07T15:00:00Z",
+  "departureTime": "2026-09-14T15:00:00Z",
   "cruise": { "tas": 105, "altitude": 3500 },
   "airspace": { "CYSN": "control-zone", "CYKF": "control-zone", "CYHM": "control-zone" },
   "profile": "../profiles/default.json",

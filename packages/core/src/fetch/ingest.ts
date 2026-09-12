@@ -1,5 +1,6 @@
 import { decodeMetar, METAR_DECODER_VERSION } from '../decode/metar/index.js';
 import { decodeTaf, TAF_DECODER_VERSION } from '../decode/taf/index.js';
+import { decodeNotam, NOTAM_DECODER_VERSION } from '../notam/decode.js';
 import type { RawReport, ReportKind, ReportStore } from '../store/types.js';
 import type { AwcClient } from './awc.js';
 import type { FaaNotamClient } from './notam.js';
@@ -32,6 +33,7 @@ export interface IngestResult {
 const DECODERS: Partial<Record<ReportKind, { version: number; decode: (raw: string) => unknown }>> = {
   metar: { version: METAR_DECODER_VERSION, decode: decodeMetar },
   taf: { version: TAF_DECODER_VERSION, decode: decodeTaf },
+  notam: { version: NOTAM_DECODER_VERSION, decode: decodeNotam },
 };
 
 /**
@@ -44,11 +46,13 @@ export async function storeAndDecode(
   reports: readonly RawReport[],
   request: string,
   now: Date,
+  /** The station the fetch was for, when the reports are not each about one station (NOTAMs). */
+  fetchedFor: string | null = null,
 ): Promise<IngestCounts> {
   let rawInserted = 0;
   let decodedInserted = 0;
   for (const report of reports) {
-    const put = await store.putRaw(report, { fetchedAt: now, request });
+    const put = await store.putRaw(report, { fetchedAt: now, request, station: fetchedFor });
     if (put.inserted) rawInserted++;
     const decoder = DECODERS[report.kind];
     if (!decoder) continue;

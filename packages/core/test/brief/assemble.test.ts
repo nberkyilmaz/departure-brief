@@ -62,8 +62,9 @@ describe('assembleBriefing', () => {
     const resolved = await resolveFlight(store, plan, new Date('2026-09-07T12:30:00Z'));
     const b = assembleBriefing(resolved, profile, aircraft);
     const d = b.document;
-    expect(d.format).toBe(1);
-    expect(d.versions).toEqual({ rules: 1, metarDecoder: 2, tafDecoder: 1 });
+    expect(d.format).toBe(2);
+    expect(d.versions).toEqual({ rules: 1, metarDecoder: 2, tafDecoder: 1, notamDecoder: 1, notamPrompt: 1 });
+    expect(d.notams).toBeNull();
     expect(d.asOf).toBe('2026-09-07T12:30:00.000Z');
     expect(d.inputs.points.map((p) => p.waypoint)).toEqual(['KTEB', 'N07', 'KHPN']);
     expect(d.inputs.points[1]!.forecast).toMatchObject({ station: 'KTEB', source: 'nearby' });

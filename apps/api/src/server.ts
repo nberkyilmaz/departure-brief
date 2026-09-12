@@ -2,12 +2,15 @@ import fastifyStatic from '@fastify/static';
 import {
   assembleBriefing,
   ingestStation,
+  notamsForFlight,
   parseAircraftLimits,
   parseFlightPlan,
   parsePilotProfile,
   resolveFlight,
   UnknownWaypointError,
   type AwcClient,
+  type ConfiguredLLM,
+  type NavCanadaClient,
   type Store,
 } from '@holdshort/core';
 import Fastify, { type FastifyInstance } from 'fastify';
@@ -17,6 +20,10 @@ import { join } from 'node:path';
 export interface ServerDeps {
   readonly store: Store;
   readonly awc: AwcClient;
+  /** Canadian NOTAMs; absent means NOTAMs are neither fetched nor shown. */
+  readonly navcanada?: NavCanadaClient | null;
+  /** The relevance model; absent means NOTAMs are classified but not ranked. Never called except during a briefing request's fetch step. */
+  readonly llm?: ConfiguredLLM | null;
   /** Directory of the built web app to serve at `/`; skipped when absent. */
   readonly staticDir?: string | null;
   readonly logger?: boolean;
@@ -30,6 +37,8 @@ interface BriefRequestBody {
   readonly asOf?: string;
   /** Fetch the latest reports for every airport in the plan first. Default true. */
   readonly fetch?: boolean;
+  /** Include NOTAMs. Default true when a NOTAM source is configured. */
+  readonly notams?: boolean;
 }
 
 /**
@@ -41,7 +50,12 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
   const app = Fastify({ logger: deps.logger ?? false });
   const { store, awc } = deps;
 
-  app.get('/api/health', async () => ({ ok: true, notOperational: 'study and planning aid only — not an official briefing' }));
+  app.get('/api/health', async () => ({
+    ok: true,
+    notOperational: 'study and planning aid only — not an official briefing',
+    notams: deps.navcanada ? 'navcanada-cfps' : null,
+    model: deps.llm?.description ?? null,
+  }));
 
   app.get<{ Params: { id: string } }>('/api/airports/:id', async (req, reply) => {
     const airport = await store.getAirport(req.params.id);
@@ -74,7 +88,20 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
       if (e instanceof UnknownWaypointError) return reply.code(422).send({ error: e.message });
       throw e;
     }
-    const briefing = assembleBriefing(resolved, profile, aircraft);
+    let notams = null;
+    if (body.notams !== false && deps.navcanada) {
+      notams = await notamsForFlight(
+        {
+          store,
+          navcanada: body.fetch !== false ? deps.navcanada : null,
+          provider: deps.llm?.provider ?? null,
+          model: deps.llm?.model ?? null,
+        },
+        resolved,
+        aircraft?.type ?? 'unknown',
+      );
+    }
+    const briefing = assembleBriefing(resolved, profile, aircraft, new Date(), notams);
     const { inserted } = await store.putBriefing(briefing);
     return reply.code(inserted ? 201 : 200).send(briefing);
   });

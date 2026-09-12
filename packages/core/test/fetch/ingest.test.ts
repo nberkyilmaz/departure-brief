@@ -46,16 +46,18 @@ describe('storeAndDecode', () => {
   it('decodes a known report again under a newer decoder version', async () => {
     const store = new MemoryStore();
     const r = rawReport({ kind: 'metar', source: 'awc', station: 'KJFK', body: 'METAR KJFK 071151Z 34007KT 10SM CLR 19/11 A3015', issuedAt: null, upstream: null });
-    await store.putRaw(r, { fetchedAt: new Date(0), request: 'x' });
+    await store.putRaw(r, { fetchedAt: new Date(0), request: 'x', station: null });
     await store.putDecoded({ sha256: r.sha256, kind: 'metar', decoderVersion: METAR_DECODER_VERSION - 1, decoded: {}, decodedAt: new Date(0) });
     const counts = await storeAndDecode(store, [r], 'x', new Date(1));
     expect(counts).toEqual({ fetched: 1, rawInserted: 0, decodedInserted: 1 });
     expect(await store.getDecoded(r.sha256, METAR_DECODER_VERSION)).not.toBeNull();
   });
 
-  it('stores kinds it cannot decode without decoding them', async () => {
+  it('decodes NOTAMs too, and records which station a fetch was for', async () => {
     const store = new MemoryStore();
-    const r = rawReport({ kind: 'notam', source: 'faa-notam', station: 'KJFK', body: '{"x":1}', issuedAt: null, upstream: null });
-    expect(await storeAndDecode(store, [r], 'x', new Date(1))).toEqual({ fetched: 1, rawInserted: 1, decodedInserted: 0 });
+    const r = rawReport({ kind: 'notam', source: 'navcanada-cfps', station: null, body: '(A0001/26 NOTAMN Q) CZYZ/QMRLC/IV/NBO/A/000/999 A) CYSN B) 2609140000 C) 2609150000 E) RWY 06/24 CLSD)', issuedAt: null, upstream: null });
+    expect(await storeAndDecode(store, [r], 'x', new Date(1), 'CYKF')).toEqual({ fetched: 1, rawInserted: 1, decodedInserted: 1 });
+    expect((await store.listRaw({ station: 'CYKF', kind: 'notam' })).map((x) => x.sha256)).toEqual([r.sha256]);
+    expect(store.fetchLog()[0]?.event.station).toBe('CYKF');
   });
 });

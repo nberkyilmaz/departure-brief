@@ -1,6 +1,9 @@
 import { createHash } from 'node:crypto';
 import type { StoredBriefing } from '../brief/types.js';
 import type { Airport } from '../domain/airport.js';
+import type { AssessmentStore } from '../notam/assess.js';
+
+export type { AssessmentStore };
 
 export type ReportKind = 'metar' | 'taf' | 'notam';
 
@@ -29,6 +32,13 @@ export interface FetchEvent {
   readonly fetchedAt: Date;
   /** The request that produced it, normally the URL. */
   readonly request: string;
+  /**
+   * The station the fetch was *for*, when a report is not about one station
+   * of its own — a FIR-wide NOTAM returned for CYKF is listed under CYKF
+   * through this, whichever site first stored it. `null` for reports that
+   * carry their own station.
+   */
+  readonly station: string | null;
 }
 
 export interface DecodedRow {
@@ -40,10 +50,13 @@ export interface DecodedRow {
 }
 
 export interface ListRawQuery {
+  /** Matches the report's own station, or any fetch that was for this station. */
   readonly station: string;
   readonly kind: ReportKind;
   /** Newest issued first; defaults to 20. */
   readonly limit?: number;
+  /** Only reports first fetched at or before this instant — "what was known then". */
+  readonly knownBy?: Date;
 }
 
 /**
@@ -79,7 +92,7 @@ export interface BriefingStore {
   listBriefings(flightKey: string, limit?: number): Promise<StoredBriefing[]>;
 }
 
-export type Store = ReportStore & AirportStore & BriefingStore;
+export type Store = ReportStore & AirportStore & BriefingStore & AssessmentStore;
 
 export function sha256Hex(text: string): string {
   return createHash('sha256').update(text, 'utf8').digest('hex');

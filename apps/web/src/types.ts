@@ -72,15 +72,52 @@ export interface AircraftInput {
   demonstratedCrosswindKt: number | null;
 }
 
+export type NotamRank = 'critical' | 'advisory' | 'unverified' | 'not-assessed' | 'irrelevant' | 'out-of-scope';
+
+export interface NotamItem {
+  sha256: string;
+  id: string | null;
+  raw: string;
+  text: string | null;
+  qcode: string | null;
+  qcodeMeaning: { subject: string | null; condition: string | null; traffic: string | null; purpose: string | null; scope: string | null } | null;
+  locations: string[];
+  from: string | null;
+  to: string | null;
+  schedule: string | null;
+  sites: string[];
+  supersededBy: string | null;
+  classification: { time: string; near: boolean; inScope: boolean; distanceNm: number | null; reasons: string[] };
+  rank: NotamRank;
+  assessment: {
+    model: string;
+    promptVersion: number;
+    citation: 'exact' | 'whitespace' | 'none';
+    cached: boolean;
+    result: { relevance: string; category: string; affects: string[]; plain_text: string; cited_span: string; rationale: string };
+  } | null;
+  assessmentError: string | null;
+}
+
+export interface NotamDocument {
+  sites: string[];
+  model: string | null;
+  promptVersion: number;
+  counts: Record<NotamRank, number>;
+  fetchErrors: { site: string; error: string }[];
+  items: NotamItem[];
+}
+
 export interface StoredBriefing {
   sha256: string;
   flightKey: string;
   asOf: string;
   createdAt: string;
   document: {
-    format: 1;
+    format: 2;
     plan: FlightPlanInput;
     asOf: string;
+    notams: NotamDocument | null;
     inputs: {
       points: { waypoint: string; eta: string; cumulativeNm: number; forecast: { station: string; source: 'own' | 'nearby'; distanceNm: number; sha256: string } | null; metar: string | null }[];
       reports: { kind: string; station: string | null; sha256: string; issuedAt: string | null }[];

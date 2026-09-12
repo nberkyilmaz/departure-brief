@@ -22,8 +22,8 @@ describe('MemoryStore fetch log', () => {
   it('keeps every fetch, including repeats of known content', async () => {
     const store = new MemoryStore();
     const r = rawReport({ kind: 'taf', source: 'awc', station: 'KJFK', body: 'TAF KJFK', issuedAt: null, upstream: null });
-    await store.putRaw(r, { fetchedAt: new Date(1), request: 'a' });
-    await store.putRaw(r, { fetchedAt: new Date(2), request: 'b' });
+    await store.putRaw(r, { fetchedAt: new Date(1), request: 'a', station: null });
+    await store.putRaw(r, { fetchedAt: new Date(2), request: 'b', station: null });
     expect(store.fetchLog().map((f) => f.event.request)).toEqual(['a', 'b']);
   });
 });

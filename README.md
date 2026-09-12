@@ -33,8 +33,8 @@ Early. Building in this order:
 | M3 | Route and time resolution | **done** — ETA per waypoint, TAF period selection with overlays |
 | M4 | Rules engine — personal minimums, CARs 602.114/115, FAR 91.155 | **done** — airport-only; every finding cited |
 | M5 | Briefing assembly and UI | **done** — API + web app; briefings immutable and content-addressed |
-| M6 | NOTAM relevance pipeline | |
-| M7 | Evaluation harness | |
+| M6 | NOTAM relevance pipeline | **done** — decoder, filter, dedupe, ranking with citation checks; needs a local model |
+| M7 | Evaluation harness | **done** — labelled set + scorer; gate skips until the model is recorded |
 
 Airspace transit analysis, nav logs and forecast verification come after the
 above works end to end.
@@ -83,7 +83,13 @@ npm run holdshort -- ourairports <dir> --country CA   # OurAirports snapshot —
 npm run holdshort -- airport CYSN         # runways with true headings (and magnetic variation where the source has it)
 npm run holdshort -- resolve flights/demo-cysn-cykf.json --fetch   # conditions at each waypoint at its ETA, cited
 npm run holdshort -- brief flights/demo-cysn-cykf.json --fetch     # go / marginal / no-go per waypoint against profiles/default.json
+npm run holdshort -- notams flights/demo-cysn-cykf.json --fetch    # every NOTAM for the flight, classified and (with a model) ranked
 npm run holdshort -- decode "METAR KJFK 071151Z 34007KT 10SM CLR 19/11 A3015"
+
+# NOTAM relevance ranking is the only part that uses a model, and it is optional.
+# Install Ollama, then:
+ollama pull qwen2.5:7b
+HOLDSHORT_LLM=ollama npm run eval:notam -- --record   # rank, record fixtures, score against the labelled set
 
 npm run build -w apps/web && npm start   # the web app and API on http://127.0.0.1:3000
 npm run dev:api & npm run dev:web        # development: Vite on :5173 proxying /api to :3000
@@ -97,7 +103,8 @@ dependency but `pg`), `apps/api` (Fastify), `apps/web` (Vite + React).
 All public domain or free, with no redistribution restrictions:
 
 - [aviationweather.gov](https://aviationweather.gov/) (NOAA/AWC) — METAR, TAF, PIREP, AIRMET/SIGMET
-- FAA NOTAM API — NOTAMs by location and time
+- NAV CANADA CFPS — Canadian NOTAMs (the JSON endpoint behind plan.navcanada.ca; unofficial, so the client fails loudly if its shape changes)
+- FAA NOTAM API — US NOTAMs by location and time (awaiting credentials; the client is written but unverified)
 - FAA NASR — US airports, runways, magnetic variation
 - OurAirports — airports and runways outside the US (public domain)
 - USGS — terrain elevation

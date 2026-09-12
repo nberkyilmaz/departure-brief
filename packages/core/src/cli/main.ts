@@ -7,8 +7,10 @@
  *   holdshort airport KJFK                        print a stored airport with its runways
  *   holdshort resolve <flight.json> [--fetch] [--as-of <ISO>] [--json]
  *                                                 conditions at each waypoint at its ETA
- *   holdshort brief <flight.json> [--fetch] [--as-of <ISO>] [--json]
+ *   holdshort brief <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams]
  *                                                 go / marginal / no-go per waypoint, every finding cited
+ *   holdshort notams <flight.json> [--fetch] [--as-of <ISO>] [--json]
+ *                                                 every NOTAM for the flight's fields, classified and (with a model) ranked
  *   holdshort decode "<METAR or TAF text>"         print the decoded JSON
  *
  * Reads `.env` if present. Uses Postgres at DATABASE_URL (default: the
@@ -28,7 +30,11 @@ import { AwcClient } from '../fetch/awc.js';
 import { createHttpClient } from '../fetch/http.js';
 import { ingestStation, type IngestCounts } from '../fetch/ingest.js';
 import { readNasrDirectory } from '../fetch/nasr.js';
+import { NavCanadaClient } from '../fetch/navcanada.js';
 import { readOurAirportsDirectory } from '../fetch/ourairports.js';
+import { llmFromEnv } from '../llm/env.js';
+import { notamBriefingText, notamDocument } from '../notam/describe.js';
+import { notamsForFlight, type NotamBriefing } from '../notam/flight.js';
 import { FaaNotamClient } from '../fetch/notam.js';
 import { MemoryStore } from '../store/memory.js';
 import { PostgresStore } from '../store/postgres.js';
@@ -40,7 +46,7 @@ const USER_AGENT = process.env.HOLDSHORT_USER_AGENT ?? 'holdshort/0.1 (+https://
 
 function usage(): never {
   console.error(
-    'usage: holdshort fetch <ICAO...> [--memory] | holdshort nasr <dir> | holdshort ourairports <dir> [--country XX] | holdshort airport <id> | holdshort resolve|brief <flight.json> [--fetch] [--as-of <ISO>] [--json] | holdshort decode "<report>"',
+    'usage: holdshort fetch <ICAO...> [--memory] | holdshort nasr <dir> | holdshort ourairports <dir> [--country XX] | holdshort airport <id> | holdshort resolve|brief|notams <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams] | holdshort decode "<report>"',
   );
   process.exit(2);
 }
@@ -136,8 +142,12 @@ async function airportCommand(args: string[]): Promise<void> {
   }
 }
 
-/** Read the plan and, optionally fetching first, resolve it as of the requested instant. */
-async function loadAndResolve(args: string[]) {
+/**
+ * Read the plan, optionally fetch, resolve it as of the requested instant,
+ * and hand the still-open store to `body` — one connection for the whole
+ * command, closed when it returns.
+ */
+async function withFlight<T>(args: string[], body: (ctx: { file: string; plan: FlightPlan; resolved: Awaited<ReturnType<typeof resolveFlight>>; store: Store }) => Promise<T>): Promise<T> {
   const file = args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--as-of');
   if (!file) usage();
   const plan = parseFlightPlan(JSON.parse(readFileSync(file, 'utf8')));
@@ -153,15 +163,16 @@ async function loadAndResolve(args: string[]) {
       );
       for (const id of ids) await ingestStation({ store, awc }, id);
     }
-    return { file, plan, resolved: await resolveFlight(store, plan, asOf) };
+    return await body({ file, plan, resolved: await resolveFlight(store, plan, asOf), store });
   } finally {
     await store.close();
   }
 }
 
 async function resolveCommand(args: string[]): Promise<void> {
-  const { resolved } = await loadAndResolve(args);
-  console.log(args.includes('--json') ? JSON.stringify(resolved, null, 2) : flightText(resolved));
+  await withFlight(args, async ({ resolved }) => {
+    console.log(args.includes('--json') ? JSON.stringify(resolved, null, 2) : flightText(resolved));
+  });
 }
 
 function readJsonRelative(planFile: string, path: string | null, fallback: string): unknown {
@@ -170,13 +181,48 @@ function readJsonRelative(planFile: string, path: string | null, fallback: strin
   return JSON.parse(readFileSync(target, 'utf8'));
 }
 
+/** NOTAMs for a resolved flight: fetched when asked, ranked when a model is configured. */
+async function notamsFor(args: string[], store: Store, resolved: Awaited<ReturnType<typeof resolveFlight>>, aircraftType: string): Promise<NotamBriefing> {
+  const llm = llmFromEnv();
+  if (llm) console.error(`NOTAM relevance: ${llm.description}`);
+  const http = createHttpClient({ userAgent: USER_AGENT });
+  return notamsForFlight(
+    {
+      store,
+      navcanada: args.includes('--fetch') ? new NavCanadaClient(http) : null,
+      provider: llm?.provider ?? null,
+      model: llm?.model ?? null,
+    },
+    resolved,
+    aircraftType,
+  );
+}
+
+function aircraftOf(file: string, plan: FlightPlan) {
+  return plan.aircraft ? parseAircraftLimits(readJsonRelative(file, plan.aircraft, '')) : null;
+}
+
 async function briefCommand(args: string[]): Promise<void> {
-  const { file, plan, resolved } = await loadAndResolve(args);
-  const profile = parsePilotProfile(readJsonRelative(file, (plan as FlightPlan).profile, 'profiles/default.json'));
-  const aircraftPath = (plan as FlightPlan).aircraft;
-  const aircraft = aircraftPath ? parseAircraftLimits(readJsonRelative(file, aircraftPath, '')) : null;
-  const briefing = evaluateFlight(resolved, profile, aircraft);
-  console.log(args.includes('--json') ? JSON.stringify(briefing, null, 2) : briefingText(briefing));
+  await withFlight(args, async ({ file, plan, resolved, store }) => {
+    const profile = parsePilotProfile(readJsonRelative(file, plan.profile, 'profiles/default.json'));
+    const aircraft = aircraftOf(file, plan);
+    const briefing = evaluateFlight(resolved, profile, aircraft);
+    const notams = args.includes('--notams') ? await notamsFor(args, store, resolved, aircraft?.type ?? 'unknown') : null;
+    if (args.includes('--json')) {
+      console.log(JSON.stringify({ briefing, notams: notams ? notamDocument(notams) : null }, null, 2));
+      return;
+    }
+    console.log(briefingText(briefing));
+    if (notams) console.log(notamBriefingText(notamDocument(notams)));
+  });
+}
+
+async function notamsCommand(args: string[]): Promise<void> {
+  await withFlight(args, async ({ file, plan, resolved, store }) => {
+    const aircraft = aircraftOf(file, plan);
+    const doc = notamDocument(await notamsFor(args, store, resolved, aircraft?.type ?? 'unknown'));
+    console.log(args.includes('--json') ? JSON.stringify(doc, null, 2) : notamBriefingText(doc));
+  });
 }
 
 function decodeCommand(args: string[]): void {
@@ -205,6 +251,9 @@ switch (command) {
     break;
   case 'brief':
     await briefCommand(rest);
+    break;
+  case 'notams':
+    await notamsCommand(rest);
     break;
   case 'decode':
     decodeCommand(rest);

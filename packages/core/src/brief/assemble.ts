@@ -2,6 +2,10 @@ import { METAR_DECODER_VERSION } from '../decode/metar/index.js';
 import { TAF_DECODER_VERSION } from '../decode/taf/index.js';
 import type { FlightPlan } from '../domain/flight.js';
 import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
+import { PROMPT_VERSION } from '../notam/assess.js';
+import { NOTAM_DECODER_VERSION } from '../notam/decode.js';
+import { notamDocument } from '../notam/describe.js';
+import type { NotamBriefing } from '../notam/flight.js';
 import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
 import { evaluateFlight } from '../rules/evaluate.js';
 import { RULES_VERSION } from '../rules/types.js';
@@ -32,15 +36,16 @@ function pointInputs(p: ResolvedPoint): BriefingPointInputs {
   };
 }
 
-function reportRefs(points: readonly ResolvedPoint[]): BriefingReportRef[] {
+function reportRefs(points: readonly ResolvedPoint[], notams: NotamBriefing | null): BriefingReportRef[] {
   const seen = new Map<string, BriefingReportRef>();
+  const add = (r: { kind: BriefingReportRef['kind']; station: string | null; sha256: string; issuedAt: Date | null } | undefined) => {
+    if (r && !seen.has(r.sha256)) seen.set(r.sha256, { kind: r.kind, station: r.station, sha256: r.sha256, issuedAt: r.issuedAt?.toISOString() ?? null });
+  };
   for (const p of points) {
-    for (const r of [p.forecast?.report, p.metar?.report]) {
-      if (r && !seen.has(r.sha256)) {
-        seen.set(r.sha256, { kind: r.kind, station: r.station, sha256: r.sha256, issuedAt: r.issuedAt?.toISOString() ?? null });
-      }
-    }
+    add(p.forecast?.report);
+    add(p.metar?.report);
   }
+  for (const n of notams?.items ?? []) add(n.report);
   return [...seen.values()].sort((a, b) => a.sha256.localeCompare(b.sha256));
 }
 
@@ -53,20 +58,28 @@ export function assembleBriefing(
   profile: PilotProfile,
   aircraft: AircraftLimits | null,
   createdAt: Date = new Date(),
+  notams: NotamBriefing | null = null,
 ): StoredBriefing {
   const briefing = evaluateFlight(resolved, profile, aircraft);
   const allPoints = [...resolved.points, ...(resolved.alternate ? [resolved.alternate] : [])];
   const document: BriefingDocument = {
-    format: 1,
+    format: 2,
     plan: resolved.plan,
     profile,
     aircraft,
     asOf: resolved.asOf.toISOString(),
-    versions: { rules: RULES_VERSION, metarDecoder: METAR_DECODER_VERSION, tafDecoder: TAF_DECODER_VERSION },
+    versions: {
+      rules: RULES_VERSION,
+      metarDecoder: METAR_DECODER_VERSION,
+      tafDecoder: TAF_DECODER_VERSION,
+      notamDecoder: NOTAM_DECODER_VERSION,
+      notamPrompt: PROMPT_VERSION,
+    },
+    notams: notams ? notamDocument(notams) : null,
     inputs: {
       points: resolved.points.map(pointInputs),
       alternate: resolved.alternate ? pointInputs(resolved.alternate) : null,
-      reports: reportRefs(allPoints),
+      reports: reportRefs(allPoints, notams),
     },
     briefing,
   };
