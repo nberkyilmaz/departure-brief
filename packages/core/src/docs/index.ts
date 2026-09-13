@@ -7,7 +7,7 @@ export { rotatePng, unrotateBox } from './reader/ocr.js';
 export type { Rotation } from './reader/ocr.js';
 export { alignNumbers, alignText, locateText, normaliseOcr, numbersIn, resolveCitation, tokensById } from './align.js';
 export type { Alignment, AlignMatch, Located } from './align.js';
-export { alignWbExtraction, buildWbRequest, pageLines, validateWbExtraction, WB_FIELDS, WB_PROMPT_VERSION, WB_SCHEMA, wbContextHash } from './extract/wb.js';
+export { alignWbExtraction, buildWbRequest, findFigureOnPage, findFigureOnPages, pageLines, validateWbExtraction, WB_FIELDS, WB_PROMPT_VERSION, WB_SCHEMA, wbContextHash } from './extract/wb.js';
 export type { WbFieldSpec } from './extract/wb.js';
 export type { CitedNumber, CitedPoint, ExtractedField, WbFieldName, WbPageExtraction } from './extract/wb.js';
 export { cropPageImage, downscalePng } from './crop.js';

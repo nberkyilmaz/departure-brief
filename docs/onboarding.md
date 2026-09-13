@@ -199,6 +199,8 @@ reading. Prefer that move to another prompt revision.
 npm run holdshort -- doc ingest C172MPOH.pdf            # OCR the scan into word boxes (cached under data/docs/)
 npm run holdshort -- doc find C172MPOH.pdf "crosswind"  # search the text, with page numbers
 HOLDSHORT_LLM=ollama OLLAMA_MODEL=qwen2.5vl:3b   npm run holdshort -- doc wb C172MPOH.pdf --pages 17,18,42,88,90 --type C172
+npm run holdshort -- wb confirm aircraft/c172.wb.json cgAftNormalIn=47.3 'cgForwardNormal[1]=2300@38.5'
+npm run holdshort -- wb confirm aircraft/c172.wb.json frontSeatArmIn=37 --pages 88 --on-my-word
 npm run holdshort -- wb aircraft/c172.wb.json --empty 1454 --empty-moment 57.6 --front 340 --fuel 38
 ```
 
@@ -210,9 +212,24 @@ in the `review` array of `aircraft/c172.wb.json` for the owner, and
 That refusal is the design, not a gap — read `IncompleteSpecError` before
 "fixing" it.
 
+`wb confirm` closes the loop the review queue opens. It records which of
+three things it could establish — the handbook states the figure beside
+words naming it, the handbook prints it on a page you name but with nothing
+on that row to check it against, or the scan cannot read it and you are
+asserting it (`--on-my-word`, no citation). The note on each figure in
+`aircraft/c172.wb.json` says which. A confirmation survives re-extraction.
+
+Two defects found by using it, both worth knowing before changing it:
+searching the whole handbook for a number matched "Total Usable: 48
+gallons" for the fuel *arm* — the right value, the wrong ink, which is why
+the search is limited to the pages the data came from. And this handbook's
+station arms live in a diagram that OCRs to noise, which is what
+`--on-my-word` exists for.
+
 **Needs from the owner:** the aircraft's own empty weight and moment (the
 handbook's sample airplane is used until then, and both the CLI and the web
-panel say so), and a pass over the review queue.
+panel say so), and a check of the figures currently entered by hand — the
+station arms were read off the page images, not confirmed by a pilot.
 
 Running the product today:
 

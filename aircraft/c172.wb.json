@@ -12,8 +12,475 @@
       90
     ]
   },
-  "stations": [],
-  "envelopes": [],
+  "figures": [
+    {
+      "name": "baggage1ArmIn",
+      "value": 95,
+      "source": null,
+      "note": "entered by hand from the page image; the scan of C172MPOH.pdf does not print this legibly, so nothing here corroborates it — check it against your handbook"
+    },
+    {
+      "name": "baggage1MaxLb",
+      "value": 120,
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 17,
+        "box": {
+          "x": 524,
+          "y": 1749,
+          "w": 1087,
+          "h": 74
+        },
+        "citedText": "Baggage Area 1 {or passenger on child's seat)-Station 82 to 168: 120 ibs. See note below."
+      },
+      "note": "confirmed by hand against the handbook, C172MPOH.pdf p.17"
+    },
+    {
+      "name": "baggage2ArmIn",
+      "value": 123,
+      "source": null,
+      "note": "entered by hand from the page image; the scan of C172MPOH.pdf does not print this legibly, so nothing here corroborates it — check it against your handbook"
+    },
+    {
+      "name": "baggage2MaxLb",
+      "value": 50,
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 17,
+        "box": {
+          "x": 524,
+          "y": 1827,
+          "w": 1020,
+          "h": 41
+        },
+        "citedText": "Paggage Area 2 -Station 108 to 142: 50 lbs. See note below."
+      },
+      "note": null
+    },
+    {
+      "name": "cgAftNormalIn",
+      "value": 47.3,
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 18,
+        "box": {
+          "x": 534,
+          "y": 837,
+          "w": 980,
+          "h": 72
+        },
+        "citedText": "line variation to 38.5 inches aft of datum at 2300 Ibe. Aft: 47. 3 inches aft of datum at all weights."
+      },
+      "note": "confirmed by hand against the handbook, C172MPOH.pdf p.18"
+    },
+    {
+      "name": "cgAftUtilityIn",
+      "value": 40.5,
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 18,
+        "box": {
+          "x": 534,
+          "y": 1185,
+          "w": 749,
+          "h": 33
+        },
+        "citedText": "Aff: 40.5 inches aft of datum at all weights."
+      },
+      "note": null
+    },
+    {
+      "name": "cgForwardNormal[0]",
+      "value": {
+        "weightLb": 1950,
+        "armIn": 35
+      },
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 18,
+        "box": {
+          "x": 539,
+          "y": 800,
+          "w": 1190,
+          "h": 66
+        },
+        "citedText": "Forward: 35.0 inches aft of datum at 1950 Ibs. or less, with siraight line variation to 38.5 inches aft of datum at 2300 Ibe."
+      },
+      "note": null
+    },
+    {
+      "name": "cgForwardNormal[1]",
+      "value": {
+        "weightLb": 2300,
+        "armIn": 38.5
+      },
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 18,
+        "box": {
+          "x": 539,
+          "y": 800,
+          "w": 1190,
+          "h": 66
+        },
+        "citedText": "Forward: 35.0 inches aft of datum at 1950 Ibs. or less, with siraight line variation to 38.5 inches aft of datum at 2300 Ibe."
+      },
+      "note": "confirmed by hand against the handbook, C172MPOH.pdf p.18"
+    },
+    {
+      "name": "cgForwardUtility[0]",
+      "value": {
+        "weightLb": 1950,
+        "armIn": 35
+      },
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 18,
+        "box": {
+          "x": 539,
+          "y": 1107,
+          "w": 1190,
+          "h": 68
+        },
+        "citedText": "Forward: 35.0 inches aft of datum at 1950 Ibs. or less, with straight line variation to 35. 5 inches aft of datura at 2000 lbs."
+      },
+      "note": null
+    },
+    {
+      "name": "demonstratedCrosswindKt",
+      "value": 15,
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 42,
+        "box": {
+          "x": 434,
+          "y": 1688,
+          "w": 1259,
+          "h": 75
+        },
+        "citedText": "Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS"
+      },
+      "note": "confirmed by hand against the handbook, C172MPOH.pdf p.42"
+    },
+    {
+      "name": "frontSeatArmIn",
+      "value": 37,
+      "source": null,
+      "note": "entered by hand from the page image; the scan of C172MPOH.pdf does not print this legibly, so nothing here corroborates it — check it against your handbook"
+    },
+    {
+      "name": "fuelArmIn",
+      "value": 48,
+      "source": null,
+      "note": "entered by hand from the page image; the scan of C172MPOH.pdf does not print this legibly, so nothing here corroborates it — check it against your handbook"
+    },
+    {
+      "name": "fuelStandardUsableGal",
+      "value": 38,
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 90,
+        "box": {
+          "x": 913,
+          "y": 862,
+          "w": 32,
+          "h": 958
+        },
+        "citedText": "Sandard Tavks {38 Gal, Masdwoom) , , , , . 228 10,9"
+      },
+      "note": "confirmed by hand against the handbook, C172MPOH.pdf p.90 (the page prints the figure, but nothing on its line names the field)"
+    },
+    {
+      "name": "maxLandingWeightLb",
+      "value": 2300,
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 17,
+        "box": {
+          "x": 445,
+          "y": 1684,
+          "w": 620,
+          "h": 33
+        },
+        "citedText": "Maximum Landing Weight: 2300 lbs."
+      },
+      "note": null
+    },
+    {
+      "name": "maxTakeoffWeightNormalLb",
+      "value": 2300,
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 17,
+        "box": {
+          "x": 446,
+          "y": 1645,
+          "w": 611,
+          "h": 33
+        },
+        "citedText": "Maximum Takeoff Weight: 2300 Ibs."
+      },
+      "note": null
+    },
+    {
+      "name": "oilMomentPer1000",
+      "value": -0.2,
+      "source": null,
+      "note": "entered by hand from the page image; the scan of C172MPOH.pdf does not print this legibly, so nothing here corroborates it — check it against your handbook"
+    },
+    {
+      "name": "oilWeightLb",
+      "value": 15,
+      "source": {
+        "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "filename": "C172MPOH.pdf",
+        "page": 90,
+        "box": {
+          "x": 759,
+          "y": 1225,
+          "w": 30,
+          "h": 623
+        },
+        "citedText": "for 211 caleulations, 8 Qs, = 15 Lbs, at 0,2"
+      },
+      "note": "confirmed by hand against the handbook, C172MPOH.pdf p.90 (the page prints the figure, but nothing on its line names the field)"
+    },
+    {
+      "name": "rearSeatArmIn",
+      "value": 73,
+      "source": null,
+      "note": "entered by hand from the page image; the scan of C172MPOH.pdf does not print this legibly, so nothing here corroborates it — check it against your handbook"
+    }
+  ],
+  "stations": [
+    {
+      "id": "front",
+      "label": "Pilot and front passenger",
+      "kind": "seat",
+      "armIn": {
+        "value": 37,
+        "source": null,
+        "note": "entered by hand from the page image; the scan of C172MPOH.pdf does not print this legibly, so nothing here corroborates it — check it against your handbook"
+      },
+      "maxLb": null,
+      "fuel": null,
+      "fixedLb": null
+    },
+    {
+      "id": "rear",
+      "label": "Rear passengers",
+      "kind": "seat",
+      "armIn": {
+        "value": 73,
+        "source": null,
+        "note": "entered by hand from the page image; the scan of C172MPOH.pdf does not print this legibly, so nothing here corroborates it — check it against your handbook"
+      },
+      "maxLb": null,
+      "fuel": null,
+      "fixedLb": null
+    },
+    {
+      "id": "bag1",
+      "label": "Baggage area 1",
+      "kind": "baggage",
+      "armIn": {
+        "value": 95,
+        "source": null,
+        "note": "entered by hand from the page image; the scan of C172MPOH.pdf does not print this legibly, so nothing here corroborates it — check it against your handbook"
+      },
+      "maxLb": {
+        "value": 120,
+        "source": {
+          "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+          "filename": "C172MPOH.pdf",
+          "page": 17,
+          "box": {
+            "x": 524,
+            "y": 1749,
+            "w": 1087,
+            "h": 74
+          },
+          "citedText": "Baggage Area 1 {or passenger on child's seat)-Station 82 to 168: 120 ibs. See note below."
+        },
+        "note": "confirmed by hand against the handbook, C172MPOH.pdf p.17"
+      },
+      "fuel": null,
+      "fixedLb": null
+    },
+    {
+      "id": "bag2",
+      "label": "Baggage area 2",
+      "kind": "baggage",
+      "armIn": {
+        "value": 123,
+        "source": null,
+        "note": "entered by hand from the page image; the scan of C172MPOH.pdf does not print this legibly, so nothing here corroborates it — check it against your handbook"
+      },
+      "maxLb": {
+        "value": 50,
+        "source": {
+          "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+          "filename": "C172MPOH.pdf",
+          "page": 17,
+          "box": {
+            "x": 524,
+            "y": 1827,
+            "w": 1020,
+            "h": 41
+          },
+          "citedText": "Paggage Area 2 -Station 108 to 142: 50 lbs. See note below."
+        },
+        "note": null
+      },
+      "fuel": null,
+      "fixedLb": null
+    },
+    {
+      "id": "fuel",
+      "label": "Fuel (standard tanks)",
+      "kind": "fuel",
+      "armIn": {
+        "value": 48,
+        "source": null,
+        "note": "entered by hand from the page image; the scan of C172MPOH.pdf does not print this legibly, so nothing here corroborates it — check it against your handbook"
+      },
+      "maxLb": null,
+      "fuel": {
+        "usableGal": {
+          "value": 38,
+          "source": {
+            "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+            "filename": "C172MPOH.pdf",
+            "page": 90,
+            "box": {
+              "x": 913,
+              "y": 862,
+              "w": 32,
+              "h": 958
+            },
+            "citedText": "Sandard Tavks {38 Gal, Masdwoom) , , , , . 228 10,9"
+          },
+          "note": "confirmed by hand against the handbook, C172MPOH.pdf p.90 (the page prints the figure, but nothing on its line names the field)"
+        },
+        "lbPerGal": {
+          "value": 6,
+          "source": null,
+          "note": "assumed 6 lb per US gallon; the handbook figure was not read"
+        }
+      },
+      "fixedLb": null
+    },
+    {
+      "id": "oil",
+      "label": "Oil",
+      "kind": "oil",
+      "armIn": {
+        "value": -13.3,
+        "source": null,
+        "note": "arm derived from the printed 15 lb at -0.2 moment/1000"
+      },
+      "maxLb": null,
+      "fuel": null,
+      "fixedLb": {
+        "value": 15,
+        "source": {
+          "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+          "filename": "C172MPOH.pdf",
+          "page": 90,
+          "box": {
+            "x": 759,
+            "y": 1225,
+            "w": 30,
+            "h": 623
+          },
+          "citedText": "for 211 caleulations, 8 Qs, = 15 Lbs, at 0,2"
+        },
+        "note": "confirmed by hand against the handbook, C172MPOH.pdf p.90 (the page prints the figure, but nothing on its line names the field)"
+      }
+    }
+  ],
+  "envelopes": [
+    {
+      "category": "normal",
+      "maxWeightLb": {
+        "value": 2300,
+        "source": {
+          "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+          "filename": "C172MPOH.pdf",
+          "page": 17,
+          "box": {
+            "x": 446,
+            "y": 1645,
+            "w": 611,
+            "h": 33
+          },
+          "citedText": "Maximum Takeoff Weight: 2300 Ibs."
+        },
+        "note": null
+      },
+      "forward": [
+        {
+          "weightLb": 1950,
+          "armIn": 35,
+          "source": {
+            "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+            "filename": "C172MPOH.pdf",
+            "page": 18,
+            "box": {
+              "x": 539,
+              "y": 800,
+              "w": 1190,
+              "h": 66
+            },
+            "citedText": "Forward: 35.0 inches aft of datum at 1950 Ibs. or less, with siraight line variation to 38.5 inches aft of datum at 2300 Ibe."
+          }
+        },
+        {
+          "weightLb": 2300,
+          "armIn": 38.5,
+          "source": {
+            "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+            "filename": "C172MPOH.pdf",
+            "page": 18,
+            "box": {
+              "x": 539,
+              "y": 800,
+              "w": 1190,
+              "h": 66
+            },
+            "citedText": "Forward: 35.0 inches aft of datum at 1950 Ibs. or less, with siraight line variation to 38.5 inches aft of datum at 2300 Ibe."
+          }
+        }
+      ],
+      "aftArmIn": {
+        "value": 47.3,
+        "source": {
+          "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+          "filename": "C172MPOH.pdf",
+          "page": 18,
+          "box": {
+            "x": 534,
+            "y": 837,
+            "w": 980,
+            "h": 72
+          },
+          "citedText": "line variation to 38.5 inches aft of datum at 2300 Ibe. Aft: 47. 3 inches aft of datum at all weights."
+        },
+        "note": "confirmed by hand against the handbook, C172MPOH.pdf p.18"
+      }
+    }
+  ],
   "maxLandingWeightLb": {
     "value": 2300,
     "source": {
@@ -32,7 +499,22 @@
   },
   "maxRampWeightLb": null,
   "baggageCombinedMaxLb": null,
-  "demonstratedCrosswindKt": null,
+  "demonstratedCrosswindKt": {
+    "value": 15,
+    "source": {
+      "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+      "filename": "C172MPOH.pdf",
+      "page": 42,
+      "box": {
+        "x": 434,
+        "y": 1688,
+        "w": 1259,
+        "h": 75
+      },
+      "citedText": "Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS"
+    },
+    "note": "confirmed by hand against the handbook, C172MPOH.pdf p.42"
+  },
   "sample": null,
   "review": [
     {
@@ -50,29 +532,11 @@
       "problem": "the quoted line does not mention ramp"
     },
     {
-      "field": "cgAftNormalIn",
-      "description": "aft centre of gravity limit, normal category, inches",
-      "proposed": 35,
-      "page": 17,
-      "citedText": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.",
-      "box": null,
-      "problem": "the quoted line is not on page 17"
-    },
-    {
       "field": "cgAftUtilityIn",
       "description": "aft centre of gravity limit, utility category, inches",
       "proposed": 38.5,
       "page": 17,
       "citedText": "38.5 inches aft of datum at 2300 lbs.",
-      "box": null,
-      "problem": "the quoted line is not on page 17"
-    },
-    {
-      "field": "demonstratedCrosswindKt",
-      "description": "maximum demonstrated crosswind velocity, knots",
-      "proposed": 100,
-      "page": 17,
-      "citedText": "100 knots",
       "box": null,
       "problem": "the quoted line is not on page 17"
     },
@@ -147,18 +611,6 @@
       "proposed": {
         "weightLb": 1950,
         "armIn": 35
-      },
-      "page": 42,
-      "citedText": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.",
-      "box": null,
-      "problem": "the quoted line is not on page 42"
-    },
-    {
-      "field": "cgForwardNormal[1]",
-      "description": "normal category forward CG limit point (weight lb, arm in)",
-      "proposed": {
-        "weightLb": 2300,
-        "armIn": 38.5
       },
       "page": 42,
       "citedText": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.",

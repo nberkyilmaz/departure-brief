@@ -76,7 +76,7 @@ export const WB_FIELDS = {
   baggage2ArmIn: f('baggage area 2 arm, inches', [['baggage']]),
   baggage2MaxLb: f('baggage area 2 maximum, lb', [['baggage', 'area 2']]),
   baggageCombinedMaxLb: f('combined maximum for all baggage areas, lb', [['combined', 'baggage']]),
-  fuelArmIn: f('fuel station arm, inches', [['fuel', 'tank']]),
+  fuelArmIn: f('fuel station arm, inches', [['fuel', 'tank'], ['arm', 'station', 'inch']]),
   fuelLbPerGal: f('fuel weight per US gallon, lb', [['gal']]),
   fuelStandardUsableGal: f('usable fuel with standard tanks, US gal', [['standard'], ['gal']]),
   fuelLongRangeUsableGal: f('usable fuel with long range tanks, US gal', [['long range', 'long-range'], ['gal']]),
@@ -223,6 +223,74 @@ export function validateWbExtraction(x: unknown): WbPageExtraction | null {
       .map((p) => ({ weightLb: p['weightLb'] as number, armIn: p['armIn'] as number, quote: p['quote'] as string }));
   };
   return { fields, cgForwardNormal: points('cgForwardNormal'), cgForwardUtility: points('cgForwardUtility'), pageSummary: typeof o['pageSummary'] === 'string' ? o['pageSummary'] : '' };
+}
+
+/**
+ * Find a figure the owner supplies, by looking for a line of the document
+ * that both prints it and names it. Same three checks a model's answer
+ * faces, with the owner as the proposer instead: the owner says *what* the
+ * handbook states, and the handbook still has to agree.
+ */
+export function findFigureOnPages(doc: DocumentOcr, pages: readonly number[], name: string, spec: WbFieldSpec, numbers: readonly number[]): ExtractedField | null {
+  for (const page of pages) {
+    const pageOcr = doc.pages[page - 1];
+    if (!pageOcr || pageOcr.words.length === 0) continue;
+    const tokens = new Map(pageOcr.words.map((w) => [w.id, w]));
+    for (let i = 0; i < pageOcr.lines.length; i++) {
+      // A figure and its label can sit on one printed line or wrap onto the next.
+      for (let count = 1; count <= 2 && i + count <= pageOcr.lines.length; count++) {
+        const run = pageOcr.lines.slice(i, i + count);
+        const ids = run.flatMap((l) => l.wordIds);
+        const alignment = alignNumbers(tokens, ids, numbers);
+        if (alignment.match === 'none') continue;
+        const ctx = contextOf(pageOcr, i, count);
+        if (checkLabel(spec, ctx) !== null) continue;
+        return {
+          name,
+          description: spec.description,
+          value: numbers.length === 2 ? { weightLb: numbers[0]!, armIn: numbers[1]! } : numbers[0]!,
+          page,
+          quote: ctx.text,
+          alignment,
+          context: ctx.text,
+          labelProblem: null,
+          verified: true,
+        };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * The weaker check, for a figure the handbook prints in a diagram rather
+ * than in a sentence — a station arm on figure 6-3 is a number with a
+ * leader line to a seat, and no label shares its printed row. The owner
+ * names the page, and all this can add is that the number really is on it.
+ * The result says so, so nothing downstream can mistake it for the strong
+ * check.
+ */
+export function findFigureOnPage(doc: DocumentOcr, page: number, name: string, spec: WbFieldSpec, numbers: readonly number[]): ExtractedField | null {
+  const pageOcr = doc.pages[page - 1];
+  if (!pageOcr || pageOcr.words.length === 0) return null;
+  const tokens = new Map(pageOcr.words.map((w) => [w.id, w]));
+  for (let i = 0; i < pageOcr.lines.length; i++) {
+    const line = pageOcr.lines[i]!;
+    const alignment = alignNumbers(tokens, line.wordIds, numbers);
+    if (alignment.match === 'none') continue;
+    return {
+      name,
+      description: spec.description,
+      value: numbers.length === 2 ? { weightLb: numbers[0]!, armIn: numbers[1]! } : numbers[0]!,
+      page,
+      quote: line.text,
+      alignment,
+      context: line.text,
+      labelProblem: `nothing on this line names ${name}; taken on the owner's word that page ${page} states it`,
+      verified: false,
+    };
+  }
+  return null;
 }
 
 /** Check every figure: quote on the page, number in the quote, line names the field. */

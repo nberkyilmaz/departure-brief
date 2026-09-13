@@ -89,6 +89,7 @@ npm run holdshort -- notams flights/demo-cysn-cykf.json --fetch    # every NOTAM
 npm run holdshort -- diff flights/demo-cysn-cykf.json --fetch      # brief again and say what changed since last time
 npm run holdshort -- doc ingest C172MPOH.pdf                       # OCR a scanned POH into word boxes (cached by content hash)
 npm run holdshort -- doc find C172MPOH.pdf "demonstrated crosswind" # search the OCR text, with page numbers
+npm run holdshort -- wb confirm aircraft/c172.wb.json cgAftNormalIn=47.3   # confirm a figure the extraction could not; the handbook still has to agree
 npm run holdshort -- wb aircraft/c172.wb.json --empty 1454 --empty-moment 57.6 --front 340 --fuel 38   # a loading, every limit cited to its POH page
 npm run holdshort -- decode "METAR KJFK 071151Z 34007KT 10SM CLR 19/11 A3015"
 
@@ -149,6 +150,19 @@ Recall is reported and deliberately not gated — a figure the model misses
 waits for you in the review queue, which is safe in a way an invented one
 is not. The checks caught the model quoting a line from a different page,
 and reading the utility-category weight limit as the normal-category one.
+
+What the model misses, you confirm — and the handbook still has to agree.
+`holdshort wb confirm` takes a figure you have read off the page and looks
+for it in the scan, recording which of three things it could establish:
+
+| | |
+| --- | --- |
+| the handbook states it beside words naming the field | the figure is cited to that line |
+| the handbook prints it on a page you name, with no label on its row | recorded as printed there, marked unlabelled |
+| the scan cannot read it at all (this handbook's diagrams OCR to noise) | `--on-my-word`: recorded as your figure, with no citation |
+
+Nothing is ever silently upgraded between those, and the note on every
+figure in `aircraft/*.wb.json` says which one it is.
 
 ## Data sources
 

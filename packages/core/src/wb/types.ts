@@ -46,6 +46,18 @@ export interface WeightBalanceSpec {
   readonly version: 1;
   readonly aircraftType: string;
   readonly source: { readonly documentSha256: string; readonly filename: string; readonly pages: readonly number[] } | null;
+  /**
+   * Every figure that survived checking, flat and named, whether a model
+   * read it or the owner confirmed it. The stations and envelopes below are
+   * assembled from these; keeping them means a later extraction run adds to
+   * the owner's confirmations instead of flattening them.
+   */
+  readonly figures: readonly {
+    readonly name: string;
+    readonly value: number | { readonly weightLb: number; readonly armIn: number };
+    readonly source: DocumentCitation | null;
+    readonly note: string | null;
+  }[];
   readonly stations: readonly Station[];
   readonly envelopes: readonly CgEnvelope[];
   readonly maxLandingWeightLb: Figure | null;

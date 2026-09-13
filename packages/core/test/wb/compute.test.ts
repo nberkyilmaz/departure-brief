@@ -41,7 +41,7 @@ describe('computeLoading', () => {
     expect(r.limits).toEqual({ maxWeightLb: 2300, forwardArmIn: 38.5, aftArmIn: 47.3 });
     // Each row's moment matches what the POH printed for it.
     const byLabel = Object.fromEntries(r.rows.map((row) => [row.label, row.momentPer1000]));
-    expect(byLabel['Oil (8 qts)']).toBe(-0.2);
+    expect(byLabel['Oil']).toBe(-0.2);
     expect(byLabel['Fuel (standard tanks)']).toBe(10.9);
     // 12.6, not the 12.8 the scan's OCR shows: 340 lb at 37 in is 12,580 lb-in,
     // and only 12.6 makes the page's own total of 102.9 add up.

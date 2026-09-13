@@ -26,11 +26,13 @@ computed).
 1. **Your aircraft's empty weight and moment**, from its own
    weight-and-balance record. Until then the web panel and CLI use the
    handbook's *sample airplane* figures and say so in both places.
-2. **Confirm the figures in the review queue** — `aircraft/c172.wb.json`,
-   the `review` array. The extraction verified 6 figures and sent 22 for
-   review; the loading computation refuses to run until the envelope is
-   complete, which is the intended behaviour, not a bug. Each entry names
-   the page and what the model proposed.
+2. **Check the figures entered by hand** — `aircraft/c172.wb.json`. The
+   extraction verified 6; the rest were completed with `wb confirm`, and
+   the note on each says how far the handbook backs it. The station arms
+   (37, 73, 95, 123 in) and the fuel arm (48 in) were read off the page
+   images and carry **no citation**, because this handbook prints them in a
+   diagram that OCRs to noise. They match the standard 172M figures, but a
+   pilot should confirm them against their own copy before flying on them.
 3. **The four open questions in the NOTAM labelled set**
    (`packages/core/test/fixtures/notam/labelled/…json`, `openQuestions`) —
    chiefly whether CYSN's runway 06/24 is a practical alternative for a
