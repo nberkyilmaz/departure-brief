@@ -1,0 +1,3266 @@
+{
+  "sha256": "ddcea7c3671769481c8fb5db7fa3ced1ccaabae6d6aee77ba1cf450f037cde4c",
+  "flightKey": "64b9a55a09f378b5115652273c5540c84abdb40d232d013620b4c33cf99be971",
+  "asOf": "2026-09-12T20:00:00.000Z",
+  "createdAt": "2026-09-12T20:00:00.000Z",
+  "document": {
+    "format": 2,
+    "plan": {
+      "departure": "CYSN",
+      "destination": "CYKF",
+      "alternate": "CYHM",
+      "route": [],
+      "departureTime": "2026-09-12T22:00:00.000Z",
+      "cruise": {
+        "tas": 105,
+        "altitude": 3500
+      },
+      "airspace": {
+        "CYSN": "control-zone",
+        "CYKF": "control-zone",
+        "CYHM": "control-zone"
+      },
+      "profile": "../profiles/default.json",
+      "aircraft": "../aircraft/c172.json"
+    },
+    "profile": {
+      "version": 1,
+      "name": "default",
+      "ceiling": 2500,
+      "visibility": 5,
+      "crosswind": 15,
+      "crosswindIncludesGust": true,
+      "maxGustSpread": null,
+      "nightAllowed": true
+    },
+    "aircraft": {
+      "type": "C172",
+      "demonstratedCrosswind": 15,
+      "demonstratedCrosswindSource": {
+        "filename": "C172MPOH.pdf",
+        "page": 42,
+        "citedText": "Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+        "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+      }
+    },
+    "asOf": "2026-09-12T20:00:00.000Z",
+    "versions": {
+      "rules": 2,
+      "metarDecoder": 2,
+      "tafDecoder": 1,
+      "notamDecoder": 1,
+      "notamPrompt": 3
+    },
+    "notams": {
+      "sites": [
+        "CYSN",
+        "CYKF",
+        "CYHM"
+      ],
+      "model": "qwen2.5:7b",
+      "promptVersion": 3,
+      "contextHash": "8c469e0b02516030e74fc2211cde74b6fc2cc0726993db21f27cec79e2f26c22",
+      "counts": {
+        "critical": 8,
+        "advisory": 9,
+        "unverified": 0,
+        "not-assessed": 0,
+        "irrelevant": 9,
+        "out-of-scope": 5
+      },
+      "fetchErrors": [],
+      "items": [
+        {
+          "sha256": "73888dadb0137883b4386736e6df8aa13efed003aaa10f256759a6ada90ff9ed",
+          "id": "D3745/26",
+          "raw": "(D3745/26 NOTAMN\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4310N07956W005\nA) CYHM B) 2609041816 C) 2609301700EST\nE) RWY 06/24 CLSD AVBL AS TWY BTN TWY C AND TWY F. \nACFT LIMITED TO AGN II AUTH NORTH OF RWY 12/30.)",
+          "text": "RWY 06/24 CLSD AVBL AS TWY BTN TWY C AND TWY F. \nACFT LIMITED TO AGN II AUTH NORTH OF RWY 12/30.",
+          "qcode": "QMRLC",
+          "qcodeMeaning": {
+            "subject": "Runway",
+            "condition": "Closed",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYHM"
+          ],
+          "from": "2026-09-04T18:16:00.000Z",
+          "to": "2026-09-30T17:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYHM"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.32723312872857646,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "critical",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "critical",
+            "rule": "runway.used-aerodrome",
+            "reason": "a runway closure (Q code QMRLC) at CYHM, the alternate aerodrome, in force during the flight"
+          }
+        },
+        {
+          "sha256": "c71590cd9bd15bb30ed25522eaca20cc963e0102daf93bdf643058a9aa37dbcf",
+          "id": "J4064/26",
+          "raw": "(J4064/26 NOTAMR J1996/26\nQ) CZYZ/QOBCE/IV/M/AE/000/006/4315N07955W005\nA) CXXX B) 2606191721 C) 2609181800EST\nE) CPJ3 HAMILTON (MCMASTER UNIVERSITY MEDICAL CENTRE) (HELI)\nCRANE 431528N 0795435W (APRX 5920FT SE AD (CPJ3)). 256FT AGL \n580FT AMSL. NOT LGTD, PAINTED.)",
+          "text": "CPJ3 HAMILTON (MCMASTER UNIVERSITY MEDICAL CENTRE) (HELI)\nCRANE 431528N 0795435W (APRX 5920FT SE AD (CPJ3)). 256FT AGL \n580FT AMSL. NOT LGTD, PAINTED.",
+          "qcode": "QOBCE",
+          "qcodeMeaning": {
+            "subject": "Obstacle",
+            "condition": "Erected",
+            "traffic": "IFR and VFR",
+            "purpose": "Miscellaneous NOTAM; not subject for briefing, but available on request",
+            "scope": "Aerodrome and en-route"
+          },
+          "locations": [
+            "CXXX"
+          ],
+          "from": "2026-06-19T17:21:00.000Z",
+          "to": "2026-09-18T18:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYHM"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 4.757529942357812,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "5 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "critical",
+          "assessment": {
+            "model": "qwen2.5:7b",
+            "promptVersion": 3,
+            "citation": "exact",
+            "cached": false,
+            "result": {
+              "relevance": "critical",
+              "category": "obstacle",
+              "affects": [
+                "departure"
+              ],
+              "plain_text": "A crane near Hamilton (McMaster University Medical Centre) is not lighted or painted and is about 256 feet AGL and 580 feet AMSL, located approximately 5.92 miles southeast of CPJ3.",
+              "cited_span": "NOT LGTD, PAINTED.",
+              "rationale": "The crane is within about 3 nm of the departure aerodrome and is unlit and unmarked, posing a critical risk to the flight."
+            }
+          },
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "5dc853cf2113b897c1d6ffad681ab996fdbfe0ab50ff49022d2ea37cda13fc88",
+          "id": "J4168/26",
+          "raw": "(J4168/26 NOTAMR J2145/26\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4328N08023W005\nA) CYKF B) 2606242209 C) 2609241700EST\nE) RWY 08/26 NON STANDARD MARKINGS)",
+          "text": "RWY 08/26 NON STANDARD MARKINGS",
+          "qcode": "QFAXX",
+          "qcodeMeaning": {
+            "subject": "Aerodrome",
+            "condition": "Other (specify in plain language)",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYKF"
+          ],
+          "from": "2026-06-24T22:09:00.000Z",
+          "to": "2026-09-24T17:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYKF"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.40816675417844017,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "critical",
+          "assessment": {
+            "model": "qwen2.5:7b",
+            "promptVersion": 3,
+            "citation": "exact",
+            "cached": false,
+            "result": {
+              "relevance": "critical",
+              "category": "runway",
+              "affects": [
+                "arrival"
+              ],
+              "plain_text": "Runway 08/26 has non-standard markings at CYKF.",
+              "cited_span": "RWY 08/26 NON STANDARD MARKINGS",
+              "rationale": "The non-standard markings on the runway could affect the pilot's ability to correctly identify and use the runway during arrival, making it critical information for this flight."
+            }
+          },
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "81b06233190fd4c79f3d62a2e591d18ebc78a6ecc0b0c2ecf9359abf4b460e5f",
+          "id": "J4819/26",
+          "raw": "(J4819/26 NOTAMN\nQ) CZYZ/QOBCE/IV/M/AE/000/012/4327N08023W005\nA) CYKF B) 2607201100 C) 2609142300\nD) DAILY 1100-2300\nE) MOBILE CRANE WITHIN 66FT RADIUS CENTRED ON 432641N 0802319W APRX \n570FT BFR THR 32 AND 4580FT SW EXTENDED RCL. 120FT AGL 1136FT \nAMSL. LGTD, NOT PAINTED.)",
+          "text": "MOBILE CRANE WITHIN 66FT RADIUS CENTRED ON 432641N 0802319W APRX \n570FT BFR THR 32 AND 4580FT SW EXTENDED RCL. 120FT AGL 1136FT \nAMSL. LGTD, NOT PAINTED.",
+          "qcode": "QOBCE",
+          "qcodeMeaning": {
+            "subject": "Obstacle",
+            "condition": "Erected",
+            "traffic": "IFR and VFR",
+            "purpose": "Miscellaneous NOTAM; not subject for briefing, but available on request",
+            "scope": "Aerodrome and en-route"
+          },
+          "locations": [
+            "CYKF"
+          ],
+          "from": "2026-07-20T11:00:00.000Z",
+          "to": "2026-09-14T23:00:00.000Z",
+          "schedule": "DAILY 1100-2300",
+          "sites": [
+            "CYKF"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": true,
+            "distanceNm": 0.6804492419618346,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "1 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "critical",
+          "assessment": {
+            "model": "qwen2.5:7b",
+            "promptVersion": 3,
+            "citation": "exact",
+            "cached": false,
+            "result": {
+              "relevance": "critical",
+              "category": "obstacle",
+              "affects": [
+                "departure"
+              ],
+              "plain_text": "A mobile crane within 66ft radius centered on 432641N 0802319W, aprx 570ft before threshold 32 and 4580ft southwest extended runway centerline, 120ft AGL, 1136ft AMSL, lit but not painted.",
+              "cited_span": "LGTD, NOT PAINTED.",
+              "rationale": "The mobile crane is within 3nm of the departure aerodrome CYKF and is not marked, posing a risk to the flight."
+            }
+          },
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "5fd98d919a9475d6c8e54042075598f54cb6bbed401846bdb0b05ff9d46a72cb",
+          "id": "J5067/26",
+          "raw": "(J5067/26 NOTAMR J2786/26\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4312N07910W005\nA) CYSN B) 2607271313 C) 2610261200EST\nE) RWY 11/29 CLSD)",
+          "text": "RWY 11/29 CLSD",
+          "qcode": "QMRLC",
+          "qcodeMeaning": {
+            "subject": "Runway",
+            "condition": "Closed",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYSN"
+          ],
+          "from": "2026-07-27T13:13:00.000Z",
+          "to": "2026-10-26T12:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYSN"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.550225091123493,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "1 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "critical",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "critical",
+            "rule": "runway.used-aerodrome",
+            "reason": "a runway closure (Q code QMRLC) at CYSN, the departure aerodrome, in force during the flight"
+          }
+        },
+        {
+          "sha256": "7d4b1c93ff9bc9607f1a75cba7ff3eb781377300c18cd9864f0755d0db88907e",
+          "id": "J5068/26",
+          "raw": "(J5068/26 NOTAMR J2788/26\nQ) CZYZ/QOBCE/IV/M/AE/000/006/4313N07912W005\nA) CYSN B) 2607271314 C) 2610261200EST\nE) MULTIPLE CRANES WITHIN 1000FT RADIUS CENTRED ON 431252N 0791228W \nAPRX 1.4NM BFR THR 11 AND 1.1NM NORTH EXTENDED RCL. 213FT AGL \n512FT AMSL. NOT LGTD, NOT PAINTED.)",
+          "text": "MULTIPLE CRANES WITHIN 1000FT RADIUS CENTRED ON 431252N 0791228W \nAPRX 1.4NM BFR THR 11 AND 1.1NM NORTH EXTENDED RCL. 213FT AGL \n512FT AMSL. NOT LGTD, NOT PAINTED.",
+          "qcode": "QOBCE",
+          "qcodeMeaning": {
+            "subject": "Obstacle",
+            "condition": "Erected",
+            "traffic": "IFR and VFR",
+            "purpose": "Miscellaneous NOTAM; not subject for briefing, but available on request",
+            "scope": "Aerodrome and en-route"
+          },
+          "locations": [
+            "CYSN"
+          ],
+          "from": "2026-07-27T13:14:00.000Z",
+          "to": "2026-10-26T12:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYSN"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 1.9495967323789425,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "2 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "critical",
+          "assessment": {
+            "model": "qwen2.5:7b",
+            "promptVersion": 3,
+            "citation": "whitespace",
+            "cached": false,
+            "result": {
+              "relevance": "critical",
+              "category": "obstacle",
+              "affects": [
+                "departure"
+              ],
+              "plain_text": "Multiple cranes within 1.4NM before threshold 11 and 1.1NM north extended, 213ft AGL, 512ft AMSL. Not lit or marked.",
+              "cited_span": "MULTIPLE CRANES WITHIN 1000FT RADIUS CENTRED ON 431252N 0791228W APRX 1.4NM BFR THR 11 AND 1.1NM NORTH EXTENDED RCL. 213FT AGL 512FT AMSL. NOT LGTD, NOT PAINTED.",
+              "rationale": "The cranes are within 1.4NM before threshold 11, which is close to the departure path and not lit or marked, making the flight critical."
+            }
+          },
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "134092379f2bf0a0f88b458871449a71bff33c95ad916401ab6b09bd767da804",
+          "id": "J5069/26",
+          "raw": "(J5069/26 NOTAMR J2785/26\nQ) CZYZ/QMDCH/IV/NBO/A/000/999/4312N07910W005\nA) CYSN B) 2607271315 C) 2610261200EST\nE) THR 19 DISPLACED BY 523FT DUE TREES 550FT BFR THR 19\nAND 100FT W EXTENDED RCL. APRX 50FT AGL 370FT AMSL.\nWITH RWY 01/19 SHORTENED, DECLARED DIST CHANGED TO:\nRWY 01 TORA 2498 TODA 2695 ASDA 2498 LDA 2498\nRWY 19 TORA 2498 TODA 3348 ASDA 2498 LDA 1975)",
+          "text": "THR 19 DISPLACED BY 523FT DUE TREES 550FT BFR THR 19\nAND 100FT W EXTENDED RCL. APRX 50FT AGL 370FT AMSL.\nWITH RWY 01/19 SHORTENED, DECLARED DIST CHANGED TO:\nRWY 01 TORA 2498 TODA 2695 ASDA 2498 LDA 2498\nRWY 19 TORA 2498 TODA 3348 ASDA 2498 LDA 1975",
+          "qcode": "QMDCH",
+          "qcodeMeaning": {
+            "subject": "Declared distances",
+            "condition": "Changed",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYSN"
+          ],
+          "from": "2026-07-27T13:15:00.000Z",
+          "to": "2026-10-26T12:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYSN"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.550225091123493,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "1 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "critical",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "critical",
+            "rule": "runway.used-aerodrome",
+            "reason": "a change of declared distances (Q code QMDCH) at CYSN, the departure aerodrome, in force during the flight"
+          }
+        },
+        {
+          "sha256": "a3101fc3b0754ced5c7bcf53a1dadc3172dbf49800027db9fdca1056b8f1d42a",
+          "id": "S2881/26",
+          "raw": "(S2881/26 NOTAMR S2860/26\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4310N07956W005\nA) CYHM B) 2609121527 C) 2609122327\nE) RSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 12 1527 - SEP 12 2327.\n\nRSC 30 6/6/6 DRY, DRY, DRY. VALID SEP 12 1527 - SEP 12 2327.\n\nADDN NON-GRF/TALPA INFO:\nCRFI 12 NR/NR/NR.\nCRFI 30 NR/NR/NR.)",
+          "text": "RSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 12 1527 - SEP 12 2327.\n\nRSC 30 6/6/6 DRY, DRY, DRY. VALID SEP 12 1527 - SEP 12 2327.\n\nADDN NON-GRF/TALPA INFO:\nCRFI 12 NR/NR/NR.\nCRFI 30 NR/NR/NR.",
+          "qcode": "QFAXX",
+          "qcodeMeaning": {
+            "subject": "Aerodrome",
+            "condition": "Other (specify in plain language)",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYHM"
+          ],
+          "from": "2026-09-12T15:27:00.000Z",
+          "to": "2026-09-12T23:27:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYHM"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.32723312872857646,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "critical",
+          "assessment": {
+            "model": "qwen2.5:7b",
+            "promptVersion": 3,
+            "citation": "exact",
+            "cached": false,
+            "result": {
+              "relevance": "critical",
+              "category": "runway",
+              "affects": [
+                "departure",
+                "arrival"
+              ],
+              "plain_text": "Runway 12 and 30 are dry, dry, dry from 15:27 to 23:27 UTC on 12 Sep.",
+              "cited_span": "RSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 12 1527 - SEP 12 2327.",
+              "rationale": "The runway surface condition is relevant as it affects the safety and performance of the aircraft during takeoff and landing."
+            }
+          },
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "c4fd18b670a06e480c360bb509f50e9e29a2c16054138c6dc32edeedfdd55250",
+          "id": "A9080/26",
+          "raw": "(A9080/26 NOTAMR A9044/26\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4328N08023W005\nA) CYKF B) 2609121636 C) 2609130036\nE) RSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 12 1635 - SEP 13 0035.\n\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 12 1635 - SEP 13 0035.\n\nRSC 14/32 DRY. VALID SEP 12 1635 - SEP 13 0035.\n\nADDN NON-GRF/TALPA INFO:\nCRFI 08 NR/NR/NR.\nCRFI 26 NR/NR/NR.\nCRFI 14/32 NR.\n\nRMK: TWY ALL DRY.\nRMK: APN ALL DRY.)",
+          "text": "RSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 12 1635 - SEP 13 0035.\n\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 12 1635 - SEP 13 0035.\n\nRSC 14/32 DRY. VALID SEP 12 1635 - SEP 13 0035.\n\nADDN NON-GRF/TALPA INFO:\nCRFI 08 NR/NR/NR.\nCRFI 26 NR/NR/NR.\nCRFI 14/32 NR.\n\nRMK: TWY ALL DRY.\nRMK: APN ALL DRY.",
+          "qcode": "QFAXX",
+          "qcodeMeaning": {
+            "subject": "Aerodrome",
+            "condition": "Other (specify in plain language)",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYKF"
+          ],
+          "from": "2026-09-12T16:36:00.000Z",
+          "to": "2026-09-13T00:36:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYKF"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.40816675417844017,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "advisory",
+          "assessment": {
+            "model": "qwen2.5:7b",
+            "promptVersion": 3,
+            "citation": "exact",
+            "cached": false,
+            "result": {
+              "relevance": "advisory",
+              "category": "runway",
+              "affects": [
+                "arrival"
+              ],
+              "plain_text": "Runway surface conditions are dry at CYKF for runways RSC 08, RSC 26, and RSC 14/32 from 16:35 on 12/09/2026 to 00:35 on 13/09/2026.",
+              "cited_span": "RSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 12 1635 - SEP 13 0035.",
+              "rationale": "The NOTAM provides runway surface conditions for the arrival runway at the destination aerodrome, which is relevant to the flight's arrival phase."
+            }
+          },
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "29e2dbd15f0ba75c6007e69e12613b54e1ec2afc8223652a76b7c76d29eef452",
+          "id": "D2402/26",
+          "raw": "(D2402/26 NOTAMR D2054/26\nQ) CZYZ/QLPAS/IV/BO/A/000/999/4310N07956W005\nA) CYHM B) 2607031622 C) 2609301600EST\nE) PAPI 06 AND 24 U/S)",
+          "text": "PAPI 06 AND 24 U/S",
+          "qcode": "QLPAS",
+          "qcodeMeaning": {
+            "subject": "Precision approach path indicator (PAPI)",
+            "condition": "Unserviceable",
+            "traffic": "IFR and VFR",
+            "purpose": "PIB entry and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYHM"
+          ],
+          "from": "2026-07-03T16:22:00.000Z",
+          "to": "2026-09-30T16:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYHM"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.32723312872857646,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "advisory",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "advisory",
+            "rule": "lighting.daylight-flight",
+            "reason": "Q code QLPAS is a lighting outage, and every point of this flight is in daylight — worth knowing in case of delay, but it changes nothing as flown"
+          }
+        },
+        {
+          "sha256": "cb1ed08f8a4e95c36566e544f40c49b742966d8b51f7c1305b4d14212dbca2b9",
+          "id": "D2593/26",
+          "raw": "(D2593/26 NOTAMN\nQ) CZYZ/QLIAS/IV/BO/A/000/999/4310N07956W005\nA) CYHM B) 2607110400 C) 2609302100\nE) RWY ID LGT 24 U/S)",
+          "text": "RWY ID LGT 24 U/S",
+          "qcode": "QLIAS",
+          "qcodeMeaning": {
+            "subject": "Runway end identifier lights",
+            "condition": "Unserviceable",
+            "traffic": "IFR and VFR",
+            "purpose": "PIB entry and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYHM"
+          ],
+          "from": "2026-07-11T04:00:00.000Z",
+          "to": "2026-09-30T21:00:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYHM"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.32723312872857646,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "advisory",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "advisory",
+            "rule": "lighting.daylight-flight",
+            "reason": "Q code QLIAS is a lighting outage, and every point of this flight is in daylight — worth knowing in case of delay, but it changes nothing as flown"
+          }
+        },
+        {
+          "sha256": "511ccce0890fe65b8a46f4714675f050820aa444bd8c07d0c21863cb44e59fb9",
+          "id": "D2597/26",
+          "raw": "(D2597/26 NOTAMN\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4310N07956W005\nA) CYHM B) 2607102005 C) 2609302100\nE) TWY B CLSD.)",
+          "text": "TWY B CLSD.",
+          "qcode": "QMXLC",
+          "qcodeMeaning": {
+            "subject": "Taxiway(s)",
+            "condition": "Closed",
+            "traffic": "IFR and VFR",
+            "purpose": "PIB entry and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYHM"
+          ],
+          "from": "2026-07-10T20:05:00.000Z",
+          "to": "2026-09-30T21:00:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYHM"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.32723312872857646,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "advisory",
+          "assessment": {
+            "model": "qwen2.5:7b",
+            "promptVersion": 3,
+            "citation": "exact",
+            "cached": false,
+            "result": {
+              "relevance": "advisory",
+              "category": "taxiway",
+              "affects": [
+                "departure",
+                "arrival"
+              ],
+              "plain_text": "Taxiway B is closed at CYHM.",
+              "cited_span": "TWY B CLSD",
+              "rationale": "The closure of taxiway B at the alternate aerodrome CYHM affects the ground routing, but there are other taxiways available."
+            }
+          },
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "47dcc983f4fce07f4845b265cde2cce889e703988c24d7694980c711669c6a60",
+          "id": "D2717/26",
+          "raw": "(D2717/26 NOTAMN\nQ) CZYZ/QLYAS/IV/M/A/000/999/4310N07956W005\nA) CYHM B) 2607171703 C) 2609302100\nE) TWY B EDGE LGT U/S)",
+          "text": "TWY B EDGE LGT U/S",
+          "qcode": "QLYAS",
+          "qcodeMeaning": {
+            "subject": "Taxiway edge lights",
+            "condition": "Unserviceable",
+            "traffic": "IFR and VFR",
+            "purpose": "Miscellaneous NOTAM; not subject for briefing, but available on request",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYHM"
+          ],
+          "from": "2026-07-17T17:03:00.000Z",
+          "to": "2026-09-30T21:00:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYHM"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.32723312872857646,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "advisory",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "advisory",
+            "rule": "lighting.daylight-flight",
+            "reason": "Q code QLYAS is a lighting outage, and every point of this flight is in daylight — worth knowing in case of delay, but it changes nothing as flown"
+          }
+        },
+        {
+          "sha256": "cab2ef989c35fc50af80b70697c7e592c8157e18ffdafd3795a69c64552a0ab1",
+          "id": "D2902/26",
+          "raw": "(D2902/26 NOTAMR D2585/26\nQ) CZYZ/QLEAS/IV/BO/A/000/999/4310N07956W005\nA) CYHM B) 2607291137 C) 2609302100\nE) REDL 06/24 BTN TWY B AND TWY C U/S)",
+          "text": "REDL 06/24 BTN TWY B AND TWY C U/S",
+          "qcode": "QLEAS",
+          "qcodeMeaning": {
+            "subject": "Runway edge lights",
+            "condition": "Unserviceable",
+            "traffic": "IFR and VFR",
+            "purpose": "PIB entry and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYHM"
+          ],
+          "from": "2026-07-29T11:37:00.000Z",
+          "to": "2026-09-30T21:00:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYHM"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.32723312872857646,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "advisory",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "advisory",
+            "rule": "lighting.daylight-flight",
+            "reason": "Q code QLEAS is a lighting outage, and every point of this flight is in daylight — worth knowing in case of delay, but it changes nothing as flown"
+          }
+        },
+        {
+          "sha256": "1043f2f550ed9013ce4e9e2218ebaa4205398101d4482c1dc654759825a4a7c6",
+          "id": "J5066/26",
+          "raw": "(J5066/26 NOTAMR J2787/26\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4312N07910W005\nA) CYSN B) 2607271311 C) 2610261200EST\nE) TWY D CLSD.)",
+          "text": "TWY D CLSD.",
+          "qcode": "QMXLC",
+          "qcodeMeaning": {
+            "subject": "Taxiway(s)",
+            "condition": "Closed",
+            "traffic": "IFR and VFR",
+            "purpose": "PIB entry and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYSN"
+          ],
+          "from": "2026-07-27T13:11:00.000Z",
+          "to": "2026-10-26T12:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYSN"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.550225091123493,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "1 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "advisory",
+          "assessment": {
+            "model": "qwen2.5:7b",
+            "promptVersion": 3,
+            "citation": "exact",
+            "cached": false,
+            "result": {
+              "relevance": "advisory",
+              "category": "taxiway",
+              "affects": [
+                "departure"
+              ],
+              "plain_text": "Taxiway D is closed.",
+              "cited_span": "TWY D CLSD",
+              "rationale": "The closure of taxiway D affects the departure from CYSN, as it blocks a route the flight might use."
+            }
+          },
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "3851175be9cc79a5978c0a02a91eb909727699e39bc2a98fdc2fa064a1887834",
+          "id": "J6250/26",
+          "raw": "(J6250/26 NOTAMR J6222/26\nQ) CZYZ/QLAAS/IV/NBO/A/000/999/4328N08023W005\nA) CYKF B) 2609111906 C) 2609142100\nE) ALS 08 U/S)",
+          "text": "ALS 08 U/S",
+          "qcode": "QLAAS",
+          "qcodeMeaning": {
+            "subject": "Approach lighting system",
+            "condition": "Unserviceable",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYKF"
+          ],
+          "from": "2026-09-11T19:06:00.000Z",
+          "to": "2026-09-14T21:00:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYKF"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.40816675417844017,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "advisory",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "advisory",
+            "rule": "lighting.daylight-flight",
+            "reason": "Q code QLAAS is a lighting outage, and every point of this flight is in daylight — worth knowing in case of delay, but it changes nothing as flown"
+          }
+        },
+        {
+          "sha256": "03076f10513bfbdbc5cc07f7296d58ebd0b64476b3624214e262c090edd840a4",
+          "id": "U1517/26",
+          "raw": "(U1517/26 NOTAMR U1312/26\nQ) CZYZ/QOLAS/IV/M/AE/000/005/4311N07913W005\nA) CYSN B) 2609022254 C) 2610172230\nE) OBST LGT U/S ANTENNA 431042N 0791257W (APRX 2.1NM WSW AD) 167FT \nAGL, 495FT AMSL.)",
+          "text": "OBST LGT U/S ANTENNA 431042N 0791257W (APRX 2.1NM WSW AD) 167FT \nAGL, 495FT AMSL.",
+          "qcode": "QOLAS",
+          "qcodeMeaning": {
+            "subject": "Obstacle lights on (specify)",
+            "condition": "Unserviceable",
+            "traffic": "IFR and VFR",
+            "purpose": "Miscellaneous NOTAM; not subject for briefing, but available on request",
+            "scope": "Aerodrome and en-route"
+          },
+          "locations": [
+            "CYSN"
+          ],
+          "from": "2026-09-02T22:54:00.000Z",
+          "to": "2026-10-17T22:30:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYSN"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 2.030661577627918,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "2 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "advisory",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "advisory",
+            "rule": "lighting.daylight-flight",
+            "reason": "Q code QOLAS is a lighting outage, and every point of this flight is in daylight — worth knowing in case of delay, but it changes nothing as flown"
+          }
+        },
+        {
+          "sha256": "4425e2f75dbaae1fb3b29226264f807fbc779dab08eef9e379eb2aca956720d3",
+          "id": "D3447/26",
+          "raw": "(D3447/26 NOTAMR D3368/26\nQ) CZYZ/QPIAU/I/NBO/A/000/999/4310N07956W005\nA) CYHM B) 2608251235 C) 2609301600EST\nE) DUE RWY CONST: \nRNAV (GNSS) Z RWY 06 AND RNAV (GNSS) Z RWY 24 APCH: \nNOT AUTH EXC FOR TRAINING FLT. TRAINING FLT MUST INITIATE\nMISSED APCH PROC AT OR ABV MDA OR DA)",
+          "text": "DUE RWY CONST: \nRNAV (GNSS) Z RWY 06 AND RNAV (GNSS) Z RWY 24 APCH: \nNOT AUTH EXC FOR TRAINING FLT. TRAINING FLT MUST INITIATE\nMISSED APCH PROC AT OR ABV MDA OR DA",
+          "qcode": "QPIAU",
+          "qcodeMeaning": {
+            "subject": "Instrument approach procedure",
+            "condition": "Not available",
+            "traffic": "IFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYHM"
+          ],
+          "from": "2026-08-25T12:35:00.000Z",
+          "to": "2026-09-30T16:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYHM"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.32723312872857646,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "irrelevant",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "irrelevant",
+            "rule": "ifr-only.vfr-flight",
+            "reason": "Q code QPIAU concerns an instrument facility or procedure; this flight is VFR"
+          }
+        },
+        {
+          "sha256": "0439ae00f97006227d8f5f20dc2585d502b82ee35b38e12c3aaaafbc70913792",
+          "id": "D3729/26",
+          "raw": "(D3729/26 NOTAMR D3511/26\nQ) CZYZ/QFFAH/IV/BO/A/000/999/4310N07956W005\nA) CYHM B) 2609041320 C) 2609250330\nE) ACFT RESCUE AND FIRE FIGHTING (ARFF) TO READ: \nDESIGNATED CAT 7 AVBL FOR SKED PAX FLT:  \n.\nSEP 04 1320-1440 1640-2359\nSEP 05 0000-0330 0950-2359\nSEP 06 0000-0110 0215-0330 0950-1445 1640-2359\nSEP 07 0000-0050 0150-0330 0950-1140 1200-1440 1600-2359\nSEP 08 0000-0050 0150-0330 0950-1140 1230-1440 1640-2359\nSEP 09 0150-0330 0950-1140 1230-1400 1530-2359\nSEP 10 0150-0330 0950-1140 1230-1330 1530-2359\nSEP 11 0200-0330, 0950-1325, 1530-2359\nSEP 12 0150-0330, 0950-1250, 1530-2010, 2130-2359\nSEP 13 0150-0330, 0950-1330, 1530-2359\nSEP 14 0150-0330, 0950-1250, 1530-2000, 2100-2359\nSEP 15 0150-0330, 0950-1250, 1530-1920, 2100-2359\nSEP 16 0200-0330, 0950-1325, 1530-1920-2035-2359\nSEP 17-18 0200-0330, 0950-1325, 1530-2359\nSEP 19 0150-0330, 0950-1250, 1530-2010, 2130-2359\nSEP 20 0150-0330, 0950-1330, 1530-2359\nSEP 21 0150-0330, 0950-1250, 1530-2000, 2100-2359\nSEP 22 0150-0330, 0950-1250, 1530-1920, 2100-2359\nSEP 23 0200-0330, 0950-1325, 1530-1920, 2035-2359\nSEP 24 0200-0330, 0950-1325, 1530-2359\nSEP 25 0200-0330)",
+          "text": "ACFT RESCUE AND FIRE FIGHTING (ARFF) TO READ: \nDESIGNATED CAT 7 AVBL FOR SKED PAX FLT:  \n.\nSEP 04 1320-1440 1640-2359\nSEP 05 0000-0330 0950-2359\nSEP 06 0000-0110 0215-0330 0950-1445 1640-2359\nSEP 07 0000-0050 0150-0330 0950-1140 1200-1440 1600-2359\nSEP 08 0000-0050 0150-0330 0950-1140 1230-1440 1640-2359\nSEP 09 0150-0330 0950-1140 1230-1400 1530-2359\nSEP 10 0150-0330 0950-1140 1230-1330 1530-2359\nSEP 11 0200-0330, 0950-1325, 1530-2359\nSEP 12 0150-0330, 0950-1250, 1530-2010, 2130-2359\nSEP 13 0150-0330, 0950-1330, 1530-2359\nSEP 14 0150-0330, 0950-1250, 1530-2000, 2100-2359\nSEP 15 0150-0330, 0950-1250, 1530-1920, 2100-2359\nSEP 16 0200-0330, 0950-1325, 1530-1920-2035-2359\nSEP 17-18 0200-0330, 0950-1325, 1530-2359\nSEP 19 0150-0330, 0950-1250, 1530-2010, 2130-2359\nSEP 20 0150-0330, 0950-1330, 1530-2359\nSEP 21 0150-0330, 0950-1250, 1530-2000, 2100-2359\nSEP 22 0150-0330, 0950-1250, 1530-1920, 2100-2359\nSEP 23 0200-0330, 0950-1325, 1530-1920, 2035-2359\nSEP 24 0200-0330, 0950-1325, 1530-2359\nSEP 25 0200-0330",
+          "qcode": "QFFAH",
+          "qcodeMeaning": {
+            "subject": "Fire fighting and rescue",
+            "condition": "Hours of service are now (specify)",
+            "traffic": "IFR and VFR",
+            "purpose": "PIB entry and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYHM"
+          ],
+          "from": "2026-09-04T13:20:00.000Z",
+          "to": "2026-09-25T03:30:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYHM"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.32723312872857646,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "irrelevant",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "irrelevant",
+            "rule": "arff.private-flight",
+            "reason": "rescue and fire fighting category applies to commercial passenger operations, not a private flight"
+          }
+        },
+        {
+          "sha256": "a6ba0102117cc6bad2f2dbe13d53dc641c401c1a8e8576d01ec9fe61197c4b14",
+          "id": "G2420/26",
+          "raw": "(G2420/26 NOTAMR G1192/26\nQ) CZXX/QOECH/IV/NBO/E/000/999/5518N09358W999\nA) CZWG CZYZ B) 2607211324 C) 2610191800EST\nE) ALL ACFT, REGARDLESS OF THE STATE OF REGISTRY, DIRECTLY OR \nINDIRECTLY OWNED, CHARTERED, LEASED, OPERATED OR OTHERWISE \nCONTROLLED BY A PERSON CONNECTED WITH EITHER THE RUSSIAN \nFEDERATION OR OF BELARUS OR BY A CORPORATION OR ENTITY THAT IS \nINCORPORATED OR FORMED UNDER THE LAWS OF THE RUSSIAN FEDERATION \nOR BELARUS, AND ALL OPERATORS HOLDING AN AIR OPERATOR CERTIFICATE \n(AOC) ISSUED BY RUSSIAN FEDERATION AND/OR BELARUSIAN AUTHORITIES \nARE PROHIBITED TO ENTER, EXIT OR OVERFLY CANADA'S TERRITORIAL \nAIRSPACE (INCLUDING FLT WITHIN 12NM OF CANADA'S COASTS). \nEXCEPTIONS PERMITTED FOR ACFT EXPERIENCING INFLIGHT EMERG. \n\nALL AUTH OBTAINED PRIOR TO 27 FEB 2022 FOR ACFT AND OPS SUBJECT \nTO THIS NOTAM ARE REVOKED.\n\nHUMANITARIAN, SAR, MEDEVAC AND ANY OTHER FLT SEEKING AN EXCEPTION \nTO THIS RESTRICTION MUST RECEIVE AUTH GRANTED AFTER 27 FEB 2022 \nFM THE MINISTER OF TRANSPORT TO OPERATE IN CANADA'S TERRITORIAL \nAIRSPACE.  AFFECTED ACFT WISHING TO OBTAIN SUCH AN AUTH OR CLR \nINTO CANADA'S TERRITORIAL AIRSPACE MAY APPLY TO THE MINISTER OF \nTRANSPORT AT 1-877-992-6853 OR 1-613-992-6853 OR BY EMAIL AT \nOPERATIONS.AVIATION(AT)TC.GC.CA.)",
+          "text": "ALL ACFT, REGARDLESS OF THE STATE OF REGISTRY, DIRECTLY OR \nINDIRECTLY OWNED, CHARTERED, LEASED, OPERATED OR OTHERWISE \nCONTROLLED BY A PERSON CONNECTED WITH EITHER THE RUSSIAN \nFEDERATION OR OF BELARUS OR BY A CORPORATION OR ENTITY THAT IS \nINCORPORATED OR FORMED UNDER THE LAWS OF THE RUSSIAN FEDERATION \nOR BELARUS, AND ALL OPERATORS HOLDING AN AIR OPERATOR CERTIFICATE \n(AOC) ISSUED BY RUSSIAN FEDERATION AND/OR BELARUSIAN AUTHORITIES \nARE PROHIBITED TO ENTER, EXIT OR OVERFLY CANADA'S TERRITORIAL \nAIRSPACE (INCLUDING FLT WITHIN 12NM OF CANADA'S COASTS). \nEXCEPTIONS PERMITTED FOR ACFT EXPERIENCING INFLIGHT EMERG. \n\nALL AUTH OBTAINED PRIOR TO 27 FEB 2022 FOR ACFT AND OPS SUBJECT \nTO THIS NOTAM ARE REVOKED.\n\nHUMANITARIAN, SAR, MEDEVAC AND ANY OTHER FLT SEEKING AN EXCEPTION \nTO THIS RESTRICTION MUST RECEIVE AUTH GRANTED AFTER 27 FEB 2022 \nFM THE MINISTER OF TRANSPORT TO OPERATE IN CANADA'S TERRITORIAL \nAIRSPACE.  AFFECTED ACFT WISHING TO OBTAIN SUCH AN AUTH OR CLR \nINTO CANADA'S TERRITORIAL AIRSPACE MAY APPLY TO THE MINISTER OF \nTRANSPORT AT 1-877-992-6853 OR 1-613-992-6853 OR BY EMAIL AT \nOPERATIONS.AVIATION(AT)TC.GC.CA.",
+          "qcode": "QOECH",
+          "qcodeMeaning": {
+            "subject": "Aircraft entry requirements",
+            "condition": "Changed",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "En-route"
+          },
+          "locations": [
+            "CZWG",
+            "CZYZ"
+          ],
+          "from": "2026-07-21T13:24:00.000Z",
+          "to": "2026-10-19T18:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYHM",
+            "CYKF",
+            "CYSN"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 884.0337865643037,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "FIR-wide"
+            ]
+          },
+          "rank": "irrelevant",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "irrelevant",
+            "rule": "entry-requirements.fir-wide",
+            "reason": "FIR-wide aircraft entry requirements; a domestic VFR flight is not the subject"
+          }
+        },
+        {
+          "sha256": "bde2a6cceb7354bcaae9f341046e8f59f64eb8fc8056f0db9e5aba3eb1131146",
+          "id": "G2674/26",
+          "raw": "(G2674/26 NOTAMR G1362/26\nQ) CZXX/QOEXX/IV/NBO/E/000/999/5245N09040W999\nA) CZWG CZYZ B) 2608071216 C) 2611061800EST\nE) AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\nIN RESPONSE TO THE SECURITY SITUATION IN MYANMAR. CANADIAN AIR\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL AT OR ABOVE FL260 IN FIR\nYANGON (VYYF) DUE TO THE RISK FROM ANTI-AIRCRAFT WEAPONRY.)",
+          "text": "AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\nIN RESPONSE TO THE SECURITY SITUATION IN MYANMAR. CANADIAN AIR\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL AT OR ABOVE FL260 IN FIR\nYANGON (VYYF) DUE TO THE RISK FROM ANTI-AIRCRAFT WEAPONRY.",
+          "qcode": "QOEXX",
+          "qcodeMeaning": {
+            "subject": "Aircraft entry requirements",
+            "condition": "Other (specify in plain language)",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "En-route"
+          },
+          "locations": [
+            "CZWG",
+            "CZYZ"
+          ],
+          "from": "2026-08-07T12:16:00.000Z",
+          "to": "2026-11-06T18:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYHM",
+            "CYKF",
+            "CYSN"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 692.228155894273,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "FIR-wide"
+            ]
+          },
+          "rank": "irrelevant",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "irrelevant",
+            "rule": "entry-requirements.fir-wide",
+            "reason": "FIR-wide aircraft entry requirements; a domestic VFR flight is not the subject"
+          }
+        },
+        {
+          "sha256": "28d8c6337f847c1cfde6aa2da9f433efbc5f0f533a0c0764cd344bc4113e4411",
+          "id": "G2675/26",
+          "raw": "(G2675/26 NOTAMR G1363/26\nQ) CZXX/QOEXX/IV/NBO/E/000/999/5245N09040W999\nA) CZWG CZYZ B) 2608071218 C) 2611061800EST\nE) AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\nIN RESPONSE TO THE SECURITY SITUATION IN MALI. CANADIAN AIR\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL EQUAL TO OR ABOVE FL320 IN\nTHE PORTIONS OF FIR DAKAR (GOOO) AND FIR NIAMEY (DRRR) LOCATED IN\nTHE TERRITORY OF MALI DUE TO THE POTENTIAL RISK FROM MILITANT\nACTIVITY AND ANTI-AIRCRAFT WEAPONRY.)",
+          "text": "AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\nIN RESPONSE TO THE SECURITY SITUATION IN MALI. CANADIAN AIR\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL EQUAL TO OR ABOVE FL320 IN\nTHE PORTIONS OF FIR DAKAR (GOOO) AND FIR NIAMEY (DRRR) LOCATED IN\nTHE TERRITORY OF MALI DUE TO THE POTENTIAL RISK FROM MILITANT\nACTIVITY AND ANTI-AIRCRAFT WEAPONRY.",
+          "qcode": "QOEXX",
+          "qcodeMeaning": {
+            "subject": "Aircraft entry requirements",
+            "condition": "Other (specify in plain language)",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "En-route"
+          },
+          "locations": [
+            "CZWG",
+            "CZYZ"
+          ],
+          "from": "2026-08-07T12:18:00.000Z",
+          "to": "2026-11-06T18:00:00.000Z EST",
+          "schedule": null,
+          "sites": [
+            "CYHM",
+            "CYKF",
+            "CYSN"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 692.228155894273,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "FIR-wide"
+            ]
+          },
+          "rank": "irrelevant",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "irrelevant",
+            "rule": "entry-requirements.fir-wide",
+            "reason": "FIR-wide aircraft entry requirements; a domestic VFR flight is not the subject"
+          }
+        },
+        {
+          "sha256": "305feb0e8a1caa8fcc28f4a8e9c36b6cb1c052117f267ae0a5e43a2a9fae7e1d",
+          "id": "G3032/26",
+          "raw": "(G3032/26 NOTAMN\nQ) CZXX/QOATT/IV/BO/E/000/999/5245N09040W999\nA) CZWG CZYZ B) 2609030901 C) 2609162359\nE) TRIGGER NOTAM - PERM AIRAC AIP AMDT (AIRAC CANADA) ISSUES 25/2026 \nTO 32/2026 WEF 03 SEP 2026. AIP CANADA, CANADA FLT SUPPLEMENT \n(CFS), CANADA AIR PILOT (CAP), RESTRICTED CANADA AIR PILOT \n(RCAP), DESIGNATED AIRSPACE HANDBOOK (DAH), TERMINAL, LOW AND \nHIGH ENR CHARTS AMENDED.)",
+          "text": "TRIGGER NOTAM - PERM AIRAC AIP AMDT (AIRAC CANADA) ISSUES 25/2026 \nTO 32/2026 WEF 03 SEP 2026. AIP CANADA, CANADA FLT SUPPLEMENT \n(CFS), CANADA AIR PILOT (CAP), RESTRICTED CANADA AIR PILOT \n(RCAP), DESIGNATED AIRSPACE HANDBOOK (DAH), TERMINAL, LOW AND \nHIGH ENR CHARTS AMENDED.",
+          "qcode": "QOATT",
+          "qcodeMeaning": {
+            "subject": "Aeronautical information service",
+            "condition": "Trigger NOTAM",
+            "traffic": "IFR and VFR",
+            "purpose": "PIB entry and concerning flight operations",
+            "scope": "En-route"
+          },
+          "locations": [
+            "CZWG",
+            "CZYZ"
+          ],
+          "from": "2026-09-03T09:01:00.000Z",
+          "to": "2026-09-16T23:59:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYHM",
+            "CYKF",
+            "CYSN"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 692.228155894273,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "FIR-wide"
+            ]
+          },
+          "rank": "irrelevant",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "irrelevant",
+            "rule": "notam.trigger",
+            "reason": "a trigger NOTAM announces a publication amendment; it has no operational content of its own"
+          }
+        },
+        {
+          "sha256": "ca35c2c286e6638f7f76d977e8bdf4cda3d26e6663f677c32c24f8c0e38f99bd",
+          "id": "J6015/26",
+          "raw": "(J6015/26 NOTAMN\nQ) CZYZ/QICAS/I/NBO/A/000/999/4328N08023W005\nA) CYKF B) 2609022105 C) 2609212000\nE) ILS RWY 26 U/S)",
+          "text": "ILS RWY 26 U/S",
+          "qcode": "QICAS",
+          "qcodeMeaning": {
+            "subject": "Instrument landing system (ILS)",
+            "condition": "Unserviceable",
+            "traffic": "IFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYKF"
+          ],
+          "from": "2026-09-02T21:05:00.000Z",
+          "to": "2026-09-21T20:00:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYKF"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.40816675417844017,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "irrelevant",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "irrelevant",
+            "rule": "ifr-only.vfr-flight",
+            "reason": "Q code QICAS concerns an instrument facility or procedure; this flight is VFR"
+          }
+        },
+        {
+          "sha256": "86429ffa8d015deef756c3e943452e092d0fb531a8a0958068dcefb0a69678b0",
+          "id": "J6066/26",
+          "raw": "(J6066/26 NOTAMN\nQ) CZYZ/QPMCH/IV/NBO/A/000/999/4328N08023W005\nA) CYKF B) 2609041100 C) 2609182100\nE) WHEN THR 26 DISPLACED:  \n.\nILS RWY 26 APCH: \nILS/DME MINIMA: NOT AUTH \nLOC/DME MINIMA TO READ: 1560 (506) 1 \nPUBLISHED DIST/ALT TABLE NOT VALID  \nPUBLISHED CONSTANT DESCENT ANGLE NOT VALID \n. \nRNAV (GNSS) Z RWY 26 APCH:  \nLPV AND LNAV/VNAV MINIMA: NOT AUTH  \nLNAV MINIMA TO READ: 1560 (506) 1  \nPUBLISHED DIST/ALT TABLE NOT VALID  \nPUBLISHED CONSTANT DESCENT ANGLE NOT VALID  \n. \nRNAV (RNP) Y RWY 26 APCH: ALL MINIMA NOT AUTH  \n. \nAD CHART: DEP PROC RWY 08: NOT ASSESSED.  \nPILOT RESPONSIBLE FOR OBST AND TERRAIN AVOIDANCE.  \n. \nSID WATERLOO THREE: DEP RTE RWY 08: NOT AUTH)",
+          "text": "WHEN THR 26 DISPLACED:  \n.\nILS RWY 26 APCH: \nILS/DME MINIMA: NOT AUTH \nLOC/DME MINIMA TO READ: 1560 (506) 1 \nPUBLISHED DIST/ALT TABLE NOT VALID  \nPUBLISHED CONSTANT DESCENT ANGLE NOT VALID \n. \nRNAV (GNSS) Z RWY 26 APCH:  \nLPV AND LNAV/VNAV MINIMA: NOT AUTH  \nLNAV MINIMA TO READ: 1560 (506) 1  \nPUBLISHED DIST/ALT TABLE NOT VALID  \nPUBLISHED CONSTANT DESCENT ANGLE NOT VALID  \n. \nRNAV (RNP) Y RWY 26 APCH: ALL MINIMA NOT AUTH  \n. \nAD CHART: DEP PROC RWY 08: NOT ASSESSED.  \nPILOT RESPONSIBLE FOR OBST AND TERRAIN AVOIDANCE.  \n. \nSID WATERLOO THREE: DEP RTE RWY 08: NOT AUTH",
+          "qcode": "QPMCH",
+          "qcodeMeaning": {
+            "subject": "Aerodrome operating minima",
+            "condition": "Changed",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYKF"
+          ],
+          "from": "2026-09-04T11:00:00.000Z",
+          "to": "2026-09-18T21:00:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYKF"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.40816675417844017,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "irrelevant",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "irrelevant",
+            "rule": "ifr-only.vfr-flight",
+            "reason": "Q code QPMCH concerns an instrument facility or procedure; this flight is VFR"
+          }
+        },
+        {
+          "sha256": "9f0ed1d67d2b854faf5051c8f932752f57b052ea1255b248e4370785f60d4772",
+          "id": "J6067/26",
+          "raw": "(J6067/26 NOTAMN\nQ) CZYZ/QPMCH/IV/NBO/A/000/999/4328N08023W005\nA) CYKF B) 2609041100 C) 2609182100\nE) WHEN THR 08 DISPLACED:  \n. \nRNAV (GNSS) Z RWY 08 APCH: \nLPV AND LNAV/VNAV MINIMA: NOT AUTH \nLNAV MINIMA TO READ: 1540 (517) 1 1/2\nPUBLISHED DIST/ALT TABLE NOT VALID  \nPUBLISHED CONSTANT DESCENT ANGLE NOT VALID \n. \nRNAV (RNP) Y RWY 08 APCH: ALL MINIMA NOT AUTH \n. \nAD CHART: DEP PROC RWY 26: NOT ASSESSED. \nPILOT RESPONSIBLE FOR OBST AND TERRAIN AVOIDANCE. \n. \nSID WATERLOO THREE: DEP RTE RWY 26: NOT AUTH)",
+          "text": "WHEN THR 08 DISPLACED:  \n. \nRNAV (GNSS) Z RWY 08 APCH: \nLPV AND LNAV/VNAV MINIMA: NOT AUTH \nLNAV MINIMA TO READ: 1540 (517) 1 1/2\nPUBLISHED DIST/ALT TABLE NOT VALID  \nPUBLISHED CONSTANT DESCENT ANGLE NOT VALID \n. \nRNAV (RNP) Y RWY 08 APCH: ALL MINIMA NOT AUTH \n. \nAD CHART: DEP PROC RWY 26: NOT ASSESSED. \nPILOT RESPONSIBLE FOR OBST AND TERRAIN AVOIDANCE. \n. \nSID WATERLOO THREE: DEP RTE RWY 26: NOT AUTH",
+          "qcode": "QPMCH",
+          "qcodeMeaning": {
+            "subject": "Aerodrome operating minima",
+            "condition": "Changed",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYKF"
+          ],
+          "from": "2026-09-04T11:00:00.000Z",
+          "to": "2026-09-18T21:00:00.000Z",
+          "schedule": null,
+          "sites": [
+            "CYKF"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "active",
+            "scheduleUnderstood": null,
+            "distanceNm": 0.40816675417844017,
+            "near": true,
+            "inScope": true,
+            "reasons": [
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "irrelevant",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": {
+            "relevance": "irrelevant",
+            "rule": "ifr-only.vfr-flight",
+            "reason": "Q code QPMCH concerns an instrument facility or procedure; this flight is VFR"
+          }
+        },
+        {
+          "sha256": "d79d4a418cd46b6c53f60e377ff57b44aaf36bdbe0c34cbc2442c9ab963413a0",
+          "id": "G3263/26",
+          "raw": "(G3263/26 NOTAMN\nQ) CZXX/QGWAU/IV/NBO/E/000/999/4442N08439W294\nA) CZWG CZYZ B) 2609140400 C) 2609181059\nD) DAILY 0400-1059\nE) GPS INTERFERENCE EXER\nRADIUS 294NM CENTRE 444202N 0843838W FL400-UNL, \n242NM RADIUS AT FL250,\n177NM RADIUS AT 10000FT AMSL,\n137NM RADIUS AT 4000FT AGL,\n80NM RADIUS AT 50FT AGL. \nGNSS SIGNAL MAY BE PERIODICALLY INTERRUPTED. INFORM ATC OF ANY\nADVERSE IMPACT.)",
+          "text": "GPS INTERFERENCE EXER\nRADIUS 294NM CENTRE 444202N 0843838W FL400-UNL, \n242NM RADIUS AT FL250,\n177NM RADIUS AT 10000FT AMSL,\n137NM RADIUS AT 4000FT AGL,\n80NM RADIUS AT 50FT AGL. \nGNSS SIGNAL MAY BE PERIODICALLY INTERRUPTED. INFORM ATC OF ANY\nADVERSE IMPACT.",
+          "qcode": "QGWAU",
+          "qcodeMeaning": {
+            "subject": "GNSS area-wide operations",
+            "condition": "Not available",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "En-route"
+          },
+          "locations": [
+            "CZWG",
+            "CZYZ"
+          ],
+          "from": "2026-09-14T04:00:00.000Z",
+          "to": "2026-09-18T10:59:00.000Z",
+          "schedule": "DAILY 0400-1059",
+          "sites": [
+            "CYHM",
+            "CYKF",
+            "CYSN"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "not-yet-effective",
+            "scheduleUnderstood": null,
+            "distanceNm": 198.65420084384513,
+            "near": true,
+            "inScope": false,
+            "reasons": [
+              "effective from 2026-09-14T04:00:00.000Z, after the flight",
+              "199 nm from the route, within its 294 nm radius"
+            ]
+          },
+          "rank": "out-of-scope",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "8fda81d2a3f84e1d6a95d80b66dac40b34b63f096bd6886360ffaeb5957933fb",
+          "id": "J6192/26",
+          "raw": "(J6192/26 NOTAMN\nQ) CZYZ/QLPAS/IV/BO/A/000/999/4328N08023W005\nA) CYKF B) 2609111100 C) 2609172100\nD) SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100,          \n   SEP 17 1030-2100\nE) PAPI 26 U/S)",
+          "text": "PAPI 26 U/S",
+          "qcode": "QLPAS",
+          "qcodeMeaning": {
+            "subject": "Precision approach path indicator (PAPI)",
+            "condition": "Unserviceable",
+            "traffic": "IFR and VFR",
+            "purpose": "PIB entry and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYKF"
+          ],
+          "from": "2026-09-11T11:00:00.000Z",
+          "to": "2026-09-17T21:00:00.000Z",
+          "schedule": "SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100, SEP 17 1030-2100",
+          "sites": [
+            "CYKF"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "schedule-inactive",
+            "scheduleUnderstood": true,
+            "distanceNm": 0.40816675417844017,
+            "near": true,
+            "inScope": false,
+            "reasons": [
+              "schedule \"SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100, SEP 17 1030-2100\" has no period during the flight",
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "out-of-scope",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "c972bf61788ecf637d17355b9f0824ac97d520ddedc20f0c99d6dd6f1e62bb72",
+          "id": "J6193/26",
+          "raw": "(J6193/26 NOTAMN\nQ) CZYZ/QLEAS/IV/BO/A/000/999/4328N08023W005\nA) CYKF B) 2609111100 C) 2609172100\nD) SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100,          \n   SEP 17 1030-2100\nE) REDL 08/26 U/S)",
+          "text": "REDL 08/26 U/S",
+          "qcode": "QLEAS",
+          "qcodeMeaning": {
+            "subject": "Runway edge lights",
+            "condition": "Unserviceable",
+            "traffic": "IFR and VFR",
+            "purpose": "PIB entry and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYKF"
+          ],
+          "from": "2026-09-11T11:00:00.000Z",
+          "to": "2026-09-17T21:00:00.000Z",
+          "schedule": "SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100, SEP 17 1030-2100",
+          "sites": [
+            "CYKF"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "schedule-inactive",
+            "scheduleUnderstood": true,
+            "distanceNm": 0.40816675417844017,
+            "near": true,
+            "inScope": false,
+            "reasons": [
+              "schedule \"SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100, SEP 17 1030-2100\" has no period during the flight",
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "out-of-scope",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "8e7e2cb0a08b750fde88e33c2fb3e84e2fe15e33df951bae81761350bcc2f617",
+          "id": "J6204/26",
+          "raw": "(J6204/26 NOTAMN\nQ) CZYZ/QLAAS/IV/NBO/A/000/999/4328N08023W005\nA) CYKF B) 2609111100 C) 2609172100\nD) SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100,          \n   SEP 17 1030-2100\nE) ALS 26 U/S. APPLY PROC FOR HIGH INTST APCH LGT INOPERATIVE\n(AIP AD 2.22.4)",
+          "text": "ALS 26 U/S. APPLY PROC FOR HIGH INTST APCH LGT INOPERATIVE\n(AIP AD 2.22.4",
+          "qcode": "QLAAS",
+          "qcodeMeaning": {
+            "subject": "Approach lighting system",
+            "condition": "Unserviceable",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYKF"
+          ],
+          "from": "2026-09-11T11:00:00.000Z",
+          "to": "2026-09-17T21:00:00.000Z",
+          "schedule": "SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100, SEP 17 1030-2100",
+          "sites": [
+            "CYKF"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "schedule-inactive",
+            "scheduleUnderstood": true,
+            "distanceNm": 0.40816675417844017,
+            "near": true,
+            "inScope": false,
+            "reasons": [
+              "schedule \"SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100, SEP 17 1030-2100\" has no period during the flight",
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "out-of-scope",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": null
+        },
+        {
+          "sha256": "50ef0c4f8f0f81c3d39b954b7f8ef23a9a324d0aea90cc82850e0f1e8c63516e",
+          "id": "J6230/26",
+          "raw": "(J6230/26 NOTAMR J6194/26\nQ) CZYZ/QMDCH/IV/NBO/A/000/999/4328N08023W005\nA) CYKF B) 2609111312 C) 2609172100\nD) SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100,          \n   SEP 17 1030-2100\nE) THR 26 DISPLACED BY 1000FT DUE CONST. \nFIRST 1000FT RWY 26 CLSD. CLSD PORTION AVBL AS TWY.\nWITH RWY 08/26 SHORTENED, DECLARED DIST CHANGED TO:\nRWY 08 TORA 6003 TODA 6003 ASDA 6003 LDA 6003\nRWY 26 TORA 6003 TODA 6659 ASDA 6003 LDA 6003)",
+          "text": "THR 26 DISPLACED BY 1000FT DUE CONST. \nFIRST 1000FT RWY 26 CLSD. CLSD PORTION AVBL AS TWY.\nWITH RWY 08/26 SHORTENED, DECLARED DIST CHANGED TO:\nRWY 08 TORA 6003 TODA 6003 ASDA 6003 LDA 6003\nRWY 26 TORA 6003 TODA 6659 ASDA 6003 LDA 6003",
+          "qcode": "QMDCH",
+          "qcodeMeaning": {
+            "subject": "Declared distances",
+            "condition": "Changed",
+            "traffic": "IFR and VFR",
+            "purpose": "Immediate attention of aircraft operators, PIB entry, and concerning flight operations",
+            "scope": "Aerodrome"
+          },
+          "locations": [
+            "CYKF"
+          ],
+          "from": "2026-09-11T13:12:00.000Z",
+          "to": "2026-09-17T21:00:00.000Z",
+          "schedule": "SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100, SEP 17 1030-2100",
+          "sites": [
+            "CYKF"
+          ],
+          "supersededBy": null,
+          "classification": {
+            "time": "schedule-inactive",
+            "scheduleUnderstood": true,
+            "distanceNm": 0.40816675417844017,
+            "near": true,
+            "inScope": false,
+            "reasons": [
+              "schedule \"SEP 11 14 1100-2100, SEP 15 1000-1800, SEP 16 1100-2100, SEP 17 1030-2100\" has no period during the flight",
+              "0 nm from the route, within its 5 nm radius"
+            ]
+          },
+          "rank": "out-of-scope",
+          "assessment": null,
+          "assessmentError": null,
+          "rule": null
+        }
+      ]
+    },
+    "inputs": {
+      "points": [
+        {
+          "waypoint": "CYSN",
+          "eta": "2026-09-12T22:00:00.000Z",
+          "cumulativeNm": 0,
+          "forecast": {
+            "station": "CYSN",
+            "source": "own",
+            "distanceNm": 0,
+            "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+          },
+          "metar": null
+        },
+        {
+          "waypoint": "CYKF",
+          "eta": "2026-09-12T22:31:30.378Z",
+          "cumulativeNm": 55.136048700569184,
+          "forecast": {
+            "station": "CYKF",
+            "source": "own",
+            "distanceNm": 0,
+            "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+          },
+          "metar": null
+        }
+      ],
+      "alternate": {
+        "waypoint": "CYHM",
+        "eta": "2026-09-12T22:46:29.121Z",
+        "cumulativeNm": 81.34938059638063,
+        "forecast": {
+          "station": "CYHM",
+          "source": "own",
+          "distanceNm": 0,
+          "sha256": "7b9fcc95247dd966181b47fd17d7e639503dd8e4ca503bfcfbee487f2bf4aa0c"
+        },
+        "metar": null
+      },
+      "reports": [
+        {
+          "kind": "notam",
+          "station": "CYSN",
+          "sha256": "03076f10513bfbdbc5cc07f7296d58ebd0b64476b3624214e262c090edd840a4",
+          "issuedAt": "2026-09-02T22:54:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYHM",
+          "sha256": "0439ae00f97006227d8f5f20dc2585d502b82ee35b38e12c3aaaafbc70913792",
+          "issuedAt": "2026-09-04T13:20:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYSN",
+          "sha256": "1043f2f550ed9013ce4e9e2218ebaa4205398101d4482c1dc654759825a4a7c6",
+          "issuedAt": "2026-07-27T13:11:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYSN",
+          "sha256": "134092379f2bf0a0f88b458871449a71bff33c95ad916401ab6b09bd767da804",
+          "issuedAt": "2026-07-27T13:15:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": null,
+          "sha256": "28d8c6337f847c1cfde6aa2da9f433efbc5f0f533a0c0764cd344bc4113e4411",
+          "issuedAt": "2026-08-07T12:18:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYHM",
+          "sha256": "29e2dbd15f0ba75c6007e69e12613b54e1ec2afc8223652a76b7c76d29eef452",
+          "issuedAt": "2026-07-03T16:22:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": null,
+          "sha256": "305feb0e8a1caa8fcc28f4a8e9c36b6cb1c052117f267ae0a5e43a2a9fae7e1d",
+          "issuedAt": "2026-08-26T18:06:45.686Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYKF",
+          "sha256": "3851175be9cc79a5978c0a02a91eb909727699e39bc2a98fdc2fa064a1887834",
+          "issuedAt": "2026-09-11T19:06:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYHM",
+          "sha256": "4425e2f75dbaae1fb3b29226264f807fbc779dab08eef9e379eb2aca956720d3",
+          "issuedAt": "2026-08-25T12:35:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYHM",
+          "sha256": "47dcc983f4fce07f4845b265cde2cce889e703988c24d7694980c711669c6a60",
+          "issuedAt": "2026-07-17T17:03:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYKF",
+          "sha256": "50ef0c4f8f0f81c3d39b954b7f8ef23a9a324d0aea90cc82850e0f1e8c63516e",
+          "issuedAt": "2026-09-11T13:12:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYHM",
+          "sha256": "511ccce0890fe65b8a46f4714675f050820aa444bd8c07d0c21863cb44e59fb9",
+          "issuedAt": "2026-07-10T20:05:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYKF",
+          "sha256": "5dc853cf2113b897c1d6ffad681ab996fdbfe0ab50ff49022d2ea37cda13fc88",
+          "issuedAt": "2026-06-24T22:09:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYSN",
+          "sha256": "5fd98d919a9475d6c8e54042075598f54cb6bbed401846bdb0b05ff9d46a72cb",
+          "issuedAt": "2026-07-27T13:13:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYHM",
+          "sha256": "73888dadb0137883b4386736e6df8aa13efed003aaa10f256759a6ada90ff9ed",
+          "issuedAt": "2026-09-04T18:16:00.000Z"
+        },
+        {
+          "kind": "taf",
+          "station": "CYHM",
+          "sha256": "7b9fcc95247dd966181b47fd17d7e639503dd8e4ca503bfcfbee487f2bf4aa0c",
+          "issuedAt": "2026-09-12T17:42:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYSN",
+          "sha256": "7d4b1c93ff9bc9607f1a75cba7ff3eb781377300c18cd9864f0755d0db88907e",
+          "issuedAt": "2026-07-27T13:14:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYKF",
+          "sha256": "81b06233190fd4c79f3d62a2e591d18ebc78a6ecc0b0c2ecf9359abf4b460e5f",
+          "issuedAt": "2026-07-17T12:42:39.070Z"
+        },
+        {
+          "kind": "taf",
+          "station": "CYKF",
+          "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9",
+          "issuedAt": "2026-09-12T19:40:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYKF",
+          "sha256": "86429ffa8d015deef756c3e943452e092d0fb531a8a0958068dcefb0a69678b0",
+          "issuedAt": "2026-09-03T17:17:53.113Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYKF",
+          "sha256": "8e7e2cb0a08b750fde88e33c2fb3e84e2fe15e33df951bae81761350bcc2f617",
+          "issuedAt": "2026-09-09T19:24:00.166Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYKF",
+          "sha256": "8fda81d2a3f84e1d6a95d80b66dac40b34b63f096bd6886360ffaeb5957933fb",
+          "issuedAt": "2026-09-09T18:13:55.116Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYKF",
+          "sha256": "9f0ed1d67d2b854faf5051c8f932752f57b052ea1255b248e4370785f60d4772",
+          "issuedAt": "2026-09-03T17:20:57.988Z"
+        },
+        {
+          "kind": "taf",
+          "station": "CYSN",
+          "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201",
+          "issuedAt": "2026-09-12T19:40:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYHM",
+          "sha256": "a3101fc3b0754ced5c7bcf53a1dadc3172dbf49800027db9fdca1056b8f1d42a",
+          "issuedAt": "2026-09-12T15:27:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": null,
+          "sha256": "a6ba0102117cc6bad2f2dbe13d53dc641c401c1a8e8576d01ec9fe61197c4b14",
+          "issuedAt": "2026-07-21T13:24:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": null,
+          "sha256": "bde2a6cceb7354bcaae9f341046e8f59f64eb8fc8056f0db9e5aba3eb1131146",
+          "issuedAt": "2026-08-07T12:16:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYKF",
+          "sha256": "c4fd18b670a06e480c360bb509f50e9e29a2c16054138c6dc32edeedfdd55250",
+          "issuedAt": "2026-09-12T16:36:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CPJ3",
+          "sha256": "c71590cd9bd15bb30ed25522eaca20cc963e0102daf93bdf643058a9aa37dbcf",
+          "issuedAt": "2026-06-19T17:21:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYKF",
+          "sha256": "c972bf61788ecf637d17355b9f0824ac97d520ddedc20f0c99d6dd6f1e62bb72",
+          "issuedAt": "2026-09-09T18:16:25.417Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYKF",
+          "sha256": "ca35c2c286e6638f7f76d977e8bdf4cda3d26e6663f677c32c24f8c0e38f99bd",
+          "issuedAt": "2026-09-02T21:05:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYHM",
+          "sha256": "cab2ef989c35fc50af80b70697c7e592c8157e18ffdafd3795a69c64552a0ab1",
+          "issuedAt": "2026-07-29T11:37:00.000Z"
+        },
+        {
+          "kind": "notam",
+          "station": "CYHM",
+          "sha256": "cb1ed08f8a4e95c36566e544f40c49b742966d8b51f7c1305b4d14212dbca2b9",
+          "issuedAt": "2026-07-10T18:37:37.846Z"
+        },
+        {
+          "kind": "notam",
+          "station": null,
+          "sha256": "d79d4a418cd46b6c53f60e377ff57b44aaf36bdbe0c34cbc2442c9ab963413a0",
+          "issuedAt": "2026-09-11T12:19:36.891Z"
+        }
+      ]
+    },
+    "briefing": {
+      "rulesVersion": 2,
+      "profile": {
+        "name": "default",
+        "version": 1
+      },
+      "aircraft": "C172",
+      "asOf": "2026-09-12T20:00:00.000Z",
+      "verdict": "marginal",
+      "points": [
+        {
+          "waypoint": "CYSN",
+          "at": "2026-09-12T22:00:00.000Z",
+          "verdict": "marginal",
+          "night": false,
+          "findings": [
+            {
+              "rule": "personal.ceiling",
+              "severity": "ok",
+              "summary": "ceiling 6000 ft AGL meets personal minimum 2500 ft",
+              "waypoint": "CYSN",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "ceiling": 6000,
+                "minimum": 2500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 76,
+                    "end": 82
+                  },
+                  "text": "BKN060",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.visibility",
+              "severity": "ok",
+              "summary": "visibility >6 SM meets personal minimum 5 SM",
+              "waypoint": "CYSN",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "visibilitySm": 6,
+                "minimum": 5
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 71,
+                    "end": 75
+                  },
+                  "text": "P6SM",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "crosswind.personal",
+              "severity": "ok",
+              "summary": "wind 20010KT: 4 kt crosswind (sustained component on runway 19, 178°T) within personal limit 15 kt",
+              "waypoint": "CYSN",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "wind": "20010KT",
+                "speedKt": 10,
+                "gustKt": null,
+                "variable": false,
+                "bestRunway": "19",
+                "bestHeadingTrue": 178.3,
+                "crosswindKt": 3.6974675727382906,
+                "headwindKt": 9.291325715340562,
+                "runways": [
+                  {
+                    "runway": "01/19",
+                    "end": "19",
+                    "heading": 178.3,
+                    "crosswind": 3.6974675727382906,
+                    "headwind": 9.291325715340562,
+                    "crosswindGust": 3.6974675727382906,
+                    "headwindGust": 9.291325715340562
+                  },
+                  {
+                    "runway": "01/19",
+                    "end": "01",
+                    "heading": 358.3,
+                    "crosswind": 3.6974675727382937,
+                    "headwind": -9.291325715340562,
+                    "crosswindGust": 3.6974675727382937,
+                    "headwindGust": -9.291325715340562
+                  },
+                  {
+                    "runway": "06/24",
+                    "end": "24",
+                    "heading": 232.7,
+                    "crosswind": 5.402403204776548,
+                    "headwind": 8.415107819453063,
+                    "crosswindGust": 5.402403204776548,
+                    "headwindGust": 8.415107819453063
+                  },
+                  {
+                    "runway": "06/24",
+                    "end": "06",
+                    "heading": 52.7,
+                    "crosswind": 5.402403204776548,
+                    "headwind": -8.415107819453064,
+                    "crosswindGust": 5.402403204776548,
+                    "headwindGust": -8.415107819453064
+                  },
+                  {
+                    "runway": "11/29",
+                    "end": "29",
+                    "heading": 275.8,
+                    "crosswind": 9.69445349895139,
+                    "headwind": 2.453073858788023,
+                    "crosswindGust": 9.69445349895139,
+                    "headwindGust": 2.453073858788023
+                  },
+                  {
+                    "runway": "11/29",
+                    "end": "11",
+                    "heading": 95.8,
+                    "crosswind": 9.694453498951388,
+                    "headwind": -2.4530738587880263,
+                    "crosswindGust": 9.694453498951388,
+                    "headwindGust": -2.4530738587880263
+                  }
+                ],
+                "unknownHeading": [],
+                "limit": 15
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 63,
+                    "end": 70
+                  },
+                  "text": "20010KT",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "airport",
+                  "station": "CYSN",
+                  "raw": null,
+                  "span": null,
+                  "text": "ourairports 2026-09-07",
+                  "sha256": null
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "crosswind.demonstrated",
+              "severity": "ok",
+              "summary": "4 kt crosswind within C172 demonstrated 15 kt",
+              "waypoint": "CYSN",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "crosswindKt": 3.6974675727382906,
+                "demonstrated": 15
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 63,
+                    "end": 70
+                  },
+                  "text": "20010KT",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": "Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+                  "span": null,
+                  "text": "C172MPOH.pdf p.42: Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                }
+              ]
+            },
+            {
+              "rule": "vfr.visibility",
+              "severity": "ok",
+              "summary": "visibility >6 SM meets CARs 602.114 (control zone) minimum 3 SM",
+              "waypoint": "CYSN",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "visibilitySm": 6,
+                "minimum": 3,
+                "rule": "CARs 602.114 (control zone)"
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 71,
+                    "end": 75
+                  },
+                  "text": "P6SM",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "vfr.ceiling",
+              "severity": "ok",
+              "summary": "ceiling 6000 ft meets CARs 602.114 (control zone) 1000 ft",
+              "waypoint": "CYSN",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "ceiling": 6000,
+                "minimum": 1000,
+                "rule": "CARs 602.114 (control zone)"
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 76,
+                    "end": 82
+                  },
+                  "text": "BKN060",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "vfr.cloudClearance",
+              "severity": "ok",
+              "summary": "BKN060 base 6321 ft MSL is 2821 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+              "waypoint": "CYSN",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "baseMsl": 6321,
+                "cruiseMsl": 3500,
+                "clearance": 2821,
+                "required": 500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 76,
+                    "end": 82
+                  },
+                  "text": "BKN060",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.ceiling",
+              "severity": "ok",
+              "summary": "ceiling 3000 ft AGL meets personal minimum 2500 ft",
+              "waypoint": "CYSN",
+              "basis": "TEMPO 21:00Z–00:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "ceiling": 3000,
+                "minimum": 2500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 99,
+                    "end": 105
+                  },
+                  "text": "BKN030",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.visibility",
+              "severity": "ok",
+              "summary": "visibility >6 SM meets personal minimum 5 SM",
+              "waypoint": "CYSN",
+              "basis": "TEMPO 21:00Z–00:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "visibilitySm": 6,
+                "minimum": 5
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 71,
+                    "end": 75
+                  },
+                  "text": "P6SM",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "crosswind.personal",
+              "severity": "ok",
+              "summary": "wind 20010KT: 4 kt crosswind (sustained component on runway 19, 178°T) within personal limit 15 kt",
+              "waypoint": "CYSN",
+              "basis": "TEMPO 21:00Z–00:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "wind": "20010KT",
+                "speedKt": 10,
+                "gustKt": null,
+                "variable": false,
+                "bestRunway": "19",
+                "bestHeadingTrue": 178.3,
+                "crosswindKt": 3.6974675727382906,
+                "headwindKt": 9.291325715340562,
+                "runways": [
+                  {
+                    "runway": "01/19",
+                    "end": "19",
+                    "heading": 178.3,
+                    "crosswind": 3.6974675727382906,
+                    "headwind": 9.291325715340562,
+                    "crosswindGust": 3.6974675727382906,
+                    "headwindGust": 9.291325715340562
+                  },
+                  {
+                    "runway": "01/19",
+                    "end": "01",
+                    "heading": 358.3,
+                    "crosswind": 3.6974675727382937,
+                    "headwind": -9.291325715340562,
+                    "crosswindGust": 3.6974675727382937,
+                    "headwindGust": -9.291325715340562
+                  },
+                  {
+                    "runway": "06/24",
+                    "end": "24",
+                    "heading": 232.7,
+                    "crosswind": 5.402403204776548,
+                    "headwind": 8.415107819453063,
+                    "crosswindGust": 5.402403204776548,
+                    "headwindGust": 8.415107819453063
+                  },
+                  {
+                    "runway": "06/24",
+                    "end": "06",
+                    "heading": 52.7,
+                    "crosswind": 5.402403204776548,
+                    "headwind": -8.415107819453064,
+                    "crosswindGust": 5.402403204776548,
+                    "headwindGust": -8.415107819453064
+                  },
+                  {
+                    "runway": "11/29",
+                    "end": "29",
+                    "heading": 275.8,
+                    "crosswind": 9.69445349895139,
+                    "headwind": 2.453073858788023,
+                    "crosswindGust": 9.69445349895139,
+                    "headwindGust": 2.453073858788023
+                  },
+                  {
+                    "runway": "11/29",
+                    "end": "11",
+                    "heading": 95.8,
+                    "crosswind": 9.694453498951388,
+                    "headwind": -2.4530738587880263,
+                    "crosswindGust": 9.694453498951388,
+                    "headwindGust": -2.4530738587880263
+                  }
+                ],
+                "unknownHeading": [],
+                "limit": 15
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 63,
+                    "end": 70
+                  },
+                  "text": "20010KT",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "airport",
+                  "station": "CYSN",
+                  "raw": null,
+                  "span": null,
+                  "text": "ourairports 2026-09-07",
+                  "sha256": null
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "crosswind.demonstrated",
+              "severity": "ok",
+              "summary": "4 kt crosswind within C172 demonstrated 15 kt",
+              "waypoint": "CYSN",
+              "basis": "TEMPO 21:00Z–00:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "crosswindKt": 3.6974675727382906,
+                "demonstrated": 15
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 63,
+                    "end": 70
+                  },
+                  "text": "20010KT",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": "Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+                  "span": null,
+                  "text": "C172MPOH.pdf p.42: Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                }
+              ]
+            },
+            {
+              "rule": "vfr.visibility",
+              "severity": "ok",
+              "summary": "visibility >6 SM meets CARs 602.114 (control zone) minimum 3 SM",
+              "waypoint": "CYSN",
+              "basis": "TEMPO 21:00Z–00:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "visibilitySm": 6,
+                "minimum": 3,
+                "rule": "CARs 602.114 (control zone)"
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 71,
+                    "end": 75
+                  },
+                  "text": "P6SM",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "vfr.ceiling",
+              "severity": "ok",
+              "summary": "ceiling 3000 ft meets CARs 602.114 (control zone) 1000 ft",
+              "waypoint": "CYSN",
+              "basis": "TEMPO 21:00Z–00:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "ceiling": 3000,
+                "minimum": 1000,
+                "rule": "CARs 602.114 (control zone)"
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 99,
+                    "end": 105
+                  },
+                  "text": "BKN030",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "vfr.cloudClearance",
+              "severity": "marginal",
+              "summary": "BKN030 base 3321 ft MSL is -179 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+              "waypoint": "CYSN",
+              "basis": "TEMPO 21:00Z–00:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:00:00.000Z",
+              "values": {
+                "baseMsl": 3321,
+                "cruiseMsl": 3500,
+                "clearance": -179,
+                "required": 500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYSN",
+                  "raw": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
+                  "span": {
+                    "start": 99,
+                    "end": 105
+                  },
+                  "text": "BKN030",
+                  "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "waypoint": "CYKF",
+          "at": "2026-09-12T22:31:30.378Z",
+          "verdict": "go",
+          "night": false,
+          "findings": [
+            {
+              "rule": "personal.ceiling",
+              "severity": "ok",
+              "summary": "ceiling 24000 ft AGL meets personal minimum 2500 ft",
+              "waypoint": "CYKF",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "ceiling": 24000,
+                "minimum": 2500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 50,
+                    "end": 56
+                  },
+                  "text": "BKN240",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.visibility",
+              "severity": "ok",
+              "summary": "visibility >6 SM meets personal minimum 5 SM",
+              "waypoint": "CYKF",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "visibilitySm": 6,
+                "minimum": 5
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 38,
+                    "end": 42
+                  },
+                  "text": "P6SM",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "crosswind.personal",
+              "severity": "ok",
+              "summary": "wind 17010G20KT: 11 kt crosswind (gust component on runway 14, 138°T) within personal limit 15 kt",
+              "waypoint": "CYKF",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "wind": "17010G20KT",
+                "speedKt": 10,
+                "gustKt": 20,
+                "variable": false,
+                "bestRunway": "14",
+                "bestHeadingTrue": 138,
+                "crosswindKt": 10.598385284664097,
+                "headwindKt": 16.96096192312852,
+                "runways": [
+                  {
+                    "runway": "14/32",
+                    "end": "14",
+                    "heading": 138,
+                    "crosswind": 5.299192642332049,
+                    "headwind": 8.48048096156426,
+                    "crosswindGust": 10.598385284664097,
+                    "headwindGust": 16.96096192312852
+                  },
+                  {
+                    "runway": "14/32",
+                    "end": "32",
+                    "heading": 318,
+                    "crosswind": 5.299192642332049,
+                    "headwind": -8.48048096156426,
+                    "crosswindGust": 10.598385284664097,
+                    "headwindGust": -16.96096192312852
+                  },
+                  {
+                    "runway": "08/26",
+                    "end": "26",
+                    "heading": 255,
+                    "crosswind": 9.961946980917455,
+                    "headwind": 0.8715574274765814,
+                    "crosswindGust": 19.92389396183491,
+                    "headwindGust": 1.7431148549531628
+                  },
+                  {
+                    "runway": "08/26",
+                    "end": "08",
+                    "heading": 75,
+                    "crosswind": 9.961946980917455,
+                    "headwind": -0.8715574274765824,
+                    "crosswindGust": 19.92389396183491,
+                    "headwindGust": -1.7431148549531648
+                  }
+                ],
+                "unknownHeading": [],
+                "limit": 15
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 27,
+                    "end": 37
+                  },
+                  "text": "17010G20KT",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "airport",
+                  "station": "CYKF",
+                  "raw": null,
+                  "span": null,
+                  "text": "ourairports 2026-09-07",
+                  "sha256": null
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "crosswind.demonstrated",
+              "severity": "ok",
+              "summary": "11 kt crosswind within C172 demonstrated 15 kt",
+              "waypoint": "CYKF",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "crosswindKt": 10.598385284664097,
+                "demonstrated": 15
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 27,
+                    "end": 37
+                  },
+                  "text": "17010G20KT",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": "Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+                  "span": null,
+                  "text": "C172MPOH.pdf p.42: Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                }
+              ]
+            },
+            {
+              "rule": "vfr.visibility",
+              "severity": "ok",
+              "summary": "visibility >6 SM meets CARs 602.114 (control zone) minimum 3 SM",
+              "waypoint": "CYKF",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "visibilitySm": 6,
+                "minimum": 3,
+                "rule": "CARs 602.114 (control zone)"
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 38,
+                    "end": 42
+                  },
+                  "text": "P6SM",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "vfr.ceiling",
+              "severity": "ok",
+              "summary": "ceiling 24000 ft meets CARs 602.114 (control zone) 1000 ft",
+              "waypoint": "CYKF",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "ceiling": 24000,
+                "minimum": 1000,
+                "rule": "CARs 602.114 (control zone)"
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 50,
+                    "end": 56
+                  },
+                  "text": "BKN240",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "vfr.cloudClearance",
+              "severity": "ok",
+              "summary": "BKN240 base 25054 ft MSL is 21554 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+              "waypoint": "CYKF",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "baseMsl": 25054,
+                "cruiseMsl": 3500,
+                "clearance": 21554,
+                "required": 500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 50,
+                    "end": 56
+                  },
+                  "text": "BKN240",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.ceiling",
+              "severity": "ok",
+              "summary": "ceiling 5000 ft AGL meets personal minimum 2500 ft",
+              "waypoint": "CYKF",
+              "basis": "TEMPO 20:00Z–23:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "ceiling": 5000,
+                "minimum": 2500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 73,
+                    "end": 79
+                  },
+                  "text": "BKN050",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.visibility",
+              "severity": "ok",
+              "summary": "visibility >6 SM meets personal minimum 5 SM",
+              "waypoint": "CYKF",
+              "basis": "TEMPO 20:00Z–23:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "visibilitySm": 6,
+                "minimum": 5
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 38,
+                    "end": 42
+                  },
+                  "text": "P6SM",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "crosswind.personal",
+              "severity": "ok",
+              "summary": "wind 17010G20KT: 11 kt crosswind (gust component on runway 14, 138°T) within personal limit 15 kt",
+              "waypoint": "CYKF",
+              "basis": "TEMPO 20:00Z–23:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "wind": "17010G20KT",
+                "speedKt": 10,
+                "gustKt": 20,
+                "variable": false,
+                "bestRunway": "14",
+                "bestHeadingTrue": 138,
+                "crosswindKt": 10.598385284664097,
+                "headwindKt": 16.96096192312852,
+                "runways": [
+                  {
+                    "runway": "14/32",
+                    "end": "14",
+                    "heading": 138,
+                    "crosswind": 5.299192642332049,
+                    "headwind": 8.48048096156426,
+                    "crosswindGust": 10.598385284664097,
+                    "headwindGust": 16.96096192312852
+                  },
+                  {
+                    "runway": "14/32",
+                    "end": "32",
+                    "heading": 318,
+                    "crosswind": 5.299192642332049,
+                    "headwind": -8.48048096156426,
+                    "crosswindGust": 10.598385284664097,
+                    "headwindGust": -16.96096192312852
+                  },
+                  {
+                    "runway": "08/26",
+                    "end": "26",
+                    "heading": 255,
+                    "crosswind": 9.961946980917455,
+                    "headwind": 0.8715574274765814,
+                    "crosswindGust": 19.92389396183491,
+                    "headwindGust": 1.7431148549531628
+                  },
+                  {
+                    "runway": "08/26",
+                    "end": "08",
+                    "heading": 75,
+                    "crosswind": 9.961946980917455,
+                    "headwind": -0.8715574274765824,
+                    "crosswindGust": 19.92389396183491,
+                    "headwindGust": -1.7431148549531648
+                  }
+                ],
+                "unknownHeading": [],
+                "limit": 15
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 27,
+                    "end": 37
+                  },
+                  "text": "17010G20KT",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "airport",
+                  "station": "CYKF",
+                  "raw": null,
+                  "span": null,
+                  "text": "ourairports 2026-09-07",
+                  "sha256": null
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "crosswind.demonstrated",
+              "severity": "ok",
+              "summary": "11 kt crosswind within C172 demonstrated 15 kt",
+              "waypoint": "CYKF",
+              "basis": "TEMPO 20:00Z–23:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "crosswindKt": 10.598385284664097,
+                "demonstrated": 15
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 27,
+                    "end": 37
+                  },
+                  "text": "17010G20KT",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": "Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+                  "span": null,
+                  "text": "C172MPOH.pdf p.42: Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                }
+              ]
+            },
+            {
+              "rule": "vfr.visibility",
+              "severity": "ok",
+              "summary": "visibility >6 SM meets CARs 602.114 (control zone) minimum 3 SM",
+              "waypoint": "CYKF",
+              "basis": "TEMPO 20:00Z–23:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "visibilitySm": 6,
+                "minimum": 3,
+                "rule": "CARs 602.114 (control zone)"
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 38,
+                    "end": 42
+                  },
+                  "text": "P6SM",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "vfr.ceiling",
+              "severity": "ok",
+              "summary": "ceiling 5000 ft meets CARs 602.114 (control zone) 1000 ft",
+              "waypoint": "CYKF",
+              "basis": "TEMPO 20:00Z–23:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "ceiling": 5000,
+                "minimum": 1000,
+                "rule": "CARs 602.114 (control zone)"
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 73,
+                    "end": 79
+                  },
+                  "text": "BKN050",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "vfr.cloudClearance",
+              "severity": "ok",
+              "summary": "BKN050 base 6054 ft MSL is 2554 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+              "waypoint": "CYKF",
+              "basis": "TEMPO 20:00Z–23:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-12T22:31:30.378Z",
+              "values": {
+                "baseMsl": 6054,
+                "cruiseMsl": 3500,
+                "clearance": 2554,
+                "required": 500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
+                  "span": {
+                    "start": 73,
+                    "end": 79
+                  },
+                  "text": "BKN050",
+                  "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
+                },
+                {
+                  "kind": "plan",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "alternate": {
+        "waypoint": "CYHM",
+        "at": "2026-09-12T22:46:29.121Z",
+        "verdict": "go",
+        "night": false,
+        "findings": [
+          {
+            "rule": "personal.ceiling",
+            "severity": "ok",
+            "summary": "ceiling 4000 ft AGL meets personal minimum 2500 ft",
+            "waypoint": "CYHM",
+            "basis": "prevailing",
+            "basisKind": "prevailing",
+            "at": "2026-09-12T22:46:29.121Z",
+            "values": {
+              "ceiling": 4000,
+              "minimum": 2500
+            },
+            "citations": [
+              {
+                "kind": "taf",
+                "station": "CYHM",
+                "raw": "TAF CYHM 121742Z 1218/1318 18008KT P6SM SCT080 BKN200 FM122100 21008KT P6SM BKN040 FM130000 21008KT P6SM BKN015 TEMPO 1300/1302 P6SM -SHRA FM130600 22007KT P6SM SCT006 OVC010 PROB30 1306/1312 2SM BR OVC005 FM131200 25008KT P6SM FEW006 OVC012 FM131400 25008KT P6SM BKN015 BECMG 1314/1316 SCT040 RMK NXT FCST BY 130000Z",
+                "span": {
+                  "start": 76,
+                  "end": 82
+                },
+                "text": "BKN040",
+                "sha256": "7b9fcc95247dd966181b47fd17d7e639503dd8e4ca503bfcfbee487f2bf4aa0c"
+              },
+              {
+                "kind": "profile",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "default v1",
+                "sha256": null
+              }
+            ]
+          },
+          {
+            "rule": "personal.visibility",
+            "severity": "ok",
+            "summary": "visibility >6 SM meets personal minimum 5 SM",
+            "waypoint": "CYHM",
+            "basis": "prevailing",
+            "basisKind": "prevailing",
+            "at": "2026-09-12T22:46:29.121Z",
+            "values": {
+              "visibilitySm": 6,
+              "minimum": 5
+            },
+            "citations": [
+              {
+                "kind": "taf",
+                "station": "CYHM",
+                "raw": "TAF CYHM 121742Z 1218/1318 18008KT P6SM SCT080 BKN200 FM122100 21008KT P6SM BKN040 FM130000 21008KT P6SM BKN015 TEMPO 1300/1302 P6SM -SHRA FM130600 22007KT P6SM SCT006 OVC010 PROB30 1306/1312 2SM BR OVC005 FM131200 25008KT P6SM FEW006 OVC012 FM131400 25008KT P6SM BKN015 BECMG 1314/1316 SCT040 RMK NXT FCST BY 130000Z",
+                "span": {
+                  "start": 71,
+                  "end": 75
+                },
+                "text": "P6SM",
+                "sha256": "7b9fcc95247dd966181b47fd17d7e639503dd8e4ca503bfcfbee487f2bf4aa0c"
+              },
+              {
+                "kind": "profile",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "default v1",
+                "sha256": null
+              }
+            ]
+          },
+          {
+            "rule": "crosswind.personal",
+            "severity": "ok",
+            "summary": "wind 21008KT: 3 kt crosswind (sustained component on runway 24, 229°T) within personal limit 15 kt",
+            "waypoint": "CYHM",
+            "basis": "prevailing",
+            "basisKind": "prevailing",
+            "at": "2026-09-12T22:46:29.121Z",
+            "values": {
+              "wind": "21008KT",
+              "speedKt": 8,
+              "gustKt": null,
+              "variable": false,
+              "bestRunway": "24",
+              "bestHeadingTrue": 229,
+              "crosswindKt": 2.604545235657253,
+              "headwindKt": 7.564148604794535,
+              "runways": [
+                {
+                  "runway": "06/24",
+                  "end": "24",
+                  "heading": 229,
+                  "crosswind": 2.604545235657253,
+                  "headwind": 7.564148604794535,
+                  "crosswindGust": 2.604545235657253,
+                  "headwindGust": 7.564148604794535
+                },
+                {
+                  "runway": "06/24",
+                  "end": "06",
+                  "heading": 49,
+                  "crosswind": 2.604545235657256,
+                  "headwind": -7.564148604794534,
+                  "crosswindGust": 2.604545235657256,
+                  "headwindGust": -7.564148604794534
+                },
+                {
+                  "runway": "12/30",
+                  "end": "30",
+                  "heading": 287,
+                  "crosswind": 7.794960518281882,
+                  "headwind": 1.7996084347509194,
+                  "crosswindGust": 7.794960518281882,
+                  "headwindGust": 1.7996084347509194
+                },
+                {
+                  "runway": "12/30",
+                  "end": "12",
+                  "heading": 107,
+                  "crosswind": 7.794960518281882,
+                  "headwind": -1.7996084347509185,
+                  "crosswindGust": 7.794960518281882,
+                  "headwindGust": -1.7996084347509185
+                }
+              ],
+              "unknownHeading": [],
+              "limit": 15
+            },
+            "citations": [
+              {
+                "kind": "taf",
+                "station": "CYHM",
+                "raw": "TAF CYHM 121742Z 1218/1318 18008KT P6SM SCT080 BKN200 FM122100 21008KT P6SM BKN040 FM130000 21008KT P6SM BKN015 TEMPO 1300/1302 P6SM -SHRA FM130600 22007KT P6SM SCT006 OVC010 PROB30 1306/1312 2SM BR OVC005 FM131200 25008KT P6SM FEW006 OVC012 FM131400 25008KT P6SM BKN015 BECMG 1314/1316 SCT040 RMK NXT FCST BY 130000Z",
+                "span": {
+                  "start": 63,
+                  "end": 70
+                },
+                "text": "21008KT",
+                "sha256": "7b9fcc95247dd966181b47fd17d7e639503dd8e4ca503bfcfbee487f2bf4aa0c"
+              },
+              {
+                "kind": "airport",
+                "station": "CYHM",
+                "raw": null,
+                "span": null,
+                "text": "ourairports 2026-09-07",
+                "sha256": null
+              },
+              {
+                "kind": "profile",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "default v1",
+                "sha256": null
+              }
+            ]
+          },
+          {
+            "rule": "crosswind.demonstrated",
+            "severity": "ok",
+            "summary": "3 kt crosswind within C172 demonstrated 15 kt",
+            "waypoint": "CYHM",
+            "basis": "prevailing",
+            "basisKind": "prevailing",
+            "at": "2026-09-12T22:46:29.121Z",
+            "values": {
+              "crosswindKt": 2.604545235657253,
+              "demonstrated": 15
+            },
+            "citations": [
+              {
+                "kind": "taf",
+                "station": "CYHM",
+                "raw": "TAF CYHM 121742Z 1218/1318 18008KT P6SM SCT080 BKN200 FM122100 21008KT P6SM BKN040 FM130000 21008KT P6SM BKN015 TEMPO 1300/1302 P6SM -SHRA FM130600 22007KT P6SM SCT006 OVC010 PROB30 1306/1312 2SM BR OVC005 FM131200 25008KT P6SM FEW006 OVC012 FM131400 25008KT P6SM BKN015 BECMG 1314/1316 SCT040 RMK NXT FCST BY 130000Z",
+                "span": {
+                  "start": 63,
+                  "end": 70
+                },
+                "text": "21008KT",
+                "sha256": "7b9fcc95247dd966181b47fd17d7e639503dd8e4ca503bfcfbee487f2bf4aa0c"
+              },
+              {
+                "kind": "aircraft",
+                "station": null,
+                "raw": "Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+                "span": null,
+                "text": "C172MPOH.pdf p.42: Maximum Demonstrated Crosswind Velocity: Takeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+                "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+              }
+            ]
+          },
+          {
+            "rule": "vfr.visibility",
+            "severity": "ok",
+            "summary": "visibility >6 SM meets CARs 602.114 (control zone) minimum 3 SM",
+            "waypoint": "CYHM",
+            "basis": "prevailing",
+            "basisKind": "prevailing",
+            "at": "2026-09-12T22:46:29.121Z",
+            "values": {
+              "visibilitySm": 6,
+              "minimum": 3,
+              "rule": "CARs 602.114 (control zone)"
+            },
+            "citations": [
+              {
+                "kind": "taf",
+                "station": "CYHM",
+                "raw": "TAF CYHM 121742Z 1218/1318 18008KT P6SM SCT080 BKN200 FM122100 21008KT P6SM BKN040 FM130000 21008KT P6SM BKN015 TEMPO 1300/1302 P6SM -SHRA FM130600 22007KT P6SM SCT006 OVC010 PROB30 1306/1312 2SM BR OVC005 FM131200 25008KT P6SM FEW006 OVC012 FM131400 25008KT P6SM BKN015 BECMG 1314/1316 SCT040 RMK NXT FCST BY 130000Z",
+                "span": {
+                  "start": 71,
+                  "end": 75
+                },
+                "text": "P6SM",
+                "sha256": "7b9fcc95247dd966181b47fd17d7e639503dd8e4ca503bfcfbee487f2bf4aa0c"
+              },
+              {
+                "kind": "plan",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "CARs 602.114 (control zone)",
+                "sha256": null
+              }
+            ]
+          },
+          {
+            "rule": "vfr.ceiling",
+            "severity": "ok",
+            "summary": "ceiling 4000 ft meets CARs 602.114 (control zone) 1000 ft",
+            "waypoint": "CYHM",
+            "basis": "prevailing",
+            "basisKind": "prevailing",
+            "at": "2026-09-12T22:46:29.121Z",
+            "values": {
+              "ceiling": 4000,
+              "minimum": 1000,
+              "rule": "CARs 602.114 (control zone)"
+            },
+            "citations": [
+              {
+                "kind": "taf",
+                "station": "CYHM",
+                "raw": "TAF CYHM 121742Z 1218/1318 18008KT P6SM SCT080 BKN200 FM122100 21008KT P6SM BKN040 FM130000 21008KT P6SM BKN015 TEMPO 1300/1302 P6SM -SHRA FM130600 22007KT P6SM SCT006 OVC010 PROB30 1306/1312 2SM BR OVC005 FM131200 25008KT P6SM FEW006 OVC012 FM131400 25008KT P6SM BKN015 BECMG 1314/1316 SCT040 RMK NXT FCST BY 130000Z",
+                "span": {
+                  "start": 76,
+                  "end": 82
+                },
+                "text": "BKN040",
+                "sha256": "7b9fcc95247dd966181b47fd17d7e639503dd8e4ca503bfcfbee487f2bf4aa0c"
+              },
+              {
+                "kind": "plan",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "CARs 602.114 (control zone)",
+                "sha256": null
+              }
+            ]
+          },
+          {
+            "rule": "vfr.cloudClearance",
+            "severity": "ok",
+            "summary": "BKN040 base 4780 ft MSL is 1280 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+            "waypoint": "CYHM",
+            "basis": "prevailing",
+            "basisKind": "prevailing",
+            "at": "2026-09-12T22:46:29.121Z",
+            "values": {
+              "baseMsl": 4780,
+              "cruiseMsl": 3500,
+              "clearance": 1280,
+              "required": 500
+            },
+            "citations": [
+              {
+                "kind": "taf",
+                "station": "CYHM",
+                "raw": "TAF CYHM 121742Z 1218/1318 18008KT P6SM SCT080 BKN200 FM122100 21008KT P6SM BKN040 FM130000 21008KT P6SM BKN015 TEMPO 1300/1302 P6SM -SHRA FM130600 22007KT P6SM SCT006 OVC010 PROB30 1306/1312 2SM BR OVC005 FM131200 25008KT P6SM FEW006 OVC012 FM131400 25008KT P6SM BKN015 BECMG 1314/1316 SCT040 RMK NXT FCST BY 130000Z",
+                "span": {
+                  "start": 76,
+                  "end": 82
+                },
+                "text": "BKN040",
+                "sha256": "7b9fcc95247dd966181b47fd17d7e639503dd8e4ca503bfcfbee487f2bf4aa0c"
+              },
+              {
+                "kind": "plan",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "CARs 602.114 (control zone)",
+                "sha256": null
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

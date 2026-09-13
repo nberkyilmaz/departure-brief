@@ -11,59 +11,113 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
 
 ---
 
-## Where we are (updated 2026-09-13, end of session 10)
+## Where we are (updated 2026-09-13, paused mid-website)
 
-**Current step: the project website**, so this can go on a resume.
-
-**Step 8 — airspace transit — remains blocked.** Checked again on
-2026-09-13: NAV CANADA publishes no airspace geometry, open.canada.ca has
-nothing usable, and OpenAIP needs a key. The FAA's ArcGIS `Class_Airspace`
-layer is queryable, so the US half is buildable whenever it is wanted.
+**Current step: the public website**, so this project can go on a resume.
+Started, not finished — see "In progress" below for exactly where it stopped.
 
 **Done:** steps 1-7, 9 and 10. Decoders, fetch layer, route and time
-resolution, rules engine, briefings + API + web, NOTAM relevance with the
-local model running and an eval gate that passes, the briefing diff, and
-aircraft document ingestion (the owner's POH read, extracted, verified and
-computed).
+resolution, rules engine, briefings + API + web app, NOTAM relevance with a
+local model and a passing eval gate, the briefing diff, aircraft document
+ingestion, and forecast verification. 653 tests, typecheck clean, web builds.
 
-**Waiting on the owner:**
+**Step 8 (airspace transit) remains blocked on data, not effort.** Rechecked
+2026-09-13: NAV CANADA publishes no airspace geometry, open.canada.ca has
+nothing usable, OpenAIP needs a key. The FAA ArcGIS `Class_Airspace` layer
+*is* queryable, so the US half could be built whenever it is wanted.
+
+### In progress: the public website
+
+**The decision taken.** The site will be **static, built from committed
+fixture data** — not a live deployment of the API. Three reasons, and they
+are worth keeping: NAV CANADA's CFPS endpoint is unofficial and a public
+site hitting it for strangers would be discourteous and likely blocked; the
+weather service asks for identified, reasonable use; and a public
+"should I go?" tool invites exactly the operational use this project
+disclaims on every screen. A static site also costs nothing and always
+works, which is what a resume link needs.
+
+**Hosting and domain, decided but not yet done.** Cloudflare Pages, free,
+which gives `holdshort.pages.dev` at no cost. If a real domain is wanted,
+Cloudflare Registrar sells at wholesale with no markup and no renewal
+spike — roughly $10/year for `.dev` or `.com`. The free subdomain is
+perfectly respectable on a resume. **Nothing has been registered or
+deployed yet**, and neither can be done without the owner's accounts.
+
+**Built so far (uncommitted at the pause):**
+
+- `packages/core/scripts/build-demo.ts` — builds the demo payload from
+  committed fixtures alone: no network, no database, no model at run time.
+  With `HOLDSHORT_LLM=ollama` it records any model answer it lacks into the
+  fixture directory, so the next build needs nothing again.
+- `packages/core/test/fixtures/fetch/awc/demo-cysn-cykf-cyhm.json` — 78 real
+  METARs and 3 TAFs for CYSN, CYKF and CYHM, recorded 12-13 September 2026,
+  verbatim as the weather service returned them. The observations run past
+  the briefing moment on purpose, so the same fixture can demonstrate
+  forecast verification.
+- `apps/web/public/demo/briefing.json` (136 KB) and `wb.json` (24 KB) — a
+  real briefing of the owner's flight: verdict marginal, 34 reports cited,
+  31 NOTAMs ranked by qwen2.5:7b (8 critical, 9 advisory, 9 irrelevant, 5
+  out of scope), and the weight-and-balance data with 18 figures.
+- 8 further recorded model answers, because the demo moves the departure to
+  a time the recorded TAFs cover and the assessment cache is keyed on the
+  flight context.
+
+**One deliberate change in the demo data, which the site must state
+plainly:** the flight departs 2026-09-12T22:00Z rather than the owner's
+2026-09-14T15:00Z. Those TAFs were issued at 1940Z on the 12th and run only
+to 0100Z on the 13th, so the real departure time sits outside them and the
+demo would show nothing but "no forecast covers this". Route, aircraft,
+personal minimums and every report are otherwise exactly as they are.
+
+**Not started:**
+
+1. Demo mode in the web app — `App.tsx` still only knows how to POST to the
+   API. It needs to load `/demo/briefing.json` instead when there is no API,
+   with a banner saying the data is recorded and frozen.
+2. The landing content a reader arrives at: what the tool is, the
+   reasoning-layer thesis, the measured numbers (NOTAM relevance 85.7 %
+   agreement with 100 % critical recall; POH extraction 6 of 6 verified
+   figures correct; decoder coverage under 0.3 % unparsed over 8,000
+   reports), and a link to the source.
+3. The Cloudflare Pages build configuration and the first deploy.
+
+**Waiting on the owner, unchanged:**
+
 1. **Your aircraft's empty weight and moment**, from its own
-   weight-and-balance record. Until then the web panel and CLI use the
+   weight-and-balance record. Until then the CLI and web panel use the
    handbook's *sample airplane* figures and say so in both places.
-2. **Check the figures entered by hand** — `aircraft/c172.wb.json`. The
-   extraction verified 6; the rest were completed with `wb confirm`, and
-   the note on each says how far the handbook backs it. The station arms
-   (37, 73, 95, 123 in) and the fuel arm (48 in) were read off the page
-   images and carry **no citation**, because this handbook prints them in a
-   diagram that OCRs to noise. They match the standard 172M figures, but a
-   pilot should confirm them against their own copy before flying on them.
+2. **Check the figures entered by hand** in `aircraft/c172.wb.json`. Six
+   were verified against the ink; the rest were completed with
+   `wb confirm`, and the note on each says how far the handbook backs it.
+   The station arms (37, 73, 95, 123 in) and the fuel arm (48 in) carry
+   **no citation** — this handbook prints them in a diagram that OCRs to
+   noise. They match the standard 172M figures, but confirm them against
+   your own copy before flying on them.
 3. **The four open questions in the NOTAM labelled set**
-   (`packages/core/test/fixtures/notam/labelled/…json`, `openQuestions`) —
-   chiefly whether CYSN's runway 06/24 is a practical alternative for a
-   C172 once 11/29 is closed, which decides whether two NOTAMs are critical
-   or advisory.
-4. **FAA NOTAM API credentials**, if US NOTAMs matter to you. Canadian ones
-   work without a key.
-5. **A look at the web app** — nobody has eyeballed it yet.
+   (`packages/core/test/fixtures/notam/labelled/…json`, `openQuestions`),
+   chiefly whether CYSN's 06/24 is a practical alternative for a C172 once
+   11/29 is closed — it decides whether two NOTAMs are critical or advisory.
+4. **FAA NOTAM API credentials**, if US NOTAMs matter. Canadian ones need
+   no key.
+5. **A look at the web app.** Nobody has eyeballed it yet.
 
 **Next steps, in order:**
-1. The website: a static page a recruiter can open, showing the real
-   briefing rendered from committed fixtures. No server, no database, no
-   keys, no load on anyone's upstream — free to host and it always works.
-2. Step 8, airspace transit: PostGIS polygons with floor and ceiling, route
-   sampled every half nautical mile, point-in-polygon by altitude band,
-   terrain AGL from USGS. Upgrades the VFR-minima check from airport-only
-   to per-segment. The blocker is Canadian airspace geometry — NAV CANADA's
-   Designated Airspace Handbook is text, not shapes.
+
+1. Finish the website: demo mode, landing content, deploy.
+2. Step 8, airspace transit — US half from FAA ArcGIS if the Canadian
+   geometry stays unavailable.
 3. Step 11, polish and demo.
 
-**Known open engineering items:**
-- The NOTAM relevance model over-calls "critical" on obstacles and taxiway
-  closures (4 of 28 on the demo flight). Safe direction, but noisy; the fix
-  is either more deterministic rules or a better prompt.
+**Environment notes that will bite whoever picks this up:**
+
 - Ollama's CUDA runner crashes on this laptop (its bundled CUDA build is
   newer than the 546.92 driver). Start the server on Vulkan:
   `OLLAMA_VULKAN=1 CUDA_VISIBLE_DEVICES=-1 ollama serve`.
+- The work depends on 146 MB that is deliberately **not** in git: the POH
+  (7.9 MB) and the OCR cache (138 MB), plus a local Postgres and Ollama.
+  **There is no git remote.** Nothing can continue on another machine, or
+  unattended, until a remote exists and those assets are dealt with.
 
 ---
 
@@ -944,3 +998,62 @@ had just dropped into the repo root.
 
 - 653 tests across workspaces, typecheck clean, web builds.
 - Steps 1-7, 9 and 10 done. Step 8 blocked on data, not on effort.
+
+---
+
+## Session 12 — 2026-09-13 — The public website (started, paused)
+
+147. The owner asked for a website for this project, to put on a resume,
+     free or very nearly free. Two questions had to be answered before any
+     of it could be built: what gets deployed, and where.
+148. **What: a static site built from committed fixtures, not a live
+     deployment.** The reasoning is worth keeping, because the tempting
+     answer is the wrong one. NAV CANADA's CFPS endpoint is unofficial, and
+     a public site calling it on behalf of strangers would be discourteous
+     and would eventually be blocked. The weather service asks for
+     identified, reasonable use. And a publicly usable "should I go?" tool
+     invites exactly the operational use every screen of this project
+     disclaims. A static site also costs nothing, never falls over, and
+     shows the same output — which is what a link on a resume has to do.
+149. **Where: Cloudflare Pages**, free, `holdshort.pages.dev`. For a real
+     domain, Cloudflare Registrar sells at wholesale with no markup and no
+     renewal spike, roughly $10 a year for `.dev` or `.com`. Nothing has
+     been registered or deployed — both need the owner's accounts.
+150. `packages/core/scripts/build-demo.ts` builds the demo payload from
+     committed fixtures alone: no network, no database, no model at run
+     time. Given `HOLDSHORT_LLM=ollama` it records any answer it lacks into
+     the fixture directory, so the next build needs nothing again.
+151. Recorded 78 real METARs and 3 TAFs for CYSN, CYKF and CYHM as a
+     fixture, verbatim as the weather service returned them. The
+     observations deliberately run past the briefing moment, so the same
+     fixture can also demonstrate forecast verification.
+152. The demo moves the flight's departure from 2026-09-14T15:00Z to
+     2026-09-12T22:00Z, and the site will have to say so plainly. Those
+     TAFs were issued at 1940Z on the 12th and run only to 0100Z on the
+     13th, so the real departure sits outside them and the demo would show
+     nothing but "no forecast covers this". Everything else — route,
+     aircraft, personal minimums, every report — is exactly as it is.
+153. That move changed the flight context, which is part of the assessment
+     cache key, so eight NOTAMs came back unassessed on the first build.
+     Recorded those eight against the live model rather than shipping a
+     demo with holes in it. The payload is now a real briefing: verdict
+     marginal, 34 reports cited, 31 NOTAMs ranked (8 critical, 9 advisory,
+     9 irrelevant, 5 out of scope).
+154. Also answered a question worth writing down: **no, this cannot keep
+     working while the laptop is closed.** There is no git remote, and
+     146 MB the work depends on is deliberately not in git — the POH
+     (7.9 MB) and the OCR cache (138 MB) — besides a local Postgres and a
+     local Ollama. Nothing could continue elsewhere until a remote exists
+     and those assets are dealt with.
+
+### Where this stopped
+
+Three things remain, in order: demo mode in the web app (`App.tsx` still
+only knows how to POST to the API and needs to load `/demo/briefing.json`
+when there is none), the landing content a reader arrives at, and the
+Cloudflare Pages configuration and first deploy.
+
+### State at end of session 12
+
+- 653 tests across workspaces, typecheck clean, web builds.
+- Steps 1-7, 9 and 10 done; step 8 blocked on data; the website started.
