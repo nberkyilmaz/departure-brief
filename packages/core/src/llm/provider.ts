@@ -10,6 +10,8 @@ import { contentHash } from '../brief/canonical.js';
 export type JsonSchema = Record<string, unknown>;
 
 export interface LLMRequest {
+  /** PNG pages, base64, for a model that can see; empty for text-only work. Part of the cache key. */
+  readonly images?: readonly string[];
   readonly model: string;
   readonly system: string;
   readonly prompt: string;
@@ -34,7 +36,7 @@ export interface LLMProvider {
 
 /** The cache key for a request: same model, prompts and schema → same key. */
 export function requestKey(request: LLMRequest): string {
-  return contentHash({ model: request.model, system: request.system, prompt: request.prompt, schema: request.schema });
+  return contentHash({ model: request.model, system: request.system, prompt: request.prompt, schema: request.schema , images: request.images ?? []});
 }
 
 export class LLMError extends Error {

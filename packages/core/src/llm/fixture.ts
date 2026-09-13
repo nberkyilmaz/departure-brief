@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { LLMError, requestKey, type LLMProvider, type LLMRequest, type LLMResponse } from './provider.js';
@@ -68,7 +69,10 @@ export class RecordingProvider implements LLMProvider {
     if (existsSync(path)) return (JSON.parse(readFileSync(path, 'utf8')) as RecordedCall).response;
     const response = await this.inner.complete(request);
     mkdirSync(this.dir, { recursive: true });
-    const recorded: RecordedCall = { key, request, response, recordedAt: this.now().toISOString() };
+    // Page images are megabytes each; the key already covers them, so the
+    // recording keeps their hashes and stays readable in a diff.
+    const images = request.images?.length ? request.images.map((i) => `sha256:${createHash('sha256').update(i).digest('hex')}`) : undefined;
+    const recorded: RecordedCall = { key, request: { ...request, ...(images ? { images } : {}) }, response, recordedAt: this.now().toISOString() };
     writeFileSync(path, JSON.stringify(recorded, null, 2));
     return response;
   }

@@ -97,6 +97,7 @@ export interface NotamItem {
     result: { relevance: string; category: string; affects: string[]; plain_text: string; cited_span: string; rationale: string };
   } | null;
   assessmentError: string | null;
+  rule: { relevance: string; rule: string; reason: string } | null;
 }
 
 export interface NotamDocument {
@@ -152,4 +153,40 @@ export interface StoredBriefing {
     };
     briefing: Briefing;
   };
+}
+
+export interface DocumentCitation {
+  documentSha256: string;
+  filename: string;
+  page: number;
+  box: { x: number; y: number; w: number; h: number } | null;
+  citedText: string;
+}
+
+export interface WbFigure {
+  value: number;
+  source: DocumentCitation | null;
+  note: string | null;
+}
+
+export interface WeightBalanceSpec {
+  version: 1;
+  aircraftType: string;
+  source: { documentSha256: string; filename: string; pages: number[] } | null;
+  stations: { id: string; label: string; kind: 'seat' | 'baggage' | 'fuel' | 'oil'; armIn: WbFigure; maxLb: WbFigure | null }[];
+  envelopes: { category: 'normal' | 'utility'; maxWeightLb: WbFigure; forward: { weightLb: number; armIn: number }[]; aftArmIn: WbFigure }[];
+  demonstratedCrosswindKt: WbFigure | null;
+  sample: { emptyWeightLb: WbFigure; emptyMomentPer1000: WbFigure } | null;
+  review: { field: string; description: string; proposed: number | { weightLb: number; armIn: number }; page: number; citedText: string; problem: string }[];
+}
+
+export interface LoadingResult {
+  rows: { label: string; weightLb: number; armIn: number; momentPer1000: number }[];
+  totalWeightLb: number;
+  totalMomentPer1000: number;
+  cgIn: number;
+  category: 'normal' | 'utility';
+  limits: { maxWeightLb: number; forwardArmIn: number; aftArmIn: number };
+  findings: { rule: string; severity: 'ok' | 'no-go'; summary: string; citations: DocumentCitation[] }[];
+  verdict: 'within-limits' | 'outside-limits';
 }

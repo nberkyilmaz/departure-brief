@@ -46,7 +46,7 @@ export class OllamaProvider implements LLMProvider {
           options: { temperature: 0, num_predict: request.maxTokens, num_ctx: this.contextTokens },
           messages: [
             { role: 'system', content: request.system },
-            { role: 'user', content: request.prompt },
+            { role: 'user', content: request.prompt, ...(request.images?.length ? { images: request.images } : {}) },
           ],
         }),
       });

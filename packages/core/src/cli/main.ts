@@ -13,6 +13,9 @@
  *                                                 every NOTAM for the flight's fields, classified and (with a model) ranked
  *   holdshort diff <flight.json> [--fetch] [--notams] [--against <sha256>] [--json]
  *                                                 brief now, store it, and say what changed since the last briefing
+ *   holdshort doc ingest|find|page|wb <pdf> ...   read a scanned POH into word boxes; extract weight-and-balance data
+ *   holdshort wb <spec.json> --empty <lb> --empty-moment <n> [--front lb] [--rear lb] [--bag1 lb] [--fuel gal]
+ *                                                 a loading against the extracted limits, every limit cited to its page
  *   holdshort decode "<METAR or TAF text>"         print the decoded JSON
  *
  * Reads `.env` if present. Uses Postgres at DATABASE_URL (default: the
@@ -38,6 +41,7 @@ import { readNasrDirectory } from '../fetch/nasr.js';
 import { NavCanadaClient } from '../fetch/navcanada.js';
 import { readOurAirportsDirectory } from '../fetch/ourairports.js';
 import { llmFromEnv } from '../llm/env.js';
+import { docCommand, wbCommand } from './docs.js';
 import { notamBriefingText, notamDocument } from '../notam/describe.js';
 import { notamsForFlight, type NotamBriefing } from '../notam/flight.js';
 import { FaaNotamClient } from '../fetch/notam.js';
@@ -51,7 +55,7 @@ const USER_AGENT = process.env.HOLDSHORT_USER_AGENT ?? 'holdshort/0.1 (+https://
 
 function usage(): never {
   console.error(
-    'usage: holdshort fetch <ICAO...> [--memory] | holdshort nasr <dir> | holdshort ourairports <dir> [--country XX] | holdshort airport <id> | holdshort resolve|brief|notams|diff <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams] [--against <sha256>] | holdshort decode "<report>"',
+    'usage: holdshort fetch <ICAO...> [--memory] | holdshort nasr <dir> | holdshort ourairports <dir> [--country XX] | holdshort airport <id> | holdshort resolve|brief|notams|diff <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams] [--against <sha256>] | holdshort doc ingest|find|page|wb <pdf> ... | holdshort wb <spec.json> ... | holdshort decode "<report>"',
   );
   process.exit(2);
 }
@@ -286,6 +290,12 @@ switch (command) {
     break;
   case 'diff':
     await diffCommand(rest);
+    break;
+  case 'doc':
+    await docCommand(rest);
+    break;
+  case 'wb':
+    await wbCommand(rest);
     break;
   case 'decode':
     decodeCommand(rest);

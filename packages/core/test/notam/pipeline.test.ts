@@ -136,6 +136,12 @@ const ctx: FlightContext = {
   destination: 'CYKF',
   alternate: 'CYHM',
   route: [],
+  daylight: true,
+  aerodromes: [
+    { id: 'CYSN', role: 'departure', runways: ['01/19', '06/24', '11/29'] },
+    { id: 'CYKF', role: 'destination', runways: ['08/26', '14/32'] },
+    { id: 'CYHM', role: 'alternate', runways: ['06/24', '12/30'] },
+  ],
   times: [
     { id: 'CYSN', eta: '2026-09-14T15:00:00.000Z' },
     { id: 'CYKF', eta: '2026-09-14T15:31:30.000Z' },
@@ -302,9 +308,19 @@ describe('notamsForFlight', () => {
     const gps = nb.items.find((i) => i.decoded.id?.value.text === 'G3263/26')!;
     expect(gps.sites).toEqual(['CYHM', 'CYKF', 'CYSN']);
     expect(gps.rank).toBe('out-of-scope');
+    // A runway closure at the departure aerodrome is critical by rule, model or no model.
     const closure = nb.items.find((i) => i.decoded.id?.value.text === 'J5067/26')!;
-    expect(closure.rank).toBe('not-assessed');
+    expect(closure.rank).toBe('critical');
+    expect(closure.rule?.rule).toBe('runway.used-aerodrome');
     expect(closure.classification.inScope).toBe(true);
+    // A lighting outage is advisory by rule for a daylight flight, no model needed.
+    const papi = nb.items.find((i) => i.decoded.id?.value.text === 'J6192/26')!;
+    expect(papi.rank).toBe('advisory');
+    expect(papi.rule?.rule).toBe('lighting.daylight-flight');
+    // Whereas a taxiway closure needs judgement, and there is no model here.
+    const taxiway = nb.items.find((i) => i.decoded.id?.value.text === 'J5066/26')!;
+    expect(taxiway.rank).toBe('not-assessed');
+    expect(taxiway.rule).toBeNull();
     // Ranking puts in-scope items before out-of-scope, and counts add up.
     const ranks = nb.items.map((i) => i.rank);
     expect(ranks.indexOf('out-of-scope')).toBeGreaterThan(ranks.lastIndexOf('not-assessed'));
@@ -323,23 +339,31 @@ describe('notamsForFlight', () => {
       calls: [],
       async complete(req) {
         this.calls.push(req);
-        const cites = req.prompt.includes('RWY 11/29 CLSD') ? 'RWY 11/29 CLSD' : 'NOT IN THE NOTAM';
-        const answer = { ...goodAnswer, relevance: cites === 'RWY 11/29 CLSD' ? 'critical' : 'advisory', cited_span: cites };
+        const cites = req.prompt.includes('TWY D CLSD') ? 'TWY D CLSD' : 'NOT IN THE NOTAM';
+        const answer = { ...goodAnswer, relevance: cites === 'TWY D CLSD' ? 'critical' : 'advisory', cited_span: cites };
         return { json: answer, text: JSON.stringify(answer), model: req.model, provider: 'stub', usage: { input: 1, output: 1 } };
       },
     };
     const nb = await notamsForFlight({ store, navcanada: new NavCanadaClient(replayHttp(cfpsRoutes)), provider, model: 'stub-model', now: () => asOf }, resolved, 'C172');
     expect(nb.model).toBe('stub-model');
-    const inScope = nb.items.filter((i) => i.classification.inScope).length;
-    expect(provider.calls.length).toBe(inScope);
-    expect(nb.counts.critical).toBe(1);
-    expect(nb.counts.unverified).toBe(inScope - 1);
-    expect(nb.items[0]!.decoded.id?.value.text).toBe('J5067/26');
-    expect(nb.items[0]!.assessment?.citation).toBe('exact');
+    // The model is asked only about in-scope NOTAMs that no rule settles.
+    const inScope = nb.items.filter((i) => i.classification.inScope);
+    const byRule = inScope.filter((i) => i.rule);
+    const asked = inScope.length - byRule.length;
+    expect(provider.calls.length).toBe(asked);
+    expect(byRule.length).toBeGreaterThan(5);
+    expect(byRule.map((i) => i.decoded.id?.value.text)).toEqual(expect.arrayContaining(['J5067/26', 'J5069/26', 'J6230/26', 'D3745/26', 'J6015/26', 'G3032/26', 'J6192/26']));
+    // Rule-decided criticals plus the one the stub called critical with an exact citation.
+    expect(nb.counts.critical).toBe(byRule.filter((i) => i.rule!.relevance === 'critical').length + 1);
+    expect(nb.counts.unverified).toBe(asked - 1);
+    const taxiway = nb.items.find((i) => i.decoded.id?.value.text === 'J5066/26')!;
+    expect(taxiway.rank).toBe('critical');
+    expect(taxiway.assessment?.citation).toBe('exact');
+    expect(nb.items[0]!.rank).toBe('critical');
     expect(nb.items.filter((i) => i.rank === 'unverified').every((i) => i.assessment?.citation === 'none')).toBe(true);
     // Second run: everything served from the cache.
     const again = await notamsForFlight({ store, provider, model: 'stub-model', now: () => asOf }, resolved, 'C172');
-    expect(provider.calls.length).toBe(inScope);
+    expect(provider.calls.length).toBe(asked);
     expect(again.items.every((i) => !i.assessment || i.assessmentCached)).toBe(true);
   });
 
@@ -389,12 +413,22 @@ describe('scoreAssessments', () => {
       nb.items,
     );
     expect(score.total).toBe(3);
-    expect(score.missing).toBe(1);
-    expect(score.agreement).toBe(0.5);
-    expect(score.confusion.critical.advisory).toBe(1);
-    expect(score.perClass.advisory.recall).toBe(1);
-    expect(score.perClass.advisory.precision).toBe(0.5);
-    expect(score.categoryAgreement).toBe(0.5);
-    expect(score.disagreements.map((d) => d.notamId)).toEqual(['J5067/26', 'G3263/26']);
+    // G3263 is out of scope by schedule, so the model was never asked: filtered, not a miss.
+    expect(score.filtered).toBe(1);
+    expect(score.missing).toBe(0);
+    // J5067 is critical by rule (the stub was not asked); J5066 the stub called advisory.
+    expect(score.agreement).toBe(1);
+    expect(score.confusion.critical.critical).toBe(1);
+    expect(score.confusion.advisory.advisory).toBe(1);
+    expect(score.perClass.advisory.precision).toBe(1);
+    // Category agreement counts only model-assessed items.
+    expect(score.categoryAgreement).toBe(goodAnswer.category === 'taxiway' ? 1 : 0);
+    expect(score.disagreements).toEqual([]);
+
+    // The same labels against a stub that gets the taxiway wrong: the rule still carries the closure.
+    const wrong = await notamsForFlight({ store: await seededStore(), navcanada: new NavCanadaClient(replayHttp(cfpsRoutes)), provider: stub({ ...goodAnswer, relevance: 'irrelevant', cited_span: 'CLSD' }), model: 'm', now: () => new Date('2026-09-12T20:00Z') }, resolved, 'C172');
+    const s2 = scoreAssessments({ flight: 'demo-cysn-cykf', description: 'test', labels: [{ notamId: 'J5067/26', relevance: 'critical', category: 'runway', labelledBy: 'test', note: null }, { notamId: 'J5066/26', relevance: 'advisory', category: 'taxiway', labelledBy: 'test', note: null }] }, wrong.items);
+    expect(s2.agreement).toBe(0.5);
+    expect(s2.disagreements).toEqual([{ notamId: 'J5066/26', expected: 'advisory', actual: 'irrelevant' }]);
   });
 });

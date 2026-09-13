@@ -96,3 +96,13 @@ code { font-size: 0.8rem; background: #eee; padding: 0 0.25rem; border-radius: 3
   .finding .summary { grid-column: 1 / -1; }
   .detail { padding-left: 0; }
 }
+.wb { margin-top: 1.5rem; }
+.table-scroll { overflow-x: auto; }
+.wb-table { border-collapse: collapse; font-size: 0.9rem; margin: 0.4rem 0; }
+.wb-table th, .wb-table td { padding: 0.2rem 0.7rem; text-align: right; border-bottom: 1px solid var(--line); }
+.wb-table th:first-child, .wb-table td:first-child { text-align: left; }
+.wb-table .total td { font-weight: 600; }
+.wb-row { grid-template-columns: 5.5rem 1fr; }
+.crop { margin: 0.3rem 0; }
+.crop img { max-width: 100%; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
+.crop figcaption { font-size: 0.75rem; color: var(--muted); }

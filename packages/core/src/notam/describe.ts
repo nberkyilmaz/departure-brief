@@ -34,6 +34,8 @@ export interface NotamDocumentItem {
     readonly result: NotamAssessment;
   } | null;
   readonly assessmentError: string | null;
+  /** Settled by a deterministic rule; no model involved. */
+  readonly rule: { readonly relevance: string; readonly rule: string; readonly reason: string } | null;
 }
 
 export interface NotamDocument {
@@ -68,6 +70,7 @@ function toItem(r: RankedNotam): NotamDocumentItem {
       ? { model: r.assessment.model, promptVersion: r.assessment.promptVersion, citation: r.assessment.citation, cached: r.assessmentCached, result: r.assessment.assessment }
       : null,
     assessmentError: r.assessmentError,
+    rule: r.rule,
   };
 }
 
@@ -114,6 +117,7 @@ export function notamBriefingText(doc: NotamDocument): string {
       lines.push(`  → ${it.assessment.result.relevance} (${it.assessment.result.category}; ${it.assessment.result.affects.join(', ') || 'no phase'}): ${it.assessment.result.rationale}`);
       lines.push(`  cites "${it.assessment.result.cited_span}" — ${it.assessment.citation === 'none' ? 'NOT FOUND in NOTAM' : 'verified'}${it.assessment.cached ? ' (cached)' : ''}`);
     }
+    if (it.rule) lines.push(`  → ${it.rule.relevance} by rule ${it.rule.rule}: ${it.rule.reason}`);
     if (it.assessmentError) lines.push(`  ! ${it.assessmentError}`);
     lines.push(`  ${it.classification.reasons.join('; ')}`);
     lines.push(`  ${(it.text ?? it.raw).replace(/\s+/g, ' ')}`);

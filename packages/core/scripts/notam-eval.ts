@@ -48,7 +48,7 @@ const replay: HttpClient = {
 };
 
 const store = new MemoryStore();
-await store.putAirports(readOurAirportsDirectory(join(fixtures, 'ourairports', '2026-09-07'), { snapshot: '2026-09-07' }));
+await store.putAirports(readOurAirportsDirectory(join(fixtures, 'fetch', 'ourairports', '2026-09-07'), { snapshot: '2026-09-07' }));
 const awc = new AwcClient(replay);
 for (const s of ['CYSN', 'CYKF', 'CYHM']) {
   const m = await awc.metars([s]);
@@ -67,7 +67,7 @@ const score = scoreAssessments(set, nb.items);
 console.log(notamBriefingText(notamDocument(nb)));
 console.log('');
 console.log(`model ${llm.model} (${llm.description}), prompt v${PROMPT_VERSION}${record ? `, recorded to ${fixtureDir}` : ''}`);
-console.log(`agreement ${(score.agreement * 100).toFixed(1)}% on ${score.total - score.missing} assessed of ${score.total} labelled (${score.missing} not assessed / unverified)`);
+console.log(`agreement ${(score.agreement * 100).toFixed(1)}% on ${score.total - score.missing - score.filtered} assessed of ${score.total} labelled (${score.filtered} filtered out of scope deterministically, ${score.missing} unverified or failed)`);
 for (const [cls, s] of Object.entries(score.perClass)) console.log(`  ${cls.padEnd(10)} precision ${(s.precision * 100).toFixed(0)}%  recall ${(s.recall * 100).toFixed(0)}%  support ${s.support}`);
 console.log(`  category agreement ${score.categoryAgreement === null ? 'n/a' : (score.categoryAgreement * 100).toFixed(0) + '%'}`);
 for (const d of score.disagreements) console.log(`  ${d.notamId}: expected ${d.expected}, got ${d.actual ?? 'nothing'}`);

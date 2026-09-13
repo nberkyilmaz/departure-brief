@@ -11,6 +11,55 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
 
 ---
 
+## Where we are (updated 2026-09-13, end of session 10)
+
+**Current step: 8 — airspace transit (M4b).** Not started; needs an
+airspace data source for Canada.
+
+**Done:** steps 1-7 and 9. Decoders, fetch layer, route and time
+resolution, rules engine, briefings + API + web, NOTAM relevance with the
+local model running and an eval gate that passes, the briefing diff, and
+aircraft document ingestion (the owner's POH read, extracted, verified and
+computed).
+
+**Waiting on the owner:**
+1. **Your aircraft's empty weight and moment**, from its own
+   weight-and-balance record. Until then the web panel and CLI use the
+   handbook's *sample airplane* figures and say so in both places.
+2. **Confirm the figures in the review queue** — `aircraft/c172.wb.json`,
+   the `review` array. The extraction verified 6 figures and sent 22 for
+   review; the loading computation refuses to run until the envelope is
+   complete, which is the intended behaviour, not a bug. Each entry names
+   the page and what the model proposed.
+3. **The four open questions in the NOTAM labelled set**
+   (`packages/core/test/fixtures/notam/labelled/…json`, `openQuestions`) —
+   chiefly whether CYSN's runway 06/24 is a practical alternative for a
+   C172 once 11/29 is closed, which decides whether two NOTAMs are critical
+   or advisory.
+4. **FAA NOTAM API credentials**, if US NOTAMs matter to you. Canadian ones
+   work without a key.
+5. **A look at the web app** — nobody has eyeballed it yet.
+
+**Next steps, in order:**
+1. Step 8, airspace transit: PostGIS polygons with floor and ceiling, route
+   sampled every half nautical mile, point-in-polygon by altitude band,
+   terrain AGL from USGS. Upgrades the VFR-minima check from airport-only
+   to per-segment. The blocker is Canadian airspace geometry — NAV CANADA's
+   Designated Airspace Handbook is text, not shapes.
+2. Step 10, forecast verification (M9): did the TAF verify against the
+   METAR at your ETA, accumulated over time.
+3. Step 11, polish and demo.
+
+**Known open engineering items:**
+- The NOTAM relevance model over-calls "critical" on obstacles and taxiway
+  closures (4 of 28 on the demo flight). Safe direction, but noisy; the fix
+  is either more deterministic rules or a better prompt.
+- Ollama's CUDA runner crashes on this laptop (its bundled CUDA build is
+  newer than the 546.92 driver). Start the server on Vulkan:
+  `OLLAMA_VULKAN=1 CUDA_VISIBLE_DEVICES=-1 ollama serve`.
+
+---
+
 ## Session 1 — 2026-09-07 — Plan, METAR decoder (step 1, part 1)
 
 ### Starting state
@@ -650,3 +699,150 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
 - Open, unchanged: install Ollama and record fixtures (onboarding §5a);
   owner review of the provisional labelled set; the C172 POH (blocks step
   7); airspace data (step 8); a visual pass over the web app.
+
+---
+
+## Session 10 — 2026-09-12/13 — The model turned on, the labels reviewed, the POH read (step 7 / M6b)
+
+The owner asked for three things at once: install and run the local model,
+review the provisional NOTAM labels properly, and ingest the C172 POH they
+had just dropped into the repo root.
+
+### The model
+
+115. Installed Ollama 0.34 (winget) and pulled `qwen2.5:7b`. The first
+     request died with "CUDA error: device kernel image is invalid" — the
+     bundled CUDA build is newer than this laptop's 546.92 driver. Ran the
+     server on its Vulkan backend instead (`OLLAMA_VULKAN=1
+     CUDA_VISIBLE_DEVICES=-1 ollama serve`), which puts the whole 7B model
+     on the RTX 3060 and answers in a few seconds. Recorded in
+     `.env.example` and onboarding, because the next person will hit it.
+116. First eval run: **61.5 % agreement**, and worse than that number
+     suggests — precision and recall on `critical` were both **0 %**. The
+     model called the departure runway closure *irrelevant*. Two prompt
+     revisions followed (v2 added the aerodromes and their roles plus the
+     deterministic facts; v3 reordered the schema so the model explains and
+     quotes before it commits, added worked examples, and asked for a short
+     citation), taking it to 64.3 % with critical recall at 100 %.
+117. **The decision that actually fixed it.** A runway closure at an
+     aerodrome the flight uses is not a judgement call, and no ranking
+     should depend on a 7B model getting it right. Added
+     `src/notam/rules.ts`: relevance settled from the ICAO Q code and the
+     flight wherever there is one right answer — runway, declared distance
+     and threshold changes at an aerodrome in use are critical; ILS and
+     instrument procedures are irrelevant to a VFR flight; trigger NOTAMs
+     and FIR-wide entry requirements are irrelevant; ARFF category is not a
+     private flight's concern. The model is left the cases that need
+     reading: obstacles, taxiways, markings, services.
+118. The remaining error was over-calling critical on ten lighting and
+     obstacle items. Lighting out by day is another thing that is not a
+     judgement call, so `daylight` (civil twilight at each point's own
+     position and ETA) joined the flight context, and a lighting rule with
+     it.
+119. **Final: 85.7 % agreement** on 28 assessed of 31 labelled; critical
+     recall 100 %, irrelevant precision and recall 100 %, category
+     agreement 100 %, zero unverified citations. The four remaining
+     disagreements are all "advisory called critical" — over-warning, the
+     safe direction. The eval gate in `test/notam/eval.test.ts` is live and
+     passing against recorded fixtures.
+120. The scorer had been counting deterministically out-of-scope NOTAMs as
+     model misses. Added `filtered` to `EvalScore` and excluded them, so
+     the model is scored on what it was actually asked.
+
+### The labels
+
+121. Put the 31 provisional labels through a second panel — instructor and
+     examiner, regulatory, flight service briefer — each asked to *refute*
+     every label rather than to agree. **0 of 31 refuted**, none needing
+     adjudication. The file now records the review and carries four
+     `openQuestions` for the owner, the sharpest being whether CYSN's 06/24
+     is a practical alternative for a C172 once 11/29 is closed.
+
+### The POH
+
+122. `C172MPOH.pdf`: 148 scanned pages, no text layer. The first render came
+     out entirely blank, and silently — pdf.js decodes JBIG2 with a
+     WebAssembly module and has to be told where it is (`wasmUrl`).
+123. OCR settings, measured on the sample loading page by how many of 18 key
+     numbers came back right: telling Tesseract the true resolution took it
+     from 4/18 to **12/18**, worth more than render scale or segmentation
+     mode. Pages printed sideways (about a fifth of the handbook) are
+     retried at 90° and 270° and the best reading kept, with boxes mapped
+     back to the scanned page so a highlight lands on the right ink.
+     Whole handbook: 148 pages read, mean word confidence 79, 30 sideways.
+124. **Quotes instead of token ids.** The extraction first asked the model
+     for the ids of the words each figure came from; the 3B vision model
+     cited "4 provides checklist and amplified procedures" for the
+     demonstrated crosswind. Switched to quoting the line, which a small
+     model can do, and made the locator do the hard part: match a quote to
+     the printed line even when the model reads the image cleanly and the
+     scan says "Aff:" for "Aft:", follow a sentence across the lines it
+     wrapped onto, and require an exact match for anything carrying a digit
+     so that "2400" can never stand in for "2300". Verified figures went
+     1 to 5 to 6.
+125. Added the check that earns its keep: the quoted line must carry the
+     words naming the field and sit under the right category heading. It
+     immediately caught the model reporting the *utility* 2,000 lb takeoff
+     limit as the normal-category one, and reporting 340 lb as the
+     demonstrated crosswind from the pilot-and-front-passenger row.
+126. **Measured** (`test/docs/extract.test.ts`): 28 figures proposed, 6
+     verified, **all 6 correct** against a hand transcription of the same
+     pages; 22 sent to review. Precision is a hard gate and recall is only
+     reported — a missed figure is safe in a way an invented one is not.
+127. `src/wb/compute.ts` reproduces the POH's own worked example exactly,
+     which is how a scan error surfaced: the page's OCR reads the front-seat
+     moment as 12.8, but 340 lb at the 37 in arm is 12,580 lb-in, and only
+     12.6 makes the printed total of 102.9 add up. Rows are rounded before
+     summing, as the POH does.
+
+### The review, and what it found
+
+128. Ran an adversarial code review over the new code — five dimensions,
+     each finding then attacked by three skeptics with different lenses.
+     **The verification phase died on a session limit**: 36 of 38 agents
+     failed, so the findings arrived unverified. Checked all eleven by hand
+     against the code instead. Every one was real. The two that mattered:
+129. **Word ids collided across runs.** Ids came from a run-local counter
+     advanced in page order, so `doc wb --pages 90` followed by
+     `doc wb --pages 88` handed both pages ids starting at 1, and
+     `tokensById` — a document-wide map — let the later page overwrite the
+     earlier one. A figure quoted on page 88 would then be checked against
+     page 90's words, and the citation stored with it would point at the
+     wrong ink. Ids are now `page * 100_000 + index`, identical whatever a
+     run touches, and `alignWbExtraction` looks words up on the page under
+     test only. Reader version bumped to 2 and the handbook re-read.
+130. **Weight typed for a missing station vanished.** The web panel asked
+     for pilot, rear, baggage and fuel from a fixed list, while the spec
+     only carries stations whose arm survived verification — so 340 lb of
+     rear passengers could be typed, silently not counted, and an
+     over-gross aeroplane could come back WITHIN LIMITS. The panel now
+     builds its form from `spec.stations`, and `computeLoading` refuses a
+     load at a station it has no arm for rather than dropping it.
+131. Also fixed: a full ingest run never reused cached pages, and its first
+     checkpoint erased the previous run's progress (`keep` was hard-wired
+     false when no page subset was given, and the checkpoint padded
+     unreached pages with blanks); one page throwing took the whole
+     document down; a page that recognised zero words was cached as "read"
+     forever (pages now carry `read | blank | failed | pending`);
+     `ocr.json` was written non-atomically and parsed unguarded; the CLI
+     treated a partially ingested cache as complete; the crop endpoint read
+     and decoded synchronously with no bounds and no error handling; the
+     "these are the sample airplane's figures" warning vanished as soon as
+     the empty weight was edited, leaving the sample *moment* presented as
+     the owner's own; and the weight-and-balance result carried no "not an
+     official computation" line.
+132. One more, found while testing the fix for another: the sloped forward
+     CG limit is held flat above its last stated point, which is correct for
+     "35.0 inches at 1950 lbs. or less" and dangerous when only the light
+     end was extracted — a 2,300 lb loading judged against the 1,950 lb
+     limit would read as within limits. `computeLoading` now refuses a
+     weight the stated line does not reach, unless the aeroplane is already
+     over gross, in which case it says which weight the limit belongs to.
+
+### State at end of session 10
+
+- 619 tests across workspaces, typecheck clean, web builds.
+- The relevance model runs locally and its eval gate passes at 85.7 %.
+- The owner's POH is read end to end: 6 figures verified, 22 awaiting the
+  owner's review, and the computation refusing to run until the envelope is
+  complete — which is the designed behaviour, not a gap.

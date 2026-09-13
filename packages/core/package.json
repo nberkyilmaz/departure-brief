@@ -14,7 +14,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "pg": "^8.23.0"
+    "@napi-rs/canvas": "^1.0.9",
+    "pdfjs-dist": "^6.3.289",
+    "pg": "^8.23.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

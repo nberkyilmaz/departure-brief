@@ -476,13 +476,91 @@ a wrong answer.
 - Eval: a hand-labelled set in `test/fixtures/notam/labelled/`, a scorer, and
   a CI gate that fails on regression past a threshold.
 
-### Step 7 — Aircraft document ingestion (M6b) — **next**
+### Step 7 — Aircraft document ingestion (M6b) — **done 2026-09-12/13**
 
-OCR word boxes → LLM extraction with token-id citations → alignment check →
-review queue for low-confidence fields. Weight-and-balance from the POH is the
-demo. Start with printed sources; measure and report the handwritten split.
+The owner supplied the handbook: `C172MPOH.pdf`, a 1976 Cessna 172M POH
+scanned on an office copier — 148 page images, no text layer, CCITT and
+JBIG2 encoded, about a fifth of the pages printed sideways.
 
-### Step 8 — Airspace transit (M4b)
+**Reading it.** `pdfjs-dist` renders (its JBIG2 decoder needs `wasmUrl`
+pointed at the package's own `wasm/` directory, or every page comes out
+blank and silent), `@napi-rs/canvas` provides the pixels, `tesseract.js`
+does the OCR. All three are prebuilt; there is still no native compile step
+and the decoders still have no runtime dependency. Results live under
+`data/docs/<sha256>/`, content-addressed like everything else.
+
+Two things mattered more than any other setting:
+
+- **Telling Tesseract the real resolution.** A rendered PNG carries none,
+  so it assumes 70 dpi and mis-sizes everything. Declaring the true figure
+  took a page of the sample loading problem from 4 of 18 key numbers read
+  correctly to 12 of 18. Page segmentation stays automatic.
+- **Trying the page sideways.** A page that reads poorly upright is
+  recognised again at 90° and 270° and the best reading kept, scored by
+  mean confidence weighted by word count so a handful of confident words
+  cannot beat a full page. Boxes are always reported in the coordinates of
+  the page as scanned, so a highlight lands on the right ink either way.
+
+Across the whole handbook: 148 pages read, mean word confidence 79, 30
+pages read sideways.
+
+**Extracting from it.** `src/docs/extract/wb.ts` asks a local vision model
+(qwen2.5vl:3b) for the weight-and-balance figures of one page at a time,
+and believes nothing until three checks pass:
+
+1. the line the model quotes is found among that page's words,
+2. the figure appears in the page's own words on that line,
+3. that line carries the words naming the field, and sits under the right
+   category heading — the 172M prints its normal and utility limits in the
+   same layout, and mixing them up would put a 2,000 lb limit on a
+   2,300 lb aeroplane.
+
+Anything failing a check goes to a review queue with its region of the
+page, and is never used in a computation.
+
+**Quotes, not token ids.** The first version asked the model for the ids of
+the words each figure came from. A 3B model cited "4 provides checklist and
+amplified procedures" for the demonstrated crosswind. Quoting is something
+a small model can actually do, and the verification is no weaker: a quote
+that is not on the page is not found, exactly as a wrong id is not backed.
+The locator then does the hard part deterministically — it matches a quote
+to the printed line even when the model reads the image cleanly and the
+scan's OCR says "Aff:" for "Aft:", and it follows a sentence across the
+lines it wrapped onto. Words carrying digits must match exactly, so "2400"
+can never stand in for "2300".
+
+**Measured, not assumed** (`test/docs/extract.test.ts`): of 28 figures the
+model proposed across five pages, **6 were verified and all 6 are correct**
+against a hand transcription of the same pages; 22 went to review. The
+precision gate is hard — a verified figure must be right — while recall is
+reported and not gated, because a missed figure is safe in a way an
+invented one is not. The two failure modes the checks caught are worth
+naming: the model quoting a line that is on a different page of the
+handbook, and reading a utility-category limit as the normal-category one.
+
+**Computing with it.** `src/wb/compute.ts` sums the loading, finds the
+centre of gravity and judges it against the envelope, citing every limit to
+the page it came from. It reproduces the POH's own worked example to the
+printed figures — which is how a transcription error surfaced: the scan
+reads the pilot-and-front-passenger moment as 12.8, but 340 lb at the 37 in
+arm is 12,580 lb-in, and only 12.6 makes the page's own total of 102.9 add
+up. Rows are rounded before summing, as the POH does.
+
+It refuses rather than guesses. No envelope, a load at a station the data
+has no arm for, a figure that is not a number, or a weight beyond the part
+of the sloped forward limit that was actually extracted — each throws with
+what is missing. That last one is the sharpest: `forwardLimitAt` holds the
+last stated point flat, which is right for "35.0 inches at 1950 lbs. or
+less" and dangerously wrong if the heavy end of the line was never read, so
+a 2,300 lb loading would be judged against the limit that applies at
+1,950 lb and a nose-heavy aeroplane would come back within limits.
+
+**Surfaces.** `holdshort doc ingest|find|page|wb`, `holdshort wb`,
+`GET`/`POST /api/aircraft/:type/wb`, `GET /api/documents/:sha/pages/:n/crop`
+(the cited region, boxed), and a web panel whose loading form is built from
+the stations the data actually carries.
+
+### Step 8 — Airspace transit (M4b) — **next**
 
 PostGIS polygons with floor/ceiling; route sampled every 0.5 NM;
 point-in-polygon by altitude band; terrain AGL from USGS; civil twilight for

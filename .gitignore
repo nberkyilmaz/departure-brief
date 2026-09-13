@@ -11,6 +11,9 @@ coverage/
 # there is no reason to commit fetched snapshots — refetch instead.
 cache/
 data/raw/
+# Rendered pages and OCR of the owner's own documents (the POH); the PDF itself is not committed either.
+data/docs/
+*.pdf
 
 .DS_Store
 Thumbs.db

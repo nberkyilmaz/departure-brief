@@ -3,6 +3,7 @@ import { BriefingView } from './BriefingView.js';
 import { DiffPanel } from './DiffPanel.js';
 import { FlightForm, defaultPlan } from './FlightForm.js';
 import { ProfileForm, defaultAircraft, defaultProfile } from './ProfileForm.js';
+import { WbPanel } from './WbPanel.js';
 import type { AircraftInput, BriefingDiff, FlightPlanInput, ProfileInput, StoredBriefing } from './types.js';
 
 export function App() {
@@ -39,7 +40,7 @@ export function App() {
   return (
     <>
       <div className="banner" role="alert">
-        <strong>Not for operational use.</strong> Hold Short is a study and planning aid, not an official weather briefing.
+        <strong>Not for operational use.</strong> Hold Short is a study and planning aid, not an official weather briefing or weight-and-balance computation.
         Obtain an official briefing from an approved source before any flight.
       </div>
       <main>
@@ -59,6 +60,7 @@ export function App() {
         </section>
         {diff && <DiffPanel d={diff} />}
         {briefing && <BriefingView stored={briefing} />}
+        <WbPanel aircraftType={aircraft.type} />
       </main>
     </>
   );

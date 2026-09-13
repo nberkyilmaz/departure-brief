@@ -1,0 +1,14 @@
+export type { DocumentOcr, PageOcr, TextLine, WordBox } from './types.js';
+export { DOC_READER_VERSION, PAGE_ID_STRIDE } from './types.js';
+export { groupLines } from './lines.js';
+export { documentDir, ingestPdf, isPending, pageImagePath, readCachedDocument, sha256Of } from './reader/ingest.js';
+export type { IngestOptions } from './reader/ingest.js';
+export { rotatePng, unrotateBox } from './reader/ocr.js';
+export type { Rotation } from './reader/ocr.js';
+export { alignNumbers, alignText, locateText, normaliseOcr, numbersIn, resolveCitation, tokensById } from './align.js';
+export type { Alignment, AlignMatch, Located } from './align.js';
+export { alignWbExtraction, buildWbRequest, pageLines, validateWbExtraction, WB_FIELDS, WB_PROMPT_VERSION, WB_SCHEMA, wbContextHash } from './extract/wb.js';
+export type { WbFieldSpec } from './extract/wb.js';
+export type { CitedNumber, CitedPoint, ExtractedField, WbFieldName, WbPageExtraction } from './extract/wb.js';
+export { cropPageImage, downscalePng } from './crop.js';
+export type { Box } from './crop.js';

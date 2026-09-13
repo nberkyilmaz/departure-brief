@@ -33,9 +33,10 @@ Early. Building in this order:
 | M3 | Route and time resolution | **done** — ETA per waypoint, TAF period selection with overlays |
 | M4 | Rules engine — personal minimums, CARs 602.114/115, FAR 91.155 | **done** — airport-only; every finding cited |
 | M5 | Briefing assembly and UI | **done** — API + web app; briefings immutable and content-addressed |
-| M6 | NOTAM relevance pipeline | **done** — decoder, filter, dedupe, ranking with citation checks; needs a local model |
-| M7 | Evaluation harness | **done** — labelled set + scorer; gate skips until the model is recorded |
+| M6 | NOTAM relevance pipeline | **done** — decoder, filter, dedupe, deterministic rules where there is one right answer, model for the rest |
+| M7 | Evaluation harness | **done** — 85.7 % agreement with a reviewed labelled set on a local 7B model; runway closures never missed |
 | M8 | Briefing diff | **done** — diffs the verdict, not the text; a value that moves without crossing a limit is not news |
+| M6b | Aircraft documents — POH weight and balance | **done** — OCR of a 148-page scan, extraction checked against the page, review queue; every limit cited to the ink it came from |
 
 Airspace transit analysis, nav logs and forecast verification come after the
 above works end to end.
@@ -86,19 +87,68 @@ npm run holdshort -- resolve flights/demo-cysn-cykf.json --fetch   # conditions 
 npm run holdshort -- brief flights/demo-cysn-cykf.json --fetch     # go / marginal / no-go per waypoint against profiles/default.json
 npm run holdshort -- notams flights/demo-cysn-cykf.json --fetch    # every NOTAM for the flight, classified and (with a model) ranked
 npm run holdshort -- diff flights/demo-cysn-cykf.json --fetch      # brief again and say what changed since last time
+npm run holdshort -- doc ingest C172MPOH.pdf                       # OCR a scanned POH into word boxes (cached by content hash)
+npm run holdshort -- doc find C172MPOH.pdf "demonstrated crosswind" # search the OCR text, with page numbers
+npm run holdshort -- wb aircraft/c172.wb.json --empty 1454 --empty-moment 57.6 --front 340 --fuel 38   # a loading, every limit cited to its POH page
 npm run holdshort -- decode "METAR KJFK 071151Z 34007KT 10SM CLR 19/11 A3015"
 
-# NOTAM relevance ranking is the only part that uses a model, and it is optional.
-# Install Ollama, then:
-ollama pull qwen2.5:7b
+# Two things use a model, both optional and both local: NOTAM relevance
+# ranking, and reading figures out of a scanned POH. Install Ollama, then:
+ollama pull qwen2.5:7b                                # text: NOTAM relevance
+ollama pull qwen2.5vl:3b                              # vision: POH extraction (sees the page image)
 HOLDSHORT_LLM=ollama npm run eval:notam -- --record   # rank, record fixtures, score against the labelled set
+HOLDSHORT_LLM=ollama OLLAMA_MODEL=qwen2.5vl:3b npm run holdshort -- doc wb C172MPOH.pdf --pages 88,90 --type C172
 
 npm run build -w apps/web && npm start   # the web app and API on http://127.0.0.1:3000
 npm run dev:api & npm run dev:web        # development: Vite on :5173 proxying /api to :3000
 ```
 
-The repo is an npm workspace: `packages/core` (the pipeline; no runtime
-dependency but `pg`), `apps/api` (Fastify), `apps/web` (Vite + React).
+The repo is an npm workspace: `packages/core` (the pipeline; runtime
+dependencies are `pg` and, for reading scanned documents, `pdfjs-dist`,
+`@napi-rs/canvas` and `tesseract.js` — all prebuilt, no native compile),
+`apps/api` (Fastify), `apps/web` (Vite + React). The decoders still depend
+on nothing.
+
+## How much of this uses a model, and how well
+
+Two things do, both optional and both local. Everything else — the
+decoders, the rules engine, the weight-and-balance arithmetic — is
+deterministic, and the numbers below are measured by tests in the repo, not
+estimated.
+
+**NOTAM relevance** (`npm run eval:notam`), qwen2.5:7b against a labelled
+set of 31 real NOTAMs for the demo flight, itself panel-labelled and then
+adversarially reviewed:
+
+| | |
+| --- | --- |
+| agreement | 85.7 % of the 28 the model was asked about |
+| critical recall | 100 % — no NOTAM that matters was missed |
+| irrelevant precision / recall | 100 % / 100 % |
+| citations that could not be verified | 0 |
+
+The three the model was never asked about were ruled out of scope by
+schedule; a further nine were settled by deterministic rules from the Q
+code, because a closed runway at your departure aerodrome should not depend
+on a 7B model. The four remaining disagreements are all *advisory* items
+called *critical* — over-warning, which is the safe direction.
+
+**POH extraction** (`npm test`, `test/docs/extract.test.ts`), qwen2.5vl:3b
+reading a 1976 handbook scanned on an office copier:
+
+| | |
+| --- | --- |
+| figures proposed | 28 |
+| verified against the page and used | 6 |
+| of those, correct | 6 of 6 |
+| sent to the review queue | 22 |
+
+Precision is a hard gate: a figure the pipeline accepts must be the figure
+the page prints, because it goes straight into a weight-and-balance sum.
+Recall is reported and deliberately not gated — a figure the model misses
+waits for you in the review queue, which is safe in a way an invented one
+is not. The checks caught the model quoting a line from a different page,
+and reading the utility-category weight limit as the normal-category one.
 
 ## Data sources
 

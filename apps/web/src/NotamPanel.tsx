@@ -52,6 +52,11 @@ function Item({ n }: { n: NotamItem }) {
               </small>
             </p>
           )}
+          {n.rule && (
+            <p className="model">
+              <b>{n.rule.relevance}</b> by rule — {n.rule.reason} <small>(no model involved)</small>
+            </p>
+          )}
           {n.assessmentError && <p className="bad">{n.assessmentError}</p>}
           <p className="reasons">
             {n.classification.reasons.join(' · ')}

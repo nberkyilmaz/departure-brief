@@ -1,8 +1,12 @@
 import fastifyStatic from '@fastify/static';
 import {
   assembleBriefing,
+  computeLoading,
+  cropPageImage,
   diffBriefings,
+  IncompleteSpecError,
   ingestStation,
+  pageImagePath,
   notamsForFlight,
   parseAircraftLimits,
   parseFlightPlan,
@@ -11,11 +15,14 @@ import {
   UnknownWaypointError,
   type AwcClient,
   type ConfiguredLLM,
+  type Loading,
   type NavCanadaClient,
   type Store,
+  type WeightBalanceSpec,
 } from '@holdshort/core';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { existsSync, readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 export interface ServerDeps {
@@ -27,6 +34,10 @@ export interface ServerDeps {
   readonly llm?: ConfiguredLLM | null;
   /** Directory of the built web app to serve at `/`; skipped when absent. */
   readonly staticDir?: string | null;
+  /** Where `<type>.wb.json` weight-and-balance specs live (default `aircraft`). */
+  readonly aircraftDir?: string;
+  /** The document cache written by `holdshort doc ingest` (default `data/docs`); page crops are served from it. */
+  readonly docCacheDir?: string;
   readonly logger?: boolean;
 }
 
@@ -136,6 +147,69 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
     const limit = req.query.limit ? Number(req.query.limit) : 20;
     return store.listBriefings(req.query.flightKey, Number.isFinite(limit) ? limit : 20);
   });
+
+  const aircraftDir = deps.aircraftDir ?? 'aircraft';
+  const docCacheDir = deps.docCacheDir ?? 'data/docs';
+  /** Everything but letters, digits and a dash is dropped, so the type can never walk out of the directory. */
+  const specPath = (type: string) => {
+    const safe = type.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    return safe.length > 0 ? join(aircraftDir, `${safe}.wb.json`) : null;
+  };
+
+  /** The aircraft type's weight-and-balance data as extracted from its POH, every figure with its page. */
+  app.get<{ Params: { type: string } }>('/api/aircraft/:type/wb', async (req, reply) => {
+    const p = specPath(req.params.type);
+    if (!p || !existsSync(p)) return reply.code(404).send({ error: `no weight-and-balance data for ${req.params.type}; run holdshort doc wb <poh.pdf> --type ${req.params.type}` });
+    return JSON.parse(readFileSync(p, 'utf8')) as WeightBalanceSpec;
+  });
+
+  /** A loading against those limits. Pure computation; nothing is stored. */
+  app.post<{ Params: { type: string }; Body: Partial<Loading> }>('/api/aircraft/:type/wb', async (req, reply) => {
+    const p = specPath(req.params.type);
+    if (!p || !existsSync(p)) return reply.code(404).send({ error: `no weight-and-balance data for ${req.params.type}` });
+    const spec = JSON.parse(readFileSync(p, 'utf8')) as WeightBalanceSpec;
+    const b = req.body ?? {};
+    if (!Number.isFinite(b.emptyWeightLb) || !(Number(b.emptyWeightLb) > 0) || !Number.isFinite(b.emptyMomentPer1000)) {
+      return reply.code(400).send({ error: '"emptyWeightLb" and "emptyMomentPer1000" are required and must be real numbers, from the aircraft W&B record' });
+    }
+    const loads = { ...(b.stations ?? {}), ...(b.fuelGal ?? {}) };
+    const bad = Object.entries(loads).filter(([, v]) => !Number.isFinite(v) || Number(v) < 0);
+    if (bad.length > 0) return reply.code(400).send({ error: `these loads must be numbers of zero or more: ${bad.map(([k]) => k).join(', ')}` });
+    const loading: Loading = {
+      emptyWeightLb: Number(b.emptyWeightLb),
+      emptyMomentPer1000: Number(b.emptyMomentPer1000),
+      stations: b.stations ?? {},
+      fuelGal: b.fuelGal ?? {},
+      category: b.category === 'utility' ? 'utility' : 'normal',
+    };
+    try {
+      return computeLoading(spec, loading);
+    } catch (e) {
+      if (e instanceof IncompleteSpecError) return reply.code(422).send({ error: e.message, review: spec.review });
+      throw e;
+    }
+  });
+
+  /** The cited region of a POH page, boxed, so a reader can check a figure against the ink. */
+  app.get<{ Params: { sha256: string; page: string }; Querystring: { x?: string; y?: string; w?: string; h?: string } }>(
+    '/api/documents/:sha256/pages/:page/crop',
+    async (req, reply) => {
+      if (!/^[0-9a-f]{64}$/.test(req.params.sha256)) return reply.code(400).send({ error: 'bad document id' });
+      const page = Number(req.params.page);
+      const img = pageImagePath(docCacheDir, req.params.sha256, page);
+      if (!Number.isInteger(page) || !existsSync(img)) return reply.code(404).send({ error: 'no such page image; run holdshort doc ingest' });
+      const box = { x: Number(req.query.x), y: Number(req.query.y), w: Number(req.query.w), h: Number(req.query.h) };
+      if (![box.x, box.y, box.w, box.h].every(Number.isFinite)) return reply.code(400).send({ error: 'x, y, w, h are required' });
+      if (box.w <= 0 || box.h <= 0 || box.w > 20_000 || box.h > 20_000 || box.x < 0 || box.y < 0) return reply.code(400).send({ error: 'x, y, w, h must describe a region of the page' });
+      try {
+        const png = await cropPageImage(await readFile(img), box);
+        // Page images are content-addressed, so a crop of one never changes.
+        return reply.type('image/png').header('cache-control', 'public, max-age=31536000, immutable').send(png);
+      } catch (e) {
+        return reply.code(500).send({ error: `could not crop that page: ${(e as Error).message}` });
+      }
+    },
+  );
 
   const staticDir = deps.staticDir ?? null;
   if (staticDir && existsSync(join(staticDir, 'index.html'))) {

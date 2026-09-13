@@ -207,11 +207,14 @@ describe('POST /api/briefings with NOTAMs', () => {
     const res = await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan: caPlan, profile, asOf: '2026-09-12T20:00:00Z' } });
     const b = res.json() as StoredBriefing;
     expect(b.document.notams?.model).toBe('stub-model');
+    // The departure runway closure is critical by rule; the model is not consulted about it.
     const closure = b.document.notams!.items.find((i) => i.id === 'J5067/26')!;
-    expect(closure.rank).toBe('advisory');
-    expect(closure.assessment?.citation).toBe('exact');
+    expect(closure.rank).toBe('critical');
+    expect(closure.rule?.rule).toBe('runway.used-aerodrome');
+    expect(closure.assessment).toBeNull();
+    // Everything the stub was asked about it cited badly, so those rank unverified.
     expect(b.document.notams!.counts.unverified).toBeGreaterThan(0);
-    expect(b.document.notams!.items[0]!.rank).toBe('advisory');
+    expect(b.document.notams!.items[0]!.rank).toBe('critical');
 
     const without = await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan: caPlan, profile, asOf: '2026-09-12T20:00:00Z', notams: false } });
     expect((without.json() as StoredBriefing).document.notams).toBeNull();

@@ -1,0 +1,655 @@
+{
+  "key": "d3b022d07fc156d22789db5249029d3a0cc8cf696243c3b256102c160b14581b",
+  "request": {
+    "model": "qwen2.5vl:3b",
+    "system": "You read weight-and-balance figures off one page of an aircraft Pilot's Operating Handbook. You are given the page as OCR text lines, and usually the page image as well.\n\nFor every figure you report, quote the line you read it from, copied from the OCR lines exactly as they appear — including their spelling mistakes. The quote is checked against the page: a figure whose quote is not on the page, or whose number is not inside the quote, is thrown away.\n\nRules:\n- Report only figures printed on THIS page. Any field the page does not state is null. Never fill a gap from what you know about the aircraft type.\n- The quote must be a run of words from ONE line, long enough to contain both the number and the words that name it. Do not join lines, do not fix the OCR's spelling, do not paraphrase.\n- Report the number exactly as printed, in the page's units (lb, inches aft of datum, US gallons, knots). Where the page prints moment/1000, report moment/1000.\n- Many POHs print the same limits twice, once under \"NORMAL CATEGORY\" and once under \"UTILITY CATEGORY\". Put each figure in the field for the heading it appears under, and do not report a utility figure as a normal one.\n- Centre of gravity: the forward limit is a sloped line given as two points (\"35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.\") — report both points, each with its weight and its arm, quoting the line it came from. The aft limit is a single arm at all weights.\n- A worked example (\"SAMPLE LOADING PROBLEM\") states the sample airplane's own weights, which are not limits. Report its empty weight and empty moment in the sample fields, and take nothing else from it.\n- pageSummary: one line saying what this page is.",
+    "prompt": "Document: C172MPOH.pdf, page 17 of 148.\n\nOCR lines:\nSECTION 2 CESSNA\nLIMITATIONS MODEL 17281\nPOWER PLANT INSTRUMENT MARKINGS\nPower plant instrument markings and their color code significance are\nshown in figure 2-3.\nRED LINE GREEN ARC | YELLOW ARC RED LINE\nINSTRUMENT MINIMUM NORMAL CAUTION MAXIMUR\nLIMIT OPERATING RANGE LIMST\nTachometer .\nAt Sea Level -- 2200 - --- 2700 8PM\n2500 RPM\nAt 5000 Ft, --- 2200 - --- 2700 RPM\n2600 RPM\nAt 10,000 Fr. nd 2200 - hl 2700 RPM\n2700 RPM\nOil Temperature --- 100°-245°F --- 245°F\nOnl Pressure 25 psi 60-90 psi - 100 psi\nCarburetor Air --- --- -15% 10 50°C ---\nTemperature\nFigure 2-3, Power Plant Instrument Markings\nWEIGHT LIMITS\nNORMAL CATEGORY\nMaximum Takeoff Weight: 2300 Ibs.\nMaximum Landing Weight: 2300 lbs.\nMaximum Weight in Baggage Compartment:\nBaggage Area 1 {or passenger on child's seat)-Station 82 to 168:\n120 ibs. See note below.\nPaggage Area 2 -Station 108 to 142: 50 lbs. See note below.\nNOTE\nThe maximum combined weight capacity for baggage areas\n1 and 2 is 120 lbs. :\n[s] [] [2]",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "pageSummary": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "object",
+          "properties": {
+            "maxTakeoffWeightNormalLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "maxTakeoffWeightUtilityLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "maxLandingWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "maxRampWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "frontSeatArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rearSeatArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage1ArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage1MaxLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage2ArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage2MaxLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggageCombinedMaxLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelLbPerGal": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelStandardUsableGal": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelLongRangeUsableGal": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "oilWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "oilArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "oilMomentPer1000": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "sampleEmptyWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "sampleEmptyMomentPer1000": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cgAftNormalIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cgAftUtilityIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "demonstratedCrosswindKt": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "cgForwardNormal": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "weightLb": {
+                "type": "number"
+              },
+              "armIn": {
+                "type": "number"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "weightLb",
+              "armIn",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 4
+        },
+        "cgForwardUtility": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "weightLb": {
+                "type": "number"
+              },
+              "armIn": {
+                "type": "number"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "weightLb",
+              "armIn",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 4
+        }
+      },
+      "required": [
+        "pageSummary",
+        "fields",
+        "cgForwardNormal",
+        "cgForwardUtility"
+      ],
+      "additionalProperties": false
+    },
+    "maxTokens": 1200,
+    "images": [
+      "sha256:a7d88a5f7ef196599cf285937202f66bfde2307485303cfcc851440d040c554e"
+    ]
+  },
+  "response": {
+    "json": {
+      "pageSummary": "LIMITATIONS",
+      "fields": {
+        "maxTakeoffWeightNormalLb": {
+          "value": 2300,
+          "quote": "Maximum Takeoff Weight: 2300 lbs."
+        },
+        "maxLandingWeightLb": {
+          "value": 2300,
+          "quote": "Maximum Landing Weight: 2300 lbs."
+        },
+        "maxRampWeightLb": {
+          "value": 120,
+          "quote": "Baggage Area 1 (or passenger on child's seat)-Station 82 to 108: 120 lbs. See note below."
+        },
+        "baggage2MaxLb": {
+          "value": 50,
+          "quote": "Baggage Area 2 -Station 108 to 142: 50 lbs. See note below."
+        },
+        "cgAftNormalIn": {
+          "value": 35,
+          "quote": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs."
+        },
+        "cgAftUtilityIn": {
+          "value": 38.5,
+          "quote": "38.5 inches aft of datum at 2300 lbs."
+        },
+        "demonstratedCrosswindKt": {
+          "value": 100,
+          "quote": "100 knots"
+        }
+      },
+      "cgForwardNormal": [],
+      "cgForwardUtility": []
+    },
+    "text": "{ \"pageSummary\": \"LIMITATIONS\", \"fields\": { \"maxTakeoffWeightNormalLb\": {\"value\": 2300, \"quote\": \"Maximum Takeoff Weight: 2300 lbs.\"}, \"maxLandingWeightLb\": {\"value\": 2300, \"quote\": \"Maximum Landing Weight: 2300 lbs.\"}, \"maxRampWeightLb\": {\"value\": 120, \"quote\": \"Baggage Area 1 (or passenger on child's seat)-Station 82 to 108: 120 lbs. See note below.\"}, \"baggage2MaxLb\": {\"value\": 50, \"quote\": \"Baggage Area 2 -Station 108 to 142: 50 lbs. See note below.\"}, \"cgAftNormalIn\": {\"value\": 35.0, \"quote\": \"35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.\"}, \"cgAftUtilityIn\": {\"value\": 38.5, \"quote\": \"38.5 inches aft of datum at 2300 lbs.\"}, \"demonstratedCrosswindKt\": {\"value\": 100, \"quote\": \"100 knots\"} },\"cgForwardNormal\": [],\"cgForwardUtility\": [] }",
+    "model": "qwen2.5vl:3b",
+    "provider": "ollama",
+    "usage": {
+      "input": 1893,
+      "output": 344
+    }
+  },
+  "recordedAt": "2026-09-13T00:46:24.804Z"
+}

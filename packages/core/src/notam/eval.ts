@@ -27,8 +27,10 @@ export interface LabelledSet {
 
 export interface EvalScore {
   readonly total: number;
-  /** Labelled NOTAMs the run produced no assessment for (out of scope, unverified, failed). */
+  /** Labelled NOTAMs the model was asked about but that produced no usable answer (unverified citation, failed). */
   readonly missing: number;
+  /** Labelled NOTAMs the deterministic filter put out of scope, so the model was never asked; not a model error either way. */
+  readonly filtered: number;
   readonly agreement: number;
   readonly perClass: Readonly<Record<Relevance, { precision: number; recall: number; support: number }>>;
   readonly confusion: Readonly<Record<Relevance, Readonly<Record<Relevance, number>>>>;
@@ -43,12 +45,17 @@ export function scoreAssessments(set: LabelledSet, items: readonly RankedNotam[]
   ) as Record<Relevance, Record<Relevance, number>>;
   const disagreements: { notamId: string; expected: Relevance; actual: Relevance | null }[] = [];
   let missing = 0;
+  let filtered = 0;
   let agree = 0;
   let catAgree = 0;
   let catTotal = 0;
   for (const label of set.labels) {
     const item = byId.get(label.notamId);
-    const actual = item?.assessment && item.assessment.citation !== 'none' ? item.assessment.assessment.relevance : null;
+    if (item && item.rank === 'out-of-scope') {
+      filtered++;
+      continue;
+    }
+    const actual = item?.rule ? item.rule.relevance : item?.assessment && item.assessment.citation !== 'none' ? item.assessment.assessment.relevance : null;
     if (actual === null) {
       missing++;
       disagreements.push({ notamId: label.notamId, expected: label.relevance, actual: null });
@@ -57,9 +64,9 @@ export function scoreAssessments(set: LabelledSet, items: readonly RankedNotam[]
     confusion[label.relevance][actual]++;
     if (actual === label.relevance) agree++;
     else disagreements.push({ notamId: label.notamId, expected: label.relevance, actual });
-    if (label.category) {
+    if (label.category && item!.assessment) {
       catTotal++;
-      if (item!.assessment!.assessment.category === label.category) catAgree++;
+      if (item!.assessment.assessment.category === label.category) catAgree++;
     }
   }
   const perClass = Object.fromEntries(
@@ -74,7 +81,8 @@ export function scoreAssessments(set: LabelledSet, items: readonly RankedNotam[]
   return {
     total,
     missing,
-    agreement: total - missing > 0 ? agree / (total - missing) : 0,
+    filtered,
+    agreement: total - missing - filtered > 0 ? agree / (total - missing - filtered) : 0,
     perClass,
     confusion,
     categoryAgreement: catTotal > 0 ? catAgree / catTotal : null,

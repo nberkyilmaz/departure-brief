@@ -24,6 +24,8 @@ const app = buildServer({
   navcanada: new NavCanadaClient(http),
   llm,
   staticDir: join(root, 'apps', 'web', 'dist'),
+  aircraftDir: join(root, 'aircraft'),
+  docCacheDir: process.env.HOLDSHORT_DOC_CACHE ?? join(root, 'data', 'docs'),
   logger: true,
 });
 app.log.info(`NOTAM relevance model: ${llm?.description ?? 'none (set HOLDSHORT_LLM=ollama)'}`);

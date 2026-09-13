@@ -1,0 +1,292 @@
+{
+  "version": 1,
+  "aircraftType": "C172",
+  "source": {
+    "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+    "filename": "C172MPOH.pdf",
+    "pages": [
+      17,
+      18,
+      42,
+      88,
+      90
+    ]
+  },
+  "stations": [],
+  "envelopes": [],
+  "maxLandingWeightLb": {
+    "value": 2300,
+    "source": {
+      "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+      "filename": "C172MPOH.pdf",
+      "page": 17,
+      "box": {
+        "x": 445,
+        "y": 1684,
+        "w": 620,
+        "h": 33
+      },
+      "citedText": "Maximum Landing Weight: 2300 lbs."
+    },
+    "note": null
+  },
+  "maxRampWeightLb": null,
+  "baggageCombinedMaxLb": null,
+  "demonstratedCrosswindKt": null,
+  "sample": null,
+  "review": [
+    {
+      "field": "maxRampWeightLb",
+      "description": "maximum ramp weight, lb",
+      "proposed": 120,
+      "page": 17,
+      "citedText": "Baggage Area 1 {or passenger on child's seat)-Station 82 to 168: 120 ibs. See note below.",
+      "box": {
+        "x": 524,
+        "y": 1749,
+        "w": 1087,
+        "h": 74
+      },
+      "problem": "the quoted line does not mention ramp"
+    },
+    {
+      "field": "cgAftNormalIn",
+      "description": "aft centre of gravity limit, normal category, inches",
+      "proposed": 35,
+      "page": 17,
+      "citedText": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.",
+      "box": null,
+      "problem": "the quoted line is not on page 17"
+    },
+    {
+      "field": "cgAftUtilityIn",
+      "description": "aft centre of gravity limit, utility category, inches",
+      "proposed": 38.5,
+      "page": 17,
+      "citedText": "38.5 inches aft of datum at 2300 lbs.",
+      "box": null,
+      "problem": "the quoted line is not on page 17"
+    },
+    {
+      "field": "demonstratedCrosswindKt",
+      "description": "maximum demonstrated crosswind velocity, knots",
+      "proposed": 100,
+      "page": 17,
+      "citedText": "100 knots",
+      "box": null,
+      "problem": "the quoted line is not on page 17"
+    },
+    {
+      "field": "maxTakeoffWeightNormalLb",
+      "description": "maximum takeoff (or gross) weight, normal category, lb",
+      "proposed": 2000,
+      "page": 18,
+      "citedText": "Maximum Takeoff Weight: 2000 ibs.",
+      "box": {
+        "x": 461,
+        "y": 374,
+        "w": 617,
+        "h": 32
+      },
+      "problem": "expected this under a NORMAL CATEGORY heading, but the nearest heading above is none"
+    },
+    {
+      "field": "maxLandingWeightLb",
+      "description": "maximum landing weight, normal category, lb",
+      "proposed": 2000,
+      "page": 18,
+      "citedText": "Maximum Landing Weight: 2000 lbs.",
+      "box": {
+        "x": 460,
+        "y": 412,
+        "w": 623,
+        "h": 34
+      },
+      "problem": "expected this under a NORMAL CATEGORY heading, but the nearest heading above is none"
+    },
+    {
+      "field": "maxRampWeightLb",
+      "description": "maximum ramp weight, lb",
+      "proposed": 0,
+      "page": 18,
+      "citedText": "Maximum Weight in Baggage Compartment: In the utility category, the baggage compartment and rear seat must not be occupied.",
+      "box": {
+        "x": 461,
+        "y": 451,
+        "w": 1218,
+        "h": 76
+      },
+      "problem": "cited text \"Maximum Weight in Baggage Compartment: In the utility category, the baggage compartment and rear seat must not be occupied.\" does not contain 0"
+    },
+    {
+      "field": "cgAftNormalIn",
+      "description": "aft centre of gravity limit, normal category, inches",
+      "proposed": 47.3,
+      "page": 18,
+      "citedText": "Aff: 40.5 inches aft of datum at all weights.",
+      "box": {
+        "x": 534,
+        "y": 1185,
+        "w": 749,
+        "h": 33
+      },
+      "problem": "cited text \"Aff: 40.5 inches aft of datum at all weights.\" does not contain 47.3"
+    },
+    {
+      "field": "demonstratedCrosswindKt",
+      "description": "maximum demonstrated crosswind velocity, knots",
+      "proposed": 0,
+      "page": 18,
+      "citedText": "Moment/1000",
+      "box": null,
+      "problem": "the quoted line is not on page 18"
+    },
+    {
+      "field": "cgForwardNormal[0]",
+      "description": "normal category forward CG limit point (weight lb, arm in)",
+      "proposed": {
+        "weightLb": 1950,
+        "armIn": 35
+      },
+      "page": 42,
+      "citedText": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.",
+      "box": null,
+      "problem": "the quoted line is not on page 42"
+    },
+    {
+      "field": "cgForwardNormal[1]",
+      "description": "normal category forward CG limit point (weight lb, arm in)",
+      "proposed": {
+        "weightLb": 2300,
+        "armIn": 38.5
+      },
+      "page": 42,
+      "citedText": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.",
+      "box": null,
+      "problem": "the quoted line is not on page 42"
+    },
+    {
+      "field": "cgForwardUtility[0]",
+      "description": "utility category forward CG limit point (weight lb, arm in)",
+      "proposed": {
+        "weightLb": 2300,
+        "armIn": 38.5
+      },
+      "page": 42,
+      "citedText": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.",
+      "box": null,
+      "problem": "the quoted line is not on page 42"
+    },
+    {
+      "field": "cgAftNormalIn",
+      "description": "aft centre of gravity limit, normal category, inches",
+      "proposed": 38.5,
+      "page": 88,
+      "citedText": "38.5 inches aft of datum at 2300 lbs.",
+      "box": null,
+      "problem": "the quoted line is not on page 88"
+    },
+    {
+      "field": "cgAftUtilityIn",
+      "description": "aft centre of gravity limit, utility category, inches",
+      "proposed": 38.5,
+      "page": 88,
+      "citedText": "38.5 inches aft of datum at 2300 lbs.",
+      "box": null,
+      "problem": "the quoted line is not on page 88"
+    },
+    {
+      "field": "demonstratedCrosswindKt",
+      "description": "maximum demonstrated crosswind velocity, knots",
+      "proposed": 10,
+      "page": 88,
+      "citedText": "10 knots.",
+      "box": null,
+      "problem": "the quoted line is not on page 88"
+    },
+    {
+      "field": "sampleEmptyWeightLb",
+      "description": "the SAMPLE airplane licensed/basic empty weight in the worked example, lb",
+      "proposed": 1366,
+      "page": 90,
+      "citedText": "1. Licensed Empty Weight (Use the data pertaining to your airplane as it is presently equipped. Includes unusable fuel.)",
+      "box": null,
+      "problem": "the quoted line is not on page 90"
+    },
+    {
+      "field": "sampleEmptyMomentPer1000",
+      "description": "the SAMPLE airplane empty moment/1000 in the worked example",
+      "proposed": 53.8,
+      "page": 90,
+      "citedText": "2. ON (8 Gis. - The weight of full oil may be used for all calculations. 9 Qs. = 15 Lbs. at 0.2 Moment/1000)",
+      "box": null,
+      "problem": "the quoted line is not on page 90"
+    },
+    {
+      "field": "cgAftNormalIn",
+      "description": "aft centre of gravity limit, normal category, inches",
+      "proposed": 35,
+      "page": 90,
+      "citedText": "8. Usable Fuel (At 6 Lbs, /Gal)",
+      "box": {
+        "x": 839,
+        "y": 1454,
+        "w": 50,
+        "h": 443
+      },
+      "problem": "cited text \"8. Usable Fuel (At 6 Lbs, /Gal)\" does not contain 35"
+    },
+    {
+      "field": "cgAftUtilityIn",
+      "description": "aft centre of gravity limit, utility category, inches",
+      "proposed": 10.9,
+      "page": 90,
+      "citedText": "8. Usable Fuel (At 6 Lbs, /Gal)",
+      "box": {
+        "x": 839,
+        "y": 1454,
+        "w": 50,
+        "h": 443
+      },
+      "problem": "cited text \"8. Usable Fuel (At 6 Lbs, /Gal)\" does not contain 10.9"
+    },
+    {
+      "field": "demonstratedCrosswindKt",
+      "description": "maximum demonstrated crosswind velocity, knots",
+      "proposed": 340,
+      "page": 90,
+      "citedText": "4, Pilot and Front Passenger (Station 340 48) . . . 340 12.8",
+      "box": {
+        "x": 1036,
+        "y": 864,
+        "w": 34,
+        "h": 1036
+      },
+      "problem": "the quoted line does not mention crosswind"
+    },
+    {
+      "field": "cgForwardNormal[0]",
+      "description": "normal category forward CG limit point (weight lb, arm in)",
+      "proposed": {
+        "weightLb": 1950,
+        "armIn": 35
+      },
+      "page": 90,
+      "citedText": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.",
+      "box": null,
+      "problem": "the quoted line is not on page 90"
+    },
+    {
+      "field": "cgForwardUtility[0]",
+      "description": "utility category forward CG limit point (weight lb, arm in)",
+      "proposed": {
+        "weightLb": 2300,
+        "armIn": 38.5
+      },
+      "page": 90,
+      "citedText": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.",
+      "box": null,
+      "problem": "the quoted line is not on page 90"
+    }
+  ]
+}

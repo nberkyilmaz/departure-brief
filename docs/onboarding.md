@@ -99,9 +99,12 @@ Inside `packages/core`:
 | `src/rules/` | `vfrMinima.ts` (CARs + FAR tables), `crosswind.ts` (components, best runway), `checks.ts` (ceiling, visibility, crosswind, regulatory, night — each cites), `evaluate.ts` (resolved flight + profile → `Briefing`), `describe.ts`, `types.ts` (`Finding`, `Citation`, `Verdict`) |
 | `src/brief/` | `canonical.ts` (canonical JSON, content hash), `assemble.ts` (`assembleBriefing`: rules output + plan + profile + report hashes + code versions → `StoredBriefing`; `flightKey`), `types.ts` |
 | `src/notam/` | `decode.ts` (ICAO NOTAM, order-aware field scan), `qcodes.ts` (181 subjects / 80 conditions, generated + verified), `filter.ts` (time and geography before any token is spent), `dedupe.ts`, `assess.ts` (the only place a model sees a NOTAM; cache key and citation verification), `flight.ts` (whole pipeline, ranked), `eval.ts` (scorer), `describe.ts` |
-| `src/llm/` | `provider.ts` (one interface, structured output only), `fixture.ts` (replay + record), `ollama.ts`, `budget.ts` (in-code spend cap), `env.ts` (`llmFromEnv`) |
+| `src/llm/` | `provider.ts` (one interface, structured output only; requests may carry page images), `fixture.ts` (replay + record), `ollama.ts`, `budget.ts` (in-code spend cap), `env.ts` (`llmFromEnv`) |
+| `src/docs/` | Scanned documents → word boxes. `reader/render.ts` (pdf.js + @napi-rs/canvas; JBIG2 scans need the wasm path), `reader/ocr.ts` (tesseract.js; tries the page sideways when the upright reading is poor; boxes always in scanned-page pixels), `reader/ingest.ts` (content-addressed cache under `data/docs/<sha>/`), `lines.ts` (reading lines, rotation-aware), `align.ts` (a cited figure must be in the cited tokens; OCR confusions allowed and marked), `extract/wb.ts` (the W&B extraction prompt, schema, alignment), `crop.ts` (the cited region, boxed, for review) |
+| `src/wb/` | `types.ts` (`WeightBalanceSpec`: every figure with its page citation; review queue), `compute.ts` (loading → CG, checked against the forward line and aft limit; every finding cites its page) |
+| `src/cli/docs.ts` | `holdshort doc ingest|find|page|wb <pdf>` and `holdshort wb <spec.json> …` |
 | `src/cli/main.ts` | `npm run holdshort -- fetch KJFK`, `nasr <dir>`, `ourairports <dir>`, `airport KJFK`, `resolve` / `brief <flight.json> [--fetch] [--as-of ISO] [--json]`, `decode "<report>"`; `--memory` runs without Postgres |
-| `.env.example` | `DATABASE_URL`, `HOLDSHORT_USER_AGENT`, FAA NOTAM credentials, optional HTTP cache dir |
+| `.env.example` | `DATABASE_URL`, `HOLDSHORT_USER_AGENT`, FAA NOTAM credentials, optional HTTP cache dir, `HOLDSHORT_LLM`/`OLLAMA_MODEL`, `HOLDSHORT_DOC_CACHE` |
 | `scripts/corpus-report.ts` | `npm run corpus:metar` / `corpus:taf` — unparsed tokens across a corpus by frequency; how the long tail is worked down |
 | `test/fixtures/fetch/` | Recorded AWC responses (2026-09-07) and a verbatim four-airport slice of the 2026-09-03 NASR cycle |
 | `test/fixtures/metar/`, `test/fixtures/taf/` | 5,060 METARs and 2,957 TAFs, all real, from AWC on 2026-09-07 (worldwide bulk caches plus a US METAR sample) |
@@ -165,39 +168,51 @@ happens.
 **The owner flies in Canada** (CYSN home field, C172). Treat Canada as the
 primary case; the spec's US wording is the second case.
 
-### 5a. Finish step 6 — turn the relevance model on (small, do it first)
+### 5a. The local model — running, and measured
 
-Everything around the model is built and tested; the model is not running.
-Ollama is not installed on this machine (the RTX 3060 is present, nothing
-listening on 11434). To close it:
+Ollama 0.34 is installed with `qwen2.5:7b` (text, NOTAM relevance) and
+`qwen2.5vl:3b` (vision, POH extraction). **On this laptop Ollama's CUDA
+runner crashes** — "device kernel image is invalid", its bundled CUDA build
+being newer than the 546.92 driver — so start the server on Vulkan:
 
 ```bash
-# install Ollama, then
-ollama pull qwen2.5:7b
-HOLDSHORT_LLM=ollama npm run eval:notam -- --record
+OLLAMA_VULKAN=1 CUDA_VISIBLE_DEVICES=-1 ollama serve
+HOLDSHORT_LLM=ollama npm run eval:notam -- --record     # ranks, records fixtures, scores
 ```
 
-That ranks the 28 in-scope NOTAMs of the demo flight, writes each answer as
-a fixture under `packages/core/test/fixtures/llm/qwen2.5_7b/`, and prints
-agreement against the labelled set. The skipped test in
-`test/notam/eval.test.ts` then becomes live and gates on ≥75 % agreement.
-If agreement is poor, iterate on the prompt in `src/notam/assess.ts` and
-**bump `PROMPT_VERSION`** — old fixtures and cached assessments stay,
-keyed by the old version.
+The recorded answers under `packages/core/test/fixtures/llm/` make the
+gates in `test/notam/eval.test.ts` and `test/docs/extract.test.ts` live; the
+suite replays them and needs no model. NOTAM relevance sits at **85.7 %
+agreement with critical recall of 100 %**. Changing a prompt means bumping
+`PROMPT_VERSION` (or `WB_PROMPT_VERSION`) and re-recording.
 
-**Review the labelled set first** (`test/fixtures/notam/labelled/`). It is
-31 provisional labels from a three-perspective panel, 28 unanimous and 3 at
-2/3 (`A9080/26`, `D3729/26`, `S2881/26`). It is the yardstick the model is
-scored against, so a wrong label is worse than a wrong answer.
+**The lesson worth keeping.** The first three prompt revisions could not
+make a 7B model reliably call a closed departure runway critical. What
+fixed it was taking the decision away from the model:
+`src/notam/rules.ts` settles relevance from the ICAO Q code and the flight
+wherever there is one right answer, and the model gets only what needs
+reading. Prefer that move to another prompt revision.
 
-### 5b. Step 7 — aircraft document ingestion (M6b)
+### 5b. Step 7 — aircraft document ingestion (M6b) — done, and what is left
 
-See `docs/plan.md` step 7. OCR word boxes → LLM extraction with token-id
-citations → alignment check → review queue for low-confidence fields.
-Weight and balance from the POH is the demo. **Needs the C172 POH**, which
-the owner has not supplied yet; until it arrives,
-`aircraft/c172.json` carries a null demonstrated crosswind and the
-crosswind rule reports only the personal limit.
+```bash
+npm run holdshort -- doc ingest C172MPOH.pdf            # OCR the scan into word boxes (cached under data/docs/)
+npm run holdshort -- doc find C172MPOH.pdf "crosswind"  # search the text, with page numbers
+HOLDSHORT_LLM=ollama OLLAMA_MODEL=qwen2.5vl:3b   npm run holdshort -- doc wb C172MPOH.pdf --pages 17,18,42,88,90 --type C172
+npm run holdshort -- wb aircraft/c172.wb.json --empty 1454 --empty-moment 57.6 --front 340 --fuel 38
+```
+
+A figure is used only if the line the model quoted is on that page, the
+number is in the page's own words on that line, and that line names the
+field under the right category heading. Six figures passed; twenty-two are
+in the `review` array of `aircraft/c172.wb.json` for the owner, and
+`computeLoading` **refuses to compute** until the envelope is complete.
+That refusal is the design, not a gap — read `IncompleteSpecError` before
+"fixing" it.
+
+**Needs from the owner:** the aircraft's own empty weight and moment (the
+handbook's sample airplane is used until then, and both the CLI and the web
+panel say so), and a pass over the review queue.
 
 Running the product today:
 

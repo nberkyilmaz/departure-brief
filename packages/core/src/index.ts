@@ -17,3 +17,5 @@ export * from './rules/index.js';
 export * from './brief/index.js';
 export * from './llm/index.js';
 export * from './notam/index.js';
+export * from './docs/index.js';
+export * from './wb/index.js';

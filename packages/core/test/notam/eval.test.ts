@@ -17,7 +17,7 @@ import { FixtureProvider } from '../../src/llm/fixture.js';
 import { buildAssessmentRequest, PROMPT_VERSION, RELEVANCES } from '../../src/notam/assess.js';
 import { decodeNotam } from '../../src/notam/decode.js';
 import { scoreAssessments, type LabelledSet } from '../../src/notam/eval.js';
-import { flightContextOf, notamsForFlight } from '../../src/notam/flight.js';
+import { flightContextOf, notamFactsOf, notamsForFlight } from '../../src/notam/flight.js';
 import { resolveFlight } from '../../src/resolve/flight.js';
 import { MemoryStore } from '../../src/store/memory.js';
 import { FIXTURES, replayHttp } from '../helpers/http.js';
@@ -41,7 +41,7 @@ describe('labelled set', () => {
     for (const l of set.labels) {
       expect(corpusIds.has(l.notamId)).toBe(true);
       expect(RELEVANCES).toContain(l.relevance);
-      expect(l.labelledBy).toContain('provisional');
+      expect(l.labelledBy).toContain('reviewed');
     }
   });
 
@@ -77,7 +77,15 @@ async function recordingsExist(): Promise<boolean> {
   const nb = await notamsForFlight({ store, navcanada: cfps, now: () => new Date('2026-09-12T20:00:00Z') }, resolved, 'C172');
   const ctx = flightContextOf(resolved, 'C172');
   const fixture = new FixtureProvider(fixtureDir);
-  return nb.items.filter((i) => i.classification.inScope).every((i) => fixture.has(buildAssessmentRequest(model, i.decoded, ctx)));
+  /*
+   * Ask exactly what the pipeline would ask — in scope, not already settled
+   * by a deterministic rule, and with the same facts attached. Building the
+   * request any other way makes the key miss, and the gate then skips
+   * itself silently, which is the one thing it must never do.
+   */
+  const asked = nb.items.filter((i) => i.classification.inScope && !i.rule);
+  if (asked.length === 0) return false;
+  return asked.every((i) => fixture.has(buildAssessmentRequest(model, i.decoded, ctx, notamFactsOf(ctx, i.decoded, i.classification))));
 }
 
 const haveRecordings = await recordingsExist();
@@ -89,7 +97,7 @@ describe.skipIf(!haveRecordings)(`NOTAM relevance eval — ${model}, prompt v${P
     const cfps = new NavCanadaClient(replayHttp(Object.fromEntries(['CYSN', 'CYKF', 'CYHM'].map((s) => [`${NAVCANADA_CFPS_BASE_URL}?site=${s}&alpha=notam`, { status: 200, file: `../notam/navcanada/2026-09-12/${s}.json` }]))));
     const nb = await notamsForFlight({ store, navcanada: cfps, provider: new FixtureProvider(fixtureDir), model, now: () => new Date('2026-09-12T20:00:00Z') }, resolved, 'C172');
     const score = scoreAssessments(set, nb.items);
-    console.log(`eval ${model}: agreement ${(score.agreement * 100).toFixed(0)}% over ${score.total - score.missing}, missing ${score.missing}`, score.perClass, score.disagreements);
+    console.log(`eval ${model}: agreement ${(score.agreement * 100).toFixed(0)}% over ${score.total - score.missing - score.filtered} (filtered ${score.filtered}, missing ${score.missing})`, score.perClass, score.disagreements);
     expect(score.agreement).toBeGreaterThanOrEqual(0.75);
     const closure = nb.items.find((i) => i.decoded.id?.value.text === 'J5067/26')!;
     expect(closure.rank).not.toBe('irrelevant');
