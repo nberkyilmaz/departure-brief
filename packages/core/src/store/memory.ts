@@ -2,6 +2,7 @@ import type { StoredBriefing } from '../brief/types.js';
 import { airportPreference, type Airport } from '../domain/airport.js';
 import { distanceNm } from '../domain/geo.js';
 import type { AssessmentRow } from '../notam/assess.js';
+import type { ForecastCheck, ForecastOutcome, VerificationPair } from '../verify/types.js';
 import type { DecodedRow, FetchEvent, ListRawQuery, RawReport, Store } from './types.js';
 
 /**
@@ -115,6 +116,9 @@ export class MemoryStore implements Store {
       .slice(0, limit);
   }
 
+  private readonly checks = new Map<string, ForecastCheck>();
+  private readonly outcomes: ForecastOutcome[] = [];
+
   async putAssessment(row: AssessmentRow): Promise<{ inserted: boolean }> {
     const key = `${row.notamSha256}|${row.contextHash}|${row.promptVersion}|${row.model}`;
     if (this.assessments.has(key)) return { inserted: false };
@@ -124,6 +128,38 @@ export class MemoryStore implements Store {
 
   async getAssessment(notamSha256: string, contextHash: string, promptVersion: number, model: string): Promise<AssessmentRow | null> {
     return this.assessments.get(`${notamSha256}|${contextHash}|${promptVersion}|${model}`) ?? null;
+  }
+
+  async putForecastCheck(check: ForecastCheck): Promise<{ inserted: boolean }> {
+    if (this.checks.has(check.key)) return { inserted: false };
+    this.checks.set(check.key, check);
+    return { inserted: true };
+  }
+
+  async listUnmatchedChecks(query: { station?: string | null; before: Date; limit?: number }): Promise<ForecastCheck[]> {
+    const matched = new Set(this.outcomes.map((o) => o.checkKey));
+    return [...this.checks.values()]
+      .filter((c) => !matched.has(c.key) && c.validAt.getTime() <= query.before.getTime() && (!query.station || c.station === query.station))
+      .sort((a, b) => b.validAt.getTime() - a.validAt.getTime())
+      .slice(0, query.limit ?? 500);
+  }
+
+  async putForecastOutcome(outcome: ForecastOutcome): Promise<{ inserted: boolean }> {
+    if (this.outcomes.some((o) => o.checkKey === outcome.checkKey && o.metarSha256 === outcome.metarSha256)) return { inserted: false };
+    this.outcomes.push(outcome);
+    return { inserted: true };
+  }
+
+  async listVerificationPairs(query: { station?: string | null; since?: Date | null; limit?: number }): Promise<VerificationPair[]> {
+    const pairs: VerificationPair[] = [];
+    for (const o of this.outcomes) {
+      const check = this.checks.get(o.checkKey);
+      if (!check) continue;
+      if (query.station && check.station !== query.station) continue;
+      if (query.since && check.validAt.getTime() < query.since.getTime()) continue;
+      pairs.push({ check, outcome: o });
+    }
+    return pairs.sort((a, b) => b.check.validAt.getTime() - a.check.validAt.getTime()).slice(0, query.limit ?? 500);
   }
 
   async close(): Promise<void> {}

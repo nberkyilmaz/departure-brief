@@ -35,6 +35,7 @@ Early. Building in this order:
 | M5 | Briefing assembly and UI | **done** — API + web app; briefings immutable and content-addressed |
 | M6 | NOTAM relevance pipeline | **done** — decoder, filter, dedupe, deterministic rules where there is one right answer, model for the rest |
 | M7 | Evaluation harness | **done** — 85.7 % agreement with a reviewed labelled set on a local 7B model; runway closures never missed |
+| M9 | Forecast verification | **done** — pairs what the TAF promised with what arrived; scores which way it was wrong |
 | M8 | Briefing diff | **done** — diffs the verdict, not the text; a value that moves without crossing a limit is not news |
 | M6b | Aircraft documents — POH weight and balance | **done** — OCR of a 148-page scan, extraction checked against the page, review queue; every limit cited to the ink it came from |
 
@@ -87,6 +88,7 @@ npm run holdshort -- resolve flights/demo-cysn-cykf.json --fetch   # conditions 
 npm run holdshort -- brief flights/demo-cysn-cykf.json --fetch     # go / marginal / no-go per waypoint against profiles/default.json
 npm run holdshort -- notams flights/demo-cysn-cykf.json --fetch    # every NOTAM for the flight, classified and (with a model) ranked
 npm run holdshort -- diff flights/demo-cysn-cykf.json --fetch      # brief again and say what changed since last time
+npm run holdshort -- verify --fetch                                # did the forecasts your briefings relied on turn out to be right?
 npm run holdshort -- doc ingest C172MPOH.pdf                       # OCR a scanned POH into word boxes (cached by content hash)
 npm run holdshort -- doc find C172MPOH.pdf "demonstrated crosswind" # search the OCR text, with page numbers
 npm run holdshort -- wb confirm aircraft/c172.wb.json cgAftNormalIn=47.3   # confirm a figure the extraction could not; the handbook still has to agree

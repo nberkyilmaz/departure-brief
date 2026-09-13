@@ -7,6 +7,7 @@
 import { resolveDayTime } from '../../domain/time.js';
 import type { FeetAgl, Knots, StatuteMiles } from '../../domain/units.js';
 import { kmh, kmhToKnots, kt, meters, metersToStatuteMiles, mps, mpsToKnots, sm } from '../../domain/units.js';
+import type { SkyCondition } from '../groups/sky.js';
 import type { Visibility } from '../groups/visibility.js';
 import type { Wind } from '../groups/wind.js';
 import type { Sourced } from '../span.js';
@@ -17,8 +18,17 @@ import type { DecodedMetar } from './types.js';
  * `null` when there is none reported (which includes an unreported height).
  */
 export function ceiling(m: DecodedMetar): Sourced<FeetAgl> | null {
+  return ceilingOf(m.sky);
+}
+
+/**
+ * The same rule over any reported sky, observed or forecast. Verification
+ * compares a TAF against a METAR, and the two must be measured the same
+ * way or the comparison measures the measuring.
+ */
+export function ceilingOf(sky: readonly Sourced<SkyCondition>[]): Sourced<FeetAgl> | null {
   let best: Sourced<FeetAgl> | null = null;
-  for (const layer of m.sky) {
+  for (const layer of sky) {
     const v = layer.value;
     let h: FeetAgl | null = null;
     if (v.kind === 'layer' && (v.amount === 'BKN' || v.amount === 'OVC')) h = v.base;
@@ -55,8 +65,11 @@ export type FlightCategory = 'VFR' | 'MVFR' | 'IFR' | 'LIFR';
  * unlimited, which is how the category is conventionally computed.
  */
 export function flightCategory(m: DecodedMetar): FlightCategory | null {
-  const c = ceiling(m)?.value ?? null;
-  const vis = m.visibility ? visibilityStatuteMiles(m.visibility.value) : null;
+  return flightCategoryOf(ceiling(m)?.value ?? null, m.visibility ? visibilityStatuteMiles(m.visibility.value) : null);
+}
+
+/** The category from a ceiling and visibility already in hand, forecast or observed. */
+export function flightCategoryOf(c: FeetAgl | null, vis: StatuteMiles | null): FlightCategory | null {
   if (c === null && vis === null) return null;
   const cv = c ?? Number.POSITIVE_INFINITY;
   const vv = vis ?? sm(Number.POSITIVE_INFINITY);

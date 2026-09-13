@@ -13,6 +13,8 @@
  *                                                 every NOTAM for the flight's fields, classified and (with a model) ranked
  *   holdshort diff <flight.json> [--fetch] [--notams] [--against <sha256>] [--json]
  *                                                 brief now, store it, and say what changed since the last briefing
+ *   holdshort verify [--fetch] [--station CYSN] [--since <ISO>] [--json]
+ *                                                 did the forecasts your briefings relied on turn out to be right?
  *   holdshort doc ingest|find|page|wb <pdf> ...   read a scanned POH into word boxes; extract weight-and-balance data
  *   holdshort wb <spec.json> --empty <lb> --empty-moment <n> [--front lb] [--rear lb] [--bag1 lb] [--fuel gal]
  *                                                 a loading against the extracted limits, every limit cited to its page
@@ -41,7 +43,10 @@ import { ingestStation, type IngestCounts } from '../fetch/ingest.js';
 import { readNasrDirectory } from '../fetch/nasr.js';
 import { NavCanadaClient } from '../fetch/navcanada.js';
 import { readOurAirportsDirectory } from '../fetch/ourairports.js';
+import { toZulu } from '../domain/time.js';
 import { llmFromEnv } from '../llm/env.js';
+import { matchOutstanding, outstandingChecks, recordForecastChecks } from '../verify/run.js';
+import { reliabilityOf, reliabilityText, scorePair } from '../verify/score.js';
 import { withHandbookLimits } from '../wb/aircraft.js';
 import type { WeightBalanceSpec } from '../wb/types.js';
 import { docCommand, wbCommand } from './docs.js';
@@ -58,7 +63,7 @@ const USER_AGENT = process.env.HOLDSHORT_USER_AGENT ?? 'holdshort/0.1 (+https://
 
 function usage(): never {
   console.error(
-    'usage: holdshort fetch <ICAO...> [--memory] | holdshort nasr <dir> | holdshort ourairports <dir> [--country XX] | holdshort airport <id> | holdshort resolve|brief|notams|diff <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams] [--against <sha256>] | holdshort doc ingest|find|page|wb <pdf> ... | holdshort wb <spec.json> ... | holdshort decode "<report>"',
+    'usage: holdshort fetch <ICAO...> [--memory] | holdshort nasr <dir> | holdshort ourairports <dir> [--country XX] | holdshort airport <id> | holdshort verify [--fetch] [--station X] | holdshort resolve|brief|notams|diff <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams] [--against <sha256>] | holdshort doc ingest|find|page|wb <pdf> ... | holdshort wb <spec.json> ... | holdshort decode "<report>"',
   );
   process.exit(2);
 }
@@ -227,6 +232,9 @@ async function briefCommand(args: string[]): Promise<void> {
     const profile = parsePilotProfile(readJsonRelative(file, plan.profile, 'profiles/default.json'));
     const aircraft = aircraftOf(file, plan);
     const briefing = evaluateFlight(resolved, profile, aircraft);
+    // Record what the forecasts assert, so `holdshort verify` can check them once their moment passes.
+    const recorded = await recordForecastChecks(store, resolved);
+    if (recorded.recorded > 0) console.error(`recording ${recorded.recorded} forecast${recorded.recorded === 1 ? '' : 's'} to check later`);
     const notams = args.includes('--notams') ? await notamsFor(args, store, resolved, aircraft?.type ?? 'unknown') : null;
     if (args.includes('--json')) {
       console.log(JSON.stringify({ briefing, notams: notams ? notamDocument(notams) : null }, null, 2));
@@ -259,6 +267,46 @@ async function diffCommand(args: string[]): Promise<void> {
     const d = diffBriefings(previous, now);
     console.log(args.includes('--json') ? JSON.stringify(d, null, 2) : diffText(d));
   });
+}
+
+/**
+ * Pair every forecast a past briefing relied on with what actually arrived,
+ * then say what that means for each station.
+ *
+ *   holdshort verify [--fetch] [--station CYSN] [--since 2026-01-01] [--json]
+ */
+async function verifyCommand(args: string[]): Promise<void> {
+  const store = await openStore(args);
+  try {
+    const station = option(args, '--station')?.toUpperCase() ?? null;
+    const sinceText = option(args, '--since');
+    const since = sinceText ? new Date(sinceText) : null;
+    if (since && Number.isNaN(since.getTime())) usage();
+
+    const report = await matchOutstanding({ store, awc: args.includes('--fetch') ? makeAwc() : null }, { station });
+    const pairs = await store.listVerificationPairs({ station, since, limit: 1000 });
+    const stations = [...new Set(pairs.map((p) => p.check.station))].sort();
+    const reliability = stations.map((s) => reliabilityOf(s, pairs.filter((p) => p.check.station === s)));
+
+    if (args.includes('--json')) {
+      console.log(JSON.stringify({ matching: report, stations: reliability, pairs: pairs.map(scorePair) }, null, 2));
+      return;
+    }
+    console.error(
+      `checked ${report.considered} forecast${report.considered === 1 ? '' : 's'} whose moment has passed: ${report.matched} newly paired with an observation, ${report.noObservation.length} with none close enough yet`,
+    );
+    for (const e of report.fetchErrors) console.error(`  ! ${e.station}: ${e.error}`);
+    if (reliability.length === 0) {
+      console.log('Nothing verified yet. Brief a flight, wait for its ETA to pass, then run this again with --fetch.');
+      const waiting = await outstandingChecks(store);
+      if (waiting.length > 0) console.log(`${waiting.length} forecast${waiting.length === 1 ? '' : 's'} waiting, the earliest for ${waiting[0]!.station} at ${toZulu(waiting[0]!.validAt)}.`);
+      return;
+    }
+    for (const r of reliability) console.log(reliabilityText(r) + '\n');
+    console.log('Study aid only — this measures one station over the flights you have briefed, not the forecaster.');
+  } finally {
+    await store.close();
+  }
 }
 
 async function notamsCommand(args: string[]): Promise<void> {
@@ -301,6 +349,9 @@ switch (command) {
     break;
   case 'diff':
     await diffCommand(rest);
+    break;
+  case 'verify':
+    await verifyCommand(rest);
     break;
   case 'doc':
     await docCommand(rest);

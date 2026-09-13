@@ -63,6 +63,8 @@ export interface ListRawQuery {
  * Append-only storage for raw and decoded reports. Implementations never
  * update or delete; `put*` return whether a new row was written.
  */
+import type { ForecastStore } from '../verify/types.js';
+
 export interface ReportStore {
   putRaw(report: RawReport, fetch: FetchEvent): Promise<{ inserted: boolean }>;
   getRaw(sha256: string): Promise<RawReport | null>;
@@ -92,7 +94,7 @@ export interface BriefingStore {
   listBriefings(flightKey: string, limit?: number): Promise<StoredBriefing[]>;
 }
 
-export type Store = ReportStore & AirportStore & BriefingStore & AssessmentStore;
+export type Store = ReportStore & AirportStore & BriefingStore & AssessmentStore & ForecastStore;
 
 export function sha256Hex(text: string): string {
   return createHash('sha256').update(text, 'utf8').digest('hex');

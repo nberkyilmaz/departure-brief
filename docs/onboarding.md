@@ -101,6 +101,7 @@ Inside `packages/core`:
 | `src/notam/` | `decode.ts` (ICAO NOTAM, order-aware field scan), `qcodes.ts` (181 subjects / 80 conditions, generated + verified), `filter.ts` (time and geography before any token is spent), `dedupe.ts`, `assess.ts` (the only place a model sees a NOTAM; cache key and citation verification), `flight.ts` (whole pipeline, ranked), `eval.ts` (scorer), `describe.ts` |
 | `src/llm/` | `provider.ts` (one interface, structured output only; requests may carry page images), `fixture.ts` (replay + record), `ollama.ts`, `budget.ts` (in-code spend cap), `env.ts` (`llmFromEnv`) |
 | `src/docs/` | Scanned documents → word boxes. `reader/render.ts` (pdf.js + @napi-rs/canvas; JBIG2 scans need the wasm path), `reader/ocr.ts` (tesseract.js; tries the page sideways when the upright reading is poor; boxes always in scanned-page pixels), `reader/ingest.ts` (content-addressed cache under `data/docs/<sha>/`), `lines.ts` (reading lines, rotation-aware), `align.ts` (a cited figure must be in the cited tokens; OCR confusions allowed and marked), `extract/wb.ts` (the W&B extraction prompt, schema, alignment), `crop.ts` (the cited region, boxed, for review) |
+| `src/verify/` | Did the TAF verify? `record.ts` (what a briefing's forecasts assert, and matching an observation to a moment), `score.ts` (direction of the miss, per-station reliability, the sentence a pilot would read), `run.ts` (record and match as operations), `types.ts` (append-only checks and outcomes) |
 | `src/wb/` | `types.ts` (`WeightBalanceSpec`: every figure with its page citation; review queue), `compute.ts` (loading → CG, checked against the forward line and aft limit; every finding cites its page) |
 | `src/cli/docs.ts` | `holdshort doc ingest|find|page|wb <pdf>` and `holdshort wb <spec.json> …` |
 | `src/cli/main.ts` | `npm run holdshort -- fetch KJFK`, `nasr <dir>`, `ourairports <dir>`, `airport KJFK`, `resolve` / `brief <flight.json> [--fetch] [--as-of ISO] [--json]`, `decode "<report>"`; `--memory` runs without Postgres |
@@ -136,6 +137,7 @@ build order.
 | **7** | **Aircraft document ingestion** | M6b | 25–35 | **next** — second LLM work; needs the C172 POH |
 | 8 | Airspace transit analysis (PostGIS) | M4b | 25–35 | |
 | 9 | Briefing diff | M8 | 10–14 | done (built early: steps 7 and 8 are blocked, this was not) |
+| 10 | Forecast verification | M9 | 12–16 | done (built before step 8, which is still blocked on Canadian airspace geometry) |
 | 10 | Forecast verification | M9 | 12–16 | |
 | 11 | Polish, README, demo | M10 | 8–12 | |
 

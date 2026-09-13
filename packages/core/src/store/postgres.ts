@@ -5,6 +5,7 @@ import pg from 'pg';
 import type { BriefingDocument, StoredBriefing } from '../brief/types.js';
 import type { Airport } from '../domain/airport.js';
 import type { AssessmentRow, CitationMatch, NotamAssessment } from '../notam/assess.js';
+import type { ForecastCheck, ForecastOutcome, VerificationPair } from '../verify/types.js';
 import { distanceNm } from '../domain/geo.js';
 import type { DecodedRow, FetchEvent, ListRawQuery, RawReport, ReportKind, Store } from './types.js';
 
@@ -246,6 +247,67 @@ export class PostgresStore implements Store {
     return res.rows.map(toBriefing);
   }
 
+  async putForecastCheck(c: ForecastCheck): Promise<{ inserted: boolean }> {
+    const res = await this.pool.query(
+      `insert into forecast_checks (key, station, valid_at, taf_sha256, taf_issued_at, taf_decoder_version, lead_hours,
+                                    ceiling_ft, visibility_sm, visibility_at_least, wind_dir_true, wind_kt, gust_kt, category, overlay_worst_category, created_at)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+       on conflict (key) do nothing`,
+      [c.key, c.station, c.validAt, c.tafSha256, c.tafIssuedAt, c.tafDecoderVersion, c.leadHours, c.ceilingFt, c.visibilitySm, c.visibilityAtLeast, c.windDirTrue, c.windKt, c.gustKt, c.category, c.overlayWorstCategory, c.createdAt],
+    );
+    return { inserted: (res.rowCount ?? 0) > 0 };
+  }
+
+  async listUnmatchedChecks(query: { station?: string | null; before: Date; limit?: number }): Promise<ForecastCheck[]> {
+    const res = await this.pool.query<CheckDbRow>(
+      `select c.* from forecast_checks c
+       where c.valid_at <= $1 and ($2::text is null or c.station = $2)
+         and not exists (select 1 from forecast_outcomes o where o.check_key = c.key)
+       order by c.valid_at desc limit $3`,
+      [query.before, query.station ?? null, query.limit ?? 500],
+    );
+    return res.rows.map(toCheck);
+  }
+
+  async putForecastOutcome(o: ForecastOutcome): Promise<{ inserted: boolean }> {
+    const res = await this.pool.query(
+      `insert into forecast_outcomes (check_key, metar_sha256, observed_at, offset_minutes, ceiling_ft, visibility_sm, visibility_at_least, wind_dir_true, wind_kt, gust_kt, category, matched_at)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+       on conflict (check_key, metar_sha256) do nothing`,
+      [o.checkKey, o.metarSha256, o.observedAt, o.offsetMinutes, o.ceilingFt, o.visibilitySm, o.visibilityAtLeast, o.windDirTrue, o.windKt, o.gustKt, o.category, o.matchedAt],
+    );
+    return { inserted: (res.rowCount ?? 0) > 0 };
+  }
+
+  async listVerificationPairs(query: { station?: string | null; since?: Date | null; limit?: number }): Promise<VerificationPair[]> {
+    const res = await this.pool.query<CheckDbRow & OutcomeDbRow>(
+      `select c.*, o.metar_sha256, o.observed_at, o.offset_minutes,
+              o.ceiling_ft as o_ceiling_ft, o.visibility_sm as o_visibility_sm, o.visibility_at_least as o_visibility_at_least, o.wind_dir_true as o_wind_dir_true,
+              o.wind_kt as o_wind_kt, o.gust_kt as o_gust_kt, o.category as o_category, o.matched_at
+       from forecast_outcomes o join forecast_checks c on c.key = o.check_key
+       where ($1::text is null or c.station = $1) and ($2::timestamptz is null or c.valid_at >= $2)
+       order by c.valid_at desc limit $3`,
+      [query.station ?? null, query.since ?? null, query.limit ?? 500],
+    );
+    return res.rows.map((r) => ({
+      check: toCheck(r),
+      outcome: {
+        checkKey: r.key,
+        metarSha256: r.metar_sha256,
+        observedAt: r.observed_at,
+        offsetMinutes: r.offset_minutes,
+        ceilingFt: r.o_ceiling_ft,
+        visibilitySm: r.o_visibility_sm,
+        visibilityAtLeast: r.o_visibility_at_least,
+        windDirTrue: r.o_wind_dir_true,
+        windKt: r.o_wind_kt,
+        gustKt: r.o_gust_kt,
+        category: r.o_category,
+        matchedAt: r.matched_at,
+      },
+    }));
+  }
+
   async putAssessment(row: AssessmentRow): Promise<{ inserted: boolean }> {
     const res = await this.pool.query(
       `insert into notam_assessments (notam_sha256, context_hash, prompt_version, model, assessment, citation, provider, usage_input, usage_output, created_at)
@@ -316,5 +378,59 @@ function toRawReport(row: RawRow): RawReport {
     body: row.body,
     issuedAt: row.issued_at,
     upstream: row.upstream,
+  };
+}
+
+interface CheckDbRow {
+  key: string;
+  station: string;
+  valid_at: Date;
+  taf_sha256: string;
+  taf_issued_at: Date | null;
+  taf_decoder_version: number;
+  lead_hours: number | null;
+  ceiling_ft: number | null;
+  visibility_sm: number | null;
+  visibility_at_least: boolean;
+  wind_dir_true: number | null;
+  wind_kt: number | null;
+  gust_kt: number | null;
+  category: ForecastCheck['category'];
+  overlay_worst_category: ForecastCheck['category'];
+  created_at: Date;
+}
+
+interface OutcomeDbRow {
+  metar_sha256: string;
+  observed_at: Date;
+  offset_minutes: number;
+  o_ceiling_ft: number | null;
+  o_visibility_sm: number | null;
+  o_visibility_at_least: boolean;
+  o_wind_dir_true: number | null;
+  o_wind_kt: number | null;
+  o_gust_kt: number | null;
+  o_category: ForecastCheck['category'];
+  matched_at: Date;
+}
+
+function toCheck(r: CheckDbRow): ForecastCheck {
+  return {
+    key: r.key,
+    station: r.station,
+    validAt: r.valid_at,
+    tafSha256: r.taf_sha256,
+    tafIssuedAt: r.taf_issued_at,
+    tafDecoderVersion: r.taf_decoder_version,
+    leadHours: r.lead_hours,
+    ceilingFt: r.ceiling_ft,
+    visibilitySm: r.visibility_sm,
+    visibilityAtLeast: r.visibility_at_least,
+    windDirTrue: r.wind_dir_true,
+    windKt: r.wind_kt,
+    gustKt: r.gust_kt,
+    category: r.category,
+    overlayWorstCategory: r.overlay_worst_category,
+    createdAt: r.created_at,
   };
 }

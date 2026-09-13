@@ -13,10 +13,14 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
 
 ## Where we are (updated 2026-09-13, end of session 10)
 
-**Current step: 8 — airspace transit (M4b).** Not started; needs an
-airspace data source for Canada.
+**Current step: the project website**, so this can go on a resume.
 
-**Done:** steps 1-7 and 9. Decoders, fetch layer, route and time
+**Step 8 — airspace transit — remains blocked.** Checked again on
+2026-09-13: NAV CANADA publishes no airspace geometry, open.canada.ca has
+nothing usable, and OpenAIP needs a key. The FAA's ArcGIS `Class_Airspace`
+layer is queryable, so the US half is buildable whenever it is wanted.
+
+**Done:** steps 1-7, 9 and 10. Decoders, fetch layer, route and time
 resolution, rules engine, briefings + API + web, NOTAM relevance with the
 local model running and an eval gate that passes, the briefing diff, and
 aircraft document ingestion (the owner's POH read, extracted, verified and
@@ -43,13 +47,14 @@ computed).
 5. **A look at the web app** — nobody has eyeballed it yet.
 
 **Next steps, in order:**
-1. Step 8, airspace transit: PostGIS polygons with floor and ceiling, route
+1. The website: a static page a recruiter can open, showing the real
+   briefing rendered from committed fixtures. No server, no database, no
+   keys, no load on anyone's upstream — free to host and it always works.
+2. Step 8, airspace transit: PostGIS polygons with floor and ceiling, route
    sampled every half nautical mile, point-in-polygon by altitude band,
    terrain AGL from USGS. Upgrades the VFR-minima check from airport-only
    to per-segment. The blocker is Canadian airspace geometry — NAV CANADA's
    Designated Airspace Handbook is text, not shapes.
-2. Step 10, forecast verification (M9): did the TAF verify against the
-   METAR at your ETA, accumulated over time.
 3. Step 11, polish and demo.
 
 **Known open engineering items:**
@@ -881,3 +886,61 @@ had just dropped into the repo root.
 - The owner's POH is read end to end: 6 figures verified, 22 awaiting the
   owner's review, and the computation refusing to run until the envelope is
   complete — which is the designed behaviour, not a gap.
+
+---
+
+## Session 11 — 2026-09-13 — Forecast verification (step 10 / M9)
+
+138. Checked whether step 8 was still blocked before skipping it: NAV
+     CANADA publishes no airspace geometry, open.canada.ca has nothing
+     usable, OpenAIP needs a key. The FAA's ArcGIS `Class_Airspace` layer is
+     queryable, so the US half is buildable — but the owner flies in Canada,
+     so step 10 was the better next move, and it needed no new data at all.
+139. A briefing now records what each waypoint's forecast asserted for that
+     waypoint's ETA, and `holdshort verify` later pairs each prediction with
+     the observation nearest its moment. Both halves are written once, so a
+     second run only adds; a moment with nothing within 35 minutes keeps
+     waiting rather than being paired with something far off.
+140. **The judgement that makes it worth having.** "How often was the TAF
+     right" needs a tolerance nobody agrees on. Which way it was wrong does
+     not, and it is the question that matters: a forecast promising a better
+     ceiling than arrives is the one that gets people airborne into weather
+     they did not plan for. Every pair is scored optimistic, pessimistic or
+     close, and the summary leads with how often the forecast was optimistic
+     and by how much at worst.
+141. **`P6SM` is a floor, not a measurement**, and this only surfaced
+     because the end-to-end test failed on real data: KJFK forecast `P6SM`
+     and observed `10SM`, which scored as *pessimistic*. Almost every
+     fair-weather TAF says "six or more" and observations of ten are
+     routine, so the visibility column would have been measuring the
+     phrasing of TAFs rather than their accuracy. An open-ended forecast the
+     observation meets is now reported as met, with no error at all — the
+     same for `CAVOK` and `9999`.
+142. A TEMPO is not what a TAF asserts, so the prevailing conditions are
+     what gets scored. But when the category is missed, the check records
+     whether an overlay in the same TAF had allowed for what arrived: a
+     forecaster who wrote "TEMPO IFR" and got IFR was not blind to it.
+143. Below eight pairs the summary says nothing rather than something
+     unfounded about a station.
+144. Two pieces of tidying the work forced, both good. `ceilingOf` existed
+     twice — once in the rules engine, once (newly) in the derived-value
+     module — so the rules engine and the verifier could have drifted apart
+     on what a ceiling is. One definition now, which is exactly the property
+     verification needs. And the scorer's own statistics were misleading at
+     first: a met "at least" forecast reported a median error of +9 SM
+     beside "close 100%", so a satisfied bound now contributes no error.
+145. Store gained `forecast_checks` and `forecast_outcomes` (migration
+     0008), both append-only, with the same contract test running against
+     the memory and Postgres backends. The migration was edited after it had
+     already applied locally; since it is unreleased, the tables were
+     dropped and its record removed so it could re-apply, rather than
+     carrying a patch migration for a schema nobody else has.
+146. **Verified live on real weather.** A CYSN TAF issued 1940Z on 12
+     September forecast a ceiling 900 ft higher than the observation that
+     arrived at the flight's ETA — the first real finding the feature has
+     produced, and the direction that matters.
+
+### State at end of session 11
+
+- 653 tests across workspaces, typecheck clean, web builds.
+- Steps 1-7, 9 and 10 done. Step 8 blocked on data, not on effort.

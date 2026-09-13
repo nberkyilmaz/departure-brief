@@ -9,6 +9,10 @@ import {
   pageImagePath,
   notamsForFlight,
   parseAircraftLimits,
+  recordForecastChecks,
+  reliabilityNote,
+  reliabilityOf,
+  scorePair,
   withHandbookLimits,
   parseFlightPlan,
   parsePilotProfile,
@@ -70,6 +74,27 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
     model: deps.llm?.description ?? null,
   }));
 
+  /**
+   * How the forecasts this store has seen turned out, per station. Reading
+   * only — pairing is a background job (`holdshort verify`), because it
+   * needs observations that may not exist yet and this must not fetch.
+   */
+  app.get<{ Querystring: { station?: string; since?: string; limit?: string } }>('/api/verification', async (req, reply) => {
+    const station = req.query.station ? req.query.station.toUpperCase() : null;
+    const since = req.query.since ? new Date(req.query.since) : null;
+    if (since && Number.isNaN(since.getTime())) return reply.code(400).send({ error: '"since" must be an ISO instant' });
+    const limit = Number(req.query.limit ?? 1000);
+    const pairs = await store.listVerificationPairs({ station, since, limit: Number.isFinite(limit) ? Math.min(limit, 5000) : 1000 });
+    const stations = [...new Set(pairs.map((p) => p.check.station))].sort();
+    return {
+      stations: stations.map((s) => {
+        const r = reliabilityOf(s, pairs.filter((p) => p.check.station === s));
+        return { ...r, note: reliabilityNote(r) };
+      }),
+      pairs: pairs.map(scorePair),
+    };
+  });
+
   const aircraftDir = deps.aircraftDir ?? 'aircraft';
   const docCacheDir = deps.docCacheDir ?? 'data/docs';
   /** Everything but letters, digits and a dash is dropped, so the type can never walk out of the directory. */
@@ -127,6 +152,8 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
         aircraft?.type ?? 'unknown',
       );
     }
+    // What the forecasts assert, so it can be checked once the moment passes.
+    await recordForecastChecks(store, resolved);
     const briefing = assembleBriefing(resolved, profile, aircraft, new Date(), notams);
     const { inserted } = await store.putBriefing(briefing);
     return reply.code(inserted ? 201 : 200).send(briefing);

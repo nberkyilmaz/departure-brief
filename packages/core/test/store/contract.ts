@@ -154,5 +154,79 @@ export function storeContract(name: string, make: () => Promise<Store>): void {
         await store.close();
       }
     });
+
+    it('records a forecast and, later, what arrived — both written once, never rewritten', async () => {
+      const store = await make();
+      try {
+        const taf = rawReport({ kind: 'taf', source: 'awc', station: 'CYSN', body: 'TAF CYSN 121140Z 1212/1312 18010KT P6SM BKN030', issuedAt: new Date('2026-09-12T11:40:00Z'), upstream: null });
+        const metar = rawReport({ kind: 'metar', source: 'awc', station: 'CYSN', body: 'METAR CYSN 121500Z 18012KT 4SM BR BKN012', issuedAt: new Date('2026-09-12T15:00:00Z'), upstream: null });
+        await store.putRaw(taf, { fetchedAt: new Date('2026-09-12T11:45:00Z'), request: 't', station: 'CYSN' });
+        await store.putRaw(metar, { fetchedAt: new Date('2026-09-12T15:05:00Z'), request: 'm', station: 'CYSN' });
+
+        const validAt = new Date('2026-09-12T15:00:00Z');
+        const check = {
+          key: 'k1',
+          station: 'CYSN',
+          validAt,
+          tafSha256: taf.sha256,
+          tafIssuedAt: taf.issuedAt,
+          tafDecoderVersion: 1,
+          leadHours: 3.3,
+          ceilingFt: 3000,
+          visibilitySm: 6,
+          visibilityAtLeast: true,
+          windDirTrue: 180,
+          windKt: 10,
+          gustKt: null,
+          category: 'VFR' as const,
+          overlayWorstCategory: null,
+          createdAt: new Date('2026-09-12T11:50:00Z'),
+        };
+        expect(await store.putForecastCheck(check)).toEqual({ inserted: true });
+        expect(await store.putForecastCheck(check)).toEqual({ inserted: false });
+
+        // Before its moment passes it is not yet answerable; after, it is outstanding.
+        expect(await store.listUnmatchedChecks({ before: new Date('2026-09-12T14:00:00Z') })).toEqual([]);
+        const waiting = await store.listUnmatchedChecks({ before: new Date('2026-09-12T16:00:00Z') });
+        expect(waiting.map((c) => c.key)).toEqual(['k1']);
+        expect(waiting[0]!.validAt.toISOString()).toBe(validAt.toISOString());
+        expect(waiting[0]!.ceilingFt).toBe(3000);
+        expect(await store.listUnmatchedChecks({ station: 'CYKF', before: new Date('2026-09-12T16:00:00Z') })).toEqual([]);
+        expect(await store.listVerificationPairs({})).toEqual([]);
+
+        const outcome = {
+          checkKey: 'k1',
+          metarSha256: metar.sha256,
+          observedAt: metar.issuedAt!,
+          offsetMinutes: 0,
+          ceilingFt: 1200,
+          visibilitySm: 4,
+          visibilityAtLeast: false,
+          windDirTrue: 180,
+          windKt: 12,
+          gustKt: null,
+          category: 'IFR' as const,
+          matchedAt: new Date('2026-09-12T15:10:00Z'),
+        };
+        expect(await store.putForecastOutcome(outcome)).toEqual({ inserted: true });
+        expect(await store.putForecastOutcome(outcome)).toEqual({ inserted: false });
+
+        // Answered, so no longer outstanding, and now a pair.
+        expect(await store.listUnmatchedChecks({ before: new Date('2026-09-12T16:00:00Z') })).toEqual([]);
+        const pairs = await store.listVerificationPairs({ station: 'CYSN' });
+        expect(pairs).toHaveLength(1);
+        expect(pairs[0]!.check.key).toBe('k1');
+        expect(pairs[0]!.check.leadHours).toBeCloseTo(3.3, 5);
+        expect(pairs[0]!.outcome.ceilingFt).toBe(1200);
+        expect(pairs[0]!.check.visibilityAtLeast).toBe(true);
+        expect(pairs[0]!.outcome.visibilityAtLeast).toBe(false);
+        expect(pairs[0]!.outcome.category).toBe('IFR');
+        expect(pairs[0]!.outcome.observedAt.toISOString()).toBe('2026-09-12T15:00:00.000Z');
+        expect(await store.listVerificationPairs({ station: 'CYKF' })).toEqual([]);
+        expect(await store.listVerificationPairs({ since: new Date('2026-09-13T00:00:00Z') })).toEqual([]);
+      } finally {
+        await store.close();
+      }
+    });
   });
 }

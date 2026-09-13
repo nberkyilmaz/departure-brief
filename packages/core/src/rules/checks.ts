@@ -8,7 +8,7 @@
 import type { Conditions } from '../decode/conditions.js';
 import type { SkyCondition } from '../decode/groups/sky.js';
 import type { Visibility } from '../decode/groups/visibility.js';
-import { visibilityStatuteMiles } from '../decode/metar/derive.js';
+import { ceilingOf, visibilityStatuteMiles } from '../decode/metar/derive.js';
 import type { Sourced, Span } from '../decode/span.js';
 import { sliceSpan } from '../decode/span.js';
 import type { Airport } from '../domain/airport.js';
@@ -69,18 +69,6 @@ function finding(ctx: CheckContext, rule: string, severity: Severity, summary: s
   return { rule, severity, summary, waypoint: ctx.waypoint, basis: ctx.basis, basisKind: ctx.basisKind, at: ctx.at.toISOString(), values, citations };
 }
 
-/** Lowest BKN/OVC base or vertical visibility, with the group it came from. */
-export function ceilingOf(sky: readonly Sourced<SkyCondition>[]): Sourced<FeetAgl> | null {
-  let best: Sourced<FeetAgl> | null = null;
-  for (const layer of sky) {
-    const v = layer.value;
-    let h: FeetAgl | null = null;
-    if (v.kind === 'layer' && (v.amount === 'BKN' || v.amount === 'OVC')) h = v.base;
-    else if (v.kind === 'verticalVisibility') h = v.height;
-    if (h !== null && (best === null || h < best.value)) best = { value: h, span: layer.span };
-  }
-  return best;
-}
 
 const fmtVis = (v: Visibility): string => {
   switch (v.kind) {

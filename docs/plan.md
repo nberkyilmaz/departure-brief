@@ -607,7 +607,54 @@ Falls out of content-addressed, immutable briefings. Diff at the **verdict and
 finding level**, not raw text: new NOTAMs, verdict transitions, any value that
 crossed a personal minimum.
 
-### Step 10 — Forecast verification (M9)
+### Step 10 — Forecast verification (M9) — **done 2026-09-13**
+
+Built before step 8, which is still blocked on Canadian airspace geometry.
+This needed nothing new: every TAF and METAR it reads is already in the
+store.
+
+A briefing records what each waypoint's forecast asserted for that
+waypoint's ETA — ceiling, visibility, wind, flight category, and how far
+ahead the TAF was looking. That moment later passes, `holdshort verify`
+fetches the observations around it, and each prediction is paired with the
+observation nearest its moment (within 35 minutes, or it keeps waiting).
+Both halves are written once and never rewritten, so re-running only adds.
+
+**The judgement that makes it useful.** "How often was the TAF right" is
+unanswerable without a tolerance nobody agrees on. Which way it is wrong is
+answerable, and it is what matters: a forecast promising a better ceiling
+than arrives is the one that gets people airborne into weather they did not
+plan for. So every pair is scored for direction — **optimistic**,
+pessimistic or close — and the summary leads with how often the forecast
+was optimistic, and by how much at worst.
+
+Two pieces of aviation judgement the arithmetic would otherwise get wrong:
+
+- **`P6SM` is a floor, not a measurement.** Almost every fair-weather TAF
+  says "six miles or more", and observations of ten are routine. Scored as
+  exactly six, every such forecast would read as pessimistic and the
+  visibility column would measure the phrasing of TAFs rather than their
+  accuracy. An open-ended forecast that the observation meets is neither a
+  miss nor an error: it is reported as met, with no error at all. The same
+  goes for `CAVOK` and `9999`.
+- **A TEMPO is not a forecast, but it is not nothing either.** The
+  prevailing conditions are what a TAF asserts, so that is what is scored.
+  But when the category is missed, the check records whether an overlay in
+  the same TAF had allowed for what arrived — a forecaster who wrote
+  "TEMPO IFR" and got IFR was not blind to it.
+
+Nothing is claimed from a handful of pairs: below eight the summary says
+nothing rather than something unfounded.
+
+Surfaces: `holdshort verify [--fetch] [--station X] [--since ISO] [--json]`,
+and `GET /api/verification`. The API never fetches — pairing needs
+observations that may not exist yet, so it is a job, not a request.
+
+Verified live on real weather: a CYSN TAF issued 1940Z on 12 September
+forecast a ceiling 900 ft higher than the observation that arrived at the
+flight's ETA.
+
+### Step 10 — Forecast verification (M9) — original plan
 
 For each briefing, record the TAF prediction at ETA; later pair it with the
 actual METAR; accumulate per-station bias on ceiling and visibility.

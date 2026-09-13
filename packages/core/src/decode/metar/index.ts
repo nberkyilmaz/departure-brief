@@ -10,5 +10,5 @@ export type {
   WindShear,
 } from './types.js';
 export type { Remark, RemarkTime, LightningType, SensorName } from './remarks.js';
-export { ceiling, flightCategory, observationTime, visibilityStatuteMiles, windKnots } from './derive.js';
+export { ceiling, ceilingOf, flightCategory, flightCategoryOf, observationTime, visibilityStatuteMiles, windKnots } from './derive.js';
 export type { FlightCategory } from './derive.js';
