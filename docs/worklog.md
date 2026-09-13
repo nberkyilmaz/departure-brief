@@ -841,9 +841,42 @@ had just dropped into the repo root.
      weight the stated line does not reach, unless the aeroplane is already
      over gross, in which case it says which weight the limit belongs to.
 
+### The loop closed
+
+133. The review queue listed 22 figures and offered no way to act on them,
+     so the loading computation could never run. Added `holdshort wb
+     confirm`: the owner gives a figure they have read off the page, and the
+     handbook still has to agree. It records which of three things it could
+     establish — stated beside words naming the field, printed on a page the
+     owner names with nothing on that row to check it against, or
+     `--on-my-word` for a figure the scan cannot read at all — and the note
+     on every figure says which. Confirmations survive re-extraction.
+134. Two defects surfaced from *using* it rather than reading it. Searching
+     the whole handbook for the fuel arm matched "Total Usable: 48 gallons"
+     — the right number, the wrong ink — so the search is now limited to the
+     pages the data came from, and an arm must sit beside a word meaning an
+     arm. And the note on a confirmed figure claimed the owner had entered
+     it when the command had been run by me; it now says how a figure was
+     entered, not who entered it.
+135. Assembly moved out of the command into `src/wb/assemble.ts`, shared by
+     both paths, and the flat figure list now lives in the spec file — which
+     is what lets a later extraction run add to confirmations rather than
+     flatten them.
+136. **The whole chain now runs on the owner's handbook**: a 148-page scan,
+     a model reading five pages, six figures verified against the ink, the
+     rest confirmed by hand, and a loading that reproduces the handbook's
+     own worked example (2,300 lb, 102.9 moment/1000, CG 44.7 in) with every
+     limit traceable to the line it came from.
+137. And the payoff the spec asked for — extraction feeding a verdict: the
+     demonstrated crosswind read off page 42 now reaches the rules engine,
+     so the briefing's crosswind finding cites `C172MPOH.pdf p.42: Maximum
+     Demonstrated Crosswind Velocity...` instead of taking 15 kt on trust.
+     A figure typed into `aircraft/c172.json` still wins, since that is the
+     owner speaking about their own aeroplane.
+
 ### State at end of session 10
 
-- 619 tests across workspaces, typecheck clean, web builds.
+- 631 tests across workspaces, typecheck clean, web builds.
 - The relevance model runs locally and its eval gate passes at 85.7 %.
 - The owner's POH is read end to end: 6 figures verified, 22 awaiting the
   owner's review, and the computation refusing to run until the envelope is

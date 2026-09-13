@@ -9,6 +9,7 @@ import {
   pageImagePath,
   notamsForFlight,
   parseAircraftLimits,
+  withHandbookLimits,
   parseFlightPlan,
   parsePilotProfile,
   resolveFlight,
@@ -69,6 +70,14 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
     model: deps.llm?.description ?? null,
   }));
 
+  const aircraftDir = deps.aircraftDir ?? 'aircraft';
+  const docCacheDir = deps.docCacheDir ?? 'data/docs';
+  /** Everything but letters, digits and a dash is dropped, so the type can never walk out of the directory. */
+  const specPath = (type: string) => {
+    const safe = type.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    return safe.length > 0 ? join(aircraftDir, `${safe}.wb.json`) : null;
+  };
+
   app.get<{ Params: { id: string } }>('/api/airports/:id', async (req, reply) => {
     const airport = await store.getAirport(req.params.id);
     if (!airport) return reply.code(404).send({ error: `no airport ${req.params.id.toUpperCase()} in the store` });
@@ -82,6 +91,11 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
       plan = parseFlightPlan(body.plan);
       profile = parsePilotProfile(body.profile ?? defaultProfile());
       aircraft = body.aircraft === undefined || body.aircraft === null ? null : parseAircraftLimits(body.aircraft);
+      // Fill a missing demonstrated crosswind from the type's handbook data.
+      if (aircraft) {
+        const wb = specPath(aircraft.type);
+        if (wb && existsSync(wb)) aircraft = withHandbookLimits(aircraft, JSON.parse(readFileSync(wb, 'utf8')) as WeightBalanceSpec);
+      }
       asOf = body.asOf === undefined ? new Date() : new Date(body.asOf);
       if (Number.isNaN(asOf.getTime())) throw new Error('"asOf" must be an ISO instant');
     } catch (e) {
@@ -147,14 +161,6 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
     const limit = req.query.limit ? Number(req.query.limit) : 20;
     return store.listBriefings(req.query.flightKey, Number.isFinite(limit) ? limit : 20);
   });
-
-  const aircraftDir = deps.aircraftDir ?? 'aircraft';
-  const docCacheDir = deps.docCacheDir ?? 'data/docs';
-  /** Everything but letters, digits and a dash is dropped, so the type can never walk out of the directory. */
-  const specPath = (type: string) => {
-    const safe = type.toLowerCase().replace(/[^a-z0-9-]/g, '');
-    return safe.length > 0 ? join(aircraftDir, `${safe}.wb.json`) : null;
-  };
 
   /** The aircraft type's weight-and-balance data as extracted from its POH, every figure with its page. */
   app.get<{ Params: { type: string } }>('/api/aircraft/:type/wb', async (req, reply) => {

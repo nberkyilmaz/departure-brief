@@ -22,6 +22,7 @@
  * Compose database) unless `--memory` is given.
  */
 import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { dirname, resolve as resolvePath } from 'node:path';
 import { decodeMetar } from '../decode/metar/index.js';
 import { parseFlightPlan, type FlightPlan } from '../domain/flight.js';
@@ -41,6 +42,8 @@ import { readNasrDirectory } from '../fetch/nasr.js';
 import { NavCanadaClient } from '../fetch/navcanada.js';
 import { readOurAirportsDirectory } from '../fetch/ourairports.js';
 import { llmFromEnv } from '../llm/env.js';
+import { withHandbookLimits } from '../wb/aircraft.js';
+import type { WeightBalanceSpec } from '../wb/types.js';
 import { docCommand, wbCommand } from './docs.js';
 import { notamBriefingText, notamDocument } from '../notam/describe.js';
 import { notamsForFlight, type NotamBriefing } from '../notam/flight.js';
@@ -207,8 +210,16 @@ async function notamsFor(args: string[], store: Store, resolved: Awaited<ReturnT
   );
 }
 
+/**
+ * The aeroplane's limits, with anything the aircraft file leaves out filled
+ * in from its handbook data — so the crosswind check can cite the page the
+ * figure was read from instead of taking it on trust.
+ */
 function aircraftOf(file: string, plan: FlightPlan) {
-  return plan.aircraft ? parseAircraftLimits(readJsonRelative(file, plan.aircraft, '')) : null;
+  if (!plan.aircraft) return null;
+  const limits = parseAircraftLimits(readJsonRelative(file, plan.aircraft, ''));
+  const wb = join('aircraft', `${limits.type.toLowerCase().replace(/[^a-z0-9-]/g, '')}.wb.json`);
+  return existsSync(wb) ? withHandbookLimits(limits, JSON.parse(readFileSync(wb, 'utf8')) as WeightBalanceSpec) : limits;
 }
 
 async function briefCommand(args: string[]): Promise<void> {

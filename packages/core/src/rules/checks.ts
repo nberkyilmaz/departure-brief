@@ -57,6 +57,14 @@ const profileCitation = (p: PilotProfile): Citation => ({
   sha256: null,
 });
 
+/** The aeroplane's own limit, cited to the handbook line when it was read from one. */
+function aircraftCitation(aircraft: AircraftLimits): Citation {
+  const src = aircraft.demonstratedCrosswindSource;
+  return src
+    ? { kind: 'aircraft', station: null, raw: src.citedText, span: null, text: `${src.filename}${src.page > 0 ? ` p.${src.page}` : ''}: ${src.citedText}`, sha256: src.sha256 }
+    : { kind: 'aircraft', station: null, raw: null, span: null, text: aircraft.type, sha256: null };
+}
+
 function finding(ctx: CheckContext, rule: string, severity: Severity, summary: string, values: Record<string, unknown>, citations: Citation[]): Finding {
   return { rule, severity, summary, waypoint: ctx.waypoint, basis: ctx.basis, basisKind: ctx.basisKind, at: ctx.at.toISOString(), values, citations };
 }
@@ -190,7 +198,7 @@ export function checkCrosswind(ctx: CheckContext, c: Conditions): Finding[] {
         within ? 'ok' : ctx.violation,
         `${Math.round(value)} kt crosswind ${within ? 'within' : 'exceeds'} ${ctx.aircraft.type} demonstrated ${demo} kt`,
         { crosswindKt: value, demonstrated: demo },
-        [cite(ctx, c.wind.span), { kind: 'aircraft', station: null, raw: null, span: null, text: ctx.aircraft.type, sha256: null }],
+        [cite(ctx, c.wind.span), aircraftCitation(ctx.aircraft)],
       ),
     );
   }

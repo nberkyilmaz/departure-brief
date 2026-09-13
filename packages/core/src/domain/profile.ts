@@ -25,6 +25,12 @@ export interface PilotProfile {
 export interface AircraftLimits {
   readonly type: string;
   readonly demonstratedCrosswind: Knots | null;
+  /**
+   * Where the demonstrated crosswind was read, when it came out of the
+   * aircraft handbook rather than being typed in. Null means the owner
+   * stated it, and the finding cites the aircraft file instead.
+   */
+  readonly demonstratedCrosswindSource: { readonly filename: string; readonly page: number; readonly citedText: string; readonly sha256: string | null } | null;
 }
 
 function positive(o: Record<string, unknown>, key: string): number {
@@ -57,5 +63,6 @@ export function parseAircraftLimits(input: unknown): AircraftLimits {
   return {
     type: o['type'].trim(),
     demonstratedCrosswind: typeof x === 'number' && x > 0 ? (x as Knots) : null,
+    demonstratedCrosswindSource: null,
   };
 }

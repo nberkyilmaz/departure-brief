@@ -2,3 +2,4 @@ export type { CgEnvelope, DocumentCitation, Figure, Loading, LoadingResult, Load
 export { computeLoading, forwardLimitAt, IncompleteSpecError, loadingText } from './compute.js';
 export { assembleWeightBalance, isCgPointName, missingFrom } from './assemble.js';
 export type { FigureName, NamedFigure } from './assemble.js';
+export { withHandbookLimits } from './aircraft.js';
