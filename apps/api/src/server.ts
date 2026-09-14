@@ -6,6 +6,7 @@ import {
   diffBriefings,
   IncompleteSpecError,
   ingestStation,
+  ingestUpperWinds,
   pageImagePath,
   notamsForFlight,
   parseAircraftLimits,
@@ -167,6 +168,19 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
       const points = [...route.points, ...(route.alternate ? [route.alternate.point] : [])];
       const stations = [...new Set(points.map((p) => p.waypoint.airport?.icaoId ?? null).filter((s): s is string => s !== null))];
       for (const id of stations) await ingestStation({ store, awc }, id);
+      /*
+       * Upper winds are published for a few dozen places, almost never the
+       * aerodromes on a light aircraft's route, so they are fetched for the
+       * route rather than per station — one request for every candidate.
+       */
+      if (deps.navcanada) {
+        try {
+          await ingestUpperWinds({ store, navcanada: deps.navcanada }, points.map((p) => p.waypoint.position));
+        } catch (e) {
+          // A briefing without upper winds is worth having; it says so itself.
+          req.log.warn({ err: e }, 'upper winds could not be fetched');
+        }
+      }
     }
     // The route is already known good, so this cannot raise UnknownWaypoint.
     const resolved = await resolveFlight(store, plan, asOf);

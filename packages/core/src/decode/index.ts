@@ -20,3 +20,4 @@ export type {
 } from './conditions.js';
 export * from './metar/index.js';
 export * from './taf/index.js';
+export * from './upperwind/index.js';

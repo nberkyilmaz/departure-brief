@@ -1,7 +1,7 @@
 import type { Span } from '../decode/span.js';
 
 /** Bump when a rule's meaning or a finding's shape changes. */
-export const RULES_VERSION = 2;
+export const RULES_VERSION = 3;
 
 export type Verdict = 'go' | 'marginal' | 'no-go';
 
@@ -15,7 +15,7 @@ export type Severity = 'ok' | 'advisory' | 'marginal' | 'no-go';
 
 /** Where a finding's inputs came from. The raw text and span are the grounding. */
 export interface Citation {
-  readonly kind: 'taf' | 'metar' | 'airport' | 'profile' | 'aircraft' | 'plan';
+  readonly kind: 'taf' | 'metar' | 'upperwind' | 'airport' | 'profile' | 'aircraft' | 'plan';
   readonly station: string | null;
   /** The whole report (or record) the span indexes into. */
   readonly raw: string | null;

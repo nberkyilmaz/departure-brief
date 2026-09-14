@@ -1,6 +1,7 @@
 import { decodeMetar, METAR_DECODER_VERSION } from '../decode/metar/index.js';
 import { decodeTaf, TAF_DECODER_VERSION } from '../decode/taf/index.js';
 import { decodeNotam, NOTAM_DECODER_VERSION } from '../notam/decode.js';
+import { decodeUpperWind, UPPERWIND_DECODER_VERSION } from '../decode/upperwind/decode.js';
 import type { RawReport, ReportKind, ReportStore } from './types.js';
 
 export interface IngestCounts {
@@ -17,6 +18,7 @@ const DECODERS: Partial<Record<ReportKind, { version: number; decode: (raw: stri
   metar: { version: METAR_DECODER_VERSION, decode: decodeMetar },
   taf: { version: TAF_DECODER_VERSION, decode: decodeTaf },
   notam: { version: NOTAM_DECODER_VERSION, decode: decodeNotam },
+  upperwind: { version: UPPERWIND_DECODER_VERSION, decode: decodeUpperWind },
 };
 
 /**

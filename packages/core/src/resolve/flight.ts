@@ -3,6 +3,7 @@ import type { FlightPlan } from '../domain/flight.js';
 import type { RawReport, Store } from '../store/types.js';
 import { forecastAt, type WaypointForecast } from './forecast.js';
 import { resolveRoute, type Route, type RoutePoint } from './route.js';
+import { windAt, type WaypointWind } from './wind.js';
 
 export interface ResolvedPoint {
   readonly point: RoutePoint;
@@ -10,6 +11,12 @@ export interface ResolvedPoint {
   readonly forecast: WaypointForecast | null;
   /** Latest observation at the field itself, when it reports; for the departure this is "now". */
   readonly metar: { readonly report: RawReport; readonly decoded: DecodedMetar } | null;
+  /**
+   * The forecast wind at the planned cruise altitude. Null when no upper
+   * wind forecast covers this place and time — never filled in with a
+   * guess, because the whole point of the number is the fuel it implies.
+   */
+  readonly wind: WaypointWind | null;
 }
 
 export interface ResolvedFlight {
@@ -29,11 +36,12 @@ async function latestMetar(store: Store, station: string, asOf: Date): Promise<R
   return { report, decoded: stored ? (stored.decoded as DecodedMetar) : decodeMetar(report.body) };
 }
 
-async function resolvePoint(store: Store, point: RoutePoint, asOf: Date): Promise<ResolvedPoint> {
+async function resolvePoint(store: Store, point: RoutePoint, asOf: Date, cruiseAltitudeFt: number): Promise<ResolvedPoint> {
   const station = point.waypoint.airport?.icaoId ?? null;
   const forecast = await forecastAt(store, point.waypoint.position, station, point.eta, asOf);
   const metar = station ? await latestMetar(store, station, asOf) : null;
-  return { point, forecast, metar };
+  const wind = await windAt(store, point.waypoint.position, station, cruiseAltitudeFt, point.eta, asOf);
+  return { point, forecast, metar, wind };
 }
 
 /**
@@ -42,8 +50,9 @@ async function resolvePoint(store: Store, point: RoutePoint, asOf: Date): Promis
  */
 export async function resolveFlight(store: Store, plan: FlightPlan, asOf: Date): Promise<ResolvedFlight> {
   const route = await resolveRoute(store, plan);
+  const cruise = plan.cruise.altitude;
   const points = [];
-  for (const p of route.points) points.push(await resolvePoint(store, p, asOf));
-  const alternate = route.alternate ? await resolvePoint(store, route.alternate.point, asOf) : null;
+  for (const p of route.points) points.push(await resolvePoint(store, p, asOf, cruise));
+  const alternate = route.alternate ? await resolvePoint(store, route.alternate.point, asOf, cruise) : null;
   return { plan, asOf, route, points, alternate };
 }

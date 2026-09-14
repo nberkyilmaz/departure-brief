@@ -1,5 +1,5 @@
 {
-  "sha256": "662175c80d3f78656314807dc18d5dae9ec615195ae8a69a40273adc1531c6f0",
+  "sha256": "919d94b27b93c4bc629c905df327cee4d73f5e938e1da15c6286293b2196585f",
   "flightKey": "64b9a55a09f378b5115652273c5540c84abdb40d232d013620b4c33cf99be971",
   "asOf": "2026-09-12T20:00:00.000Z",
   "createdAt": "2026-09-12T20:00:00.000Z",
@@ -45,7 +45,7 @@
     },
     "asOf": "2026-09-12T20:00:00.000Z",
     "versions": {
-      "rules": 2,
+      "rules": 3,
       "metarDecoder": 2,
       "tafDecoder": 1,
       "notamDecoder": 1,
@@ -1468,7 +1468,8 @@
             "distanceNm": 0,
             "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201"
           },
-          "metar": null
+          "metar": null,
+          "wind": null
         },
         {
           "waypoint": "CYKF",
@@ -1480,7 +1481,8 @@
             "distanceNm": 0,
             "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9"
           },
-          "metar": null
+          "metar": null,
+          "wind": null
         }
       ],
       "alternate": {
@@ -1493,7 +1495,8 @@
           "distanceNm": 0,
           "sha256": "7b9fcc95247dd966181b47fd17d7e639503dd8e4ca503bfcfbee487f2bf4aa0c"
         },
-        "metar": null
+        "metar": null,
+        "wind": null
       },
       "reports": [
         {
@@ -1703,7 +1706,7 @@
       ]
     },
     "briefing": {
-      "rulesVersion": 2,
+      "rulesVersion": 3,
       "profile": {
         "name": "default",
         "version": 1

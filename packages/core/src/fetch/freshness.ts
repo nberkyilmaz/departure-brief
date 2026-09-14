@@ -10,7 +10,8 @@
  *
  * The windows are set by how often each product is actually issued. A METAR
  * comes hourly with specials in between, so ten minutes is generous. A TAF
- * is issued four times a day, and a NOTAM changes when it changes.
+ * is issued four times a day, a NOTAM changes when it changes, and upper
+ * winds come three times a day.
  */
 import type { ReportKind } from '../store/types.js';
 
@@ -18,6 +19,8 @@ export const DEFAULT_FRESHNESS_MS: Readonly<Record<ReportKind, number>> = {
   metar: 10 * 60_000,
   taf: 30 * 60_000,
   notam: 30 * 60_000,
+  // Three bulletins a day, so asking more than hourly buys nothing at all.
+  upperwind: 60 * 60_000,
 };
 
 export interface FreshnessStore {

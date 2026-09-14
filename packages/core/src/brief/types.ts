@@ -23,6 +23,8 @@ export interface BriefingPointInputs {
     readonly sha256: string;
   } | null;
   readonly metar: string | null;
+  /** The upper wind forecast this point's cruise wind came from. */
+  readonly wind: { readonly station: string; readonly distanceNm: number; readonly altitudeFt: number; readonly sha256: string } | null;
 }
 
 /**

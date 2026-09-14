@@ -1,6 +1,8 @@
 /**
  * OurAirports parsing against a verbatim slice of the 2026-09-07 snapshot
- * (test/fixtures/fetch/ourairports): CYSN, CYKF, CYHM, KJFK and CNC3.
+ * (test/fixtures/fetch/ourairports): CYSN, CYKF, CYHM, CYYZ, KJFK and
+ * CNC3. Toronto is there because it is the upper wind site the others
+ * borrow from — the nearest one to any of them.
  */
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -13,14 +15,14 @@ const byIcao = (id: string) => all.find((a) => a.icaoId === id)!;
 
 describe('readOurAirportsDirectory', () => {
   it('reads every airport in the slice with source and snapshot', () => {
-    expect(all.map((a) => a.icaoId).sort()).toEqual(['CNC3', 'CYHM', 'CYKF', 'CYSN', 'KJFK']);
+    expect(all.map((a) => a.icaoId).sort()).toEqual(['CNC3', 'CYHM', 'CYKF', 'CYSN', 'CYYZ', 'KJFK']);
     expect(new Set(all.map((a) => a.source))).toEqual(new Set(['ourairports']));
     expect(new Set(all.map((a) => a.cycle))).toEqual(new Set(['2026-09-07']));
   });
 
   it('filters by country', () => {
     const ca = readOurAirportsDirectory(dir, { snapshot: '2026-09-07', country: 'ca' });
-    expect(ca.map((a) => a.icaoId).sort()).toEqual(['CNC3', 'CYHM', 'CYKF', 'CYSN']);
+    expect(ca.map((a) => a.icaoId).sort()).toEqual(['CNC3', 'CYHM', 'CYKF', 'CYSN', 'CYYZ']);
   });
 
   it('CYSN: identity, position, elevation, three runways with true headings', () => {

@@ -33,6 +33,7 @@ function pointInputs(p: ResolvedPoint): BriefingPointInputs {
       ? { station: p.forecast.station, source: p.forecast.source, distanceNm: p.forecast.distance, sha256: p.forecast.report.sha256 }
       : null,
     metar: p.metar?.report.sha256 ?? null,
+    wind: p.wind ? { station: p.wind.station, distanceNm: p.wind.distance, altitudeFt: p.wind.wind.altitudeFt, sha256: p.wind.report.sha256 } : null,
   };
 }
 
@@ -44,6 +45,7 @@ function reportRefs(points: readonly ResolvedPoint[], notams: NotamBriefing | nu
   for (const p of points) {
     add(p.forecast?.report);
     add(p.metar?.report);
+    add(p.wind?.report);
   }
   for (const n of notams?.items ?? []) add(n.report);
   return [...seen.values()].sort((a, b) => a.sha256.localeCompare(b.sha256));
