@@ -13,7 +13,7 @@
  * is issued four times a day, a NOTAM changes when it changes, and upper
  * winds come three times a day.
  */
-import type { ReportKind } from '../store/types.js';
+import type { FetchAttempt, ReportKind } from '../store/types.js';
 
 export const DEFAULT_FRESHNESS_MS: Readonly<Record<ReportKind, number>> = {
   metar: 10 * 60_000,
@@ -21,11 +21,16 @@ export const DEFAULT_FRESHNESS_MS: Readonly<Record<ReportKind, number>> = {
   notam: 30 * 60_000,
   // Three bulletins a day, so asking more than hourly buys nothing at all.
   upperwind: 60 * 60_000,
+  // A hazard advisory can be issued at any moment, and is the one product
+  // where being a quarter of an hour behind actually matters.
+  sigmet: 15 * 60_000,
 };
 
 export interface FreshnessStore {
   /** When this station's reports of this kind were last fetched, whatever came back. */
   lastFetchAt(station: string, kind: ReportKind): Promise<Date | null>;
+  /** Records the asking, so a request that came back empty still counts as recent. */
+  putFetchAttempt(attempt: FetchAttempt): Promise<void>;
 }
 
 /**
@@ -72,4 +77,17 @@ export async function decideFetch(
     lastFetchAt: last,
     reason: `${station} ${kind} was fetched ${Math.round(ageMs / 60_000)} min ago; using what is stored`,
   };
+}
+
+/**
+ * Record that an upstream was asked. Called after the request rather than
+ * before it, so a client that throws before reaching the network does not
+ * leave a mark saying it did.
+ *
+ * Without this, a product whose usual answer is "nothing in force" would be
+ * asked for again on every single briefing: there would be no report to
+ * hang the fetch on, and so no evidence that anybody had asked.
+ */
+export async function recordFetchAttempt(store: FreshnessStore, scope: string, kind: ReportKind, at: Date, request: string): Promise<void> {
+  await store.putFetchAttempt({ scope: scope.trim().toUpperCase(), kind, attemptedAt: at, request });
 }

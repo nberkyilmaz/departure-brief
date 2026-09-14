@@ -7,7 +7,7 @@ import type { Airport } from '../domain/airport.js';
 import type { AssessmentRow, CitationMatch, NotamAssessment } from '../notam/assess.js';
 import type { ForecastCheck, ForecastOutcome, VerificationPair } from '../verify/types.js';
 import { distanceNm } from '../domain/geo.js';
-import type { DecodedRow, FetchEvent, ListRawQuery, RawReport, ReportKind, Store } from './types.js';
+import type { DecodedRow, FetchAttempt, FetchEvent, ListRawQuery, RawReport, ReportKind, Store } from './types.js';
 
 export const DEFAULT_DATABASE_URL = 'postgres://holdshort:holdshort@localhost:5433/holdshort';
 
@@ -122,10 +122,13 @@ export class PostgresStore implements Store {
 
   async listRaw(query: ListRawQuery): Promise<RawReport[]> {
     const res = await this.pool.query<RawRow>(
+      // A null station means every report of this kind, for the products
+      // that belong to an area rather than to an aerodrome.
       `select r.sha256, r.kind, r.source, r.station, r.body, r.issued_at, r.upstream from raw_reports r
        where r.kind = $2
          and (
-           (r.station = $1 and ($4::timestamptz is null or r.first_seen_at <= $4))
+           ($1::text is null and ($4::timestamptz is null or r.first_seen_at <= $4))
+           or (r.station = $1 and ($4::timestamptz is null or r.first_seen_at <= $4))
            or exists (
              select 1 from report_fetches f
              where f.sha256 = r.sha256 and f.station = $1 and ($4::timestamptz is null or f.fetched_at <= $4)
@@ -133,7 +136,7 @@ export class PostgresStore implements Store {
          )
        order by r.issued_at desc nulls last, r.first_seen_at desc
        limit $3`,
-      [query.station, query.kind, query.limit ?? 20, query.knownBy ?? null],
+      [query.station ?? null, query.kind, query.limit ?? 20, query.knownBy ?? null],
     );
     return res.rows.map(toRawReport);
   }
@@ -247,11 +250,25 @@ export class PostgresStore implements Store {
     return res.rows.map(toBriefing);
   }
 
+  async putFetchAttempt(attempt: FetchAttempt): Promise<void> {
+    await this.pool.query(
+      `insert into fetch_attempts (scope, kind, attempted_at, request) values ($1, $2, $3, $4)
+       on conflict (scope, kind, attempted_at) do nothing`,
+      [attempt.scope.toUpperCase(), attempt.kind, attempt.attemptedAt, attempt.request],
+    );
+  }
+
   async lastFetchAt(station: string, kind: ReportKind): Promise<Date | null> {
     const res = await this.pool.query<{ last: Date | null }>(
-      `select max(f.fetched_at) as last
-       from report_fetches f join raw_reports r on r.sha256 = f.sha256
-       where r.kind = $2 and (f.station = $1 or r.station = $1)`,
+      // The later of: when something was last received for this station, and
+      // when the upstream was last asked — which are different whenever the
+      // answer was "nothing", and that is the usual answer for some products.
+      `select greatest(
+         (select max(f.fetched_at)
+          from report_fetches f join raw_reports r on r.sha256 = f.sha256
+          where r.kind = $2 and (f.station = $1 or r.station = $1)),
+         (select max(a.attempted_at) from fetch_attempts a where a.scope = $1 and a.kind = $2)
+       ) as last`,
       [station.toUpperCase(), kind],
     );
     return res.rows[0]?.last ?? null;

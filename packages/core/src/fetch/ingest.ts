@@ -1,6 +1,6 @@
 import { storeAndDecode, type IngestCounts } from '../store/decode.js';
 import type { ReportKind, ReportStore } from '../store/types.js';
-import { decideFetch, DEFAULT_FRESHNESS_MS, type FreshnessDecision } from './freshness.js';
+import { decideFetch, DEFAULT_FRESHNESS_MS, recordFetchAttempt, type FreshnessDecision } from './freshness.js';
 import type { AwcClient } from './awc.js';
 import type { FaaNotamClient } from './notam.js';
 
@@ -42,6 +42,7 @@ export async function ingestStation(deps: IngestDeps, station: string, opts: Ing
   let metar = nothing;
   if (metarDecision.fetched) {
     const metars = await deps.awc.metars([station]);
+    await recordFetchAttempt(deps.store, station, 'metar', now, metars.request);
     metar = await storeAndDecode(deps.store, metars.reports, metars.request, now);
   } else skipped.push(metarDecision);
 
@@ -49,6 +50,7 @@ export async function ingestStation(deps: IngestDeps, station: string, opts: Ing
   let taf = nothing;
   if (tafDecision.fetched) {
     const tafs = await deps.awc.tafs([station]);
+    await recordFetchAttempt(deps.store, station, 'taf', now, tafs.request);
     taf = await storeAndDecode(deps.store, tafs.reports, tafs.request, now);
   } else skipped.push(tafDecision);
 

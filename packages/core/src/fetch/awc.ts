@@ -117,4 +117,56 @@ export class AwcClient {
     });
     return { request: url, reports };
   }
+
+  /**
+   * Hazard advisories: the international SIGMETs and the American domestic
+   * SIGMETs and AIRMETs, which are two feeds of the same thing with their
+   * fields named differently.
+   *
+   * Unlike a METAR there is nothing to ask for by station — these belong to
+   * areas — so both feeds come whole and the geometry decides what is about
+   * any particular flight. That is a few hundred kilobytes for an answer
+   * that is usually "none of these", which is why the freshness window
+   * matters more here than anywhere else.
+   */
+  async sigmets(): Promise<AwcFetch> {
+    const reports: RawReport[] = [];
+    const requests: string[] = [];
+    for (const [path, rawField] of [
+      ['isigmet', 'rawSigmet'],
+      ['airsigmet', 'rawAirSigmet'],
+    ] as const) {
+      const url = `${this.baseUrl}/${path}?format=json`;
+      requests.push(url);
+      const res = await this.http.get(url, { headers: { Accept: 'application/json' } });
+      // A feed with nothing in it answers 204, which is not a failure.
+      if (res.status === 204) continue;
+      expectOk(url, res);
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(res.body);
+      } catch {
+        throw new AwcError(`${path} response is not JSON`, url);
+      }
+      if (!Array.isArray(parsed)) throw new AwcError(`${path} response is not an array`, url);
+      for (const record of parsed as Record<string, unknown>[]) {
+        if (typeof record[rawField] !== 'string') continue;
+        const from = record['validTimeFrom'];
+        reports.push(
+          rawReport({
+            kind: 'sigmet',
+            source: 'awc',
+            // The region it is about, which is not an aerodrome.
+            station: typeof record['firId'] === 'string' ? record['firId'] : typeof record['icaoId'] === 'string' ? (record['icaoId'] as string) : null,
+            // The record as sent: the bulletin is inside it, and the area
+            // has already been reduced to coordinates by the service.
+            body: JSON.stringify(record),
+            issuedAt: typeof from === 'number' ? new Date(from * 1000) : null,
+            upstream: record,
+          }),
+        );
+      }
+    }
+    return { request: requests.join(' '), reports };
+  }
 }

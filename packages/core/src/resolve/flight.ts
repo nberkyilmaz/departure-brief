@@ -2,6 +2,7 @@ import { decodeMetar, METAR_DECODER_VERSION, type DecodedMetar } from '../decode
 import type { FlightPlan } from '../domain/flight.js';
 import type { RawReport, Store } from '../store/types.js';
 import { forecastAt, type WaypointForecast } from './forecast.js';
+import { hazardsKnownBy, type HazardAdvisory } from './hazards.js';
 import { resolveRoute, type Route, type RoutePoint } from './route.js';
 import { windAt, type WaypointWind } from './wind.js';
 
@@ -26,6 +27,12 @@ export interface ResolvedFlight {
   readonly route: Route;
   readonly points: readonly ResolvedPoint[];
   readonly alternate: ResolvedPoint | null;
+  /**
+   * Hazard advisories known at `asOf`. Kept on the flight rather than the
+   * points, because an area is not a place: which points it concerns is
+   * decided by geometry, not by which aerodrome it was filed under.
+   */
+  readonly hazards: readonly HazardAdvisory[];
 }
 
 async function latestMetar(store: Store, station: string, asOf: Date): Promise<ResolvedPoint['metar']> {
@@ -54,5 +61,7 @@ export async function resolveFlight(store: Store, plan: FlightPlan, asOf: Date):
   const points = [];
   for (const p of route.points) points.push(await resolvePoint(store, p, asOf, cruise));
   const alternate = route.alternate ? await resolvePoint(store, route.alternate.point, asOf, cruise) : null;
-  return { plan, asOf, route, points, alternate };
+  const last = [...points, ...(alternate ? [alternate] : [])].reduce((latest, p) => Math.max(latest, p.point.eta.getTime()), asOf.getTime());
+  const hazards = await hazardsKnownBy(store, asOf, new Date(last));
+  return { plan, asOf, route, points, alternate, hazards };
 }

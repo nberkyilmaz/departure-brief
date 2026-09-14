@@ -3,7 +3,7 @@ import { airportPreference, type Airport } from '../domain/airport.js';
 import { distanceNm } from '../domain/geo.js';
 import type { AssessmentRow } from '../notam/assess.js';
 import type { ForecastCheck, ForecastOutcome, VerificationPair } from '../verify/types.js';
-import type { DecodedRow, FetchEvent, ListRawQuery, RawReport, ReportKind, Store } from './types.js';
+import type { DecodedRow, FetchAttempt, FetchEvent, ListRawQuery, RawReport, ReportKind, Store } from './types.js';
 
 /**
  * In-memory store with the same semantics as Postgres. For tests, the CLI's
@@ -12,6 +12,7 @@ import type { DecodedRow, FetchEvent, ListRawQuery, RawReport, ReportKind, Store
 export class MemoryStore implements Store {
   private readonly raw = new Map<string, RawReport>();
   private readonly fetches: { sha256: string; event: FetchEvent }[] = [];
+  private readonly attempts: FetchAttempt[] = [];
   private readonly decoded = new Map<string, DecodedRow>();
   private readonly airports = new Map<string, Airport>();
   private readonly briefings = new Map<string, StoredBriefing>();
@@ -40,13 +41,18 @@ export class MemoryStore implements Store {
   async listRaw(query: ListRawQuery): Promise<RawReport[]> {
     const limit = query.limit ?? 20;
     const knownBy = query.knownBy?.getTime() ?? Number.POSITIVE_INFINITY;
+    const station = query.station ?? null;
+    const seenBy = (sha: string) => (this.firstSeen.get(sha)?.getTime() ?? 0) <= knownBy;
     const fetchedForStation = (sha: string) => {
-      const at = this.fetchedFor.get(sha)?.get(query.station);
+      if (station === null) return false;
+      const at = this.fetchedFor.get(sha)?.get(station);
       return at !== undefined && at.getTime() <= knownBy;
     };
     return [...this.raw.values()]
       .filter((r) => r.kind === query.kind)
-      .filter((r) => (r.station === query.station && (this.firstSeen.get(r.sha256)?.getTime() ?? 0) <= knownBy) || fetchedForStation(r.sha256))
+      // No station asked for means every report of this kind: a SIGMET
+      // belongs to an area, not to an aerodrome.
+      .filter((r) => (station === null ? seenBy(r.sha256) : (r.station === station && seenBy(r.sha256)) || fetchedForStation(r.sha256)))
       .sort((a, b) => (b.issuedAt?.getTime() ?? 0) - (a.issuedAt?.getTime() ?? 0))
       .slice(0, limit);
   }
@@ -130,8 +136,16 @@ export class MemoryStore implements Store {
     return this.assessments.get(`${notamSha256}|${contextHash}|${promptVersion}|${model}`) ?? null;
   }
 
+  async putFetchAttempt(attempt: FetchAttempt): Promise<void> {
+    this.attempts.push(attempt);
+  }
+
   async lastFetchAt(station: string, kind: ReportKind): Promise<Date | null> {
     let latest: Date | null = null;
+    for (const a of this.attempts) {
+      if (a.kind !== kind || a.scope.toUpperCase() !== station) continue;
+      if (latest === null || a.attemptedAt > latest) latest = a.attemptedAt;
+    }
     for (const f of this.fetches) {
       const report = this.raw.get(f.sha256);
       if (!report || report.kind !== kind) continue;

@@ -14,5 +14,5 @@ export { parseCsv } from './csv.js';
 export type { IngestDeps, IngestResult } from './ingest.js';
 export { ingestUpperWinds, upperWindCandidates, MAX_UPPERWIND_SITES } from './winds.js';
 export type { UpperWindIngest } from './winds.js';
-export { decideFetch, shouldFetch, DEFAULT_FRESHNESS_MS } from './freshness.js';
+export { decideFetch, recordFetchAttempt, shouldFetch, DEFAULT_FRESHNESS_MS } from './freshness.js';
 export type { FreshnessDecision, FreshnessStore } from './freshness.js';

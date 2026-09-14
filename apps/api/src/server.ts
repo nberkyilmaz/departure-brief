@@ -7,6 +7,9 @@ import {
   IncompleteSpecError,
   ingestStation,
   ingestUpperWinds,
+  recordFetchAttempt,
+  shouldFetch,
+  storeAndDecode,
   pageImagePath,
   notamsForFlight,
   parseAircraftLimits,
@@ -32,6 +35,13 @@ import { existsSync, readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fixedWindow, type RateLimit } from './ratelimit.js';
+
+/**
+ * Hazard advisories are not about any one station, so the fetch is recorded
+ * against this name — it is how "we asked the service a moment ago" is
+ * remembered for a product that has no station of its own.
+ */
+const HAZARD_STATION = 'WORLD';
 
 export interface ServerDeps {
   readonly store: Store;
@@ -180,6 +190,24 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
           // A briefing without upper winds is worth having; it says so itself.
           req.log.warn({ err: e }, 'upper winds could not be fetched');
         }
+      }
+      /*
+       * Hazard advisories belong to areas rather than stations, so they are
+       * fetched whole and the geometry decides what is about this flight.
+       * Not per station, and not per briefing either: the window keeps it to
+       * once a quarter of an hour however many people are briefing.
+       */
+      try {
+        const now = new Date();
+        if (await shouldFetch(store, HAZARD_STATION, 'sigmet', now)) {
+          const fetched = await awc.sigmets();
+          // Recorded as asked whether or not anything was in force, which
+          // most of the time it is not.
+          await recordFetchAttempt(store, HAZARD_STATION, 'sigmet', now, fetched.request);
+          await storeAndDecode(store, fetched.reports, fetched.request, now, HAZARD_STATION);
+        }
+      } catch (e) {
+        req.log.warn({ err: e }, 'hazard advisories could not be fetched');
       }
     }
     // The route is already known good, so this cannot raise UnknownWaypoint.

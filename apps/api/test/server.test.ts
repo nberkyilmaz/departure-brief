@@ -43,6 +43,9 @@ for (const id of ['KTEB', 'N07', 'KHPN', 'KJFK']) {
   routes[`${AWC_BASE_URL}/metar?ids=${id}&format=json`] = id === 'N07' ? { status: 204 } : three;
   routes[`${AWC_BASE_URL}/taf?ids=${id}&format=json`] = id === 'N07' ? { status: 204 } : threeTaf;
 }
+// Hazard advisories: nothing in force, which is what the service says most days.
+routes[`${AWC_BASE_URL}/isigmet?format=json`] = { status: 204 };
+routes[`${AWC_BASE_URL}/airsigmet?format=json`] = { status: 204 };
 
 async function makeApp(staticDir: string | null = null) {
   const store = new MemoryStore();
@@ -133,11 +136,30 @@ describe('POST /api/briefings', () => {
      * One METAR and one TAF request in total, for a plan naming five points.
      * A repeated waypoint was never a second request; the first response
      * carried KHPN and KJFK as well as KTEB, so by the time those came round
-     * the freshness window already had them.
+     * the freshness window already had them. Then the two hazard feeds,
+     * which are not per station: they are the whole world, once, however
+     * many aerodromes the plan names.
      */
-    expect(calls).toEqual([`${AWC_BASE_URL}/metar?ids=KTEB&format=json`, `${AWC_BASE_URL}/taf?ids=KTEB&format=json`]);
+    expect(calls).toEqual([
+      `${AWC_BASE_URL}/metar?ids=KTEB&format=json`,
+      `${AWC_BASE_URL}/taf?ids=KTEB&format=json`,
+      `${AWC_BASE_URL}/isigmet?format=json`,
+      `${AWC_BASE_URL}/airsigmet?format=json`,
+    ]);
     // N07 has no ICAO identifier, so there are no reports filed under it to ask for.
     expect(calls.some((u) => u.includes('N07'))).toBe(false);
+  });
+
+  it('asks for the hazard feeds once, not once per briefing', async () => {
+    const { app, calls } = await makeCountingApp();
+    const payload = { plan, profile, asOf: '2026-09-07T12:30:00Z' };
+    await app.inject({ method: 'POST', url: '/api/briefings', payload });
+    const first = calls.filter((u) => u.includes('sigmet')).length;
+    expect(first).toBe(2);
+    await app.inject({ method: 'POST', url: '/api/briefings', payload });
+    // A quarter of an hour is as often as anybody needs the world's worth
+    // of advisories, however many people are briefing.
+    expect(calls.filter((u) => u.includes('sigmet')).length).toBe(first);
   });
 
   it('refuses a caller asking far too often, and says when to come back', async () => {

@@ -129,6 +129,12 @@ export async function notamsForFlight(deps: NotamDeps, flight: ResolvedFlight, a
       try {
         const fetched = await deps.navcanada.notams(site);
         fetchedAt = now();
+        /*
+         * Recorded as asked even when nothing came back — a quiet aerodrome
+         * is a real answer, and without this it would be asked about again
+         * on every briefing.
+         */
+        await deps.store.putFetchAttempt({ scope: site.toUpperCase(), kind: 'notam', attemptedAt: fetchedAt, request: fetched.request });
         // The fetch is recorded as being for this site, so a FIR-wide NOTAM
         // stored under the first site is still listed under the others.
         await storeAndDecode(deps.store, fetched.reports, fetched.request, fetchedAt, site);

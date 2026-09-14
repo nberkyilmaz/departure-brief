@@ -6,6 +6,7 @@ import { toZulu } from '../domain/time.js';
 import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
 import { checkConditions, checkNight, type CheckContext } from './checks.js';
 import { checkDaylight } from './daylight.js';
+import { checkHazards } from './hazards.js';
 import { checkWindAloft } from './windAloft.js';
 import { RULES_VERSION, verdictOf, worst, type Briefing, type Finding, type PointVerdict } from './types.js';
 
@@ -26,7 +27,20 @@ const hhmm = (d: Date) => toZulu(d).slice(11, 16) + 'Z';
 /** How long a METAR is treated as describing "now" for a point's ETA. */
 export const OBSERVATION_WINDOW_MS = 90 * 60_000;
 
-function evaluatePoint(p: ResolvedPoint, flight: ResolvedFlight, profile: PilotProfile, aircraft: AircraftLimits | null): PointVerdict {
+/** Departure to the last arrival, which is when an advisory could matter. */
+function flightWindow(flight: ResolvedFlight): { from: Date; to: Date } {
+  const points = [...flight.points, ...(flight.alternate ? [flight.alternate] : [])];
+  const times = points.map((p) => p.point.eta.getTime());
+  return { from: new Date(Math.min(...times)), to: new Date(Math.max(...times)) };
+}
+
+function evaluatePoint(
+  p: ResolvedPoint,
+  flight: ResolvedFlight,
+  profile: PilotProfile,
+  aircraft: AircraftLimits | null,
+  previous: ResolvedPoint | null,
+): PointVerdict {
   const w = p.point.waypoint;
   const at = p.point.eta;
   const night = isNight(w.position, at);
@@ -109,6 +123,26 @@ function evaluatePoint(p: ResolvedPoint, flight: ResolvedFlight, profile: PilotP
 
   findings.push(...checkDaylight({ waypoint: w.id, position: w.position, at, nightAllowed: profile.nightAllowed }));
 
+  /*
+   * A hazard belongs to the leg that arrives here, not to the point alone:
+   * a route can pass through an area without any of its waypoints being
+   * inside one. The departure has no leg before it, so it is judged on its
+   * own position.
+   */
+  const arriving = previous ? [previous.point.waypoint.position, w.position] : [w.position];
+  findings.push(
+    ...checkHazards(
+      {
+        waypoint: w.id,
+        at,
+        route: arriving,
+        window: flightWindow(flight),
+        cruiseAltitudeFt: flight.plan.cruise.altitude,
+      },
+      flight.hazards,
+    ),
+  );
+
   findings.push(...checkNight({ ...base, basis: 'time', basisKind: 'time', violation: 'no-go', source: { kind: 'taf', station: null, raw: '', sha256: null } }));
 
   return { waypoint: w.id, at: at.toISOString(), verdict: verdictOf(findings), night, findings };
@@ -120,8 +154,8 @@ function evaluatePoint(p: ResolvedPoint, flight: ResolvedFlight, profile: PilotP
  * report text and span it came from.
  */
 export function evaluateFlight(flight: ResolvedFlight, profile: PilotProfile, aircraft: AircraftLimits | null): Briefing {
-  const points = flight.points.map((p) => evaluatePoint(p, flight, profile, aircraft));
-  const alternate = flight.alternate ? evaluatePoint(flight.alternate, flight, profile, aircraft) : null;
+  const points = flight.points.map((p, i) => evaluatePoint(p, flight, profile, aircraft, i > 0 ? (flight.points[i - 1] ?? null) : null));
+  const alternate = flight.alternate ? evaluatePoint(flight.alternate, flight, profile, aircraft, flight.points[flight.points.length - 1] ?? null) : null;
   return {
     rulesVersion: RULES_VERSION,
     profile: { name: profile.name, version: profile.version },

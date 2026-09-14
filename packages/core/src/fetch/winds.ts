@@ -17,7 +17,7 @@ import type { LatLon } from '../domain/geo.js';
 import { UPPERWIND_RADIUS_NM } from '../resolve/wind.js';
 import { storeAndDecode, type IngestCounts } from '../store/decode.js';
 import type { AirportStore, ReportStore } from '../store/types.js';
-import { decideFetch, DEFAULT_FRESHNESS_MS, type FreshnessDecision, type FreshnessStore } from './freshness.js';
+import { decideFetch, DEFAULT_FRESHNESS_MS, recordFetchAttempt, type FreshnessDecision, type FreshnessStore } from './freshness.js';
 import type { NavCanadaClient } from './navcanada.js';
 
 /** How many candidate sites to ask about. They go in one request, so this is not a request count. */
@@ -76,11 +76,12 @@ export async function ingestUpperWinds(
 
   const fetched = await deps.navcanada.upperWinds(wanted);
   /*
-   * Each record is stored against the site it belongs to. A site that
-   * published nothing leaves no trace, so it counts as never fetched and
-   * will be asked about again — but since every candidate travels in one
-   * request, that costs nothing beyond the request already being made.
+   * Every site asked about is recorded as asked, including the ones that
+   * published nothing — which is most of them, since a small aerodrome is
+   * not an upper wind site. Without that, those sites would be asked about
+   * again on every briefing, for ever, and always for nothing.
    */
+  for (const site of wanted) await recordFetchAttempt(deps.store, site, 'upperwind', now, fetched.request);
   let counts: IngestCounts = { fetched: fetched.reports.length, rawInserted: 0, decodedInserted: 0 };
   for (const site of wanted) {
     const mine = fetched.reports.filter((r) => r.station === site);

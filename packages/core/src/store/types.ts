@@ -5,7 +5,7 @@ import type { AssessmentStore } from '../notam/assess.js';
 
 export type { AssessmentStore };
 
-export type ReportKind = 'metar' | 'taf' | 'notam' | 'upperwind';
+export type ReportKind = 'metar' | 'taf' | 'notam' | 'upperwind' | 'sigmet';
 
 /**
  * One upstream report, stored verbatim. Content-addressed: `sha256` is the
@@ -25,6 +25,18 @@ export interface RawReport {
   readonly issuedAt: Date | null;
   /** The upstream's own metadata record, verbatim; never used for decisions. */
   readonly upstream: unknown;
+}
+
+/**
+ * One occasion on which an upstream was asked for something, whatever came
+ * back. `scope` is usually a station; products that belong to an area
+ * rather than a place are recorded under a name for the area.
+ */
+export interface FetchAttempt {
+  readonly scope: string;
+  readonly kind: ReportKind;
+  readonly attemptedAt: Date;
+  readonly request: string;
 }
 
 /** One occasion on which a report was fetched. Recorded even when the content was already known. */
@@ -50,8 +62,12 @@ export interface DecodedRow {
 }
 
 export interface ListRawQuery {
-  /** Matches the report's own station, or any fetch that was for this station. */
-  readonly station: string;
+  /**
+   * Matches the report's own station, or any fetch that was for this
+   * station. Omitted for products that belong to an area rather than a
+   * place — a SIGMET is about a region, not an aerodrome.
+   */
+  readonly station?: string | null;
   readonly kind: ReportKind;
   /** Newest issued first; defaults to 20. */
   readonly limit?: number;
@@ -69,6 +85,12 @@ export interface ReportStore {
   putRaw(report: RawReport, fetch: FetchEvent): Promise<{ inserted: boolean }>;
   getRaw(sha256: string): Promise<RawReport | null>;
   listRaw(query: ListRawQuery): Promise<RawReport[]>;
+  /**
+   * Record that an upstream was asked, whether or not it answered with
+   * anything. A request that came back empty leaves no report to hang a
+   * fetch on, and "we asked a moment ago" still has to be knowable.
+   */
+  putFetchAttempt(attempt: FetchAttempt): Promise<void>;
   putDecoded(row: DecodedRow): Promise<{ inserted: boolean }>;
   getDecoded(sha256: string, decoderVersion: number): Promise<DecodedRow | null>;
   /**

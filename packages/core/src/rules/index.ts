@@ -9,3 +9,4 @@ export { evaluateFlight, metarConditions, OBSERVATION_WINDOW_MS } from './evalua
 export { briefingText } from './describe.js';
 export { checkDaylight, THIN_MARGIN_MINUTES } from './daylight.js';
 export { checkWindAloft, windText, FREEZING_C } from './windAloft.js';
+export { checkHazards, HAZARD_TEXT, NEAR_HAZARD_NM } from './hazards.js';

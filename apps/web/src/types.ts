@@ -10,7 +10,7 @@ export type Severity = 'ok' | 'advisory' | 'marginal' | 'no-go';
 export type AirspaceClass = 'control-zone' | 'controlled' | 'uncontrolled' | 'B' | 'C' | 'D' | 'E' | 'G';
 
 export interface Citation {
-  kind: 'taf' | 'metar' | 'upperwind' | 'airport' | 'profile' | 'aircraft' | 'plan';
+  kind: 'taf' | 'metar' | 'upperwind' | 'sigmet' | 'airport' | 'profile' | 'aircraft' | 'plan';
   station: string | null;
   raw: string | null;
   span: { start: number; end: number } | null;

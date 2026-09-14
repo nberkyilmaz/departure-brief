@@ -6,6 +6,8 @@ export { forecastAt, latestTaf, NEARBY_RADIUS_NM } from './forecast.js';
 export { upperWindFor, windAt, UPPERWIND_RADIUS_NM } from './wind.js';
 export type { WaypointWind } from './wind.js';
 export type { WaypointForecast } from './forecast.js';
+export { hazardsKnownBy, MAX_ADVISORIES } from './hazards.js';
+export type { HazardAdvisory } from './hazards.js';
 export { resolveFlight } from './flight.js';
 export type { ResolvedFlight, ResolvedPoint } from './flight.js';
 export { conditionsText, flightText, forecastText } from './describe.js';

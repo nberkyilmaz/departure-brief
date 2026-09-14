@@ -228,5 +228,24 @@ export function storeContract(name: string, make: () => Promise<Store>): void {
         await store.close();
       }
     });
+
+    it('remembers being asked, even when the answer was nothing', async () => {
+      const store = await make();
+      const kind = 'sigmet' as const;
+      // Nothing was received, so there is no report to hang a fetch on.
+      expect(await store.lastFetchAt('WORLD', kind)).toBeNull();
+
+      const at = new Date('2026-09-14T05:00:00Z');
+      await store.putFetchAttempt({ scope: 'WORLD', kind, attemptedAt: at, request: 'https://example.test/isigmet' });
+      expect((await store.lastFetchAt('WORLD', kind))?.getTime()).toBe(at.getTime());
+
+      // The latest asking wins, and another kind is a different question.
+      const later = new Date('2026-09-14T06:00:00Z');
+      await store.putFetchAttempt({ scope: 'WORLD', kind, attemptedAt: later, request: 'x' });
+      expect((await store.lastFetchAt('WORLD', kind))?.getTime()).toBe(later.getTime());
+      expect(await store.lastFetchAt('WORLD', 'metar')).toBeNull();
+      expect(await store.lastFetchAt('CYSN', kind)).toBeNull();
+    });
+
   });
 }
