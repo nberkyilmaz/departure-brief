@@ -1,5 +1,7 @@
 # Hold Short
 
+[![CI](https://github.com/nberkyilmaz/holdshort/actions/workflows/ci.yml/badge.svg)](https://github.com/nberkyilmaz/holdshort/actions/workflows/ci.yml)
+
 > ## ⚠ Not for operational use
 >
 > **This is a study and planning aid. It is not an official weather briefing and
