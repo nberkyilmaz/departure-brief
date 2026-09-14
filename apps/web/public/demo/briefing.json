@@ -1,5 +1,5 @@
 {
-  "sha256": "ddcea7c3671769481c8fb5db7fa3ced1ccaabae6d6aee77ba1cf450f037cde4c",
+  "sha256": "662175c80d3f78656314807dc18d5dae9ec615195ae8a69a40273adc1531c6f0",
   "flightKey": "64b9a55a09f378b5115652273c5540c84abdb40d232d013620b4c33cf99be971",
   "asOf": "2026-09-12T20:00:00.000Z",
   "createdAt": "2026-09-12T20:00:00.000Z",
@@ -150,7 +150,6 @@
             "model": "qwen2.5:7b",
             "promptVersion": 3,
             "citation": "exact",
-            "cached": false,
             "result": {
               "relevance": "critical",
               "category": "obstacle",
@@ -203,7 +202,6 @@
             "model": "qwen2.5:7b",
             "promptVersion": 3,
             "citation": "exact",
-            "cached": false,
             "result": {
               "relevance": "critical",
               "category": "runway",
@@ -256,7 +254,6 @@
             "model": "qwen2.5:7b",
             "promptVersion": 3,
             "citation": "exact",
-            "cached": false,
             "result": {
               "relevance": "critical",
               "category": "obstacle",
@@ -351,7 +348,6 @@
             "model": "qwen2.5:7b",
             "promptVersion": 3,
             "citation": "whitespace",
-            "cached": false,
             "result": {
               "relevance": "critical",
               "category": "obstacle",
@@ -446,7 +442,6 @@
             "model": "qwen2.5:7b",
             "promptVersion": 3,
             "citation": "exact",
-            "cached": false,
             "result": {
               "relevance": "critical",
               "category": "runway",
@@ -500,7 +495,6 @@
             "model": "qwen2.5:7b",
             "promptVersion": 3,
             "citation": "exact",
-            "cached": false,
             "result": {
               "relevance": "advisory",
               "category": "runway",
@@ -637,7 +631,6 @@
             "model": "qwen2.5:7b",
             "promptVersion": 3,
             "citation": "exact",
-            "cached": false,
             "result": {
               "relevance": "advisory",
               "category": "taxiway",
@@ -775,7 +768,6 @@
             "model": "qwen2.5:7b",
             "promptVersion": 3,
             "citation": "exact",
-            "cached": false,
             "result": {
               "relevance": "advisory",
               "category": "taxiway",

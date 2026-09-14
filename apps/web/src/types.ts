@@ -93,7 +93,6 @@ export interface NotamItem {
     model: string;
     promptVersion: number;
     citation: 'exact' | 'whitespace' | 'none';
-    cached: boolean;
     result: { relevance: string; category: string; affects: string[]; plain_text: string; cited_span: string; rationale: string };
   } | null;
   assessmentError: string | null;

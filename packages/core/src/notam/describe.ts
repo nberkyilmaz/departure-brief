@@ -26,11 +26,17 @@ export interface NotamDocumentItem {
   readonly supersededBy: string | null;
   readonly classification: NotamClassification;
   readonly rank: NotamRank;
+  /*
+   * Whether the answer came from the cache is deliberately not here. A
+   * briefing is named by the hash of this document, and two briefings with
+   * the same findings over the same reports must be the same briefing —
+   * whether a model was asked again, or its earlier answer reused, is about
+   * how the answer arrived, not about what it says.
+   */
   readonly assessment: {
     readonly model: string;
     readonly promptVersion: number;
     readonly citation: CitationMatch;
-    readonly cached: boolean;
     readonly result: NotamAssessment;
   } | null;
   readonly assessmentError: string | null;
@@ -67,7 +73,7 @@ function toItem(r: RankedNotam): NotamDocumentItem {
     classification: r.classification,
     rank: r.rank,
     assessment: r.assessment
-      ? { model: r.assessment.model, promptVersion: r.assessment.promptVersion, citation: r.assessment.citation, cached: r.assessmentCached, result: r.assessment.assessment }
+      ? { model: r.assessment.model, promptVersion: r.assessment.promptVersion, citation: r.assessment.citation, result: r.assessment.assessment }
       : null,
     assessmentError: r.assessmentError,
     rule: r.rule,
@@ -115,7 +121,7 @@ export function notamBriefingText(doc: NotamDocument): string {
     if (it.assessment) {
       lines.push(`  ${it.assessment.result.plain_text}`);
       lines.push(`  → ${it.assessment.result.relevance} (${it.assessment.result.category}; ${it.assessment.result.affects.join(', ') || 'no phase'}): ${it.assessment.result.rationale}`);
-      lines.push(`  cites "${it.assessment.result.cited_span}" — ${it.assessment.citation === 'none' ? 'NOT FOUND in NOTAM' : 'verified'}${it.assessment.cached ? ' (cached)' : ''}`);
+      lines.push(`  cites "${it.assessment.result.cited_span}" — ${it.assessment.citation === 'none' ? 'NOT FOUND in NOTAM' : 'verified'}`);
     }
     if (it.rule) lines.push(`  → ${it.rule.relevance} by rule ${it.rule.rule}: ${it.rule.reason}`);
     if (it.assessmentError) lines.push(`  ! ${it.assessmentError}`);

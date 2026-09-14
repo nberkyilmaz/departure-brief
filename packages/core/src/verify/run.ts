@@ -7,7 +7,7 @@
  * answer does not exist yet at briefing time — that is the whole point.
  */
 import type { AwcClient } from '../fetch/awc.js';
-import { storeAndDecode } from '../fetch/ingest.js';
+import { storeAndDecode } from '../store/decode.js';
 import type { ResolvedFlight } from '../resolve/flight.js';
 import type { Store } from '../store/types.js';
 import { checksFrom, matchOutcome } from './record.js';

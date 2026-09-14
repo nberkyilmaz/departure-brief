@@ -48,7 +48,7 @@ function Item({ n }: { n: NotamItem }) {
               <br />
               <small>
                 {n.assessment.model}, prompt v{n.assessment.promptVersion}
-                {n.assessment.cached ? ', cached' : ''} · citation {n.assessment.citation === 'none' ? <b className="bad">not found in the NOTAM</b> : 'verified'}
+                · citation {n.assessment.citation === 'none' ? <b className="bad">not found in the NOTAM</b> : 'verified'}
               </small>
             </p>
           )}

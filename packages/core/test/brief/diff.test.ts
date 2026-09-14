@@ -12,7 +12,7 @@ import { diffText } from '../../src/brief/describeDiff.js';
 import { parseFlightPlan } from '../../src/domain/flight.js';
 import { parseAircraftLimits, parsePilotProfile } from '../../src/domain/profile.js';
 import { AWC_BASE_URL, AwcClient } from '../../src/fetch/awc.js';
-import { storeAndDecode } from '../../src/fetch/ingest.js';
+import { storeAndDecode } from '../../src/store/decode.js';
 import { readNasrDirectory } from '../../src/fetch/nasr.js';
 import { NAVCANADA_CFPS_BASE_URL, NavCanadaClient } from '../../src/fetch/navcanada.js';
 import { readOurAirportsDirectory } from '../../src/fetch/ourairports.js';

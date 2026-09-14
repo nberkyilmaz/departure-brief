@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseFlightPlan } from '../../src/domain/flight.js';
 import { AWC_BASE_URL, AwcClient } from '../../src/fetch/awc.js';
-import { storeAndDecode } from '../../src/fetch/ingest.js';
+import { storeAndDecode } from '../../src/store/decode.js';
 import { readNasrDirectory } from '../../src/fetch/nasr.js';
 import { resolveFlight } from '../../src/resolve/flight.js';
 import { MemoryStore } from '../../src/store/memory.js';

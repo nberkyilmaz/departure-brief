@@ -7,7 +7,7 @@
  */
 
 import type { NavCanadaClient } from '../fetch/navcanada.js';
-import { storeAndDecode } from '../fetch/ingest.js';
+import { storeAndDecode } from '../store/decode.js';
 import type { LLMProvider } from '../llm/provider.js';
 import { isNight } from '../domain/sun.js';
 import type { ResolvedFlight } from '../resolve/flight.js';

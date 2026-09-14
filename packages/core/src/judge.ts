@@ -44,3 +44,19 @@ export { notamBriefingText, notamDocument } from './notam/describe.js';
 export type { NotamDocument, NotamDocumentItem } from './notam/describe.js';
 export { ruleRelevance } from './notam/rules.js';
 export type { RuleDecision } from './notam/rules.js';
+/*
+ * Ranking NOTAMs for a flight, including the rules that settle relevance
+ * from the Q code. Without a model it ranks what the rules can settle and
+ * says the rest was not assessed, which is exactly what should happen where
+ * there is no model to call.
+ */
+export { flightContextOf, notamFactsOf, notamsForFlight, RANK_ORDER, WINDOW_MARGIN_MS } from './notam/flight.js';
+export type { NotamBriefing, NotamDeps, NotamRank, RankedNotam } from './notam/flight.js';
+export { flightContextHash, PROMPT_VERSION, verifyCitation } from './notam/assess.js';
+export type { Affects, Category, FlightContext, NotamAssessment, Relevance } from './notam/assess.js';
+export { storeAndDecode } from './store/decode.js';
+// Carrying a store's contents somewhere with no database and no network.
+export { BundleIntegrityError, loadBundle } from './demo/bundle.js';
+export type { BundledReport, DemoBundle } from './demo/bundle.js';
+// Implemented by the caller when there is no model to call; the type is erased.
+export type { LLMProvider, LLMRequest, LLMResponse } from './llm/provider.js';

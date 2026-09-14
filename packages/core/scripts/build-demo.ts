@@ -14,11 +14,12 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assembleBriefing } from '../src/brief/assemble.js';
+import type { BundledReport, DemoBundle } from '../src/demo/bundle.js';
 import { parseFlightPlan } from '../src/domain/flight.js';
 import { parseAircraftLimits, parsePilotProfile } from '../src/domain/profile.js';
 import { AWC_BASE_URL, AwcClient } from '../src/fetch/awc.js';
 import type { HttpClient } from '../src/fetch/http.js';
-import { storeAndDecode } from '../src/fetch/ingest.js';
+import { storeAndDecode } from '../src/store/decode.js';
 import { NAVCANADA_CFPS_BASE_URL, NavCanadaClient } from '../src/fetch/navcanada.js';
 import { readOurAirportsDirectory } from '../src/fetch/ourairports.js';
 import { FixtureProvider, RecordingProvider } from '../src/llm/fixture.js';
@@ -26,6 +27,7 @@ import { OllamaProvider } from '../src/llm/ollama.js';
 import { notamsForFlight } from '../src/notam/flight.js';
 import { resolveFlight } from '../src/resolve/flight.js';
 import { MemoryStore } from '../src/store/memory.js';
+import type { RawReport } from '../src/store/types.js';
 import { withHandbookLimits } from '../src/wb/aircraft.js';
 import type { WeightBalanceSpec } from '../src/wb/types.js';
 
@@ -53,7 +55,34 @@ const replay: HttpClient = {
 };
 
 const store = new MemoryStore();
-await store.putAirports(readOurAirportsDirectory(join(fixtures, 'fetch', 'ourairports', '2026-09-07'), { snapshot: '2026-09-07' }));
+const airports = readOurAirportsDirectory(join(fixtures, 'fetch', 'ourairports', '2026-09-07'), { snapshot: '2026-09-07' });
+await store.putAirports(airports);
+
+/*
+ * Everything that goes into the store also goes into the bundle the web app
+ * loads, so the page can build the briefing itself rather than render one it
+ * was handed. Reports are collected by hash, with the sites each was fetched
+ * for: a FIR-wide NOTAM is returned for several.
+ */
+const bundled = new Map<string, BundledReport>();
+const collect = (reports: readonly RawReport[], request: string, fetchedFor: string | null): void => {
+  for (const r of reports) {
+    const seen = bundled.get(r.sha256);
+    const sites = new Set(seen?.fetchedFor ?? []);
+    if (fetchedFor) sites.add(fetchedFor);
+    bundled.set(r.sha256, {
+      sha256: r.sha256,
+      kind: r.kind,
+      source: r.source,
+      station: r.station,
+      body: r.body,
+      issuedAt: r.issuedAt?.toISOString() ?? null,
+      upstream: r.upstream,
+      fetchedFor: [...sites].sort(),
+      request: seen?.request ?? request,
+    });
+  }
+};
 
 // The METARs and TAFs these fields were reporting when the corpus was taken.
 const liveWeather = join(fixtures, 'fetch', 'awc', 'demo-cysn-cykf-cyhm.json');
@@ -68,8 +97,10 @@ if (existsSync(liveWeather)) {
   });
   const m = await awc.metars([...SITES]);
   await storeAndDecode(store, m.reports, m.request, AS_OF);
+  collect(m.reports, m.request, null);
   const t = await awc.tafs([...SITES]);
   await storeAndDecode(store, t.reports, t.request, AS_OF);
+  collect(t.reports, t.request, null);
 }
 
 /*
@@ -79,12 +110,28 @@ if (existsSync(liveWeather)) {
  * demo would show nothing but "no forecast covers this". Everything else —
  * route, aircraft, personal minimums, reports — is exactly as it is.
  */
-const plan = parseFlightPlan({ ...JSON.parse(readFileSync(join(root, 'flights', 'demo-cysn-cykf.json'), 'utf8')), departureTime: '2026-09-12T22:00:00Z' });
-const profile = parsePilotProfile(JSON.parse(readFileSync(join(root, 'profiles', 'default.json'), 'utf8')));
-let aircraft = parseAircraftLimits(JSON.parse(readFileSync(join(root, 'aircraft', 'c172.json'), 'utf8')));
+const planJson = { ...JSON.parse(readFileSync(join(root, 'flights', 'demo-cysn-cykf.json'), 'utf8')), departureTime: '2026-09-12T22:00:00Z' };
+const profileJson = JSON.parse(readFileSync(join(root, 'profiles', 'default.json'), 'utf8'));
+const aircraftJson = JSON.parse(readFileSync(join(root, 'aircraft', 'c172.json'), 'utf8'));
+const plan = parseFlightPlan(planJson);
+const profile = parsePilotProfile(profileJson);
+let aircraft = parseAircraftLimits(aircraftJson);
 const wbPath = join(root, 'aircraft', 'c172.wb.json');
 const wb = existsSync(wbPath) ? (JSON.parse(readFileSync(wbPath, 'utf8')) as WeightBalanceSpec) : null;
 aircraft = withHandbookLimits(aircraft, wb);
+
+/*
+ * The NOTAMs, fetched here rather than left to the briefing so the bundle
+ * carries every one the pipeline saw — including those a later NOTAM
+ * replaces, which is what lets the page say "superseded by" as this build
+ * does. `notamsForFlight` asks again below and the store dedupes.
+ */
+const cfps = new NavCanadaClient(replay);
+for (const site of SITES) {
+  const fetched = await cfps.notams(site);
+  await storeAndDecode(store, fetched.reports, fetched.request, AS_OF, site);
+  collect(fetched.reports, fetched.request, site);
+}
 
 const resolved = await resolveFlight(store, plan, AS_OF);
 
@@ -102,15 +149,35 @@ const provider = recording
     ? new FixtureProvider(llmDir)
     : null;
 const notams = await notamsForFlight(
-  { store, navcanada: new NavCanadaClient(replay), provider, model: provider ? MODEL : null, now: () => AS_OF },
+  { store, navcanada: cfps, provider, model: provider ? MODEL : null, now: () => AS_OF },
   resolved,
   aircraft.type,
 );
 
 const briefing = assembleBriefing(resolved, profile, aircraft, AS_OF, notams);
 
+/*
+ * The same inputs, for the page to work from. The briefing above is what
+ * this build produced; the bundle is what it produced it from, so a visitor
+ * changing their minimums gets a briefing built here in front of them
+ * rather than a different picture of the same one.
+ */
+const bundle: DemoBundle = {
+  recordedAt: AS_OF.toISOString(),
+  asOf: AS_OF.toISOString(),
+  model: notams.model,
+  promptVersion: notams.promptVersion,
+  plan: planJson,
+  profile: profileJson,
+  aircraft: aircraftJson,
+  airports: airports.filter((a) => SITES.includes(a.icaoId as (typeof SITES)[number])),
+  reports: [...bundled.values()].sort((a, b) => a.sha256.localeCompare(b.sha256)),
+  assessments: notams.items.map((i) => i.assessment).filter((a): a is NonNullable<typeof a> => a !== null),
+};
+
 mkdirSync(out, { recursive: true });
 writeFileSync(join(out, 'briefing.json'), JSON.stringify(briefing, null, 2) + '\n');
+writeFileSync(join(out, 'bundle.json'), JSON.stringify(bundle, null, 2) + '\n');
 if (wb) writeFileSync(join(out, 'wb.json'), JSON.stringify(wb, null, 2) + '\n');
 
 const counts = briefing.document.notams?.counts;
@@ -119,3 +186,4 @@ console.log(`  verdict ${briefing.document.briefing.verdict}, ${briefing.documen
 console.log(`  NOTAMs: ${briefing.document.notams?.items.length ?? 0}${counts ? ` (${Object.entries(counts).filter(([, n]) => n > 0).map(([k, n]) => `${n} ${k}`).join(', ')})` : ''}`);
 console.log(`  ranked by ${briefing.document.notams?.model ?? 'no model'}`);
 console.log(`  weight and balance: ${wb ? `${wb.figures.length} figures, ${wb.review.length} in review` : 'none'}`);
+console.log(`  bundle: ${bundle.reports.length} reports, ${bundle.airports.length} aerodromes, ${bundle.assessments.length} recorded model answers`);

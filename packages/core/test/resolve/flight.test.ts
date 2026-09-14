@@ -9,7 +9,7 @@ import { parseFlightPlan } from '../../src/domain/flight.js';
 import { distanceNm, initialCourse, parseLatLon } from '../../src/domain/geo.js';
 import { resolveNearestDayTime } from '../../src/domain/time.js';
 import { AWC_BASE_URL, AwcClient } from '../../src/fetch/awc.js';
-import { storeAndDecode } from '../../src/fetch/ingest.js';
+import { storeAndDecode } from '../../src/store/decode.js';
 import { readNasrDirectory } from '../../src/fetch/nasr.js';
 import { flightText } from '../../src/resolve/describe.js';
 import { resolveFlight } from '../../src/resolve/flight.js';

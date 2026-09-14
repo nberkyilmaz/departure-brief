@@ -10,7 +10,7 @@ import { parseFlightPlan } from '../../src/domain/flight.js';
 import { parseAircraftLimits, parsePilotProfile } from '../../src/domain/profile.js';
 import { isNight, solarElevation } from '../../src/domain/sun.js';
 import { AWC_BASE_URL, AwcClient } from '../../src/fetch/awc.js';
-import { storeAndDecode } from '../../src/fetch/ingest.js';
+import { storeAndDecode } from '../../src/store/decode.js';
 import { readNasrDirectory } from '../../src/fetch/nasr.js';
 import { resolveFlight } from '../../src/resolve/flight.js';
 import { briefingText } from '../../src/rules/describe.js';
