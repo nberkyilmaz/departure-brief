@@ -6,7 +6,7 @@ import { createCanvas } from '@napi-rs/canvas';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { getDocument, type PDFDocumentProxy, type PDFPageProxy } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 /**
  * Scanned documents are usually JBIG2 or CCITT images, and pdf.js decodes
@@ -23,6 +23,13 @@ export interface OpenedPdf {
 }
 
 export async function openPdf(bytes: Uint8Array): Promise<OpenedPdf> {
+  /*
+   * Loaded here rather than at the top of the file: pdf.js costs about
+   * 108 MB of resident memory and a third of a second to import, and the
+   * API — which imports this package transitively — never opens a PDF. On a
+   * host with 512 MB that is a third of the budget for nothing.
+   */
+  const { getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs');
   const doc: PDFDocumentProxy = await getDocument({ data: bytes, useSystemFonts: false, wasmUrl: WASM_URL, verbosity: 0 }).promise;
   return {
     pageCount: doc.numPages,
