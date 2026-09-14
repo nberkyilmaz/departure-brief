@@ -32,6 +32,9 @@ input, select { font: inherit; padding: 0.35rem 0.5rem; border: 1px solid var(--
 .actions { display: flex; align-items: center; gap: 1rem; }
 button { font: inherit; padding: 0.55rem 1rem; border-radius: 6px; border: 1px solid var(--fg); background: var(--fg); color: #fff; cursor: pointer; }
 button:disabled { opacity: 0.6; cursor: wait; }
+/* A second action that should not compete with the reading. */
+button.quiet { background: transparent; color: var(--muted); border-color: var(--line); padding: 0.35rem 0.7rem; font-size: 0.85rem; }
+button.quiet:hover { color: var(--fg); border-color: var(--fg); }
 .error { color: var(--nogo); margin: 0; }
 
 .briefing h2 { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; font-size: 1.2rem; }

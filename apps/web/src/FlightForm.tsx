@@ -1,4 +1,5 @@
-import { AerodromeField } from './AerodromeField.js';
+import { AerodromeField, lookupViaApi, type AirportLookup } from './AerodromeField.js';
+import type { Aerodrome } from './engine.js';
 import type { AirspaceClass, FlightPlanInput } from './types.js';
 
 const CLASSES: AirspaceClass[] = ['control-zone', 'controlled', 'uncontrolled', 'B', 'C', 'D', 'E', 'G'];
@@ -33,8 +34,22 @@ export function planProblems(plan: FlightPlanInput): string[] {
   return out;
 }
 
-export function FlightForm({ plan, onChange }: { plan: FlightPlanInput; onChange: (p: FlightPlanInput) => void }) {
+export function FlightForm({
+  plan,
+  onChange,
+  lookup,
+  aerodromes = [],
+}: {
+  plan: FlightPlanInput;
+  onChange: (p: FlightPlanInput) => void;
+  /** Where identifiers are checked; null means ask the API. */
+  lookup?: AirportLookup | null;
+  /** The aerodromes there is data for, offered as suggestions when the set is known. */
+  aerodromes?: readonly Aerodrome[];
+}) {
   const set = (patch: Partial<FlightPlanInput>) => onChange({ ...plan, ...patch });
+  const ask = lookup ?? lookupViaApi;
+  const listId = aerodromes.length > 0 ? 'aerodromes-with-data' : undefined;
   const ids = [plan.departure, ...plan.route, plan.destination, plan.alternate]
     .filter((s): s is string => !!s && /^[A-Z0-9]{3,4}$/i.test(s))
     .map((s) => s.toUpperCase());
@@ -46,14 +61,25 @@ export function FlightForm({ plan, onChange }: { plan: FlightPlanInput; onChange
   return (
     <fieldset>
       <legend>The flight</legend>
+      {listId && (
+        <datalist id={listId}>
+          {aerodromes.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.name}
+            </option>
+          ))}
+        </datalist>
+      )}
       <div className="grid">
-        <AerodromeField label="Departure" value={plan.departure} onChange={(v) => set({ departure: v })} />
-        <AerodromeField label="Destination" value={plan.destination} onChange={(v) => set({ destination: v })} />
+        <AerodromeField label="Departure" value={plan.departure} onChange={(v) => set({ departure: v })} lookup={ask} listId={listId} />
+        <AerodromeField label="Destination" value={plan.destination} onChange={(v) => set({ destination: v })} lookup={ask} listId={listId} />
         <AerodromeField
           label="Alternate"
           value={plan.alternate ?? ''}
           optional
           hint="optional, but it is judged too"
+          lookup={ask}
+          listId={listId}
           onChange={(v) => set({ alternate: v || null })}
         />
         <label>

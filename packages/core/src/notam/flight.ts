@@ -6,7 +6,6 @@
  * and collapse state, never presence.
  */
 
-import type { NavCanadaClient } from '../fetch/navcanada.js';
 import { storeAndDecode } from '../store/decode.js';
 import type { LLMProvider } from '../llm/provider.js';
 import { isNight } from '../domain/sun.js';
@@ -51,10 +50,20 @@ export interface NotamBriefing {
   readonly fetchErrors: readonly { readonly site: string; readonly error: string }[];
 }
 
+/**
+ * Somewhere NOTAMs can be fetched from, named by what it does rather than
+ * by which client it is. Ranking NOTAMs for a flight then depends on no
+ * code that talks to the network, which is what lets it run over reports
+ * that were fetched somewhere else entirely — in a browser, say.
+ */
+export interface NotamSource {
+  notams(site: string): Promise<{ readonly request: string; readonly reports: readonly RawReport[] }>;
+}
+
 export interface NotamDeps {
   readonly store: Store & import('./assess.js').AssessmentStore;
   /** Fetches fresh NOTAMs per site when present. */
-  readonly navcanada?: NavCanadaClient | null;
+  readonly navcanada?: NotamSource | null;
   /** Assesses in-scope NOTAMs when present. */
   readonly provider?: LLMProvider | null;
   readonly model?: string | null;

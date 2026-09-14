@@ -1,10 +1,11 @@
 /**
- * What a first-time reader arrives at. Shown only on the public demo,
- * where there is no API behind the page and the briefing below is a
- * recorded one — so the page has to explain itself.
+ * What a first-time reader arrives at. Shown only on the public build,
+ * where the reports are recorded rather than fetched — so the page has to
+ * say what it is, and what it is not.
  */
+import type { Aerodrome } from './engine.js';
 
-export function About({ recordedAt }: { recordedAt: string }) {
+export function About({ recordedAt, aerodromes }: { recordedAt: string; aerodromes: readonly Aerodrome[] }) {
   return (
     <section className="about">
       <p className="lede">
@@ -22,12 +23,18 @@ export function About({ recordedAt }: { recordedAt: string }) {
         <div>
           <h3>What is on this page</h3>
           <p>
-            A real briefing of a real flight — St. Catharines to Waterloo in a Cessna 172, alternate Hamilton — over the reports those three aerodromes were
-            actually publishing on {recordedAt}. Every METAR, TAF and NOTAM below came off NAV CANADA and the US weather service and is stored here verbatim.
+            A real flight — St. Catharines to Waterloo in a Cessna 172, alternate Hamilton — over the reports those aerodromes were actually publishing on{' '}
+            {recordedAt}. Every METAR, TAF and NOTAM below came off NAV CANADA and the US weather service and is stored here verbatim.
+          </p>
+          <p>
+            <b>The briefing is built in your browser.</b> The page carries the reports, not a result: decoding, resolution and the rules all run here, so
+            changing a personal minimum or the departure time rebuilds the verdict in front of you from the same code the server runs. It produces the same
+            briefing, down to the content hash — there is a test that fails if it ever does not.
           </p>
           <p className="hint">
-            The page is static. It fetches nothing, so it puts no load on either service and cannot be mistaken for a live briefing. The flight departs at
-            22:00Z rather than its real time so that the recorded forecasts cover it; everything else is exactly as it was.
+            What it cannot do is fetch. Neither weather service allows a page to call it directly, so the reports are frozen at the moment they were recorded,
+            and there is data for {aerodromes.length > 0 ? aerodromes.map((a) => a.id).join(', ') : 'a few aerodromes'} only. The flight departs at 22:00Z
+            rather than its real time so that the recorded forecasts cover it; everything else is exactly as it was.
           </p>
         </div>
 

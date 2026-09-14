@@ -11,4 +11,11 @@ export default defineConfig({
     proxy: { '/api': 'http://127.0.0.1:3000' },
   },
   build: { outDir: 'dist', sourcemap: true },
+  /*
+   * The core package ships TypeScript sources rather than a build, so
+   * dependency pre-bundling has to leave it alone and let Vite compile it
+   * with everything else. Only the `judge` entry point is imported, which
+   * is the half of the package that never reaches for Node.
+   */
+  optimizeDeps: { exclude: ['@holdshort/core'] },
 });

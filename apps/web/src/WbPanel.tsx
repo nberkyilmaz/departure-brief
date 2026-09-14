@@ -1,9 +1,10 @@
+import { computeLoading, IncompleteSpecError, type Loading, type WeightBalanceSpec as CoreSpec } from '@holdshort/core/judge';
 import { useEffect, useState } from 'react';
 import type { DocumentCitation, LoadingResult, WeightBalanceSpec } from './types.js';
 
 /** A page region from the POH, served by the API as a crop with the cited words boxed. */
-function Crop({ c }: { c: DocumentCitation }) {
-  if (!c.box) {
+function Crop({ c, crops }: { c: DocumentCitation; crops: boolean }) {
+  if (!c.box || !crops) {
     return (
       <span className="source-label">
         {c.filename} p.{c.page}: "{c.citedText}"
@@ -39,7 +40,17 @@ const entry = (value: string, fromSample = false): Entry => ({ value, fromSample
  * verification is not in the spec — and a weight typed against a station
  * the computation does not know would simply not be counted.
  */
-export function WbPanel({ aircraftType }: { aircraftType: string }) {
+export function WbPanel({
+  aircraftType,
+  spec: given = null,
+  crops = true,
+}: {
+  aircraftType: string;
+  /** The handbook data, when the page already has it and there is no API to ask. */
+  spec?: WeightBalanceSpec | null;
+  /** Whether page crops can be fetched; they are served by the API. */
+  crops?: boolean;
+}) {
   const [spec, setSpec] = useState<WeightBalanceSpec | null | 'missing'>(null);
   const [empty, setEmpty] = useState<Entry>(entry(''));
   const [emptyMoment, setEmptyMoment] = useState<Entry>(entry(''));
@@ -56,23 +67,27 @@ export function WbPanel({ aircraftType }: { aircraftType: string }) {
     setEmptyMoment(entry(''));
     setLoads({});
     let live = true;
-    fetch(`/api/aircraft/${encodeURIComponent(aircraftType)}/wb`)
-      .then(async (r) => (r.ok ? ((await r.json()) as WeightBalanceSpec) : 'missing'))
-      .then((s) => {
-        if (!live) return;
-        setSpec(s);
-        if (s === 'missing') return;
-        if (s.sample) {
-          setEmpty(entry(String(s.sample.emptyWeightLb.value), true));
-          setEmptyMoment(entry(String(s.sample.emptyMomentPer1000.value), true));
-        }
-        setLoads(Object.fromEntries(s.stations.filter((st) => st.kind !== 'oil').map((st) => [st.id, '0'])));
-      })
-      .catch(() => live && setSpec('missing'));
+    const arrive = (s: WeightBalanceSpec | 'missing') => {
+      if (!live) return;
+      setSpec(s);
+      if (s === 'missing') return;
+      if (s.sample) {
+        setEmpty(entry(String(s.sample.emptyWeightLb.value), true));
+        setEmptyMoment(entry(String(s.sample.emptyMomentPer1000.value), true));
+      }
+      setLoads(Object.fromEntries(s.stations.filter((st) => st.kind !== 'oil').map((st) => [st.id, '0'])));
+    };
+    if (given) arrive(given.aircraftType.toUpperCase() === aircraftType.toUpperCase() ? given : 'missing');
+    else {
+      fetch(`/api/aircraft/${encodeURIComponent(aircraftType)}/wb`)
+        .then(async (r) => (r.ok ? ((await r.json()) as WeightBalanceSpec) : 'missing'))
+        .then(arrive)
+        .catch(() => live && setSpec('missing'));
+    }
     return () => {
       live = false;
     };
-  }, [aircraftType]);
+  }, [aircraftType, given]);
 
   async function compute() {
     if (spec === null || spec === 'missing') return;
@@ -84,10 +99,27 @@ export function WbPanel({ aircraftType }: { aircraftType: string }) {
       if (st.kind === 'oil') continue;
       (st.kind === 'fuel' ? fuelGal : stations)[st.id] = num(loads[st.id] ?? '0');
     }
+    const loading: Loading = {
+      emptyWeightLb: num(empty.value),
+      emptyMomentPer1000: num(emptyMoment.value),
+      stations,
+      fuelGal,
+      category: utility ? 'utility' : 'normal',
+    };
+    // The same computation either way; only where it runs differs.
+    if (given) {
+      try {
+        setResult(JSON.parse(JSON.stringify(computeLoading(given as unknown as CoreSpec, loading))) as LoadingResult);
+      } catch (e) {
+        setResult(null);
+        setError(e instanceof IncompleteSpecError ? e.message : (e as Error).message);
+      }
+      return;
+    }
     const res = await fetch(`/api/aircraft/${encodeURIComponent(aircraftType)}/wb`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ emptyWeightLb: num(empty.value), emptyMomentPer1000: num(emptyMoment.value), stations, fuelGal, category: utility ? 'utility' : 'normal' }),
+      body: JSON.stringify(loading),
     });
     const body = (await res.json()) as LoadingResult | { error: string };
     if (!res.ok || 'error' in body) {
@@ -214,7 +246,7 @@ export function WbPanel({ aircraftType }: { aircraftType: string }) {
                 </div>
                 <div className="detail">
                   {f.citations.map((c, j) => (
-                    <Crop key={j} c={c} />
+                    <Crop key={j} crops={crops} c={c} />
                   ))}
                 </div>
               </li>

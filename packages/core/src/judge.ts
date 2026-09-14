@@ -26,7 +26,11 @@ export * from './resolve/index.js';
 export * from './rules/index.js';
 export * from './brief/index.js';
 export * from './hash/sha256.js';
+// Weight and balance: the computation and the handbook limits it fills in.
 export * from './wb/compute.js';
+export { withHandbookLimits } from './wb/aircraft.js';
+export { assembleWeightBalance, isCgPointName, missingFrom } from './wb/assemble.js';
+export type { CgEnvelope, DocumentCitation, Figure, Loading, LoadingResult, LoadingRow, ReviewItem, Station, StationKind, WbFinding, WeightBalanceSpec } from './wb/types.js';
 export type * from './store/types.js';
 export { rawReport } from './store/types.js';
 export { MemoryStore } from './store/memory.js';
@@ -51,7 +55,7 @@ export type { RuleDecision } from './notam/rules.js';
  * there is no model to call.
  */
 export { flightContextOf, notamFactsOf, notamsForFlight, RANK_ORDER, WINDOW_MARGIN_MS } from './notam/flight.js';
-export type { NotamBriefing, NotamDeps, NotamRank, RankedNotam } from './notam/flight.js';
+export type { NotamBriefing, NotamDeps, NotamRank, NotamSource, RankedNotam } from './notam/flight.js';
 export { flightContextHash, PROMPT_VERSION, verifyCitation } from './notam/assess.js';
 export type { Affects, Category, FlightContext, NotamAssessment, Relevance } from './notam/assess.js';
 export { storeAndDecode } from './store/decode.js';
