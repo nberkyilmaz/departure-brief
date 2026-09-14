@@ -21,23 +21,23 @@ mobile one. A study aid throughout — never an official briefing.
 `docs/roadmap.md` holds the sequence and why each piece comes where it does.
 This file holds what was actually done and what it cost.
 
-**The site works.** <https://nberkyilmaz.github.io/holdshort/> has four
-pages — brief a flight, the reports it was judged on, weight and balance,
-and how it works — and it runs the pipeline in the browser: change a
-personal minimum, the aircraft, the route or the departure time and the
-verdict is rebuilt in front of you, by the same code the API runs. What it
-cannot do is fetch, so the weather is frozen at the moment it was recorded
-and the page says so.
+**The site works.** <https://nberkyilmaz.github.io/holdshort/> has five
+pages — brief a flight, the nav log, the reports it was judged on, weight
+and balance, and how it works — and it runs the pipeline in the browser:
+change a personal minimum, the aircraft, the route or the departure time
+and the verdict is rebuilt in front of you, by the same code the API runs.
+What it cannot do is fetch, so the weather is frozen at the moment it was
+recorded (05:10Z on 14 September 2026) and the page says so.
 
 **Current work: the rest of the pre-flight picture** (`docs/roadmap.md`).
-Winds aloft and daylight are done; SIGMET, AIRMET and PIREPs are next,
-then the nav log, which the winds were the missing input for.
+Winds aloft, daylight and the nav log are done. SIGMET, AIRMET and PIREPs
+are next, then more out of the handbook.
 
 **Done:** steps 1-7, 9 and 10, the public site, CI, winds and temperatures
-aloft, and daylight. Decoders, fetch layer, route and time resolution,
-rules engine, briefings with an API and a web view, NOTAM relevance with a
-local model and a passing eval gate, the briefing diff, aircraft document
-ingestion, forecast verification.
+aloft, daylight, and the nav log. Decoders, fetch layer, route and time
+resolution, rules engine, briefings with an API and a web view, NOTAM
+relevance with a local model and a passing eval gate, the briefing diff,
+aircraft document ingestion, forecast verification.
 
 **Blocked on data, not effort:** airspace transit needs Canadian airspace
 geometry, which NAV CANADA does not publish; US NOTAMs need FAA
@@ -1292,3 +1292,53 @@ had just dropped into the repo root.
 - Upper winds and daylight are in the pipeline and the API; the published
   demo shows daylight, and will show winds once its reports are re-recorded
   with an upper wind column in them.
+
+---
+
+## Session 17 — 2026-09-14 — The nav log, and what a fresh set of reports found
+
+199. **The nav log**: true course and distance per leg, the wind triangle
+     against the forecast at the point the leg ends at, wind correction
+     angle, heading, groundspeed, time, running total, and fuel when a burn
+     rate is given. The point is not that the wind triangle is hard — it is
+     that doing it by hand at eleven at night, for six legs, is where the
+     arithmetic mistakes live.
+200. It refuses to fill a gap. No wind forecast for a leg means no
+     groundspeed, no time and no fuel for that leg, with the reason printed
+     under it, and the totals refuse to be a partial sum pretending to be a
+     whole one. No magnetic variation in the airport data means the courses
+     stay true and say so — OurAirports publishes none, so that is the
+     normal case for a Canadian field here. No burn rate means no fuel
+     column: the handbook prints burn against power setting and altitude,
+     and nothing here will invent one.
+201. North is 360, not 000, because that is what a heading bug says. Also:
+     no negative zero, which reads as a mistake in a table of headings.
+202. **Re-recorded the demo against live data**, since Ollama was running
+     and could rank the new NOTAMs. The published page now shows all of it:
+     winds aloft borrowed from Toronto forty miles away, a nav log with a
+     real groundspeed, daylight margins, and thirty-two NOTAMs ranked by the
+     local model. Verdict: go, on a clear September morning.
+203. **That re-recording earned its keep immediately.** CYSN is a part-time
+     station: its TAF had expired overnight, and the briefing answered "no
+     forecast covers your departure" while a valid one sat thirty-six miles
+     away at Hamilton. A pilot would use Hamilton's. Now so does this — a
+     field's own forecast is preferred only when it actually covers the time
+     asked about, and the borrowed one says whose it is and how far away.
+     No amount of staring at the old fixtures would have shown that.
+204. And a defect in the page's own code, found the same way: it diffed each
+     new briefing against the last one it made without checking they were of
+     the same flight. Change the destination and "what changed" has no
+     answer; asking for one threw.
+205. The nav log lives in the briefing document rather than beside it,
+     because it is worked out from the same resolved flight and is part of
+     what the briefing says. Which means the API serves it, the page shows
+     it, and it is inside the content hash like everything else.
+
+### State at end of session 17
+
+- 727 tests across three workspaces (701 core, 17 API, 9 web), typecheck
+  clean, CI green.
+- Five pages, live, briefing in the browser over reports recorded at
+  05:10Z on 14 September 2026.
+- The demo's own weather, NOTAMs and upper winds are committed fixtures, so
+  the build is reproducible without a network, a database or a model.

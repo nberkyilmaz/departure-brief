@@ -32,7 +32,8 @@ official briefing.
 | **Forecast verification** | Did the TAF turn out to be right, and which way was it wrong. |
 | **Winds and temperatures aloft** | Interpolated to the altitude flown; the temperature at cruise as the first question about icing. |
 | **Daylight** | Last light on arrival and how much of it is left, from the same solar arithmetic the night rules use. |
-| **The site** | Four pages, running the whole pipeline in the browser over reports it carries. |
+| **Nav log** | The wind triangle leg by leg, with a blank and a reason wherever a number cannot be had. |
+| **The site** | Five pages, running the whole pipeline in the browser over reports it carries. |
 
 ### Blocked, and on what
 
@@ -77,16 +78,17 @@ verbatim, feed the rules — so they get cheaper as they go.
 - **Graphical area forecast.** Images rather than text, so a different kind
   of work: show it, do not pretend to reason about it.
 
-### 3. The nav log
+### 3. The nav log — done
 
-The arithmetic a pilot does by hand, done once and checked: true and
-magnetic heading per leg, groundspeed against the winds aloft, time en
-route, fuel burned against fuel aboard, and the reserve the regulations
-require. Deterministic, testable, and it makes the go/no-go answer complete
-rather than weather-only.
+True course, the wind triangle, heading, groundspeed, time and fuel, leg by
+leg, with the reason printed wherever a number is missing.
 
-Depends on winds aloft, and on magnetic variation the aerodrome data
-already carries.
+Two things it still wants. **Magnetic** courses need variation, which
+OurAirports does not publish and NASR does — so a US field gets magnetic
+today and a Canadian one does not; the fix is a variation model rather than
+a data source. And **fuel reserve** against fuel aboard, which needs the
+handbook's burn table read out the way the weight-and-balance figures
+were.
 
 ### 4. Daylight — done
 
