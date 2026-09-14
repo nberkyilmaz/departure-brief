@@ -13,7 +13,7 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { App } from '../src/App.js';
 
 const DEMO = join(__dirname, '..', 'public', 'demo');
@@ -31,6 +31,11 @@ beforeAll(() => {
       return new Response('not found', { status: 404 });
     }
   }) as typeof fetch;
+});
+
+// Each test arrives at the application fresh, as a visitor would.
+beforeEach(() => {
+  window.location.hash = '';
 });
 
 afterEach(cleanup);
@@ -99,5 +104,66 @@ describe('the published page', () => {
     await verdict();
     expect(screen.getByText(/The weather here is frozen/i)).toBeTruthy();
     expect(screen.getByText(/rebuilt in your browser/i)).toBeTruthy();
+  });
+});
+
+describe('moving around it', () => {
+  /*
+   * Navigation is by hash, which is what a click on one of these links does
+   * in a browser — jsdom does not follow them itself, so the links' targets
+   * are checked and the address is then set the way the browser would set
+   * it. What is being tested is the application's half: the right target on
+   * the link, and the right page for the address.
+   */
+  function go(name: RegExp): void {
+    const link = screen.getByRole('link', { name });
+    const href = link.getAttribute('href')!;
+    expect(href.startsWith('#/')).toBe(true);
+    window.location.hash = href;
+  }
+
+  it('opens the reports it was judged on, in the words they arrived in', async () => {
+    render(<App />);
+    await verdict();
+
+    go(/The reports/i);
+
+    expect(await screen.findByRole('heading', { level: 2, name: /The reports/i })).toBeTruthy();
+    // Every report the page holds, not only the ones the briefing cited.
+    expect(document.querySelectorAll('.held').length).toBeGreaterThan(50);
+
+    // Opening one shows the report itself, not a summary of it.
+    fireEvent.click(document.querySelector('.held-row') as HTMLButtonElement);
+    expect(document.querySelector('.held .raw')!.textContent!.length).toBeGreaterThan(10);
+  });
+
+  it('keeps the verdict in reach from every page', async () => {
+    render(<App />);
+    const before = await verdict();
+
+    go(/Weight and balance/i);
+    await waitFor(() => expect(document.querySelector('.wb')).not.toBeNull());
+
+    // The briefing is no longer on screen, so the verdict rides in the navigation.
+    expect(currentVerdict()).toBeNull();
+    const chip = document.querySelector('.nav-verdict')!;
+    expect(chip.textContent).toBe(before);
+    expect(chip.getAttribute('href')).toBe('#/brief');
+
+    window.location.hash = chip.getAttribute('href')!;
+    await waitFor(() => expect(currentVerdict()).toBe(before));
+  });
+
+  it('lands on the page an address names, and says which one it is on', async () => {
+    window.location.hash = '#/about';
+    render(<App />);
+
+    expect(await screen.findByRole('heading', { level: 2, name: /What this is/i })).toBeTruthy();
+    const current = [...document.querySelectorAll('.nav a[aria-current="page"]')].map((a) => a.textContent);
+    expect(current).toEqual(['How this works']);
+
+    // An address that names nothing lands on the briefing rather than nowhere.
+    window.location.hash = '#/nonsense';
+    await waitFor(() => expect(document.querySelector('.inputs')).not.toBeNull());
   });
 });

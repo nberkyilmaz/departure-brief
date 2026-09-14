@@ -4,7 +4,11 @@ import { BriefingView } from './BriefingView.js';
 import { DiffPanel } from './DiffPanel.js';
 import { loadEngine, type LocalEngine } from './engine.js';
 import { FlightForm, defaultPlan, planProblems } from './FlightForm.js';
+import { FlightLine } from './FlightLine.js';
+import { Nav } from './Nav.js';
 import { ProfileForm, defaultAircraft, defaultProfile } from './ProfileForm.js';
+import { ReportsPage } from './ReportsPage.js';
+import { hrefFor, useRoute } from './router.js';
 import { useStored } from './useStored.js';
 import { WbPanel } from './WbPanel.js';
 import type { AircraftInput, BriefingDiff, FlightPlanInput, ProfileInput, StoredBriefing } from './types.js';
@@ -25,6 +29,7 @@ const base = import.meta.env.BASE_URL;
 const SETTLE_MS = 250;
 
 export function App() {
+  const route = useRoute();
   const [engine, setEngine] = useState<LocalEngine | null>(null);
   const [plan, setPlan] = useStored<FlightPlanInput>('plan', defaultPlan);
   const [profile, setProfile] = useStored<ProfileInput>('profile', defaultProfile);
@@ -143,73 +148,89 @@ export function App() {
         <strong>Not for operational use.</strong> Hold Short is a study and planning aid, not an official weather briefing or weight-and-balance computation.
         Obtain an official briefing from an approved source before any flight.
       </div>
+      {/* Keyboard and screen reader users should not have to walk the form to reach the answer. */}
+      <a className="skip" href="#verdict">
+        Skip to the verdict
+      </a>
       <main>
         <header>
-          <h1>Hold Short</h1>
-          <p className="tagline">
-            Stop before the line and brief before you cross it.
-            {DEMO && (
-              <>
-                {' '}
-                <a href="#about">What is this?</a>
-              </>
-            )}
-          </p>
+          <h1>
+            <a href={hrefFor('brief')}>Hold Short</a>
+          </h1>
+          <p className="tagline">Stop before the line and brief before you cross it.</p>
+          <Nav route={route} verdict={briefing?.document.briefing.verdict ?? null} />
         </header>
 
-        {DEMO && (
-          <div className="frozen" role="note">
-            <b>The weather here is frozen.</b> These are the real reports {engine ? `for ${engine.aerodromes.map((a) => a.id).join(', ')}, taken on ${recordedText}` : 'as recorded'} —
-            this page fetches nothing. Everything else is live: change your minimums, your aircraft, the route or the departure time and the briefing below is
-            rebuilt in your browser, by the same code the server runs.
-          </div>
+        {route === 'brief' && (
+          <>
+            {DEMO && (
+              <div className="frozen" role="note">
+                <b>The weather here is frozen.</b> These are the real reports{' '}
+                {engine ? `for ${engine.aerodromes.map((a) => a.id).join(', ')}, taken on ${recordedText}` : 'as recorded'} — this page fetches nothing.
+                Everything else is live: change your minimums, your aircraft, the route or the departure time and the briefing below is rebuilt in your
+                browser, by the same code the server runs.
+              </div>
+            )}
+
+            <FlightLine plan={plan} aircraft={aircraft} />
+
+            <section className="inputs">
+              <FlightForm plan={plan} onChange={change(setPlan)} lookup={engine ? engine.airport : null} aerodromes={engine?.aerodromes ?? []} />
+              <ProfileForm profile={profile} aircraft={aircraft} onProfile={change(setProfile)} onAircraft={change(setAircraft)} />
+              <div className="actions">
+                {DEMO ? (
+                  <>
+                    <p className="field-note" aria-live="polite">
+                      {busy ? 'Rebuilding the briefing…' : briefing ? `Rebuilt from the recorded reports${touched ? ' with your changes' : ''}.` : ''}
+                    </p>
+                    {touched && engine && (
+                      <button
+                        className="quiet"
+                        onClick={() => {
+                          setPlan(engine.plan);
+                          setProfile(engine.profile);
+                          setAircraft(engine.aircraft);
+                          setTouched(false);
+                        }}
+                      >
+                        Back to the recorded flight
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <button onClick={briefRemotely} disabled={busy || !ready}>
+                      {busy ? 'Fetching and judging…' : 'Brief this flight'}
+                    </button>
+                    {!ready && <p className="field-note">Still needs {problems.join(', ')}.</p>}
+                  </>
+                )}
+                {error && (
+                  <p className="error" role="alert">
+                    {error}
+                  </p>
+                )}
+              </div>
+            </section>
+
+            {diff && <DiffPanel d={diff} />}
+            {briefing ? (
+              <BriefingView stored={briefing} />
+            ) : (
+              busy && (
+                <p className="explain" role="status">
+                  {DEMO ? 'Loading the recorded reports…' : 'Fetching and judging…'}
+                </p>
+              )
+            )}
+          </>
         )}
 
-        <section className="inputs">
-          <FlightForm plan={plan} onChange={change(setPlan)} lookup={engine ? engine.airport : null} aerodromes={engine?.aerodromes ?? []} />
-          <ProfileForm profile={profile} aircraft={aircraft} onProfile={change(setProfile)} onAircraft={change(setAircraft)} />
-          <div className="actions">
-            {DEMO ? (
-              <>
-                <p className="field-note" aria-live="polite">
-                  {busy ? 'Rebuilding the briefing…' : briefing ? `Rebuilt from the recorded reports${touched ? ' with your changes' : ''}.` : ''}
-                </p>
-                {touched && engine && (
-                  <button
-                    className="quiet"
-                    onClick={() => {
-                      setPlan(engine.plan);
-                      setProfile(engine.profile);
-                      setAircraft(engine.aircraft);
-                      setTouched(false);
-                    }}
-                  >
-                    Back to the recorded flight
-                  </button>
-                )}
-              </>
-            ) : (
-              <>
-                <button onClick={briefRemotely} disabled={busy || !ready}>
-                  {busy ? 'Fetching and judging…' : 'Brief this flight'}
-                </button>
-                {!ready && <p className="field-note">Still needs {problems.join(', ')}.</p>}
-              </>
-            )}
-            {error && (
-              <p className="error" role="alert">
-                {error}
-              </p>
-            )}
-          </div>
-        </section>
+        {route === 'reports' && <ReportsPage held={engine?.reports ?? []} briefing={briefing} recordedAt={DEMO ? recordedText : null} />}
 
-        {diff && <DiffPanel d={diff} />}
-        {briefing && <BriefingView stored={briefing} />}
-        <WbPanel aircraftType={aircraft.type} spec={engine?.wb ?? null} crops={!DEMO} />
+        {route === 'weight' && <WbPanel aircraftType={aircraft.type} spec={engine?.wb ?? null} crops={!DEMO} />}
 
-        {/* The explaining comes after the thing itself. */}
-        {DEMO && <About recordedAt={recordedText} aerodromes={engine?.aerodromes ?? []} />}
+        {route === 'about' && <About recordedAt={recordedText} aerodromes={engine?.aerodromes ?? []} />}
 
         <footer>
           <p>

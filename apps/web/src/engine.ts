@@ -70,6 +70,16 @@ export interface LocalBriefing {
   readonly diff: BriefingDiff | null;
 }
 
+/** A report the page is holding, as it arrived. */
+export interface HeldReport {
+  readonly sha256: string;
+  readonly kind: string;
+  readonly station: string | null;
+  readonly issuedAt: string | null;
+  readonly body: string;
+  readonly fetchedFor: readonly string[];
+}
+
 export interface LocalEngine {
   /** When the reports it holds were taken. */
   readonly recordedAt: string;
@@ -83,6 +93,8 @@ export interface LocalEngine {
   readonly wb: WeightBalanceSpec | null;
   /** Which model ranked the NOTAMs when this was recorded, if any. */
   readonly model: string | null;
+  /** Every report it holds, verbatim — the whole of what a briefing here can see. */
+  readonly reports: readonly HeldReport[];
   brief(plan: FlightPlanInput, profile: ProfileInput, aircraft: AircraftInput): Promise<LocalBriefing>;
   /** What the store knows about an identifier, for the form to answer as it is typed. */
   airport(id: string): Promise<{ icaoId: string | null; faaId: string | null; name: string; city: string | null; country: string | null; runways: { id: string }[] } | null>;
@@ -116,6 +128,14 @@ export async function loadEngine(base: string): Promise<LocalEngine> {
     aircraft: asJson<AircraftInput>(bundle.aircraft),
     wb,
     model: bundle.model,
+    reports: bundle.reports.map((r) => ({
+      sha256: r.sha256,
+      kind: r.kind,
+      station: r.station,
+      issuedAt: r.issuedAt,
+      body: r.body,
+      fetchedFor: r.fetchedFor,
+    })),
     async brief(planInput, profileInput, aircraftInput) {
       const plan = parseFlightPlan(planInput);
       const profile = parsePilotProfile(profileInput);

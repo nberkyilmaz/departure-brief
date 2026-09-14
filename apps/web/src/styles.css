@@ -92,6 +92,56 @@ header h1 {
   line-height: 1.1;
 }
 .tagline { margin: var(--s1) 0 0; color: var(--muted); font-size: 1.02rem; }
+header h1 a { color: inherit; text-decoration: none; }
+header h1 a:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+
+/*
+ * The four things this does. A row of tabs rather than a menu, because
+ * four is few enough to show all of them, and a reader should be able to
+ * see what else is here without opening anything.
+ */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  margin-top: var(--s4);
+  border-bottom: 1px solid var(--line);
+}
+.nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav a {
+  display: block;
+  padding: var(--s2) var(--s3);
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-size: 0.95rem;
+}
+.nav a:hover { color: var(--fg); }
+.nav a[aria-current='page'] { color: var(--fg); font-weight: 600; border-bottom-color: var(--fg); }
+/* The answer, still visible from wherever the reader has wandered to. */
+.nav .nav-verdict { border: 0; margin-bottom: 0; padding: 0.2rem 0.55rem; font-size: 0.78rem; font-weight: 600; color: #fff; }
+.nav .nav-verdict:hover { opacity: 0.85; }
+
+/* Everything the briefing could see, in the words it arrived in. */
+.reports-page h2 { font-size: 1.3rem; margin: 0 0 var(--s2); }
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s4); margin: var(--s4) 0 var(--s2); }
+.held-list { border-top: 1px solid var(--line); }
+.held { border-bottom: 1px solid var(--line); border-top: 0; }
+.held-row { grid-template-columns: 6.5rem 8rem 1fr auto; align-items: baseline; padding: var(--s2) 0; }
+.badge.kind { background: var(--surface-sunk); color: var(--muted); border: 1px solid var(--line); }
+.held-station { font-weight: 600; }
+.held-time { color: var(--muted); font-size: 0.85rem; }
+.held .raw { margin: 0 0 var(--s3); }
+
 a { color: var(--advisory); text-decoration-thickness: 1px; text-underline-offset: 2px; }
 
 /* Every panel is the same card, so the page has one rhythm rather than five. */
@@ -295,6 +345,11 @@ summary:focus-visible,
   .change .basis { grid-column: 2; font-size: 0.75rem; }
   .change .summary { grid-column: 1 / -1; }
   .notam-group summary, .point h3 { flex-wrap: wrap; }
+  .nav { flex-direction: column; align-items: stretch; gap: var(--s2); }
+  .nav ul { justify-content: space-between; }
+  .nav a { padding: var(--s2); font-size: 0.9rem; }
+  .held-row { grid-template-columns: 6rem 1fr; }
+  .held-time, .held-row code { grid-column: 1 / -1; }
   .raw { font-size: 0.78rem; }
 }
 
@@ -305,4 +360,46 @@ summary:focus-visible,
 @media (prefers-color-scheme: dark) {
   .verdict, .badge, .banner { color: #15151a; }
   .night { background: var(--surface-sunk); color: var(--fg); }
+}
+
+/* The flight in one line, above the form that spells it out. */
+.flight-line {
+  margin: var(--s4) 0 var(--s3);
+  font-size: 1.05rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--s1);
+  align-items: baseline;
+}
+.flight-line .muted { color: var(--muted); font-size: 0.9rem; }
+.flight-line small { color: var(--muted); }
+
+/* Visible only once it has focus, which is when it is wanted. */
+.skip {
+  position: absolute;
+  left: -9999px;
+  background: var(--surface);
+  color: var(--fg);
+  padding: var(--s2) var(--s4);
+  border: 1px solid var(--fg);
+  border-radius: 0 0 var(--radius) 0;
+  z-index: 20;
+}
+.skip:focus { left: 0; top: 0; }
+
+/*
+ * On paper, for a kneeboard. The form and the navigation are of no use
+ * there; the disclaimer, the verdict, the findings and the reports behind
+ * them are the whole point, so every collapsed section is opened.
+ */
+@media print {
+  :root { --bg: #fff; --surface: #fff; --surface-sunk: #f4f4f0; --fg: #000; --muted: #444; --line: #bbb; }
+  .nav, .inputs, .skip, .about, button.quiet { display: none !important; }
+  .banner { position: static; color: #000; background: #fff; border: 2px solid #000; font-weight: 600; }
+  details { display: block; }
+  details > summary { display: none; }
+  .finding .detail, .met > *, details > * { display: block !important; }
+  .point, .notam-group, .diff, fieldset { break-inside: avoid; box-shadow: none; }
+  main { max-width: none; padding: 0; }
+  a[href^='#'] { text-decoration: none; color: inherit; }
 }
