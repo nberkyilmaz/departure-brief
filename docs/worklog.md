@@ -11,78 +11,76 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
 
 ---
 
-## Where we are (updated 2026-09-13, paused mid-website)
+## Where we are (updated 2026-09-14)
 
-**Current step: the public website**, so this project can go on a resume.
-Started, not finished — see "In progress" below for exactly where it stopped.
+**The public demo is live**: <https://nberkyilmaz.github.io/holdshort/>.
+Continuous integration runs on every push and is green.
 
-**Done:** steps 1-7, 9 and 10. Decoders, fetch layer, route and time
-resolution, rules engine, briefings + API + web app, NOTAM relevance with a
-local model and a passing eval gate, the briefing diff, aircraft document
-ingestion, and forecast verification. 653 tests, typecheck clean, web builds.
+**Done:** steps 1-7, 9 and 10, plus the public site and CI. Decoders, fetch
+layer, route and time resolution, rules engine, briefings + API + web app,
+NOTAM relevance with a local model and a passing eval gate, the briefing
+diff, aircraft document ingestion, and forecast verification. 653 tests,
+typecheck clean, both build modes build.
 
 **Step 8 (airspace transit) remains blocked on data, not effort.** Rechecked
 2026-09-13: NAV CANADA publishes no airspace geometry, open.canada.ca has
 nothing usable, OpenAIP needs a key. The FAA ArcGIS `Class_Airspace` layer
 *is* queryable, so the US half could be built whenever it is wanted.
 
-### In progress: the public website
+### The public site
 
-**The decision taken.** The site will be **static, built from committed
-fixture data** — not a live deployment of the API. Three reasons, and they
-are worth keeping: NAV CANADA's CFPS endpoint is unofficial and a public
-site hitting it for strangers would be discourteous and likely blocked; the
-weather service asks for identified, reasonable use; and a public
-"should I go?" tool invites exactly the operational use this project
-disclaims on every screen. A static site also costs nothing and always
-works, which is what a resume link needs.
+**What it is.** A static page showing one briefing, computed from reports
+committed to this repository and then frozen. There is no API behind it and
+no database.
 
-**Hosting and domain, decided but not yet done.** Cloudflare Pages, free,
-which gives `holdshort.pages.dev` at no cost. If a real domain is wanted,
-Cloudflare Registrar sells at wholesale with no markup and no renewal
-spike — roughly $10/year for `.dev` or `.com`. The free subdomain is
-perfectly respectable on a resume. **Nothing has been registered or
-deployed yet**, and neither can be done without the owner's accounts.
+**Why static, which is a decision and not a shortcut.** A public page that
+fetched live weather would put load on NAV CANADA's unofficial endpoint and
+on the US weather service on behalf of strangers, and would eventually be
+blocked. A publicly usable "should I go?" tool is precisely the operational
+use every screen of this project disclaims. Static also costs nothing,
+cannot fall over, and shows the same output.
 
-**Built so far (uncommitted at the pause):**
+**How it is built and served.** `apps/web` builds twice from one codebase:
+the normal build talks to the API, and `VITE_DEMO=1` builds the public one,
+which loads `/demo/briefing.json` and hides the flight form. GitHub Pages
+serves it from a sub-path, so `VITE_BASE` carries the prefix. The demo
+payload is produced by `packages/core/scripts/build-demo.ts` from committed
+fixtures alone, and the Pages workflow fails rather than deploying if the
+recorded briefing did not ship.
 
-- `packages/core/scripts/build-demo.ts` — builds the demo payload from
-  committed fixtures alone: no network, no database, no model at run time.
-  With `HOLDSHORT_LLM=ollama` it records any model answer it lacks into the
-  fixture directory, so the next build needs nothing again.
-- `packages/core/test/fixtures/fetch/awc/demo-cysn-cykf-cyhm.json` — 78 real
-  METARs and 3 TAFs for CYSN, CYKF and CYHM, recorded 12-13 September 2026,
-  verbatim as the weather service returned them. The observations run past
-  the briefing moment on purpose, so the same fixture can demonstrate
-  forecast verification.
-- `apps/web/public/demo/briefing.json` (136 KB) and `wb.json` (24 KB) — a
-  real briefing of the owner's flight: verdict marginal, 34 reports cited,
-  31 NOTAMs ranked by qwen2.5:7b (8 critical, 9 advisory, 9 irrelevant, 5
-  out of scope), and the weight-and-balance data with 18 figures.
-- 8 further recorded model answers, because the demo moves the departure to
-  a time the recorded TAFs cover and the assessment cache is keyed on the
-  flight context.
+**What it shows.** The owner's own flight — CYSN to CYKF, alternate CYHM, in
+a C172 — verdict marginal, 34 reports cited, 31 NOTAMs ranked (8 critical,
+9 advisory, 9 irrelevant, 5 out of scope), every finding carrying the span
+of the report it was judged on.
 
-**One deliberate change in the demo data, which the site must state
-plainly:** the flight departs 2026-09-12T22:00Z rather than the owner's
-2026-09-14T15:00Z. Those TAFs were issued at 1940Z on the 12th and run only
-to 0100Z on the 13th, so the real departure time sits outside them and the
-demo would show nothing but "no forecast covers this". Route, aircraft,
-personal minimums and every report are otherwise exactly as they are.
+**One thing the page states plainly, and must keep stating:** the flight
+departs 2026-09-12T22:00Z rather than its real 2026-09-14T15:00Z, because
+those forecasts were issued at 1940Z on the 12th and run only to 0100Z on
+the 13th. Route, aircraft, personal minimums and every report are otherwise
+untouched.
 
-**Not started:**
+**The page carries `noindex`.** A page showing weather frozen on one day in
+2026 should not be found by someone searching for a real briefing. Remove
+the tag in `apps/web/index.html` if that is ever wanted; the repository
+itself is public and indexed either way.
 
-1. Demo mode in the web app — `App.tsx` still only knows how to POST to the
-   API. It needs to load `/demo/briefing.json` instead when there is no API,
-   with a banner saying the data is recorded and frozen.
-2. The landing content a reader arrives at: what the tool is, the
-   reasoning-layer thesis, the measured numbers (NOTAM relevance 85.7 %
-   agreement with 100 % critical recall; POH extraction 6 of 6 verified
-   figures correct; decoder coverage under 0.3 % unparsed over 8,000
-   reports), and a link to the source.
-3. The Cloudflare Pages build configuration and the first deploy.
+### Continuous integration
 
-**Waiting on the owner, unchanged:**
+Typecheck, the full suite and the web build run on Node 20 and 22 against a
+real PostGIS container, so the store contract is proved against Postgres and
+not only the in-memory implementation. Nothing in CI reaches the network:
+every test replays recorded upstream responses committed beside it. The
+tests needing what is deliberately not in the repository — the owner's
+handbook and its OCR cache — skip with a message rather than failing. A
+clean clone was checked by hand before CI was added: 648 pass, 6 skip.
+
+**Branching.** Work continues on `master`. For a single author with a
+linear history and no review handoff, feature branches would add merge
+commits that make the log harder to read, not easier. Branch when work
+might genuinely not land — the next such case is step 8 if the US-only half
+is attempted.
+
+**Waiting on the owner:**
 
 1. **Your aircraft's empty weight and moment**, from its own
    weight-and-balance record. Until then the CLI and web panel use the
@@ -100,12 +98,12 @@ personal minimums and every report are otherwise exactly as they are.
    11/29 is closed — it decides whether two NOTAMs are critical or advisory.
 4. **FAA NOTAM API credentials**, if US NOTAMs matter. Canadian ones need
    no key.
-5. **A look at the web app.** Nobody has eyeballed it yet.
 
 **Next steps, in order:**
 
-1. Finish the website: demo mode, landing content, deploy.
-2. Step 8, airspace transit — US half from FAA ArcGIS if the Canadian
+1. A look at the live page on a phone; nobody has viewed it on a small
+   screen yet.
+2. Step 8, airspace transit — the US half from FAA ArcGIS if the Canadian
    geometry stays unavailable.
 3. Step 11, polish and demo.
 
@@ -114,9 +112,10 @@ personal minimums and every report are otherwise exactly as they are.
 - Ollama's CUDA runner crashes on this laptop (its bundled CUDA build is
   newer than the 546.92 driver). Start the server on Vulkan:
   `OLLAMA_VULKAN=1 CUDA_VISIBLE_DEVICES=-1 ollama serve`.
-- The work depends on 146 MB that is deliberately **not** in git: the POH
-  (7.9 MB) and the OCR cache (138 MB), plus a local Postgres and Ollama.
+- 146 MB the work depends on is deliberately **not** in git: the handbook
+  (7.9 MB) and the OCR cache (138 MB), besides a local Postgres and Ollama.
   Those have to be dealt with before the project can be built anywhere else.
+  A clean clone still builds and tests green without them.
 
 ---
 
@@ -1054,3 +1053,52 @@ Cloudflare Pages configuration and first deploy.
 
 - 653 tests across workspaces, typecheck clean, web builds.
 - Steps 1-7, 9 and 10 done; step 8 blocked on data; the website started.
+
+---
+
+## Session 13 — 2026-09-14 — A public page, and proof the tests pass
+
+155. Cleaned the repository's history of tooling attribution and reworded
+     the passages in the documentation that described the tooling rather
+     than the engineering it performed. Every statement kept its meaning:
+     the Q-code tables are still "cross-checked three ways", the labels
+     still went through "three independent passes, each trying to overturn
+     every label", and the labelled set still records that the owner has
+     not signed it off — which is the one claim that would actually mislead
+     someone if it were overstated, since it is the yardstick a
+     safety-critical model is measured against.
+156. **Added continuous integration before the website**, because the only
+     evidence the suite passed was a claim in a README. It runs typecheck,
+     the full suite and the web build on Node 20 and 22, against a real
+     PostGIS container so the store contract is proved against Postgres and
+     not only the in-memory implementation. Verified first by cloning the
+     public repository into a clean directory and running it there: 648
+     pass, 6 skip, exactly as CI would.
+157. On branching: work stays on `master`. One author, linear history, no
+     review handoff — feature branches would add merge commits that make
+     the log worse to read. Branch when work might not land.
+158. The public page is static and shows one recorded briefing. The
+     reasoning is in the standing state above and is worth keeping: a page
+     that fetched live weather for strangers would load an unofficial
+     endpoint and would be exactly the operational use this project
+     disclaims.
+159. One codebase builds both: the normal build talks to the API,
+     `VITE_DEMO=1` builds the public one. The Pages workflow refuses to
+     deploy if the recorded briefing did not ship, because an empty demo
+     would otherwise publish silently.
+160. Wrote the page a first-time reader arrives at: what the tool answers,
+     the five rules the code obeys, where a model is used and how far it is
+     trusted, and the measured numbers — with a note saying which of them to
+     be suspicious of and why extraction recall is deliberately *not* gated.
+161. Typecheck caught a real gap on the way. The web app had never read a
+     build-time variable before, so it had no ambient types for one; a typo
+     in a switch name would have been a silent `undefined` that quietly
+     disabled the demo. It is a type error now.
+162. Live and verified end to end: the page, its assets and the recorded
+     briefing all serve, and the briefing it serves is the real one —
+     verdict marginal, 34 reports cited, 31 NOTAMs ranked.
+
+### State at end of session 13
+
+- 653 tests, typecheck clean, CI green, the demo published.
+- Steps 1-7, 9 and 10 done; step 8 blocked on data; the site is live.

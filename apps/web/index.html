@@ -3,7 +3,27 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Hold Short</title>
+    <title>Hold Short — should I go, and why?</title>
+    <meta
+      name="description"
+      content="A flight briefing tool that answers whether a planned flight should be flown. Decodes METAR, TAF and NOTAM, resolves them to each waypoint at its ETA, and judges the result against the pilot's own personal minimums — citing the source behind every finding. Study aid only, not an official briefing."
+    />
+    <meta name="color-scheme" content="light" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Hold Short — should I go, and why?" />
+    <meta
+      property="og:description"
+      content="Decodes the raw products a pilot already reads, resolves them to each point along the route at the time the aircraft will be there, and judges them against that pilot's personal minimums. Every finding cites its source."
+    />
+    <meta name="twitter:card" content="summary" />
+
+    <!--
+      A recorded briefing, not a live one. Keeping search engines away from a
+      page that shows weather frozen on one day in 2026 is the courteous
+      thing to do: nobody should reach this looking for a real briefing.
+    -->
+    <meta name="robots" content="noindex" />
   </head>
   <body>
     <div id="root"></div>

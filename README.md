@@ -11,6 +11,10 @@
 
 Stop before the line and brief before you cross it.
 
+**[See a real briefing →](https://nberkyilmaz.github.io/holdshort/)** — one
+flight, judged against the weather and NOTAMs those aerodromes were actually
+publishing on 12 September 2026. The page is static and fetches nothing.
+
 Hold Short answers one question about a planned flight: **given this route, at
 this time, in this aircraft — should I go, and why?** It decodes the raw
 products a pilot already reads, resolves them to each point along the route at
