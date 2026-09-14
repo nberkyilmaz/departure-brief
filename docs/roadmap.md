@@ -30,6 +30,9 @@ official briefing.
 | **Briefing diff** | What changed since last time, measured against the verdict rather than the text. |
 | **Weight and balance** | Read out of a scanned handbook, every figure checked against the ink before it is used. |
 | **Forecast verification** | Did the TAF turn out to be right, and which way was it wrong. |
+| **Winds and temperatures aloft** | Interpolated to the altitude flown; the temperature at cruise as the first question about icing. |
+| **Daylight** | Last light on arrival and how much of it is left, from the same solar arithmetic the night rules use. |
+| **The site** | Four pages, running the whole pipeline in the browser over reports it carries. |
 
 ### Blocked, and on what
 
@@ -64,7 +67,10 @@ briefs over reports frozen at the moment they were recorded, and says so.
 Each is the same shape as METAR and TAF — fetch, decode with spans, store
 verbatim, feed the rules — so they get cheaper as they go.
 
-- **Winds and temperatures aloft.** Also the input the nav log needs.
+- ~~**Winds and temperatures aloft.**~~ Done. Interpolated to the altitude
+  being flown, with the temperature at cruise as the first question about
+  icing. Fetched for the route rather than the aerodromes, because a small
+  field is almost never an upper wind site.
 - **SIGMET and AIRMET.** Hazards along the route at the altitude flown.
 - **PIREPs.** What somebody up there actually found, which is often the
   only honest answer about icing and turbulence.
@@ -82,11 +88,12 @@ rather than weather-only.
 Depends on winds aloft, and on magnetic variation the aerodrome data
 already carries.
 
-### 4. Daylight
+### 4. Daylight — done
 
-Sunrise, sunset, civil twilight and how much usable daylight is left at the
-destination on arrival. The solar arithmetic is already in the repository
-for the night-minima rules; this surfaces it.
+Sunrise, sunset, civil twilight and how much daylight is left on arrival,
+which is the question before "is this a night flight". The *next* of each
+event rather than the day's, because last light in Ontario falls after
+midnight Zulu for half the year.
 
 ### 5. More out of the handbook
 

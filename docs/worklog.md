@@ -21,21 +21,23 @@ mobile one. A study aid throughout — never an official briefing.
 `docs/roadmap.md` holds the sequence and why each piece comes where it does.
 This file holds what was actually done and what it cost.
 
-**The site works.** <https://nberkyilmaz.github.io/holdshort/> carries the
-recorded reports and runs the pipeline in the browser: change a personal
-minimum, the aircraft, the route or the departure time and the verdict is
-rebuilt in front of you, by the same code the API runs. What it cannot do is
-fetch — neither weather service allows a page to call it directly — so the
-weather is frozen at the moment it was recorded, and the page says so.
+**The site works.** <https://nberkyilmaz.github.io/holdshort/> has four
+pages — brief a flight, the reports it was judged on, weight and balance,
+and how it works — and it runs the pipeline in the browser: change a
+personal minimum, the aircraft, the route or the departure time and the
+verdict is rebuilt in front of you, by the same code the API runs. What it
+cannot do is fetch, so the weather is frozen at the moment it was recorded
+and the page says so.
 
-**Current work: the rest of the pre-flight picture** (`docs/roadmap.md`),
-and a live deployment when the owner wants one, which is the only way to
-brief a flight happening now.
+**Current work: the rest of the pre-flight picture** (`docs/roadmap.md`).
+Winds aloft and daylight are done; SIGMET, AIRMET and PIREPs are next,
+then the nav log, which the winds were the missing input for.
 
-**Done:** steps 1-7, 9 and 10, plus the public site and CI. Decoders, fetch
-layer, route and time resolution, rules engine, briefings with an API and a
-web view, NOTAM relevance with a local model and a passing eval gate, the
-briefing diff, aircraft document ingestion, forecast verification.
+**Done:** steps 1-7, 9 and 10, the public site, CI, winds and temperatures
+aloft, and daylight. Decoders, fetch layer, route and time resolution,
+rules engine, briefings with an API and a web view, NOTAM relevance with a
+local model and a passing eval gate, the briefing diff, aircraft document
+ingestion, forecast verification.
 
 **Blocked on data, not effort:** airspace transit needs Canadian airspace
 geometry, which NAV CANADA does not publish; US NOTAMs need FAA
@@ -1197,3 +1199,96 @@ had just dropped into the repo root.
 - The published site runs the pipeline in the browser over frozen reports.
 - The API is hardened and containerised; a live deployment needs only a
   host and the owner's accounts.
+
+---
+
+## Session 16 — 2026-09-14 — Winds aloft, daylight, and a site with pages
+
+184. **Winds and temperatures aloft.** NAV CANADA serves them already
+     reduced to numbers, so there is nothing coded to parse — but the
+     numbers still carry the span of the record they came from, and the
+     record is stored verbatim, so a pilot can see what the service said
+     beside what this made of it.
+185. The arithmetic pilots do by hand: interpolate between 3,000 and 6,000
+     for a Cessna at 3,500, linearly for speed and temperature and the
+     short way round for direction, because halfway between 350 and 010 is
+     000. It refuses to extrapolate below the lowest level, where the wind
+     is heading for the surface and the forecast says nothing about that,
+     and it says which of the two it is doing. Two directions exactly
+     opposite have no short way, so the turn is taken clockwise — arbitrary,
+     but fixed, and stated.
+186. Choosing the right forecast is most of the work. Six records cover a
+     day per site: three bulletins, each issued for the low levels by
+     Canada's office and the high ones by the American office. The one
+     wanted is the one whose window covers the ETA *and* whose levels reach
+     the altitude. Handing a Cessna the bulletin that starts at 24,000 ft
+     would be worse than handing it nothing.
+187. Getting them is not the same as getting them for the aerodromes. CYSN
+     and CYKF publish no upper winds at all — asking returns an empty
+     answer — and a flight between them needs Toronto's column, forty miles
+     away. So they are fetched for the *route*: the major fields within
+     reach, biggest first, all in one request, since the service answers for
+     whichever of them it publishes. Runway length is the proxy for "major",
+     because it is the one measure the airport data already carries and a
+     wrong guess costs nothing but an empty answer.
+188. Two findings come out of it: the wind at cruise, and the temperature —
+     at or below freezing, cloud or precipitation at cruise stops being
+     merely inconvenient. Both advisory: they decide fuel and route, not
+     whether to go.
+189. **Daylight**, which was roadmap item 4 and turned out to be an hour's
+     work because the solar arithmetic was already here for the night
+     minima. What was missing was the times, found by walking forward and
+     bisecting each crossing: no algebra to get subtly wrong, and it handles
+     the latitudes where the sun does not rise or set at all.
+190. They are the *next* of each event rather than "today's", because a day
+     is not the same thing in Zulu as it is where the aeroplane is. Last
+     light at Waterloo on a September evening is 00:05Z — the next day by
+     the clock this runs on, the same evening to the pilot. The demo now
+     reads "1 h 34 min of daylight after arrival", which is the sort of
+     thing a pilot actually wants to be told.
+191. Checked against itself rather than somebody else's table: each instant
+     is where the elevation crosses the boundary it claims, and the minute
+     either side is on the right side of it.
+192. That finding has no report behind it — it is the sun's position for a
+     place and an instant — so it cites the place and the instant. Not an
+     exemption from the rule that everything cites its source.
+193. **A defect the daylight work turned up.** A briefing written before
+     findings carried a basis kind has that kind recovered from the readable
+     basis; a basis string with no case there falls through to "overlay",
+     which changes the finding's identity and makes the diff report it as
+     new when nothing happened. Both new bases have cases now, and the
+     comment says the next one will need one too.
+194. **The site has pages.** One long page was fine when there was one thing
+     to read; there are four now. Routing is by hash rather than path,
+     because the site is served two ways — GitHub Pages under a repository
+     prefix, and the API's own static handler — and a hash needs neither of
+     them configured. Deep links work from either, a reload does not 404,
+     and the back button behaves.
+195. The verdict rides along in the navigation once there is one, so a
+     reader who has wandered off to the loading sheet can still see what the
+     flight came out as and get back to it in one tap.
+196. The reports got a page of their own rather than living only inside the
+     findings that happened to cite them: every METAR, TAF, NOTAM and upper
+     wind the page holds, filterable by kind and aerodrome, each opening to
+     the bytes the service sent. A verdict is worth what the reports behind
+     it are worth, and now they can be read.
+197. Smaller things a person notices: the flight in one line above the form
+     that spells it out; a skip link to the verdict; an honest "loading"
+     instead of an empty page; and a print stylesheet, because the obvious
+     place for a briefing is a kneeboard — it drops the form and the
+     navigation and opens every collapsed section, since on paper there is
+     nothing to tap.
+198. The web tests navigate by setting the address, which is what a click
+     does in a browser: jsdom does not follow hash links itself. What is
+     checked is this application's half — the right target on each link, the
+     right page for each address, and an address that names nothing landing
+     on the briefing rather than nowhere.
+
+### State at end of session 16
+
+- 719 tests across three workspaces (695 core, 17 API, 7 web), typecheck
+  clean, CI green.
+- Four pages, live, briefing in the browser over frozen reports.
+- Upper winds and daylight are in the pipeline and the API; the published
+  demo shows daylight, and will show winds once its reports are re-recorded
+  with an upper wind column in them.
