@@ -4,10 +4,16 @@ The goal, stated plainly: **everything a pilot looks at before a flight, in
 one place, with a reason and a source behind every line of it.** Not all at
 once — steadily, and each piece finished before the next is started.
 
+**This tool does not decide whether to fly.** It reports what the products
+say, compares them against the limits the pilot set, and puts what deserves a
+second look first. The decision is the pilot's. Where a summary is needed,
+it is the flight category — VFR, MVFR, IFR, LIFR — which is an objective
+classification of ceiling and visibility, not an opinion.
+
 Two rules that do not bend as it grows. Nothing is ever hidden: ranking and
 collapsing change what you see first, never what exists. And every finding
-carries the span of the report it was judged on, because a verdict without
-its source is worse than no verdict.
+carries the span of the report it was judged on, because a statement without
+its source is worth nothing.
 
 This is a study and planning aid. It is not, and will not become, an
 official briefing.
@@ -46,6 +52,19 @@ official briefing.
 ---
 
 ## Next
+
+### 0. Take the verdict out, and judge what is decoded — in progress
+
+The go/no-go verdict is being removed in favour of reporting. In the same
+pass, the rules engine has to start reading what the decoders already hand
+it: present weather (thunderstorms, freezing rain, fog, snow), total wind
+speed, and indeterminate ceilings (`BKN///`, `VV///`). Today a heavy
+thunderstorm with freezing rain produces three lines saying everything is
+fine, because no rule reads the weather groups.
+
+Then, in order: report age shown in colour; the nearest reporting station
+when a field's own is asleep; takeoff and landing distance from the POH;
+a page per aerodrome; fuel planning; airspace.
 
 ### 1. Make the site usable — done, except for live weather
 

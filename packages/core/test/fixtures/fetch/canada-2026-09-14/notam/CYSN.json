@@ -1,0 +1,141 @@
+{
+ "meta": {
+  "now": "2026-09-14T14:30:34.422",
+  "count": {
+   "notam": 10
+  },
+  "messages": []
+ },
+ "data": [
+  {
+   "type": "notam",
+   "pk": "1771368",
+   "location": null,
+   "startValidity": "2026-09-11T12:19:36.891",
+   "endValidity": "2026-09-18T10:59:00",
+   "text": "{\"raw\" : \"(G3263/26 NOTAMN\\nQ) CZXX/QGWAU/IV/NBO/E/000/999/4442N08439W294\\nA) CZWG CZYZ B) 2609140400 C) 2609181059\\nD) DAILY 0400-1059\\nE) GPS INTERFERENCE EXER\\nRADIUS 294NM CENTRE 444202N 0843838W FL400-UNL, \\n242NM RADIUS AT FL250,\\n177NM RADIUS AT 10000FT AMSL,\\n137NM RADIUS AT 4000FT AGL,\\n80NM RADIUS AT 50FT AGL. \\nGNSS SIGNAL MAY BE PERIODICALLY INTERRUPTED. INFORM ATC OF ANY\\nADVERSE IMPACT.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1766504",
+   "location": "CYSN",
+   "startValidity": "2026-09-02T22:54:00",
+   "endValidity": "2026-10-17T22:30:00",
+   "text": "{\"raw\" : \"(U1517/26 NOTAMR U1312/26\\nQ) CZYZ/QOLAS/IV/M/AE/000/005/4311N07913W005\\nA) CYSN B) 2609022254 C) 2610172230\\nE) OBST LGT U/S ANTENNA 431042N 0791257W (APRX 2.1NM WSW AD) 167FT \\nAGL, 495FT AMSL.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1762181",
+   "location": null,
+   "startValidity": "2026-08-26T18:06:45.686",
+   "endValidity": "2026-09-16T23:59:00",
+   "text": "{\"raw\" : \"(G3032/26 NOTAMN\\nQ) CZXX/QOATT/IV/BO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2609030901 C) 2609162359\\nE) TRIGGER NOTAM - PERM AIRAC AIP AMDT (AIRAC CANADA) ISSUES 25/2026 \\nTO 32/2026 WEF 03 SEP 2026. AIP CANADA, CANADA FLT SUPPLEMENT \\n(CFS), CANADA AIR PILOT (CAP), RESTRICTED CANADA AIR PILOT \\n(RCAP), DESIGNATED AIRSPACE HANDBOOK (DAH), TERMINAL, LOW AND \\nHIGH ENR CHARTS AMENDED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1750858",
+   "location": null,
+   "startValidity": "2026-08-07T12:18:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2675/26 NOTAMR G1363/26\\nQ) CZXX/QOEXX/IV/NBO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2608071218 C) 2611061800EST\\nE) AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\\nIN RESPONSE TO THE SECURITY SITUATION IN MALI. CANADIAN AIR\\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL EQUAL TO OR ABOVE FL320 IN\\nTHE PORTIONS OF FIR DAKAR (GOOO) AND FIR NIAMEY (DRRR) LOCATED IN\\nTHE TERRITORY OF MALI DUE TO THE POTENTIAL RISK FROM MILITANT\\nACTIVITY AND ANTI-AIRCRAFT WEAPONRY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1750853",
+   "location": null,
+   "startValidity": "2026-08-07T12:16:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2674/26 NOTAMR G1362/26\\nQ) CZXX/QOEXX/IV/NBO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2608071216 C) 2611061800EST\\nE) AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\\nIN RESPONSE TO THE SECURITY SITUATION IN MYANMAR. CANADIAN AIR\\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL AT OR ABOVE FL260 IN FIR\\nYANGON (VYYF) DUE TO THE RISK FROM ANTI-AIRCRAFT WEAPONRY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1744420",
+   "location": "CYSN",
+   "startValidity": "2026-07-27T13:15:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J5069/26 NOTAMR J2785/26\\nQ) CZYZ/QMDCH/IV/NBO/A/000/999/4312N07910W005\\nA) CYSN B) 2607271315 C) 2610261200EST\\nE) THR 19 DISPLACED BY 523FT DUE TREES 550FT BFR THR 19\\nAND 100FT W EXTENDED RCL. APRX 50FT AGL 370FT AMSL.\\nWITH RWY 01/19 SHORTENED, DECLARED DIST CHANGED TO:\\nRWY 01 TORA 2498 TODA 2695 ASDA 2498 LDA 2498\\nRWY 19 TORA 2498 TODA 3348 ASDA 2498 LDA 1975)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1744417",
+   "location": "CYSN",
+   "startValidity": "2026-07-27T13:14:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J5068/26 NOTAMR J2788/26\\nQ) CZYZ/QOBCE/IV/M/AE/000/006/4313N07912W005\\nA) CYSN B) 2607271314 C) 2610261200EST\\nE) MULTIPLE CRANES WITHIN 1000FT RADIUS CENTRED ON 431252N 0791228W \\nAPRX 1.4NM BFR THR 11 AND 1.1NM NORTH EXTENDED RCL. 213FT AGL \\n512FT AMSL. NOT LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1744416",
+   "location": "CYSN",
+   "startValidity": "2026-07-27T13:13:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J5067/26 NOTAMR J2786/26\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4312N07910W005\\nA) CYSN B) 2607271313 C) 2610261200EST\\nE) RWY 11/29 CLSD)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1744414",
+   "location": "CYSN",
+   "startValidity": "2026-07-27T13:11:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J5066/26 NOTAMR J2787/26\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4312N07910W005\\nA) CYSN B) 2607271311 C) 2610261200EST\\nE) TWY D CLSD.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1741094",
+   "location": null,
+   "startValidity": "2026-07-21T13:24:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2420/26 NOTAMR G1192/26\\nQ) CZXX/QOECH/IV/NBO/E/000/999/5518N09358W999\\nA) CZWG CZYZ B) 2607211324 C) 2610191800EST\\nE) ALL ACFT, REGARDLESS OF THE STATE OF REGISTRY, DIRECTLY OR \\nINDIRECTLY OWNED, CHARTERED, LEASED, OPERATED OR OTHERWISE \\nCONTROLLED BY A PERSON CONNECTED WITH EITHER THE RUSSIAN \\nFEDERATION OR OF BELARUS OR BY A CORPORATION OR ENTITY THAT IS \\nINCORPORATED OR FORMED UNDER THE LAWS OF THE RUSSIAN FEDERATION \\nOR BELARUS, AND ALL OPERATORS HOLDING AN AIR OPERATOR CERTIFICATE \\n(AOC) ISSUED BY RUSSIAN FEDERATION AND/OR BELARUSIAN AUTHORITIES \\nARE PROHIBITED TO ENTER, EXIT OR OVERFLY CANADA'S TERRITORIAL \\nAIRSPACE (INCLUDING FLT WITHIN 12NM OF CANADA'S COASTS). \\nEXCEPTIONS PERMITTED FOR ACFT EXPERIENCING INFLIGHT EMERG. \\n\\nALL AUTH OBTAINED PRIOR TO 27 FEB 2022 FOR ACFT AND OPS SUBJECT \\nTO THIS NOTAM ARE REVOKED.\\n\\nHUMANITARIAN, SAR, MEDEVAC AND ANY OTHER FLT SEEKING AN EXCEPTION \\nTO THIS RESTRICTION MUST RECEIVE AUTH GRANTED AFTER 27 FEB 2022 \\nFM THE MINISTER OF TRANSPORT TO OPERATE IN CANADA'S TERRITORIAL \\nAIRSPACE.  AFFECTED ACFT WISHING TO OBTAIN SUCH AN AUTH OR CLR \\nINTO CANADA'S TERRITORIAL AIRSPACE MAY APPLY TO THE MINISTER OF \\nTRANSPORT AT 1-877-992-6853 OR 1-613-992-6853 OR BY EMAIL AT \\nOPERATIONS.AVIATION(AT)TC.GC.CA.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,349 @@
+{
+ "meta": {
+  "now": "2026-09-14T14:30:43.145",
+  "count": {
+   "notam": 26
+  },
+  "messages": []
+ },
+ "data": [
+  {
+   "type": "notam",
+   "pk": "1772797",
+   "location": "CYTZ",
+   "startValidity": "2026-09-14T11:11:00",
+   "endValidity": "2026-09-14T19:11:00",
+   "text": "{\"raw\" : \"(A9268/26 NOTAMN\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609141111 C) 2609141911\\nE) RSC 06/24 DRY. VALID SEP 14 1111 - SEP 14 1911.\\n\\nRSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 14 1111 - SEP 14 1911.\\n\\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 14 1111 - SEP 14 1911.\\n\\nADDN NON-GRF/TALPA INFO:)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1771824",
+   "location": "CYTZ",
+   "startValidity": "2026-09-11T22:37:08.689",
+   "endValidity": "2026-09-20T11:00:00",
+   "text": "{\"raw\" : \"(J6256/26 NOTAMN\\nQ) CZYZ/QFPXX/IV/BO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609120300 C) 2609201100\\nD) SEP 12 0300-1015, SEP 13 0200-1100, SEP 15-19 0300-1000,       \\nSEP 20 0200-1100\\nE) MEDEVAC HEL TO OPR FM TEMPO NON-INSTR FATO 433748N 0792348W\\n(APRX 2001FT BEYOND THR 08 N SIDE TWY F, DIAMETER 82FT,\\nASPH, LGTD). ARR/DEP 107DEG TO 231DEG CLOCKWISE FR FATO.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1771726",
+   "location": "CYTZ",
+   "startValidity": "2026-09-11T19:44:55.549",
+   "endValidity": "2026-09-20T11:00:00",
+   "text": "{\"raw\" : \"(J6253/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609120300 C) 2609201100\\nD) SEP 12 0300-1015, SEP 13 0200-1100, SEP 15-19 0300-1000,        \\nSEP 20 0200-1100\\nE) RWY 06/24 AND RWY 08/26 CLSD DUE CONST)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1771722",
+   "location": null,
+   "startValidity": "2026-09-11T19:42:36.156",
+   "endValidity": "2026-09-16T04:00:00",
+   "text": "{\"raw\" : \"(G3282/26 NOTAMN\\nQ) CZYZ/QRTCA/IV/BO/W/000/025/4340N07923W003\\nA) CZYZ B) 2609131400 C) 2609160400\\nE) PURSUANT TO SECTION 5.1 OF THE AERONAUTICS ACT, THE AIRSPACE\\nWITHIN RADIUS 2NM CENTRE 434015N 0792324W (CENTRE APRX 5142FT N\\nTORONTO (HOSPITAL FOR SICK CHILDREN) (HELI) AD (CNW8), 2.6 NM\\nNNE TORONTO / BILLY BISHOP TORONTO CITY AIRPORT (CYTZ)) IS\\nRESTRICTED DURING POLICE OPS. NO PERSON SHALL OPR A REMOTELY\\nPILOTED ACFT (RPA) WITHIN THE AREA DESCRIBED EXC FOR POLICE OPS\\nUNLESS PRIOR AUTH HAS BEEN RECEIVED BY AIR SUPPORT UNIT TORONTO\\nPOLICE SVC 416-671-2159 OR AIRSUPPORT(A)TPS.CA\\nF) SFC G) 2500FT AMSL)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1771368",
+   "location": null,
+   "startValidity": "2026-09-11T12:19:36.891",
+   "endValidity": "2026-09-18T10:59:00",
+   "text": "{\"raw\" : \"(G3263/26 NOTAMN\\nQ) CZXX/QGWAU/IV/NBO/E/000/999/4442N08439W294\\nA) CZWG CZYZ B) 2609140400 C) 2609181059\\nD) DAILY 0400-1059\\nE) GPS INTERFERENCE EXER\\nRADIUS 294NM CENTRE 444202N 0843838W FL400-UNL, \\n242NM RADIUS AT FL250,\\n177NM RADIUS AT 10000FT AMSL,\\n137NM RADIUS AT 4000FT AGL,\\n80NM RADIUS AT 50FT AGL. \\nGNSS SIGNAL MAY BE PERIODICALLY INTERRUPTED. INFORM ATC OF ANY\\nADVERSE IMPACT.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1769023",
+   "location": "CYTZ",
+   "startValidity": "2026-09-07T17:40:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J6141/26 NOTAMN\\nQ) CZYZ/QFALT/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609071740 C) 2612071700EST\\nE) FLOATPLANE RAMP NOT AVBL)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1766862",
+   "location": "CYYZ",
+   "startValidity": "2026-09-03T13:02:00",
+   "endValidity": "2026-09-16T23:59:00",
+   "text": "{\"raw\" : \"(D3712/26 NOTAMN\\nQ) CZYZ/QOBTT/IV/BO/AE/000/016/4341N07938W030\\nA) CYYZ B) 2609031302 C) 2609162359\\nE) TRIGGER NOTAM - AIP SUP 083/2026 WEF 03 SEP 2026. CRANES-WITHIN \\n30 NAUTICAL MILES OF TORONTO / LESTER B. PEARSON INTL AIRPORT \\n(CYYZ)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1766857",
+   "location": "CYTZ",
+   "startValidity": "2026-09-03T13:00:00",
+   "endValidity": "2026-09-16T23:59:00",
+   "text": "{\"raw\" : \"(J6046/26 NOTAMN\\nQ) CZYZ/QFATT/IV/BO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609031300 C) 2609162359\\nE) TRIGGER NOTAM - AIP SUP 081/2026 WEF 03 SEP 2026. AERODROME \\nCONSTRUCTION - BILLY BISHOP TORONTO CITY AIRPORT, ON (CYTZ)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1762181",
+   "location": null,
+   "startValidity": "2026-08-26T18:06:45.686",
+   "endValidity": "2026-09-16T23:59:00",
+   "text": "{\"raw\" : \"(G3032/26 NOTAMN\\nQ) CZXX/QOATT/IV/BO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2609030901 C) 2609162359\\nE) TRIGGER NOTAM - PERM AIRAC AIP AMDT (AIRAC CANADA) ISSUES 25/2026 \\nTO 32/2026 WEF 03 SEP 2026. AIP CANADA, CANADA FLT SUPPLEMENT \\n(CFS), CANADA AIR PILOT (CAP), RESTRICTED CANADA AIR PILOT \\n(RCAP), DESIGNATED AIRSPACE HANDBOOK (DAH), TERMINAL, LOW AND \\nHIGH ENR CHARTS AMENDED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1761897",
+   "location": "CYYZ",
+   "startValidity": "2026-08-26T12:41:00",
+   "endValidity": "2026-09-30T23:59:00",
+   "text": "{\"raw\" : \"(G3020/26 NOTAMR G2908/26\\nQ) CZYZ/QNVAS/IV/BO/AE/000/999/4340N07940W025\\nA) CYYZ B) 2608261241 C) 2609302359\\nE) PEARSON (TORONTO/LBP INTL) VOR YTP 116.55MHZ U/S)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1751103",
+   "location": "CYTZ",
+   "startValidity": "2026-08-07T17:11:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2684/26 NOTAMR G2623/26\\nQ) CZYZ/QACXX/IV/NBO/AE/000/025/4338N07924W006\\nA) CYTZ B) 2608071711 C) 2611071700EST\\nE) DUE TO REDUCED SYSTEM CAPACITY AND ANTICIPATED TFC DEMANDS, \\nVFR TRAINING AND SIGHTSEEING FLT AVBL PPR EMAIL: \\nCYTZ(UNDERSCORE)PPR(UNDERSCORE)REQUEST(A)NAVCANADA.CA)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1750858",
+   "location": null,
+   "startValidity": "2026-08-07T12:18:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2675/26 NOTAMR G1363/26\\nQ) CZXX/QOEXX/IV/NBO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2608071218 C) 2611061800EST\\nE) AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\\nIN RESPONSE TO THE SECURITY SITUATION IN MALI. CANADIAN AIR\\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL EQUAL TO OR ABOVE FL320 IN\\nTHE PORTIONS OF FIR DAKAR (GOOO) AND FIR NIAMEY (DRRR) LOCATED IN\\nTHE TERRITORY OF MALI DUE TO THE POTENTIAL RISK FROM MILITANT\\nACTIVITY AND ANTI-AIRCRAFT WEAPONRY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1750853",
+   "location": null,
+   "startValidity": "2026-08-07T12:16:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2674/26 NOTAMR G1362/26\\nQ) CZXX/QOEXX/IV/NBO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2608071216 C) 2611061800EST\\nE) AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\\nIN RESPONSE TO THE SECURITY SITUATION IN MYANMAR. CANADIAN AIR\\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL AT OR ABOVE FL260 IN FIR\\nYANGON (VYYF) DUE TO THE RISK FROM ANTI-AIRCRAFT WEAPONRY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1749561",
+   "location": "CPP4",
+   "startValidity": "2026-08-05T11:47:38.457",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J5321/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/008/4339N07923W005\\nA) CXXX B) 2608071100 C) PERM\\nE) CPP4 TORONTO/CHARTRIGHT POLSON PIER (HELI)\\nAMEND PUBLICATIONS: NEW BUILDING 433921N 0792309W (APRX 1.55NM NW \\nAD (CPP4)). 485FT AGL 793FT AMSL. LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1741094",
+   "location": null,
+   "startValidity": "2026-07-21T13:24:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2420/26 NOTAMR G1192/26\\nQ) CZXX/QOECH/IV/NBO/E/000/999/5518N09358W999\\nA) CZWG CZYZ B) 2607211324 C) 2610191800EST\\nE) ALL ACFT, REGARDLESS OF THE STATE OF REGISTRY, DIRECTLY OR \\nINDIRECTLY OWNED, CHARTERED, LEASED, OPERATED OR OTHERWISE \\nCONTROLLED BY A PERSON CONNECTED WITH EITHER THE RUSSIAN \\nFEDERATION OR OF BELARUS OR BY A CORPORATION OR ENTITY THAT IS \\nINCORPORATED OR FORMED UNDER THE LAWS OF THE RUSSIAN FEDERATION \\nOR BELARUS, AND ALL OPERATORS HOLDING AN AIR OPERATOR CERTIFICATE \\n(AOC) ISSUED BY RUSSIAN FEDERATION AND/OR BELARUSIAN AUTHORITIES \\nARE PROHIBITED TO ENTER, EXIT OR OVERFLY CANADA'S TERRITORIAL \\nAIRSPACE (INCLUDING FLT WITHIN 12NM OF CANADA'S COASTS). \\nEXCEPTIONS PERMITTED FOR ACFT EXPERIENCING INFLIGHT EMERG. \\n\\nALL AUTH OBTAINED PRIOR TO 27 FEB 2022 FOR ACFT AND OPS SUBJECT \\nTO THIS NOTAM ARE REVOKED.\\n\\nHUMANITARIAN, SAR, MEDEVAC AND ANY OTHER FLT SEEKING AN EXCEPTION \\nTO THIS RESTRICTION MUST RECEIVE AUTH GRANTED AFTER 27 FEB 2022 \\nFM THE MINISTER OF TRANSPORT TO OPERATE IN CANADA'S TERRITORIAL \\nAIRSPACE.  AFFECTED ACFT WISHING TO OBTAIN SUCH AN AUTH OR CLR \\nINTO CANADA'S TERRITORIAL AIRSPACE MAY APPLY TO THE MINISTER OF \\nTRANSPORT AT 1-877-992-6853 OR 1-613-992-6853 OR BY EMAIL AT \\nOPERATIONS.AVIATION(AT)TC.GC.CA.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1739368",
+   "location": "CPP4",
+   "startValidity": "2026-07-17T18:34:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J4834/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/009/4339N07923W005\\nA) CXXX B) 2607171834 C) PERM\\nE) CPP4 TORONTO/CHARTRIGHT POLSON PIER (HELI)\\nAMEND PUBLICATIONS: NEW BUILDING 433912N 0792232W (APRX 1.1NM NW \\nAD (CPP4)). 612FT AGL 896FT AMSL. LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1737189",
+   "location": "CYTZ",
+   "startValidity": "2026-07-14T13:45:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J4723/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/009/4339N07924W005\\nA) CYTZ B) 2607141345 C) PERM\\nE) AMEND PUBLICATIONS: NEW BUILDING 433846N 0792336W APRX 710FT BFR \\nTHR 26 AND 5600FT NORTH EXTENDED RCL. 549FT AGL 834FT AMSL. NOT \\nLGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1736433",
+   "location": "CYTZ",
+   "startValidity": "2026-07-13T12:28:11.040",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J4690/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/003/4338N07924W005\\nA) CYTZ B) 2607150400 C) 2610131800EST\\nE) MAINT CREW AND EQPT WITHIN AREA BOUNDED BY 433733N 0792400W - \\n433734N 0792358W - 433733N 0792358W - 433732N 0792359W - \\n433733N 0792400W (CENTRE APRX 390FT BFR THR 06 AND 310FT NW \\nEXTENDED RCL). 26FT AGL 280FT AMSL. LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1721966",
+   "location": null,
+   "startValidity": "2026-06-17T17:58:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(M1141/26 NOTAMN\\nQ) CZYZ/QANCH/I/NBO/E/000/180/4355N07836W050\\nA) CZYZ B) 2606171758 C) PERM\\nE) AMEND PUBLICATIONS:\\nT781 BTN TESUK TO TALEB: MOCA TO READ 2500 INSTEAD OF 2300)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1716971",
+   "location": "CPP4",
+   "startValidity": "2026-06-09T12:36:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J3827/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/008/4339N07922W005\\nA) CXXX B) 2606091236 C) PERM\\nE) CPP4 TORONTO/CHARTRIGHT POLSON PIER (HELI)\\nAMEND PUBLICATIONS: NEW BUILDINGS WITHIN 150FT RADIUS CENTRED ON \\n433912N 0792157W (APRX 4974FT NNW AD (CPP4)). 525FT AGL 794FT \\nAMSL. LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1713246",
+   "location": "CPP4",
+   "startValidity": "2026-06-02T17:54:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J3655/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/011/4341N07924W005\\nA) CXXX B) 2606021754 C) PERM\\nE) CPP4 TORONTO/CHARTRIGHT POLSON PIER (HELI)\\nAMEND PUBLICATIONS: NEW BUILDING 434114N 0792332W (APRX 3.2NM NNW \\nAD (CPP4)). 570FT AGL 1031FT AMSL. NOT LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1694523",
+   "location": "CYTZ",
+   "startValidity": "2026-05-04T14:43:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J2934/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/006/4338N07925W005\\nA) CYTZ B) 2605041443 C) PERM\\nE) AMEND PUBLICATIONS: NEW BUILDING 433759N 0792444W APRX 1570FT BFR \\nTHR 08 AND 2690FT NORTH EXTENDED RCL. 329FT AGL 588FT AMSL. NOT \\nLGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1665469",
+   "location": "CYTZ",
+   "startValidity": "2026-04-02T13:16:03.371",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J2259/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/008/4340N07929W005\\nA) CYTZ B) 2604071100 C) PERM\\nE) AMEND PUBLICATIONS: MOBILE CRANE WITHIN 141FT RADIUS CENTRED ON \\n433955N 0792840W (APRX 4.2NM NW AD (CYTZ)). 315FT AGL 705FT AMSL. \\nNOT LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1638840",
+   "location": "CYTZ",
+   "startValidity": "2026-03-11T16:08:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J1731/26 NOTAMR J7655/25\\nQ) CZYZ/QOBCE/IV/M/AE/000/004/4338N07925W005\\nA) CYTZ B) 2603111608 C) PERM\\nE) AMEND PUBLICATIONS: MULTIPLE CRANES WITHIN 330FT RADIUS CENTRED \\nON 433741N 0792453W APRX 2780FT BFR THR 08 AND 1170FT NORTH \\nEXTENDED RCL. 105FT AGL 367FT AMSL. LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1638799",
+   "location": "CPP4",
+   "startValidity": "2026-03-11T15:56:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J1716/26 NOTAMR J0692/26\\nQ) CZYZ/QOBCE/IV/M/AE/000/009/4340N07924W005\\nA) CXXX B) 2603111556 C) PERM\\nE) CPP4 TORONTO/CHARTRIGHT POLSON PIER (HELI)\\nAMEND PUBLICATIONS: NEW BUILDING 434015N 0792340W (APRX 2.4NM NNW \\nAD (CPP4)). 470FT AGL 850FT AMSL. NOT LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1638796",
+   "location": "CPP4",
+   "startValidity": "2026-03-11T15:55:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J1715/26 NOTAMR J0691/26\\nQ) CZYZ/QOBCE/IV/M/AE/000/011/4340N07924W005\\nA) CXXX B) 2603111555 C) PERM\\nE) CPP4 TORONTO/CHARTRIGHT POLSON PIER (HELI)\\nAMEND PUBLICATIONS: CRANE WITHIN 164FT RADIUS CENTRED ON 434015N \\n0792340W (APRX 2.4NM NNW AD (CPP4)). 702FT AGL 1082FT AMSL. NOT \\nLGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  }
+ ]
+}

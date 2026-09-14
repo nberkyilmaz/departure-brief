@@ -11,70 +11,121 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
 
 ---
 
-## Where we are (updated 2026-09-14)
+## Where we are (updated 2026-09-14, paused mid-change)
 
-**The goal, restated:** everything a pilot looks at before a flight, in one
-place, with a reason and a source behind every line. Built steadily, each
-piece finished before the next is started. A web application first, then a
-mobile one. A study aid throughout — never an official briefing.
+**The product has changed shape. Read this before touching the code.**
 
-`docs/roadmap.md` holds the sequence and why each piece comes where it does.
-This file holds what was actually done and what it cost.
+The owner's words, on 14 September: *"we should take out the go no go thing,
+its peoples decision we are not deciding it for them. We are providing
+information."*
 
-**The site works.** <https://nberkyilmaz.github.io/holdshort/> has five
-pages — brief a flight, the nav log, the reports it was judged on, weight
-and balance, and how it works — and it runs the pipeline in the browser:
-change a personal minimum, the aircraft, the route or the departure time
-and the verdict is rebuilt in front of you, by the same code the API runs.
-What it cannot do is fetch, so the weather is frozen at the moment it was
-recorded (05:10Z on 14 September 2026) and the page says so.
+So the single go/no-go verdict is being removed. What replaces it is not a
+softer verdict — it is nothing. The tool reports what the products say,
+compares them against the limits this pilot set, puts the things that deserve
+a second look first, and leaves the decision where it belongs.
 
-**Current work: the rest of the pre-flight picture** (`docs/roadmap.md`).
-Winds aloft, daylight, the nav log and hazard advisories are done. PIREPs
-are next, then more out of the handbook.
+**The design that was agreed, and half-written when work stopped:**
 
-**Done:** steps 1-7, 9 and 10, the public site, CI, winds and temperatures
-aloft, daylight, the nav log, and SIGMET/AIRMET hazards. Decoders, fetch
-layer, route and time resolution, rules engine, briefings with an API and a
-web view, NOTAM relevance with a local model and a passing eval gate, the
-briefing diff, aircraft document ingestion, forecast verification.
+- `Severity = 'ok' | 'advisory' | 'marginal' | 'no-go'` becomes
+  `Attention = 'routine' | 'note' | 'caution' | 'alert'`. The old words are
+  the decision; the new ones are about reading. An `alert` is not "do not
+  go" — it is "you asked to be told about this, and here it is, with the
+  report it came from".
+- `Briefing.verdict` and `PointVerdict.verdict` go away. `PointVerdict`
+  becomes `PointReview`, carrying `category: FlightCategory | null` — VFR,
+  MVFR, IFR or LIFR from ceiling and visibility. That is an objective
+  classification every weather service publishes, not an opinion, and
+  `flightCategoryOf` in `decode/metar/derive.ts` already computes it.
+- `worst()` and `verdictOf()` are deleted. Nothing aggregates.
+- `RULES_VERSION` goes to 5.
+- A half-written migration script is at
+  `<scratchpad>/no-verdict.py` — but it is only the first of the eight files
+  that need it, so re-deriving it is probably cleaner than finding it.
 
-**Blocked on data, not effort:** airspace transit needs Canadian airspace
-geometry, which NAV CANADA does not publish; US NOTAMs need FAA
-credentials. The FAA's airspace layer is queryable, so the US half of
-airspace is buildable whenever it is wanted.
+Twenty-five files reference the verdict: `rules/types.ts`, `rules/checks.ts`
+(`ctx.violation` becomes `'alert' | 'caution'`), `rules/evaluate.ts`,
+`rules/describe.ts`, `brief/diff.ts`, `brief/describeDiff.ts`,
+`brief/assemble.ts`, then the web app (`types.ts`, `BriefingView.tsx`,
+`RouteStrip.tsx`, `Nav.tsx`, `DiffPanel.tsx`, `App.tsx`, `styles.css`), then
+the tests and `About.tsx`.
 
-**Waiting on the owner:**
+---
 
-1. **Your aircraft's empty weight and moment**, from its own
-   weight-and-balance record. Until then the CLI and web panel use the
-   handbook's *sample airplane* figures and say so in both places.
-2. **Check the figures entered by hand** in `aircraft/c172.wb.json`. Six
-   were verified against the ink; the rest were completed with
-   `wb confirm`, and the note on each says how far the handbook backs it.
-   The station arms (37, 73, 95, 123 in) and the fuel arm (48 in) carry
-   **no citation** — the handbook prints them in a diagram that OCRs to
-   noise. They match the standard 172M figures, but confirm them against
-   your own copy before flying on them.
-3. **The four open questions in the NOTAM labelled set**
-   (`packages/core/test/fixtures/notam/labelled/…json`, `openQuestions`),
-   chiefly whether CYSN's 06/24 is a practical alternative for a C172 once
-   11/29 is closed.
-4. **FAA NOTAM API credentials**, if US NOTAMs matter. Canadian ones need
-   no key.
-5. **Accounts for a host**, for live weather: a free Render web service
-   plus a free Neon Postgres is the $0 route; Fly.io is a few dollars a
-   month and starts faster. The image and the hardening are done and
-   waiting.
+## The audit, and what it found
 
-**Environment notes that will bite whoever picks this up:**
+Fourteen agents read the repository on 14 September: seven dimensions, each
+adversarially verified. 95 findings survived verification, 15 of them
+blockers. The full output is in the session transcript; the ones that matter:
 
-- Ollama's CUDA runner crashes on this laptop (its bundled CUDA build is
-  newer than the 546.92 driver). Start the server on Vulkan:
-  `OLLAMA_VULKAN=1 CUDA_VISIBLE_DEVICES=-1 ollama serve`.
-- 146 MB the work depends on is deliberately **not** in git: the handbook
-  (7.9 MB) and the OCR cache (138 MB), besides a local Postgres and Ollama.
-  A clean clone still builds and tests green without them.
+**The engine is blind to most of what it decodes.** `checkConditions` runs
+exactly four checks — ceiling, visibility, crosswind, regulatory minima.
+Reproduced directly:
+
+    METAR CYSN 141400Z 24008KT 6SM +TSRA FZRA BKN035 OVC080 12/10 A2992
+      decoded: [{intensity:"heavy",descriptor:"TS",phenomena:["RA"]},
+                {descriptor:"FZ",phenomena:["RA"]}]
+      => GO
+
+    METAR CYSN 141400Z 24045G60KT 15SM SKC 12/10 A2992
+      decoded wind: {speed:45, gust:60}
+      => GO
+
+A heavy thunderstorm with freezing rain, and forty-five knots gusting sixty,
+both decoded perfectly and judged by nothing. `BKN///` and `VV///` are
+reported as "no ceiling" with a clean pass. Present weather and total wind
+speed reach `Conditions` and are never read. **This is the first thing to fix
+whatever else happens**, and removing the verdict does not fix it: a
+thunderstorm must still be *reported*, loudly, as an alert.
+
+**Other blockers, grouped:**
+
+- *Silent failure*: a hazard feed that breaks produces a briefing
+  byte-identical to a clear sky; CFPS NOTAMs refetch on every briefing,
+  ignoring the freshness window entirely.
+- *Would not survive deployment*: nothing loads the airports table into a
+  fresh database, so every briefing 422s; `pg.Pool` has no `'error'`
+  listener, so the first idle-connection drop kills the process; the rate
+  limiter keys on `req.ip`, which behind a proxy is the proxy, so every
+  visitor shares one bucket.
+- *A gate that cannot fail*: the NOTAM eval passes at 86% because 22 of its
+  28 scored items are settled by deterministic rules. A constant-answer model
+  scores 96.4%. Score the model only on what the rules did not settle.
+- *Missing, and a pilot needs them*: no fuel planning at all (CARs 602.88
+  reserve, fuel aboard, taxi and climb); airspace is hand-typed, optional,
+  and silently degrades the whole regulatory check to an advisory.
+
+---
+
+## What the owner asked for next, in his words
+
+1. **Take the go/no-go out.** (Design above.)
+2. **Put the API live**, and **find an actual domain.**
+3. **Show when the METAR or TAF was published**, and colour it when it is
+   more than an hour old so it reads as unreliable.
+4. **When a field's own station is asleep, show the nearest one that
+   reports** — *"for cysn it can show kiag metar at night. But this goes for
+   all the airports."* CYSN is a part-time station; KIAG is 12 nm away across
+   the border and reports around the clock. `resolve/forecast.ts` already
+   borrows a TAF from within 60 nm and labels it; `latestMetar` in
+   `resolve/flight.ts` does not borrow at all. That is where this goes.
+5. **Performance numbers from the POH** — takeoff and landing distances. The
+   document pipeline that reads weight-and-balance figures out of the scanned
+   handbook, with citations verified against the words on the page, is the
+   machinery to extend.
+6. **More pages, user friendly.** *"not just one page that display
+   everything"*. The model is metar-taf.com: a page per aerodrome with
+   everything about that field, rather than one briefing that says
+   everything at once.
+
+**Recorded and waiting to be used:** a Canada-wide snapshot taken at
+2026-09-14T14:30Z sits in `packages/core/test/fixtures/fetch/canada-2026-09-14/`
+— 181 METARs and 112 TAF stations across the country, upper winds for the
+seventeen Canadian sites that publish them, NOTAMs for six aerodromes, and
+every Canadian aerodrome from OurAirports (1,504 once heliports and seaplane
+bases are dropped). It is enough to let the published page brief almost any
+Canadian aerodrome pair instead of the four it carries now. `build-demo.ts`
+needs pointing at it; that edit was made and then reverted to keep the tree
+clean, so it needs redoing.
 
 ---
 
