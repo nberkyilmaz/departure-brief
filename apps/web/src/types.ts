@@ -136,6 +136,16 @@ export interface BriefingDiff {
   quiet: boolean;
 }
 
+/** What one point was resolved from: the reports, and how far they travelled. */
+export interface PointInputs {
+  waypoint: string;
+  eta: string;
+  cumulativeNm: number;
+  forecast: { station: string; source: 'own' | 'nearby'; distanceNm: number; sha256: string } | null;
+  metar: string | null;
+  wind: { station: string; distanceNm: number; altitudeFt: number; sha256: string } | null;
+}
+
 export interface StoredBriefing {
   sha256: string;
   flightKey: string;
@@ -147,14 +157,9 @@ export interface StoredBriefing {
     asOf: string;
     notams: NotamDocument | null;
     inputs: {
-      points: {
-        waypoint: string;
-        eta: string;
-        cumulativeNm: number;
-        forecast: { station: string; source: 'own' | 'nearby'; distanceNm: number; sha256: string } | null;
-        metar: string | null;
-        wind: { station: string; distanceNm: number; altitudeFt: number; sha256: string } | null;
-      }[];
+      points: PointInputs[];
+      /** The alternate's inputs, kept apart from the route's. */
+      alternate: PointInputs | null;
       reports: { kind: string; station: string | null; sha256: string; issuedAt: string | null }[];
     };
     briefing: Briefing;

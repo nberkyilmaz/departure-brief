@@ -403,3 +403,67 @@ summary:focus-visible,
   main { max-width: none; padding: 0; }
   a[href^='#'] { text-decoration: none; color: inherit; }
 }
+
+/*
+ * The route as a strip. The findings say why; this says where — which a
+ * list of findings is worst at, because "marginal, marginal, go" does not
+ * tell you whether the trouble is at this end or the far one.
+ */
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0;
+  list-style: none;
+  margin: var(--s4) 0;
+  padding: 0;
+}
+.strip-point { display: flex; align-items: center; }
+.strip-leg {
+  color: var(--muted);
+  font-size: 0.78rem;
+  padding: 0 var(--s2);
+  white-space: nowrap;
+  position: relative;
+}
+/* The line between two points, with the distance sitting on it. */
+.strip-leg::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px dashed var(--line-strong);
+  z-index: -1;
+}
+.strip-body {
+  display: grid;
+  gap: 0.1rem;
+  justify-items: center;
+  text-decoration: none;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--s2) var(--s3);
+  min-width: 6.5rem;
+}
+.strip-body:hover { border-color: var(--muted); }
+.strip-point.go .strip-body { border-top-color: var(--ok); }
+.strip-point.marginal .strip-body { border-top-color: var(--marginal); }
+.strip-point.no-go .strip-body { border-top-color: var(--nogo); }
+.strip-id { font-weight: 600; font-size: 1.05rem; letter-spacing: 0.02em; }
+.strip-label { color: var(--muted); font-weight: 400; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.strip-time { color: var(--muted); font-size: 0.8rem; display: flex; align-items: center; gap: var(--s1); }
+.strip-body .verdict { font-size: 0.68rem; padding: 0.1rem 0.4rem; }
+
+@media (max-width: 40rem) {
+  /* One per row on a phone, with the distance between them as a rung. */
+  .strip { flex-direction: column; align-items: stretch; }
+  .strip-point { flex-direction: column; align-items: stretch; }
+  .strip-leg { padding: var(--s1) 0 var(--s1) var(--s4); }
+  .strip-leg::before { left: 0.9rem; right: auto; top: 0; bottom: 0; border-top: 0; border-left: 1px dashed var(--line-strong); }
+  .strip-body { grid-template-columns: 1fr auto auto; justify-items: start; align-items: center; gap: var(--s3); }
+}

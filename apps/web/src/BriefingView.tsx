@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NotamPanel } from './NotamPanel.js';
+import { RouteStrip } from './RouteStrip.js';
 import { hhmmZ, local, zulu } from './time.js';
 import type { Citation, Finding, PointVerdict, StoredBriefing, Verdict } from './types.js';
 
@@ -176,6 +177,8 @@ export function BriefingView({ stored }: { stored: StoredBriefing }) {
           {b.aircraft ? ` · ${b.aircraft}` : ''} · rules v{b.rulesVersion} · briefing <code title="content hash">{stored.sha256.slice(0, 12)}</code>
         </span>
       </h2>
+
+      <RouteStrip stored={stored} />
 
       <Why verdict={b.verdict} points={points} />
       <Gaps stored={stored} />

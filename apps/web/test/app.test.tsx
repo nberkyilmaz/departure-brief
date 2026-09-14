@@ -99,6 +99,19 @@ describe('the published page', () => {
     expect(document.querySelector('.error')!.textContent).toMatch(/CYSN|CYKF|CYHM/);
   });
 
+  it('shows the route as a strip, with the verdict at each point', async () => {
+    render(<App />);
+    await verdict();
+    const points = [...document.querySelectorAll('.strip-point')];
+    // Departure, destination and the alternate, in that order.
+    expect(points.map((p) => p.querySelector('.strip-id')!.textContent)).toEqual(['CYSN', 'CYKF', 'alternate CYHM']);
+    // Each carries its own verdict, which is not necessarily the flight's.
+    for (const p of points) expect(p.querySelector('.verdict')!.textContent).toMatch(/^(GO|MARGINAL|NO-GO)$/);
+    // And the distance between them, from the resolver's own numbers.
+    expect(document.querySelectorAll('.strip-leg').length).toBe(points.length - 1);
+    expect(document.querySelector('.strip-leg')!.textContent).toMatch(/^\d+ nm$/);
+  });
+
   it('says plainly that the weather is frozen and it fetches nothing', async () => {
     render(<App />);
     await verdict();
