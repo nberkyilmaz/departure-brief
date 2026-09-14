@@ -30,14 +30,14 @@ What it cannot do is fetch, so the weather is frozen at the moment it was
 recorded (05:10Z on 14 September 2026) and the page says so.
 
 **Current work: the rest of the pre-flight picture** (`docs/roadmap.md`).
-Winds aloft, daylight and the nav log are done. SIGMET, AIRMET and PIREPs
+Winds aloft, daylight, the nav log and hazard advisories are done. PIREPs
 are next, then more out of the handbook.
 
 **Done:** steps 1-7, 9 and 10, the public site, CI, winds and temperatures
-aloft, daylight, and the nav log. Decoders, fetch layer, route and time
-resolution, rules engine, briefings with an API and a web view, NOTAM
-relevance with a local model and a passing eval gate, the briefing diff,
-aircraft document ingestion, forecast verification.
+aloft, daylight, the nav log, and SIGMET/AIRMET hazards. Decoders, fetch
+layer, route and time resolution, rules engine, briefings with an API and a
+web view, NOTAM relevance with a local model and a passing eval gate, the
+briefing diff, aircraft document ingestion, forecast verification.
 
 **Blocked on data, not effort:** airspace transit needs Canadian airspace
 geometry, which NAV CANADA does not publish; US NOTAMs need FAA
@@ -1342,3 +1342,61 @@ had just dropped into the repo root.
   05:10Z on 14 September 2026.
 - The demo's own weather, NOTAMs and upper winds are committed fixtures, so
   the build is reproducible without a network, a database or a model.
+
+---
+
+## Session 18 — 2026-09-14 — Hazards on the route, and a fetch that left no trace
+
+206. **SIGMETs and AIRMETs**, from the two feeds the weather service
+     publishes them on: the international one and the American domestic one,
+     which are the same thing with their fields named differently. Both are
+     read into one shape, because a hazard is a hazard.
+207. The service has already reduced the bulletin's "WI N7800 E11445 - …"
+     to coordinates, so the record is what is stored and the bulletin
+     travels inside it, quoted verbatim in the decoded result. Re-parsing
+     the text to arrive at numbers the service has published would be
+     inventing a second opinion about the same thing.
+208. Whether the route goes through an area is two plain geometric tests:
+     is a point inside, and does any leg cross an edge. A route that starts
+     and ends outside but passes straight through counts — the reason this
+     is not simply a test of the waypoints. Treated as flat: over a few
+     hundred miles, against areas drawn to the nearest degree, the error is
+     far smaller than the polygon's own precision.
+209. The two places flat is not good enough are refused rather than answered
+     wrongly — an area that wraps the antimeridian, and one that reaches a
+     pole — and then *reported*, because the advisory is in force at your
+     altitude and only the geometry is beyond us. Saying nothing there would
+     be hiding something; saying nothing about a SIGMET over Kansas is not.
+210. Three questions decide whether a hazard is mentioned at all: in force
+     while you are flying, reaching the altitude you are at, crossing the
+     route. Crossing a live SIGMET is a no-go, because a SIGMET is a warning
+     to everything in the air. An AIRMET is advice about conditions a light
+     aircraft meets routinely, so it is marginal: look at this and decide.
+211. Tested on the 123 advisories the service was actually carrying at
+     05:20Z — thunderstorms, turbulence, icing, volcanic ash, mountain wave
+     and a tropical cyclone — with routes built from the advisories' own
+     corners, so "through it" and "nowhere near it" are facts about the
+     published geometry rather than about a shape invented to pass a test.
+     A test that the decoder knows every hazard code the service publishes
+     would have failed on any it did not.
+212. **A real defect, found by the second briefing in a row.** A fetch is
+     recorded against the report it returned, so a request that came back
+     empty left no trace and "have we asked recently" was false every time.
+     Hazard advisories are usually "nothing in force"; a small aerodrome
+     publishes no upper winds at all. Both would have been asked for again
+     on every briefing, for ever, and always for nothing — exactly the
+     discourtesy the freshness windows exist to prevent.
+213. So the store records the asking as well as the receiving (migration
+     0009), both implementations are held to it by the shared contract, and
+     every fetch that can come back empty says it asked. `lastFetchAt` now
+     means "when did we last ask", which is the question the freshness
+     windows were always trying to answer.
+214. `listRaw` takes an optional station, because a SIGMET belongs to an area
+     rather than a place and there is no aerodrome to file it under.
+
+### State at end of session 18
+
+- 750 tests across three workspaces (723 core, 18 API, 9 web), typecheck
+  clean.
+- Nothing in force over Ontario this morning, so the demo shows no hazards
+  — which is the correct answer and not an empty feature.

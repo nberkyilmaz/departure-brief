@@ -33,6 +33,7 @@ official briefing.
 | **Winds and temperatures aloft** | Interpolated to the altitude flown; the temperature at cruise as the first question about icing. |
 | **Daylight** | Last light on arrival and how much of it is left, from the same solar arithmetic the night rules use. |
 | **Nav log** | The wind triangle leg by leg, with a blank and a reason wherever a number cannot be had. |
+| **Hazard advisories** | SIGMETs and AIRMETs that are in force, at your altitude, and across your route. |
 | **The site** | Five pages, running the whole pipeline in the browser over reports it carries. |
 
 ### Blocked, and on what
@@ -72,7 +73,9 @@ verbatim, feed the rules — so they get cheaper as they go.
   being flown, with the temperature at cruise as the first question about
   icing. Fetched for the route rather than the aerodromes, because a small
   field is almost never an upper wind site.
-- **SIGMET and AIRMET.** Hazards along the route at the altitude flown.
+- ~~**SIGMET and AIRMET.**~~ Done. In force, at your altitude, and across
+  your route — all three, or it is not mentioned. An area the geometry
+  cannot answer for is reported as needing to be checked by eye.
 - **PIREPs.** What somebody up there actually found, which is often the
   only honest answer about icing and turbulence.
 - **Graphical area forecast.** Images rather than text, so a different kind
