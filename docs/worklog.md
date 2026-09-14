@@ -21,11 +21,18 @@ mobile one. A study aid throughout — never an official briefing.
 `docs/roadmap.md` holds the sequence and why each piece comes where it does.
 This file holds what was actually done and what it cost.
 
-**Current work: making the site usable.** The pipeline works and nobody can
-drive it. That comes before every feature on the roadmap, because a feature
-nobody can reach is not finished.
+**The site works.** <https://nberkyilmaz.github.io/holdshort/> carries the
+recorded reports and runs the pipeline in the browser: change a personal
+minimum, the aircraft, the route or the departure time and the verdict is
+rebuilt in front of you, by the same code the API runs. What it cannot do is
+fetch — neither weather service allows a page to call it directly — so the
+weather is frozen at the moment it was recorded, and the page says so.
 
-**Done:** steps 1-7, 9 and 10, plus a published demo and CI. Decoders, fetch
+**Current work: the rest of the pre-flight picture** (`docs/roadmap.md`),
+and a live deployment when the owner wants one, which is the only way to
+brief a flight happening now.
+
+**Done:** steps 1-7, 9 and 10, plus the public site and CI. Decoders, fetch
 layer, route and time resolution, rules engine, briefings with an API and a
 web view, NOTAM relevance with a local model and a passing eval gate, the
 briefing diff, aircraft document ingestion, forecast verification.
@@ -53,9 +60,10 @@ airspace is buildable whenever it is wanted.
    11/29 is closed.
 4. **FAA NOTAM API credentials**, if US NOTAMs matter. Canadian ones need
    no key.
-5. **Accounts for a host**, when the live site is wanted: a free Render web
-   service and a free Neon Postgres is the $0 route; Fly.io is a few
-   dollars a month and starts faster.
+5. **Accounts for a host**, for live weather: a free Render web service
+   plus a free Neon Postgres is the $0 route; Fly.io is a few dollars a
+   month and starts faster. The image and the hardening are done and
+   waiting.
 
 **Environment notes that will bite whoever picks this up:**
 
@@ -954,15 +962,20 @@ had just dropped into the repo root.
      free or very nearly free. Two questions had to be answered before any
      of it could be built: what gets deployed, and where.
 148. **A static site built from committed fixtures, not a live
-     deployment.** The reasoning is worth keeping, because the tempting
-     answer is the wrong one. NAV CANADA's CFPS endpoint is unofficial, and
+     deployment.** *(Half of this was wrong; see 163 and session 15. The
+     courtesy argument holds. The conclusion drawn from it — that the page
+     should not be interactive — did not follow, and the site now runs the
+     pipeline in the browser without fetching anything.)* The reasoning as
+     it stood: NAV CANADA's CFPS endpoint is unofficial, and
      a public site calling it on behalf of strangers would be discourteous
      and would eventually be blocked. The weather service asks for
      identified, reasonable use. And a publicly usable "should I go?" tool
      invites exactly the operational use every screen of this project
      disclaims. A static site also costs nothing, never falls over, and
      shows the same output — which is what a link on a resume has to do.
-149. **Where: Cloudflare Pages**, free, `holdshort.pages.dev`. For a real
+149. **Where: Cloudflare Pages**, free, `holdshort.pages.dev`. *(Session 13
+     used GitHub Pages instead, deployed from Actions — one fewer account,
+     and the repository was already there.)* For a real
      domain, Cloudflare Registrar sells at wholesale with no markup and no
      renewal spike, roughly $10 a year for `.dev` or `.com`. Nothing has
      been registered or deployed — both need the owner's accounts.
@@ -990,13 +1003,6 @@ had just dropped into the repo root.
      it stands.** There was no git remote, and 146 MB the work depends on is
      deliberately not in git — the POH (7.9 MB) and the OCR cache
      (138 MB) — besides a local Postgres and a local Ollama.
-
-### Where this stopped
-
-Three things remain, in order: demo mode in the web app (`App.tsx` still
-only knows how to POST to the API and needs to load `/demo/briefing.json`
-when there is none), the landing content a reader arrives at, and the
-Cloudflare Pages configuration and first deploy.
 
 ### State at end of session 12
 
@@ -1107,3 +1113,87 @@ Cloudflare Pages configuration and first deploy.
 - 662 tests, typecheck clean, CI green.
 - The static demo is still what is published; the live interactive site
   needs a host, which needs the owner's accounts.
+
+---
+
+## Session 15 — 2026-09-14 — The page briefs for itself
+
+171. Closed the four deployment holes an audit found, all of them things
+     that only matter once strangers can reach it. A flight plan may now
+     name at most 25 enroute waypoints, because each one costs a weather
+     fetch and an unbounded route was a way to make this server work without
+     limit on somebody else's behalf.
+172. The route is resolved **before** anything is fetched. Checking
+     waypoints against the airport data costs nothing upstream; fetching
+     first meant a plan naming an aerodrome that does not exist still spent
+     NAV CANADA's capacity before being rejected. Only fields that resolved
+     are asked about, once each, under the identifier the resolver will look
+     reports up by — so a plan naming the same field three times is one
+     request, and a field with no ICAO identifier is not asked about at all.
+173. Every HTTP attempt has a deadline now. Requests are serialised to keep
+     the interval between them honest, which means one upstream that accepts
+     a connection and then says nothing would have stopped every caller
+     behind it. Fastify got a body limit and a request timeout for the same
+     reason, and briefings are capped at twenty a minute per address with a
+     `Retry-After` saying when to come back.
+174. `tsx` was a development dependency and the image installs with
+     `--omit=dev`, so the container would have built and then failed to
+     start. Found by reading the Dockerfile against the manifest rather than
+     by deploying and watching it crash.
+175. **Reconsidered the static-site decision properly.** Checked whether
+     either weather service sends the header a browser needs to call it
+     directly: neither does. So fetching genuinely requires a server — but
+     *judging* does not, and that distinction is the whole difference
+     between a page that shows a result and a page that works.
+176. So SHA-256 is written out in plain TypeScript. Content addressing is
+     the spine of this project and the only thing tying it to Node was
+     `createHash`. Checked against Node's implementation at every length
+     from 0 to 200 bytes — where a wrong implementation of the padding shows
+     up — and on multi-byte text. Every briefing hash in the suite came out
+     unchanged, which is the real proof.
+177. With that, `@holdshort/core/judge`: decode, resolve, judge, assemble,
+     NOTAM ranking, weight and balance, the in-memory store, and nothing
+     that reaches for a database, a file, a PDF or the network. 145 KB
+     bundled. A test walks the import graph from it and fails if anything
+     reachable imports a package or a Node built-in — nothing in the
+     compiler enforces that, and the first sign of a mistake would be a
+     blank page.
+178. Two things had to move to make that boundary real. Storing and decoding
+     a batch of reports went from the fetch layer to the store, where it
+     belongs: it never touched the network. And NOTAM briefing now names
+     what it needs — something that can fetch NOTAMs for a site — rather
+     than importing the client class that does it over HTTP.
+179. The build now writes the *inputs* beside the briefing: 112 reports
+     verbatim, the aerodromes they concern, and the model's eight recorded
+     answers. The page loads them into an in-memory store and runs the
+     pipeline. The test that matters: rebuild from the bundle in an empty
+     store and the briefing must come out with the same content hash as the
+     one the build published. It does. A report's hash is recomputed as it
+     loads, so a bundle altered in transit is refused rather than briefed
+     on.
+180. That test found a real defect. Whether a model answer came from the
+     cache was recorded *in the briefing document*, so the same findings
+     over the same reports hashed differently depending on whether the model
+     had been asked before. Content addressing means a briefing is named by
+     what it says; how an answer arrived is not part of what it says.
+181. The form is live on the published site. Changing a minimum rebuilds the
+     verdict in about the time it takes to let go of the key, and what moved
+     is shown above it. Weight and balance computes in the page too.
+182. **The web app has tests now, which it did not before**, and the first
+     one it ran found that demo mode defaulted the departure to two hours
+     from now — outside the recorded forecasts, so every point said "no
+     forecast covers this" and nothing a visitor changed made any
+     difference. Invisible until the page was driven the way a visitor
+     drives it. It starts from the flight the reports cover now.
+183. Pruned this log: the two decisions later overturned (148, 149) are
+     marked where a reader meets them rather than deleted, and session 12's
+     superseded "where this stopped" list is gone — the current state is at
+     the top of this file and nowhere else.
+
+### State at end of session 15
+
+- 678 tests across three workspaces (657 core, 17 API, 4 web), typecheck
+  clean, CI green.
+- The published site runs the pipeline in the browser over frozen reports.
+- The API is hardened and containerised; a live deployment needs only a
+  host and the owner's accounts.

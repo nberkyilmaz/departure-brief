@@ -42,20 +42,22 @@ official briefing.
 
 ## Next
 
-### 1. Make the site usable — in progress
+### 1. Make the site usable — done, except for live weather
 
-The pipeline works and nobody can use it. This comes before every feature
+The pipeline works and nobody could use it. That came before every feature
 below, because a feature nobody can reach is not finished.
 
-- A flight form that forgives: aerodrome lookup rather than free text,
-  sensible defaults, a plan that survives a reload.
-- A verdict that is scannable in five seconds, with the reasoning one tap
-  away rather than a wall of text.
-- Works on a phone, since that is where a pilot stands at the aeroplane.
-- Says plainly when something could not be fetched, rather than showing a
-  confident verdict built on less than it should have been.
-- Live, on a free host, fetching real weather — with the refetch windows
-  that make that courteous to the services it depends on.
+Done: a form that forgives, with aerodrome lookup rather than free text and
+a plan that survives a reload; a verdict scannable in five seconds with the
+reasoning one tap away; a phone layout; what the briefing could not see,
+stated beside the verdict rather than left to be inferred. And the page
+runs the pipeline itself, so changing a minimum rebuilds the verdict in the
+browser rather than showing a different picture of one.
+
+What is left is **live weather**, which needs a host, because neither
+weather service allows a browser to call it directly. The image and the
+rate limits are done; it needs the owner's accounts. Until then the site
+briefs over reports frozen at the moment they were recorded, and says so.
 
 ### 2. The rest of the weather picture
 
