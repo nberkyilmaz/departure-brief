@@ -1,5 +1,5 @@
 {
-  "sha256": "919d94b27b93c4bc629c905df327cee4d73f5e938e1da15c6286293b2196585f",
+  "sha256": "f50d47e02ae929dd64b529aa539dc943825b74c09ccfd700583ba63c5d9e7bb6",
   "flightKey": "64b9a55a09f378b5115652273c5540c84abdb40d232d013620b4c33cf99be971",
   "asOf": "2026-09-12T20:00:00.000Z",
   "createdAt": "2026-09-12T20:00:00.000Z",
@@ -2348,6 +2348,30 @@
                   "sha256": null
                 }
               ]
+            },
+            {
+              "waypoint": "CYSN",
+              "basis": "daylight",
+              "basisKind": "time",
+              "at": "2026-09-12T22:00:00.000Z",
+              "citations": [
+                {
+                  "kind": "airport",
+                  "station": "CYSN",
+                  "raw": null,
+                  "span": null,
+                  "text": "43.192, -79.172 at 2026-09-12T22:00:00Z",
+                  "sha256": null
+                }
+              ],
+              "rule": "daylight.margin",
+              "severity": "ok",
+              "summary": "last light 00:00Z (sunset 23:32Z) — 2 h 1 min of daylight after arrival",
+              "values": {
+                "marginMinutes": 121,
+                "civilDusk": "2026-09-13T00:00:39.000Z",
+                "sunset": "2026-09-12T23:32:00.000Z"
+              }
             }
           ]
         },
@@ -2948,6 +2972,30 @@
                   "sha256": null
                 }
               ]
+            },
+            {
+              "waypoint": "CYKF",
+              "basis": "daylight",
+              "basisKind": "time",
+              "at": "2026-09-12T22:31:30.378Z",
+              "citations": [
+                {
+                  "kind": "airport",
+                  "station": "CYKF",
+                  "raw": null,
+                  "span": null,
+                  "text": "43.461, -80.379 at 2026-09-12T22:31:30Z",
+                  "sha256": null
+                }
+              ],
+              "rule": "daylight.margin",
+              "severity": "ok",
+              "summary": "last light 00:05Z (sunset 23:36Z) — 1 h 34 min of daylight after arrival",
+              "values": {
+                "marginMinutes": 94,
+                "civilDusk": "2026-09-13T00:05:45.000Z",
+                "sunset": "2026-09-12T23:36:59.000Z"
+              }
             }
           ]
         }
@@ -3253,6 +3301,30 @@
                 "sha256": null
               }
             ]
+          },
+          {
+            "waypoint": "CYHM",
+            "basis": "daylight",
+            "basisKind": "time",
+            "at": "2026-09-12T22:46:29.121Z",
+            "citations": [
+              {
+                "kind": "airport",
+                "station": "CYHM",
+                "raw": null,
+                "span": null,
+                "text": "43.171, -79.929 at 2026-09-12T22:46:29Z",
+                "sha256": null
+              }
+            ],
+            "rule": "daylight.margin",
+            "severity": "ok",
+            "summary": "last light 00:03Z (sunset 23:35Z) — 1 h 17 min of daylight after arrival",
+            "values": {
+              "marginMinutes": 77,
+              "civilDusk": "2026-09-13T00:03:39.000Z",
+              "sunset": "2026-09-12T23:35:01.000Z"
+            }
           }
         ]
       }

@@ -75,13 +75,20 @@ export interface BriefingDiff {
   readonly quiet: boolean;
 }
 
-/** Pre-`basisKind` briefings: recover the kind from the readable basis. */
+/**
+ * Pre-`basisKind` briefings: recover the kind from the readable basis.
+ *
+ * Every basis string the rules can emit needs a case here. Without one a
+ * finding falls through to `overlay`, its identity changes, and the diff
+ * reports it as having appeared when nothing happened at all.
+ */
 function basisKindOf(f: Finding): BasisKind {
   if (f.basisKind) return f.basisKind;
   if (f.basis.startsWith('prevailing')) return 'prevailing';
   if (f.basis.startsWith('observed')) return 'observed';
   if (f.basis === 'forecast') return 'forecast';
-  if (f.basis === 'time') return 'time';
+  if (f.basis === 'time' || f.basis === 'daylight') return 'time';
+  if (f.basis.endsWith('upper wind')) return 'forecast';
   return 'overlay';
 }
 

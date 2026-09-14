@@ -5,6 +5,7 @@ import { isNight } from '../domain/sun.js';
 import { toZulu } from '../domain/time.js';
 import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
 import { checkConditions, checkNight, type CheckContext } from './checks.js';
+import { checkDaylight } from './daylight.js';
 import { checkWindAloft } from './windAloft.js';
 import { RULES_VERSION, verdictOf, worst, type Briefing, type Finding, type PointVerdict } from './types.js';
 
@@ -105,6 +106,8 @@ function evaluatePoint(p: ResolvedPoint, flight: ResolvedFlight, profile: PilotP
   }
 
   findings.push(...checkWindAloft({ waypoint: w.id, at, cruiseAltitude: flight.plan.cruise.altitude }, p.wind));
+
+  findings.push(...checkDaylight({ waypoint: w.id, position: w.position, at, nightAllowed: profile.nightAllowed }));
 
   findings.push(...checkNight({ ...base, basis: 'time', basisKind: 'time', violation: 'no-go', source: { kind: 'taf', station: null, raw: '', sha256: null } }));
 

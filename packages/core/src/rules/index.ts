@@ -7,3 +7,5 @@ export { checkCeiling, checkConditions, checkCrosswind, checkNight, checkRegulat
 export type { CheckContext } from './checks.js';
 export { evaluateFlight, metarConditions, OBSERVATION_WINDOW_MS } from './evaluate.js';
 export { briefingText } from './describe.js';
+export { checkDaylight, THIN_MARGIN_MINUTES } from './daylight.js';
+export { checkWindAloft, windText, FREEZING_C } from './windAloft.js';
