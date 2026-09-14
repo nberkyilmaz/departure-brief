@@ -45,5 +45,8 @@ ENV HOST=0.0.0.0
 EXPOSE 3000
 
 # tsx runs the TypeScript sources directly, which is what the repo does
-# everywhere else — one way of running the code, not two.
-CMD ["npx", "tsx", "apps/api/src/main.ts"]
+# everywhere else — one way of running the code, not two. It is a runtime
+# dependency of apps/api for exactly this reason; --no-install makes a
+# missing one a startup failure rather than a silent download of some other
+# version on every cold start.
+CMD ["npx", "--no-install", "tsx", "apps/api/src/main.ts"]

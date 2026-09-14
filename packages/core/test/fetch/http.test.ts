@@ -111,6 +111,39 @@ describe('createHttpClient', () => {
   });
 });
 
+describe('a deadline on every attempt', () => {
+  /** Accepts the connection and then says nothing — the case a bare fetch waits out forever. */
+  function stalling(): { calls: number[]; fetch: typeof fetch } {
+    const calls: number[] = [];
+    const fake = (async (input: string | URL | Request, init?: RequestInit) => {
+      calls.push(calls.length);
+      return await new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => reject(init.signal!.reason as Error));
+      });
+    }) as unknown as typeof fetch;
+    return { calls, fetch: fake };
+  }
+
+  it('abandons the attempt, retries, and finally throws rather than hanging', async () => {
+    const h = stalling();
+    const sleeps: number[] = [];
+    const http = createHttpClient({
+      userAgent: 'x',
+      minIntervalMs: 0,
+      timeoutMs: 10,
+      retries: 2,
+      fetch: h.fetch,
+      sleep: async (ms: number) => {
+        sleeps.push(ms);
+      },
+    });
+    await expect(http.get('https://e/stalls')).rejects.toThrow();
+    // Requests are serialised, so a hang here is a hang for every caller.
+    expect(h.calls.length).toBe(3);
+    expect(sleeps).toEqual([500, 1000]);
+  });
+});
+
 describe('expectOk', () => {
   it('passes 2xx and throws HttpError otherwise', () => {
     const ok = { status: 204, body: '', headers: {} };

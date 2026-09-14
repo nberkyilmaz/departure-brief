@@ -10,6 +10,14 @@ export type AirspaceClass = 'control-zone' | 'controlled' | 'uncontrolled' | 'B'
 export const AIRSPACE_CLASSES: readonly AirspaceClass[] = ['control-zone', 'controlled', 'uncontrolled', 'B', 'C', 'D', 'E', 'G'];
 
 /**
+ * The most enroute waypoints a plan may name. Every one of them costs a
+ * weather fetch and a set of findings, so an unbounded route is a way to
+ * make this server work — and ask its upstreams for things — without limit.
+ * A VFR cross-country that needs more than this wants to be two flights.
+ */
+export const MAX_ROUTE_WAYPOINTS = 25;
+
+/**
  * What the pilot tells us about the flight. Times are Zulu ISO strings; the
  * route is a list of waypoint specs — an airport identifier (`KTEB`, `N07`)
  * or a `lat,lon` pair — excluding departure and destination.
@@ -52,6 +60,9 @@ export function parseFlightPlan(input: unknown): FlightPlan {
   if (!Array.isArray(route) || !route.every((r) => typeof r === 'string')) {
     throw new Error('flight plan: "route" must be an array of strings');
   }
+  if (route.length > MAX_ROUTE_WAYPOINTS) {
+    throw new Error(`flight plan: "route" has ${route.length} waypoints; ${MAX_ROUTE_WAYPOINTS} is the most this will plan`);
+  }
   const departureTime = o['departureTime'];
   if (typeof departureTime !== 'string' || Number.isNaN(Date.parse(departureTime)) || !/Z$/.test(departureTime)) {
     throw new Error('flight plan: "departureTime" must be an ISO 8601 instant ending in Z');
@@ -77,7 +88,8 @@ export function parseFlightPlan(input: unknown): FlightPlan {
     departure,
     destination,
     alternate,
-    route: route.map((r) => (r as string).trim()),
+    // Upper-cased like every other identifier here; a `lat,lon` pair is unaffected.
+    route: route.map((r) => (r as string).trim().toUpperCase()),
     departureTime: new Date(departureTime).toISOString(),
     cruise: { tas: c['tas'] as Knots, altitude: c['altitude'] as FeetMsl },
     airspace,

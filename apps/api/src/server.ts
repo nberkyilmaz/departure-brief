@@ -17,6 +17,7 @@ import {
   parseFlightPlan,
   parsePilotProfile,
   resolveFlight,
+  resolveRoute,
   UnknownWaypointError,
   type AwcClient,
   type ConfiguredLLM,
@@ -29,6 +30,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import { existsSync, readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { fixedWindow, type RateLimit } from './ratelimit.js';
 
 export interface ServerDeps {
   readonly store: Store;
@@ -39,6 +41,11 @@ export interface ServerDeps {
   readonly llm?: ConfiguredLLM | null;
   /** Directory of the built web app to serve at `/`; skipped when absent. */
   readonly staticDir?: string | null;
+  /**
+   * How often one caller may ask for a briefing. Defaults to 20 a minute;
+   * `null` turns it off, for a private instance or a test.
+   */
+  readonly rateLimit?: RateLimit | null;
   /** Where `<type>.wb.json` weight-and-balance specs live (default `aircraft`). */
   readonly aircraftDir?: string;
   /** The document cache written by `holdshort doc ingest` (default `data/docs`); page crops are served from it. */
@@ -64,8 +71,15 @@ interface BriefRequestBody {
  * cached in the store.
  */
 export function buildServer(deps: ServerDeps): FastifyInstance {
-  const app = Fastify({ logger: deps.logger ?? false });
+  const app = Fastify({
+    logger: deps.logger ?? false,
+    // A briefing request is a few hundred bytes; nothing here needs more.
+    bodyLimit: 64 * 1024,
+    // A request that has not arrived in half a minute is not going to.
+    requestTimeout: 30_000,
+  });
   const { store, awc } = deps;
+  const briefingLimit = deps.rateLimit === undefined ? fixedWindow({ limit: 20, windowMs: 60_000 }) : deps.rateLimit;
 
   app.get('/api/health', async () => ({
     ok: true,
@@ -110,6 +124,13 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
   });
 
   app.post<{ Body: BriefRequestBody }>('/api/briefings', async (req, reply) => {
+    const retryAfter = briefingLimit?.check(req.ip, Date.now()) ?? null;
+    if (retryAfter !== null) {
+      return reply
+        .code(429)
+        .header('Retry-After', String(retryAfter))
+        .send({ error: `too many briefings from this address; try again in ${retryAfter}s` });
+    }
     const body = req.body ?? ({} as BriefRequestBody);
     let plan, profile, aircraft, asOf: Date;
     try {
@@ -126,19 +147,29 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
     } catch (e) {
       return reply.code(400).send({ error: (e as Error).message });
     }
-    if (body.fetch !== false) {
-      const ids = [plan.departure, ...plan.route, plan.destination, plan.alternate].filter(
-        (s): s is string => s !== null && /^[A-Z0-9]{3,4}$/.test(s),
-      );
-      for (const id of ids) await ingestStation({ store, awc }, id);
-    }
-    let resolved;
+    /*
+     * Resolve the route before fetching anything. Checking the waypoints
+     * against the airport data costs nothing upstream; fetching first meant
+     * a plan naming an aerodrome that does not exist still sent a round of
+     * requests on its behalf before being rejected.
+     */
+    let route;
     try {
-      resolved = await resolveFlight(store, plan, asOf);
+      route = await resolveRoute(store, plan);
     } catch (e) {
       if (e instanceof UnknownWaypointError) return reply.code(422).send({ error: e.message });
       throw e;
     }
+    if (body.fetch !== false) {
+      // Only fields that resolved, once each, under the identifier the
+      // resolver will look reports up by — a field with no ICAO identifier
+      // has no reports to ask for.
+      const points = [...route.points, ...(route.alternate ? [route.alternate.point] : [])];
+      const stations = [...new Set(points.map((p) => p.waypoint.airport?.icaoId ?? null).filter((s): s is string => s !== null))];
+      for (const id of stations) await ingestStation({ store, awc }, id);
+    }
+    // The route is already known good, so this cannot raise UnknownWaypoint.
+    const resolved = await resolveFlight(store, plan, asOf);
     let notams = null;
     if (body.notams !== false && deps.navcanada) {
       notams = await notamsForFlight(

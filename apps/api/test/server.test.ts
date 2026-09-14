@@ -20,6 +20,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
+import { fixedWindow, type RateLimit } from '../src/ratelimit.js';
 import { buildServer } from '../src/server.js';
 
 const FIXTURES = join(__dirname, '..', '..', '..', 'packages', 'core', 'test', 'fixtures');
@@ -47,6 +48,21 @@ async function makeApp(staticDir: string | null = null) {
   const store = new MemoryStore();
   await store.putAirports(readNasrDirectory(join(FIXTURES, 'fetch', 'nasr', '2026-09-03')));
   return buildServer({ store, awc: new AwcClient(replay(routes)), staticDir });
+}
+
+/** The same app with every upstream call recorded, for asserting what a request costs. */
+async function makeCountingApp(opts: { rateLimit?: RateLimit | null } = {}) {
+  const store = new MemoryStore();
+  await store.putAirports(readNasrDirectory(join(FIXTURES, 'fetch', 'nasr', '2026-09-03')));
+  const calls: string[] = [];
+  const inner = replay(routes);
+  const counted: HttpClient = {
+    get(url, init) {
+      calls.push(url);
+      return inner.get(url, init);
+    },
+  };
+  return { app: buildServer({ store, awc: new AwcClient(counted), ...opts }), calls };
 }
 
 const plan = JSON.parse(readFileSync(join(ROOT, 'flights', 'demo-kteb-khpn.json'), 'utf8'));
@@ -92,6 +108,46 @@ describe('POST /api/briefings', () => {
     const unknown = await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan: { ...plan, route: ['KZZZ'] }, profile, fetch: false } });
     expect(unknown.statusCode).toBe(422);
     expect(unknown.json().error).toContain('KZZZ');
+  });
+
+  it('asks upstream for nothing until the route is known good', async () => {
+    // Checking waypoints against the airport data costs nothing; fetching
+    // first meant a plan naming a field that does not exist still spent
+    // somebody else's capacity before being rejected.
+    const { app, calls } = await makeCountingApp();
+    const res = await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan: { ...plan, route: ['KZZZ'] }, profile } });
+    expect(res.statusCode).toBe(422);
+    expect(calls).toEqual([]);
+  });
+
+  it('asks upstream as little as the plan allows', async () => {
+    const { app, calls } = await makeCountingApp();
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/briefings',
+      // KJFK named twice over in the route, and again as the alternate.
+      payload: { plan: { ...plan, route: ['N07', 'KJFK', 'KJFK'] }, profile, asOf: '2026-09-07T12:30:00Z' },
+    });
+    expect(res.statusCode).toBe(201);
+    /*
+     * One METAR and one TAF request in total, for a plan naming five points.
+     * A repeated waypoint was never a second request; the first response
+     * carried KHPN and KJFK as well as KTEB, so by the time those came round
+     * the freshness window already had them.
+     */
+    expect(calls).toEqual([`${AWC_BASE_URL}/metar?ids=KTEB&format=json`, `${AWC_BASE_URL}/taf?ids=KTEB&format=json`]);
+    // N07 has no ICAO identifier, so there are no reports filed under it to ask for.
+    expect(calls.some((u) => u.includes('N07'))).toBe(false);
+  });
+
+  it('refuses a caller asking far too often, and says when to come back', async () => {
+    const { app } = await makeCountingApp({ rateLimit: fixedWindow({ limit: 1, windowMs: 60_000 }) });
+    const payload = { plan, profile, fetch: false, asOf: '2026-09-07T12:30:00Z' };
+    expect((await app.inject({ method: 'POST', url: '/api/briefings', payload })).statusCode).toBe(201);
+    const again = await app.inject({ method: 'POST', url: '/api/briefings', payload });
+    expect(again.statusCode).toBe(429);
+    expect(again.headers['retry-after']).toBe('60');
+    expect(again.json().error).toContain('try again in 60s');
   });
 
   it('with fetch:false uses only what the store already has', async () => {

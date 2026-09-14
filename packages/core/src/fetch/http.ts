@@ -26,6 +26,12 @@ export interface HttpClientOptions {
   readonly retries?: number;
   /** First backoff; doubles per attempt. Default 500 ms. */
   readonly backoffMs?: number;
+  /**
+   * How long one attempt may take before it is abandoned. Default 10 s.
+   * Requests are serialised, so without a deadline a single upstream that
+   * accepts a connection and then says nothing stops every caller behind it.
+   */
+  readonly timeoutMs?: number;
   /** Development cache of 2xx responses on disk, keyed by URL; skipped when `null`. */
   readonly cache?: { readonly dir: string; readonly ttlMs: number } | null;
   readonly fetch?: typeof fetch;
@@ -63,6 +69,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
   const minInterval = options.minIntervalMs ?? 250;
   const retries = options.retries ?? 3;
   const backoff = options.backoffMs ?? 500;
+  const timeoutMs = options.timeoutMs ?? 10_000;
   const now = options.now ?? Date.now;
   const sleep = options.sleep ?? defaultSleep;
   const doFetch = options.fetch ?? fetch;
@@ -101,6 +108,8 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
     const res = await doFetch(url, {
       method: 'GET',
       headers: { 'User-Agent': options.userAgent, Accept: 'application/json, text/plain;q=0.9, */*;q=0.8', ...init?.headers },
+      // Aborts the body too, so a response that stalls half-read also ends.
+      signal: AbortSignal.timeout(timeoutMs),
     });
     const headers: Record<string, string> = {};
     res.headers.forEach((v, k) => {
