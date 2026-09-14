@@ -416,10 +416,11 @@ Built:
   order-aware scan (`A)` only after `Q)`), so free text containing `A)`
   cannot be mistaken for a field. Every field span-annotated; total.
 - `src/notam/qcodes.ts` — 181 subject and 80 condition Q-codes, drafted
-  twice independently, reconciled, and adversarially verified by three
-  reviewers (0 refutations). Every code in the corpus decodes; unknown
+  twice independently, reconciled, then cross-checked three ways — wrong
+  meanings, missing entries, and how the codes are used in practice — which
+  turned up no corrections. Every code in the corpus decodes; unknown
   codes return null rather than a guess. Regenerate with
-  `scratchpad/gen-qcodes.cjs` from the `icao-qcode-tables` workflow.
+  `scratchpad/gen-qcodes.cjs`.
 - `src/notam/filter.ts` — time and geography classification before any
   token is spent. Understands `DAILY hhmm-hhmm` and `MON dd dd hhmm-hhmm`
   schedules; an unreadable schedule or a missing position counts as
@@ -459,7 +460,7 @@ which records fixtures and prints agreement against the labelled set. The
 test suite then replays those fixtures and the gate becomes live.
 
 **The labelled set is provisional.** `test/fixtures/notam/labelled/` holds
-31 labels from a three-perspective panel (instructor, safety-minded private
+31 labels taken from three perspectives (instructor, safety-minded private
 pilot, flight service specialist) with majority vote — 28 unanimous, 3 at
 2/3. They are marked provisional and **need the owner's review**: they are
 the yardstick the model is measured against, so a wrong label is worse than

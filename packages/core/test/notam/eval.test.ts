@@ -41,7 +41,8 @@ describe('labelled set', () => {
     for (const l of set.labels) {
       expect(corpusIds.has(l.notamId)).toBe(true);
       expect(RELEVANCES).toContain(l.relevance);
-      expect(l.labelledBy).toContain('reviewed');
+      // The yardstick is not signed off by the owner yet, and must say so.
+      expect(l.labelledBy).toContain('owner sign-off pending');
     }
   });
 

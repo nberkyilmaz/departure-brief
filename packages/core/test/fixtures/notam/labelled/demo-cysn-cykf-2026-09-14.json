@@ -1,11 +1,11 @@
 {
   "flight": "demo-cysn-cykf",
-  "description": "CYSN → CYKF direct, alternate CYHM, departing 2026-09-14 15:00Z, C172 VFR day at 3,500 ft. NOTAMs from the NAV CANADA corpus recorded 2026-09-12. Labels were produced by a three-perspective panel (instructor, safety-minded private pilot, flight service specialist) with majority vote, then put through an adversarial review by three further reviewers (instructor/examiner, regulatory, flight service briefer) each trying to refute every label: 31 of 31 held, 0 refutations. Agreement per item is in the note. Four points are left for the owner (openQuestions).",
+  "description": "CYSN → CYKF direct, alternate CYHM, departing 2026-09-14 15:00Z, C172 VFR day at 3,500 ft. NOTAMs from the NAV CANADA corpus recorded 2026-09-12. Labels were taken from three perspectives (instructor, safety-minded private pilot, flight service specialist) by majority vote, then cross-checked by three further independent passes (instructor/examiner, regulatory, flight service briefer), each trying to overturn every label rather than confirm it: all 31 held. Agreement per item is in the note. Four points are left for the owner (openQuestions).",
   "labelledAt": "2026-09-12",
   "review": {
-    "method": "three-lens adversarial refutation, then adjudication of any disputed label",
+    "method": "three independent passes, each trying to overturn every label, then adjudication of any that were disputed",
     "reviewedAt": "2026-09-12",
-    "refuted": 0,
+    "overturned": 0,
     "changed": 0,
     "ownerSignedOff": false
   },
@@ -20,7 +20,7 @@
       "notamId": "A9080/26",
       "relevance": "advisory",
       "category": "runway",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "2/3 — Runway surface condition report for CYKF that expires Sep 13 0036Z, before the flight, and reports all surfaces dry. No operational effect; a newer RSC should be checked on the day.",
       "affects": [
         "arrival"
@@ -31,7 +31,7 @@
       "notamId": "D2402/26",
       "relevance": "advisory",
       "category": "lighting",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — PAPI out for the closed 06/24 at CYHM; a diversion would land on 12/30, so this is background knowledge only.",
       "affects": [
         "alternate"
@@ -42,7 +42,7 @@
       "notamId": "D2593/26",
       "relevance": "advisory",
       "category": "lighting",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Runway identification lights for RWY 24 at the alternate out; daytime, and 06/24 is closed, so no effect on this flight.",
       "affects": [
         "alternate"
@@ -53,7 +53,7 @@
       "notamId": "D2597/26",
       "relevance": "advisory",
       "category": "taxiway",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Taxiway closure at the alternate; would only affect taxi routing after a diversion landing on 12/30 and ground control will route around it. Worth knowing, not decisive.",
       "affects": [
         "alternate"
@@ -64,7 +64,7 @@
       "notamId": "D2717/26",
       "relevance": "advisory",
       "category": "lighting",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Taxiway B edge lighting unserviceable at CYHM; day VFR and TWY B is closed in any case, so no operational effect on a diversion.",
       "affects": [
         "alternate"
@@ -75,7 +75,7 @@
       "notamId": "D2902/26",
       "relevance": "advisory",
       "category": "lighting",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Edge lights out on a section of RWY 06/24 at the alternate; the runway is closed and the flight is by day, so this changes nothing operationally.",
       "affects": [
         "alternate"
@@ -86,7 +86,7 @@
       "notamId": "D3447/26",
       "relevance": "irrelevant",
       "category": "approach",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Instrument approach restriction at CYHM for a runway that is closed anyway; IFR-only item for a VFR flight.",
       "affects": [],
       "cited_span": "RNAV (GNSS) Z RWY 06 AND RNAV (GNSS) Z RWY 24 APCH: NOT AUTH"
@@ -95,7 +95,7 @@
       "notamId": "D3729/26",
       "relevance": "irrelevant",
       "category": "services",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "2/3 — ARFF category availability schedule for scheduled passenger operations; a private VFR C172 has no ARFF requirement at the alternate.",
       "affects": [],
       "cited_span": "DESIGNATED CAT 7 AVBL FOR SKED PAX FLT"
@@ -104,7 +104,7 @@
       "notamId": "D3745/26",
       "relevance": "critical",
       "category": "runway",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — The crosswind runway at the alternate is closed for the whole period, leaving only 12/30 at CYHM. A diversion there must be planned on 12/30 regardless of wind, so crosswind limits for the alternate need checking; also note the closed runway is in use as a taxiway.",
       "affects": [
         "alternate"
@@ -115,7 +115,7 @@
       "notamId": "G2420/26",
       "relevance": "irrelevant",
       "category": "airspace",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Prohibition applies only to Russian/Belarusian-connected aircraft and operators; not applicable to a Canadian-registered private C172.",
       "affects": [],
       "cited_span": "PROHIBITED TO ENTER, EXIT OR OVERFLY CANADA'S TERRITORIAL AIRSPACE"
@@ -124,7 +124,7 @@
       "notamId": "G2674/26",
       "relevance": "irrelevant",
       "category": "airspace",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Airspace security warning for Yangon FIR; geopolitical item about another region.",
       "affects": [],
       "cited_span": "SECURITY SITUATION IN MYANMAR"
@@ -133,7 +133,7 @@
       "notamId": "G2675/26",
       "relevance": "irrelevant",
       "category": "airspace",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Airspace security warning for Dakar/Niamey FIRs over Mali; nothing to do with a southern Ontario VFR flight.",
       "affects": [],
       "cited_span": "SECURITY SITUATION IN MALI"
@@ -142,7 +142,7 @@
       "notamId": "G3032/26",
       "relevance": "irrelevant",
       "category": "other",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Administrative trigger NOTAM for AIP/CFS/CAP amendments; no operational effect on this flight beyond carrying current publications.",
       "affects": [],
       "cited_span": "TRIGGER NOTAM - PERM AIRAC AIP AMDT"
@@ -151,7 +151,7 @@
       "notamId": "G3263/26",
       "relevance": "advisory",
       "category": "navaid",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — GPS jamming exercise centred near Grayling MI; the flight is only about 200 NM from centre (outside the 137 NM/4000 ft AGL ring) and the D) schedule is DAILY 0400-1059Z, well before the 14:00-16:46Z window. Worth knowing for a basic-GNSS aircraft but not active during the flight; navigate by pilotage/VOR anyway.",
       "affects": [
         "enroute"
@@ -162,7 +162,7 @@
       "notamId": "J4064/26",
       "relevance": "advisory",
       "category": "obstacle",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Unlit crane to 580 ft AMSL in central Hamilton near the McMaster heliport, roughly 5 NM north of CYHM and a few miles north of the CYKF-CYHM diversion track. Well below cruise altitude and off the approach paths to 12/30; a heliport-area obstacle to be aware of when descending into the Hamilton control zone, not a decisive factor.",
       "affects": [
         "alternate"
@@ -173,7 +173,7 @@
       "notamId": "J4168/26",
       "relevance": "advisory",
       "category": "runway",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Non-standard markings on the landing runway at CYKF during construction; combined with the displaced threshold the pilot should brief what the threshold will look like, but it does not change whether the flight can be flown.",
       "affects": [
         "arrival"
@@ -184,7 +184,7 @@
       "notamId": "J4819/26",
       "relevance": "advisory",
       "category": "obstacle",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Lighted 120 ft AGL crane near CYKF, active 1100-2300Z on 14 Sep so it covers the arrival, but it sits 4580 ft SW of the RWY 32 extended centreline and well clear of the 08/26 approach paths; worth a look in the circuit, not decisive.",
       "affects": [
         "arrival"
@@ -195,7 +195,7 @@
       "notamId": "J5066/26",
       "relevance": "advisory",
       "category": "taxiway",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — A taxiway closure at the departure aerodrome; with 11/29 also closed the taxi route to 01/19 is constrained. Not decisive on its own, but the pilot should confirm the taxi routing with ground/ATIS before starting.",
       "affects": [
         "departure"
@@ -206,7 +206,7 @@
       "notamId": "J5067/26",
       "relevance": "critical",
       "category": "runway",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Closure of the second runway at the departure aerodrome leaves only the shortened 01/19; crosswind options are gone, so runway choice and crosswind limits must be checked against the wind at 15:00Z.",
       "affects": [
         "departure"
@@ -217,7 +217,7 @@
       "notamId": "J5068/26",
       "relevance": "critical",
       "category": "obstacle",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Cluster of unlit, unpainted cranes to 512 ft AMSL about 2 NM NW of CYSN, right in the sector a C172 climbing out of RWY 01/19 and turning onto the ~287 deg track to Waterloo will pass through at low altitude. Departure obstacle near the planned path; brief it and climb clear before turning on course.",
       "affects": [
         "departure"
@@ -228,7 +228,7 @@
       "notamId": "J5069/26",
       "relevance": "critical",
       "category": "runway",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — With 11/29 closed, 01/19 is the only runway at CYSN. Displaced threshold 19 due trees shortens declared distances (TORA 2498, LDA 19 1975) and puts a 50 ft AGL obstacle just short of THR 19; still adequate for a C172 but the pilot must plan takeoff performance and any return-to-land on the shortened runway.",
       "affects": [
         "departure"
@@ -239,7 +239,7 @@
       "notamId": "J6015/26",
       "relevance": "irrelevant",
       "category": "navaid",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — ILS outage is an IFR-only item; a VFR C172 with no IFR capability does not use it.",
       "affects": [],
       "cited_span": "ILS RWY 26 U/S"
@@ -248,7 +248,7 @@
       "notamId": "J6066/26",
       "relevance": "irrelevant",
       "category": "approach",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — IFR approach minima and SID changes for CYKF while THR 26 is displaced; not applicable to a VFR arrival.",
       "affects": [],
       "cited_span": "ILS RWY 26 APCH: ILS/DME MINIMA: NOT AUTH"
@@ -257,7 +257,7 @@
       "notamId": "J6067/26",
       "relevance": "irrelevant",
       "category": "approach",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Instrument approach minima changes and SID restrictions for RWY 08/26 at CYKF; the flight is VFR with no IFR capability and is not departing CYKF.",
       "affects": [],
       "cited_span": "RNAV (GNSS) Z RWY 08 APCH: LPV AND LNAV/VNAV MINIMA: NOT AUTH"
@@ -266,7 +266,7 @@
       "notamId": "J6192/26",
       "relevance": "advisory",
       "category": "lighting",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — PAPI for RWY 26 is unavailable during the arrival window, so no vertical guidance on final to the displaced threshold; a VFR pilot can fly a visual approach without it, but should expect no glidepath aid and be wary of the closed first 1000 ft.",
       "affects": [
         "arrival"
@@ -277,7 +277,7 @@
       "notamId": "J6193/26",
       "relevance": "advisory",
       "category": "lighting",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Runway edge lights on 08/26 out during the daytime construction window covering the arrival; not a factor for a day VFR landing, though it matters if the flight is delayed toward dusk.",
       "affects": [
         "arrival"
@@ -288,7 +288,7 @@
       "notamId": "J6204/26",
       "relevance": "advisory",
       "category": "lighting",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — High-intensity approach lights for RWY 26 out during the arrival window; the referenced AIP procedure concerns instrument approaches and day VFR is unaffected.",
       "affects": [
         "arrival"
@@ -299,7 +299,7 @@
       "notamId": "J6230/26",
       "relevance": "critical",
       "category": "runway",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — D) schedule SEP 14 1100-2100Z covers the 15:32Z arrival. If landing RWY 26 the pilot must aim for the displaced threshold and not touch down in the closed first 1000 ft; declared distances change (LDA 6003, still ample for a C172). Construction on the runway is a must-know for the destination.",
       "affects": [
         "arrival"
@@ -310,7 +310,7 @@
       "notamId": "J6250/26",
       "relevance": "advisory",
       "category": "lighting",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Approach lighting for RWY 08 at CYKF is out through 14 Sep 2100Z, so it covers the arrival, but approach lights are of no consequence for a day VFR arrival.",
       "affects": [
         "arrival"
@@ -321,7 +321,7 @@
       "notamId": "S2881/26",
       "relevance": "advisory",
       "category": "runway",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "2/3 — CYHM runway surface condition report expired Sep 12 2327Z, before the flight, and reported dry surfaces; no operational effect.",
       "affects": [
         "alternate"
@@ -332,7 +332,7 @@
       "notamId": "U1517/26",
       "relevance": "advisory",
       "category": "obstacle",
-      "labelledBy": "panel-of-3, adversarially reviewed by 3 (0 refutations); owner sign-off pending",
+      "labelledBy": "majority of three perspectives, cross-checked by three independent passes (none overturned); owner sign-off pending",
       "note": "3/3 — Unlit antenna 2.1 NM WSW of CYSN at 495 ft AMSL; light out is immaterial for a day VFR departure, but the tower itself is in the general direction of departure toward Waterloo.",
       "affects": [
         "departure"

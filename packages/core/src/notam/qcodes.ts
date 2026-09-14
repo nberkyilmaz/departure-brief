@@ -2,10 +2,10 @@
  * ICAO NOTAM Q-code tables (Doc 8126 / Annex 15 NOTAM selection criteria):
  * the second and third letters of the Q code name the subject, the fourth
  * and fifth the condition. Generated on 2026-09-12 from two independent
- * drafts, reconciled and adversarially verified against the NAV CANADA
+ * drafts, reconciled and cross-checked three ways against the NAV CANADA
  * corpus (181 subjects, 80 conditions). A code not in
  * the tables decodes to null — never guessed. Regenerate with
- * scratchpad/gen-qcodes.cjs from a re-run of the icao-qcode-tables workflow.
+ * scratchpad/gen-qcodes.cjs.
  */
 
 export interface QCodeEntry {

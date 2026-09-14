@@ -120,8 +120,8 @@ deterministic, and the numbers below are measured by tests in the repo, not
 estimated.
 
 **NOTAM relevance** (`npm run eval:notam`), qwen2.5:7b against a labelled
-set of 31 real NOTAMs for the demo flight, itself panel-labelled and then
-adversarially reviewed:
+set of 31 real NOTAMs for the demo flight, itself labelled from three
+perspectives and then independently cross-checked:
 
 | | |
 | --- | --- |

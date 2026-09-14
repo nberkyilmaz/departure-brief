@@ -309,7 +309,7 @@ A briefing might have 30 NOTAMs surviving the deterministic filter, at roughly 8
 | Haiku 4.5 | ~$0.05 | ~$1.00 |
 | Local (Ollama) | $0 | **$0** |
 
-**NOTAM assessment is short text in, small JSON out — the ideal local-model workload.** Realistically this runs at $0 forever once you've tuned it. Use Claude to build your labelled reference set and to benchmark against, then run local.
+**NOTAM assessment is short text in, small JSON out — the ideal local-model workload.** Realistically this runs at $0 forever once you've tuned it. Use a stronger hosted model to build your labelled reference set and to benchmark against, then run local.
 
 The seven cost rules from the earlier spec still apply, and two matter most here:
 
@@ -339,7 +339,7 @@ The desktop stops being a dependency and becomes a benchmark box you visit.
 | Language | TypeScript, strict | Your strongest |
 | API | Node + Fastify | Schema-first validation |
 | Database | PostgreSQL + **PostGIS** | Append-only briefings, time-series reports, and airspace geometry in the same engine — no separate geo store |
-| Model | Ollama local, Claude for benchmarking | Behind one `LLMProvider` interface |
+| Model | Ollama local, a hosted model for benchmarking | Behind one `LLMProvider` interface |
 | Frontend | React | The briefing view is the product surface |
 | Eval | Vitest + CLI runner | Decoder correctness + NOTAM relevance scoring |
 | CI | GitHub Actions | Decoder tests always; eval gate on the labelled set |
