@@ -124,6 +124,17 @@ code { font-size: 0.8rem; background: #eee; padding: 0 0.25rem; border-radius: 3
   background: #fffbe8; padding: 0.6rem 0.9rem; margin: 0 0 1rem; font-size: 0.9rem;
 }
 
+/* The reasons the verdict is what it is, before anything else. */
+.why { margin: 0.4rem 0 1rem; }
+.why h3, .gaps h3 { font-size: 0.95rem; margin: 0 0 0.2rem; }
+.why-none { color: var(--muted); margin: 0.2rem 0 1rem; }
+.gaps {
+  border: 1px solid var(--marginal); border-left-width: 6px; border-radius: 6px;
+  background: #fffbe8; padding: 0.5rem 0.9rem; margin: 0 0 1rem;
+}
+.gaps ul { margin: 0.2rem 0; padding-left: 1.1rem; font-size: 0.9rem; }
+.met > summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; padding: 0.3rem 0; }
+
 /* What the tool knows about what you just typed, under the field itself. */
 .field-note-line { display: block; min-height: 1.05rem; font-size: 0.75rem; line-height: 1.05rem; }
 .field-note { color: var(--muted); }
