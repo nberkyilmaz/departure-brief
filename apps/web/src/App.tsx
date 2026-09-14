@@ -146,10 +146,16 @@ export function App() {
       <main>
         <header>
           <h1>Hold Short</h1>
-          <p className="tagline">Stop before the line and brief before you cross it.</p>
+          <p className="tagline">
+            Stop before the line and brief before you cross it.
+            {DEMO && (
+              <>
+                {' '}
+                <a href="#about">What is this?</a>
+              </>
+            )}
+          </p>
         </header>
-
-        {DEMO && <About recordedAt={recordedText} aerodromes={engine?.aerodromes ?? []} />}
 
         {DEMO && (
           <div className="frozen" role="note">
@@ -201,6 +207,16 @@ export function App() {
         {diff && <DiffPanel d={diff} />}
         {briefing && <BriefingView stored={briefing} />}
         <WbPanel aircraftType={aircraft.type} spec={engine?.wb ?? null} crops={!DEMO} />
+
+        {/* The explaining comes after the thing itself. */}
+        {DEMO && <About recordedAt={recordedText} aerodromes={engine?.aerodromes ?? []} />}
+
+        <footer>
+          <p>
+            Hold Short is a study and planning aid. Nothing here is an official weather briefing, an official weight-and-balance computation, or a substitute
+            for either. <a href="https://github.com/nberkyilmaz/holdshort">Source and work log</a>.
+          </p>
+        </footer>
       </main>
     </>
   );

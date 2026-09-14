@@ -7,7 +7,8 @@ import type { Aerodrome } from './engine.js';
 
 export function About({ recordedAt, aerodromes }: { recordedAt: string; aerodromes: readonly Aerodrome[] }) {
   return (
-    <section className="about">
+    <section className="about" id="about">
+      <h2>What this is</h2>
       <p className="lede">
         Hold Short answers one question about a planned flight: <b>given this route, at this time, in this aircraft — should I go, and why?</b> It decodes the
         raw products a pilot already reads, resolves them to each point along the route at the time the aircraft will actually be there, and judges the result
