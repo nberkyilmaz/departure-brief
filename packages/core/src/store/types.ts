@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { sha256Hex } from '../hash/sha256.js';
 import type { StoredBriefing } from '../brief/types.js';
 import type { Airport } from '../domain/airport.js';
 import type { AssessmentStore } from '../notam/assess.js';
@@ -103,9 +103,8 @@ export interface BriefingStore {
 
 export type Store = ReportStore & AirportStore & BriefingStore & AssessmentStore & ForecastStore;
 
-export function sha256Hex(text: string): string {
-  return createHash('sha256').update(text, 'utf8').digest('hex');
-}
+/** Re-exported so the identity of a report and of a briefing are the same function. */
+export { sha256Hex };
 
 export function rawReport(fields: Omit<RawReport, 'sha256'>): RawReport {
   return { ...fields, sha256: sha256Hex(fields.body) };

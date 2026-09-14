@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { sha256Hex } from '../hash/sha256.js';
 
 /**
  * Canonical JSON: keys sorted recursively, dates as ISO strings, `undefined`
@@ -21,7 +21,7 @@ export function canonicalJson(value: unknown): string {
   return JSON.stringify(canonicalize(value));
 }
 
-/** SHA-256 hex of the canonical JSON. */
+/** SHA-256 hex of the canonical JSON. Portable, so the same bytes hash the same anywhere. */
 export function contentHash(value: unknown): string {
-  return createHash('sha256').update(canonicalJson(value), 'utf8').digest('hex');
+  return sha256Hex(canonicalJson(value));
 }
