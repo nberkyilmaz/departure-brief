@@ -54,6 +54,8 @@ above works end to end.
   build order, conventions, environment, how work is done.
 - **[`docs/spec.md`](docs/spec.md)** — the full build plan: hard parts in depth,
   hour estimates, data sources.
+- **[`docs/roadmap.md`](docs/roadmap.md)** — what is done, what is blocked
+  and on what, and the order of what comes next.
 - **[`docs/plan.md`](docs/plan.md)** — the build sequence: decisions taken,
   what each step builds, and what "done" means for it.
 - **[`docs/worklog.md`](docs/worklog.md)** — chronological log of everything

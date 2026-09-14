@@ -3,7 +3,7 @@ import { airportPreference, type Airport } from '../domain/airport.js';
 import { distanceNm } from '../domain/geo.js';
 import type { AssessmentRow } from '../notam/assess.js';
 import type { ForecastCheck, ForecastOutcome, VerificationPair } from '../verify/types.js';
-import type { DecodedRow, FetchEvent, ListRawQuery, RawReport, Store } from './types.js';
+import type { DecodedRow, FetchEvent, ListRawQuery, RawReport, ReportKind, Store } from './types.js';
 
 /**
  * In-memory store with the same semantics as Postgres. For tests, the CLI's
@@ -128,6 +128,18 @@ export class MemoryStore implements Store {
 
   async getAssessment(notamSha256: string, contextHash: string, promptVersion: number, model: string): Promise<AssessmentRow | null> {
     return this.assessments.get(`${notamSha256}|${contextHash}|${promptVersion}|${model}`) ?? null;
+  }
+
+  async lastFetchAt(station: string, kind: ReportKind): Promise<Date | null> {
+    let latest: Date | null = null;
+    for (const f of this.fetches) {
+      const report = this.raw.get(f.sha256);
+      if (!report || report.kind !== kind) continue;
+      // The fetch counts for the station it was made for, and for the station it turned out to be about.
+      if (f.event.station?.toUpperCase() !== station && report.station?.toUpperCase() !== station) continue;
+      if (latest === null || f.event.fetchedAt > latest) latest = f.event.fetchedAt;
+    }
+    return latest;
   }
 
   async putForecastCheck(check: ForecastCheck): Promise<{ inserted: boolean }> {

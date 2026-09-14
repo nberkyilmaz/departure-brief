@@ -33,12 +33,21 @@ describe('ingestStation', () => {
     const m = (await store.getDecoded(metars[0]!.sha256, METAR_DECODER_VERSION))?.decoded as DecodedMetar;
     expect(m.raw).toBe(metars[0]!.body);
 
+    // Five minutes later nothing is asked for again: the reports have not
+    // had time to change, and a second request would only cost the upstream.
     const t1 = new Date('2026-09-07T12:05:00Z');
     const second = await ingestStation({ store, awc, now: () => t1 }, 'KHPN');
-    expect(second.metar).toEqual({ fetched: 3, rawInserted: 0, decodedInserted: 0 });
-    expect(second.taf).toEqual({ fetched: 1, rawInserted: 0, decodedInserted: 0 });
+    expect(second.metar).toEqual({ fetched: 0, rawInserted: 0, decodedInserted: 0 });
+    expect(second.skipped.map((d) => d.kind).sort()).toEqual(['metar', 'taf']);
+    expect(store.fetchLog().filter((f) => f.event.fetchedAt === t1)).toHaveLength(0);
+
+    // Forced, it asks again — and recognises every report as one it already has.
+    const t2 = new Date('2026-09-07T12:06:00Z');
+    const forced = await ingestStation({ store, awc, now: () => t2 }, 'KHPN', { maxAge: { metar: 0, taf: 0 } });
+    expect(forced.metar).toEqual({ fetched: 3, rawInserted: 0, decodedInserted: 0 });
+    expect(forced.taf).toEqual({ fetched: 1, rawInserted: 0, decodedInserted: 0 });
     // Both fetches are on record even though nothing changed.
-    expect(store.fetchLog().filter((f) => f.event.fetchedAt === t1)).toHaveLength(4);
+    expect(store.fetchLog().filter((f) => f.event.fetchedAt === t2)).toHaveLength(4);
   });
 });
 

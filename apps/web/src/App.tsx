@@ -2,17 +2,15 @@ import { useEffect, useState } from 'react';
 import { About } from './About.js';
 import { BriefingView } from './BriefingView.js';
 import { DiffPanel } from './DiffPanel.js';
-import { FlightForm, defaultPlan } from './FlightForm.js';
+import { FlightForm, defaultPlan, planProblems } from './FlightForm.js';
 import { ProfileForm, defaultAircraft, defaultProfile } from './ProfileForm.js';
+import { useStored } from './useStored.js';
 import { WbPanel } from './WbPanel.js';
 import type { AircraftInput, BriefingDiff, FlightPlanInput, ProfileInput, StoredBriefing } from './types.js';
 
 /**
- * The public build has no API behind it: it shows one briefing, recorded
- * and frozen, from data committed to the repository. That keeps the page
- * free to host, unable to fall over, and — the reason that matters — unable
- * to put load on NAV CANADA or the weather service on behalf of strangers,
- * or to be mistaken for a live briefing by someone about to fly.
+ * The public build has no API behind it and shows one recorded briefing.
+ * Everywhere else the form is live.
  */
 const DEMO = import.meta.env.VITE_DEMO === '1';
 const base = import.meta.env.BASE_URL;
@@ -21,9 +19,9 @@ const base = import.meta.env.BASE_URL;
 const RECORDED_AT = '12 September 2026';
 
 export function App() {
-  const [plan, setPlan] = useState<FlightPlanInput>(defaultPlan);
-  const [profile, setProfile] = useState<ProfileInput>(defaultProfile);
-  const [aircraft, setAircraft] = useState<AircraftInput>(defaultAircraft);
+  const [plan, setPlan] = useStored<FlightPlanInput>('plan', defaultPlan);
+  const [profile, setProfile] = useStored<ProfileInput>('profile', defaultProfile);
+  const [aircraft, setAircraft] = useStored<AircraftInput>('aircraft', defaultAircraft);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [briefing, setBriefing] = useState<StoredBriefing | null>(null);
@@ -50,6 +48,8 @@ export function App() {
     };
   }, []);
 
+  const problems = planProblems(plan);
+
   async function brief() {
     setBusy(true);
     setError(null);
@@ -65,6 +65,7 @@ export function App() {
       // A 404 here just means this is the first briefing of this flight.
       const d = await fetch(`/api/briefings/${body.sha256}/diff`);
       setDiff(d.ok ? ((await d.json()) as BriefingDiff) : null);
+      document.getElementById('verdict')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -97,16 +98,25 @@ export function App() {
             <FlightForm plan={plan} onChange={setPlan} />
             <ProfileForm profile={profile} aircraft={aircraft} onProfile={setProfile} onAircraft={setAircraft} />
             <div className="actions">
-              <button onClick={brief} disabled={busy}>
+              <button onClick={brief} disabled={busy || problems.length > 0}>
                 {busy ? 'Fetching and judging…' : 'Brief this flight'}
               </button>
-              {error && <p className="error">{error}</p>}
+              {problems.length > 0 && <p className="field-note">Still needs {problems.join(', ')}.</p>}
+              {error && (
+                <p className="error" role="alert">
+                  {error}
+                </p>
+              )}
             </div>
           </section>
         )}
 
         {DEMO && busy && <p className="explain">Loading the recorded briefing…</p>}
-        {DEMO && error && <p className="error">{error}</p>}
+        {DEMO && error && (
+          <p className="error" role="alert">
+            {error}
+          </p>
+        )}
         {diff && <DiffPanel d={diff} />}
         {briefing && <BriefingView stored={briefing} />}
         {!DEMO && <WbPanel aircraftType={aircraft.type} />}

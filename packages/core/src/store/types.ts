@@ -71,6 +71,13 @@ export interface ReportStore {
   listRaw(query: ListRawQuery): Promise<RawReport[]>;
   putDecoded(row: DecodedRow): Promise<{ inserted: boolean }>;
   getDecoded(sha256: string, decoderVersion: number): Promise<DecodedRow | null>;
+  /**
+   * When this station's reports of this kind were last asked for upstream,
+   * whether or not anything new came back. Serving strangers, this is what
+   * keeps a second visitor — or one impatient one — from sending another
+   * round of requests for reports that have not changed.
+   */
+  lastFetchAt(station: string, kind: ReportKind): Promise<Date | null>;
   close(): Promise<void>;
 }
 

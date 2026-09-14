@@ -13,72 +13,27 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
 
 ## Where we are (updated 2026-09-14)
 
-**The public demo is live**: <https://nberkyilmaz.github.io/holdshort/>.
-Continuous integration runs on every push and is green.
+**The goal, restated:** everything a pilot looks at before a flight, in one
+place, with a reason and a source behind every line. Built steadily, each
+piece finished before the next is started. A web application first, then a
+mobile one. A study aid throughout — never an official briefing.
 
-**Done:** steps 1-7, 9 and 10, plus the public site and CI. Decoders, fetch
-layer, route and time resolution, rules engine, briefings + API + web app,
-NOTAM relevance with a local model and a passing eval gate, the briefing
-diff, aircraft document ingestion, and forecast verification. 653 tests,
-typecheck clean, both build modes build.
+`docs/roadmap.md` holds the sequence and why each piece comes where it does.
+This file holds what was actually done and what it cost.
 
-**Step 8 (airspace transit) remains blocked on data, not effort.** Rechecked
-2026-09-13: NAV CANADA publishes no airspace geometry, open.canada.ca has
-nothing usable, OpenAIP needs a key. The FAA ArcGIS `Class_Airspace` layer
-*is* queryable, so the US half could be built whenever it is wanted.
+**Current work: making the site usable.** The pipeline works and nobody can
+drive it. That comes before every feature on the roadmap, because a feature
+nobody can reach is not finished.
 
-### The public site
+**Done:** steps 1-7, 9 and 10, plus a published demo and CI. Decoders, fetch
+layer, route and time resolution, rules engine, briefings with an API and a
+web view, NOTAM relevance with a local model and a passing eval gate, the
+briefing diff, aircraft document ingestion, forecast verification.
 
-**What it is.** A static page showing one briefing, computed from reports
-committed to this repository and then frozen. There is no API behind it and
-no database.
-
-**Why static, which is a decision and not a shortcut.** A public page that
-fetched live weather would put load on NAV CANADA's unofficial endpoint and
-on the US weather service on behalf of strangers, and would eventually be
-blocked. A publicly usable "should I go?" tool is precisely the operational
-use every screen of this project disclaims. Static also costs nothing,
-cannot fall over, and shows the same output.
-
-**How it is built and served.** `apps/web` builds twice from one codebase:
-the normal build talks to the API, and `VITE_DEMO=1` builds the public one,
-which loads `/demo/briefing.json` and hides the flight form. GitHub Pages
-serves it from a sub-path, so `VITE_BASE` carries the prefix. The demo
-payload is produced by `packages/core/scripts/build-demo.ts` from committed
-fixtures alone, and the Pages workflow fails rather than deploying if the
-recorded briefing did not ship.
-
-**What it shows.** The owner's own flight — CYSN to CYKF, alternate CYHM, in
-a C172 — verdict marginal, 34 reports cited, 31 NOTAMs ranked (8 critical,
-9 advisory, 9 irrelevant, 5 out of scope), every finding carrying the span
-of the report it was judged on.
-
-**One thing the page states plainly, and must keep stating:** the flight
-departs 2026-09-12T22:00Z rather than its real 2026-09-14T15:00Z, because
-those forecasts were issued at 1940Z on the 12th and run only to 0100Z on
-the 13th. Route, aircraft, personal minimums and every report are otherwise
-untouched.
-
-**The page carries `noindex`.** A page showing weather frozen on one day in
-2026 should not be found by someone searching for a real briefing. Remove
-the tag in `apps/web/index.html` if that is ever wanted; the repository
-itself is public and indexed either way.
-
-### Continuous integration
-
-Typecheck, the full suite and the web build run on Node 20 and 22 against a
-real PostGIS container, so the store contract is proved against Postgres and
-not only the in-memory implementation. Nothing in CI reaches the network:
-every test replays recorded upstream responses committed beside it. The
-tests needing what is deliberately not in the repository — the owner's
-handbook and its OCR cache — skip with a message rather than failing. A
-clean clone was checked by hand before CI was added: 648 pass, 6 skip.
-
-**Branching.** Work continues on `master`. For a single author with a
-linear history and no review handoff, feature branches would add merge
-commits that make the log harder to read, not easier. Branch when work
-might genuinely not land — the next such case is step 8 if the US-only half
-is attempted.
+**Blocked on data, not effort:** airspace transit needs Canadian airspace
+geometry, which NAV CANADA does not publish; US NOTAMs need FAA
+credentials. The FAA's airspace layer is queryable, so the US half of
+airspace is buildable whenever it is wanted.
 
 **Waiting on the owner:**
 
@@ -89,23 +44,18 @@ is attempted.
    were verified against the ink; the rest were completed with
    `wb confirm`, and the note on each says how far the handbook backs it.
    The station arms (37, 73, 95, 123 in) and the fuel arm (48 in) carry
-   **no citation** — this handbook prints them in a diagram that OCRs to
+   **no citation** — the handbook prints them in a diagram that OCRs to
    noise. They match the standard 172M figures, but confirm them against
    your own copy before flying on them.
 3. **The four open questions in the NOTAM labelled set**
    (`packages/core/test/fixtures/notam/labelled/…json`, `openQuestions`),
    chiefly whether CYSN's 06/24 is a practical alternative for a C172 once
-   11/29 is closed — it decides whether two NOTAMs are critical or advisory.
+   11/29 is closed.
 4. **FAA NOTAM API credentials**, if US NOTAMs matter. Canadian ones need
    no key.
-
-**Next steps, in order:**
-
-1. A look at the live page on a phone; nobody has viewed it on a small
-   screen yet.
-2. Step 8, airspace transit — the US half from FAA ArcGIS if the Canadian
-   geometry stays unavailable.
-3. Step 11, polish and demo.
+5. **Accounts for a host**, when the live site is wanted: a free Render web
+   service and a free Neon Postgres is the $0 route; Fly.io is a few
+   dollars a month and starts faster.
 
 **Environment notes that will bite whoever picks this up:**
 
@@ -114,7 +64,6 @@ is attempted.
   `OLLAMA_VULKAN=1 CUDA_VISIBLE_DEVICES=-1 ollama serve`.
 - 146 MB the work depends on is deliberately **not** in git: the handbook
   (7.9 MB) and the OCR cache (138 MB), besides a local Postgres and Ollama.
-  Those have to be dealt with before the project can be built anywhere else.
   A clean clone still builds and tests green without them.
 
 ---
@@ -1102,3 +1051,59 @@ Cloudflare Pages configuration and first deploy.
 
 - 653 tests, typecheck clean, CI green, the demo published.
 - Steps 1-7, 9 and 10 done; step 8 blocked on data; the site is live.
+
+---
+
+## Session 14 — 2026-09-14 — Making it usable, and polite enough to be public
+
+163. Reconsidered the decision to keep the site static, because the reason
+     given for it was partly wrong. Pulling from the US weather service is
+     not a problem at all: it is a public government API, documented, no
+     key, meant to be consumed. NAV CANADA is a grey area rather than a red
+     line — undocumented, but public aeronautical data served by the same
+     endpoint their own planning site calls. The risk is volume, not
+     principle, and volume is an engineering problem. "Be courteous to
+     upstreams" had been conflated with "do not be interactive"; only the
+     first is required.
+164. So: refetch windows, on the way to a live site. A station's METAR is
+     not asked for again inside ten minutes, a TAF or NOTAM inside thirty,
+     because that is roughly how often they change. Without it, every
+     visitor briefing the same flight — or one impatient visitor clicking
+     twice — sends another round of requests that buys nothing. The store
+     already recorded every fetch, so the question "when did we last ask
+     about this station" was one query away.
+165. It is tested as behaviour rather than left as an optimisation: one
+     visitor clicking twice costs one round of requests, the windows differ
+     by kind, and a caller can force one kind without forcing the others.
+     A fetch made *for* a station counts even when the report turns out to
+     be about no station, which is the FIR-wide NOTAM case.
+166. **Measured a real deployment problem before it bit.** Importing the
+     core package cost 2,640 ms and 147 MB of resident memory, because the
+     document reader sat on the eager export path and pulled in pdf.js.
+     The API imports the package and never opens a PDF. Loading pdf.js only
+     when a PDF is actually opened took that to 371 ms and 44 MB — pdf.js
+     alone is 108 MB of it. On a host with 512 MB that is a third of the
+     budget reclaimed by one line.
+167. Added the container the API will run in: two stages, so the runtime
+     carries no compiler, no fixtures and no development dependencies, and
+     the build fails rather than shipping an image whose page is empty.
+168. The form now forgives. An aerodrome identifier is checked against the
+     airport data as it is typed and answers with the field's name, or says
+     it does not know it — rather than letting somebody find out after a
+     briefing. The plan, profile and aircraft survive a reload. The brief
+     button says what is still missing instead of failing silently.
+169. A phone layout, since that is where a pilot stands beside the
+     aeroplane: one column, targets big enough for a thumb, and no table
+     wide enough to push the page sideways. Focus is visible for anyone
+     using a keyboard.
+170. Wrote `docs/roadmap.md`: what is done, what is blocked and on what, and
+     the order of what comes next — the rest of the weather picture, the nav
+     log, daylight, more out of the handbook, currency. Each piece after the
+     first is the same shape as METAR and TAF, so they get cheaper as they
+     go.
+
+### State at end of session 14
+
+- 662 tests, typecheck clean, CI green.
+- The static demo is still what is published; the live interactive site
+  needs a host, which needs the owner's accounts.

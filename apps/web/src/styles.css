@@ -123,3 +123,39 @@ code { font-size: 0.8rem; background: #eee; padding: 0 0.25rem; border-radius: 3
   border: 1px solid var(--marginal); border-left-width: 6px; border-radius: 6px;
   background: #fffbe8; padding: 0.6rem 0.9rem; margin: 0 0 1rem; font-size: 0.9rem;
 }
+
+/* What the tool knows about what you just typed, under the field itself. */
+.field-note-line { display: block; min-height: 1.05rem; font-size: 0.75rem; line-height: 1.05rem; }
+.field-note { color: var(--muted); }
+.field-ok { color: var(--ok); }
+.field-bad { color: var(--nogo); }
+.aerodrome input[aria-invalid='true'] { border-color: var(--nogo); }
+
+/* Keyboard users need to see where they are. */
+input:focus-visible,
+select:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+.row:focus-visible {
+  outline: 2px solid var(--advisory);
+  outline-offset: 2px;
+}
+
+/*
+ * A phone is where a pilot stands beside the aeroplane, so the briefing has
+ * to be readable there: one column, targets big enough for a thumb, and no
+ * table wide enough to push the page sideways.
+ */
+@media (max-width: 40rem) {
+  main { padding: 0.75rem 0.75rem 3rem; }
+  header h1 { font-size: 1.5rem; }
+  .grid { grid-template-columns: 1fr; }
+  input, select, button { min-height: 2.75rem; font-size: 1rem; }
+  .about-grid { grid-template-columns: 1fr; }
+  .numbers { grid-template-columns: 1fr 1fr; }
+  .change { grid-template-columns: 5rem 1fr; }
+  .change .basis { grid-column: 2; font-size: 0.75rem; }
+  .change .summary { grid-column: 1 / -1; }
+  .notam-group summary, .point h3 { flex-wrap: wrap; }
+  .raw { font-size: 0.78rem; }
+}

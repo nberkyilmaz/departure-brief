@@ -247,6 +247,16 @@ export class PostgresStore implements Store {
     return res.rows.map(toBriefing);
   }
 
+  async lastFetchAt(station: string, kind: ReportKind): Promise<Date | null> {
+    const res = await this.pool.query<{ last: Date | null }>(
+      `select max(f.fetched_at) as last
+       from report_fetches f join raw_reports r on r.sha256 = f.sha256
+       where r.kind = $2 and (f.station = $1 or r.station = $1)`,
+      [station.toUpperCase(), kind],
+    );
+    return res.rows[0]?.last ?? null;
+  }
+
   async putForecastCheck(c: ForecastCheck): Promise<{ inserted: boolean }> {
     const res = await this.pool.query(
       `insert into forecast_checks (key, station, valid_at, taf_sha256, taf_issued_at, taf_decoder_version, lead_hours,
