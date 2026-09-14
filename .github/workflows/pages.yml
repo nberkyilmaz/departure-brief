@@ -1,11 +1,15 @@
-# Publish the public demo to GitHub Pages.
+# Publish the public site to GitHub Pages.
 #
-# What gets published is a static build: one briefing, recorded and frozen,
-# read from JSON committed to this repository. There is no API behind it and
-# no database. That is deliberate rather than a shortcut — a public page
-# that fetched live weather would put load on NAV CANADA and the US weather
-# service on behalf of strangers, and a publicly usable "should I go?" tool
-# is exactly the operational use this project disclaims on every screen.
+# What gets published is static files, but not a static briefing: the page
+# carries the recorded reports and runs the pipeline itself, so a visitor
+# can change their minimums, the aircraft or the route and watch the verdict
+# move. What it cannot do is fetch — neither weather service allows a page
+# to call it directly, and a public page that did would be putting load on
+# them on behalf of strangers. So the weather is frozen at the moment it was
+# recorded, and the page says so where nobody can miss it.
+#
+# The page bundles the core package, so a change there changes the site even
+# when nothing under apps/web has moved. That is why it is in the paths.
 
 name: Pages
 
@@ -14,6 +18,7 @@ on:
     branches: [master]
     paths:
       - 'apps/web/**'
+      - 'packages/core/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -48,9 +53,12 @@ jobs:
           # A project site is served from /<repo>/, so the build needs the prefix.
           VITE_BASE: /${{ github.event.repository.name }}/
 
-      - name: Fail if the recorded briefing did not ship
-        # The page is nothing without it, and an empty demo would deploy silently.
-        run: test -s apps/web/dist/demo/briefing.json
+      - name: Fail if the recorded reports did not ship
+        # The page is nothing without them, and an empty site would deploy silently.
+        run: |
+          test -s apps/web/dist/demo/bundle.json
+          test -s apps/web/dist/demo/briefing.json
+          test -s apps/web/dist/demo/wb.json
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
