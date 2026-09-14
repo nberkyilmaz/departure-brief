@@ -1,10 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { About } from './About.js';
 import { BriefingView } from './BriefingView.js';
 import { DiffPanel } from './DiffPanel.js';
 import { FlightForm, defaultPlan } from './FlightForm.js';
 import { ProfileForm, defaultAircraft, defaultProfile } from './ProfileForm.js';
 import { WbPanel } from './WbPanel.js';
 import type { AircraftInput, BriefingDiff, FlightPlanInput, ProfileInput, StoredBriefing } from './types.js';
+
+/**
+ * The public build has no API behind it: it shows one briefing, recorded
+ * and frozen, from data committed to the repository. That keeps the page
+ * free to host, unable to fall over, and — the reason that matters — unable
+ * to put load on NAV CANADA or the weather service on behalf of strangers,
+ * or to be mistaken for a live briefing by someone about to fly.
+ */
+const DEMO = import.meta.env.VITE_DEMO === '1';
+const base = import.meta.env.BASE_URL;
+
+/** The moment the recorded reports were taken, for the page to say so plainly. */
+const RECORDED_AT = '12 September 2026';
 
 export function App() {
   const [plan, setPlan] = useState<FlightPlanInput>(defaultPlan);
@@ -14,6 +28,27 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [briefing, setBriefing] = useState<StoredBriefing | null>(null);
   const [diff, setDiff] = useState<BriefingDiff | null>(null);
+
+  useEffect(() => {
+    if (!DEMO) return;
+    let live = true;
+    setBusy(true);
+    fetch(`${base}demo/briefing.json`)
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`the recorded briefing could not be loaded (HTTP ${r.status})`);
+        return (await r.json()) as StoredBriefing;
+      })
+      .then((b) => {
+        if (!live) return;
+        setBriefing(b);
+        setPlan(b.document.plan);
+      })
+      .catch((e: Error) => live && setError(e.message))
+      .finally(() => live && setBusy(false));
+    return () => {
+      live = false;
+    };
+  }, []);
 
   async function brief() {
     setBusy(true);
@@ -48,19 +83,33 @@ export function App() {
           <h1>Hold Short</h1>
           <p className="tagline">Stop before the line and brief before you cross it.</p>
         </header>
-        <section className="inputs">
-          <FlightForm plan={plan} onChange={setPlan} />
-          <ProfileForm profile={profile} aircraft={aircraft} onProfile={setProfile} onAircraft={setAircraft} />
-          <div className="actions">
-            <button onClick={brief} disabled={busy}>
-              {busy ? 'Fetching and judging…' : 'Brief this flight'}
-            </button>
-            {error && <p className="error">{error}</p>}
-          </div>
-        </section>
+
+        {DEMO ? (
+          <>
+            <About recordedAt={RECORDED_AT} />
+            <div className="frozen" role="note">
+              Everything below is a <b>recorded briefing</b>, computed from reports taken on {RECORDED_AT} and frozen. This page fetches no weather and judges
+              no flight of yours. To brief a real one, run it yourself — the repository has the instructions.
+            </div>
+          </>
+        ) : (
+          <section className="inputs">
+            <FlightForm plan={plan} onChange={setPlan} />
+            <ProfileForm profile={profile} aircraft={aircraft} onProfile={setProfile} onAircraft={setAircraft} />
+            <div className="actions">
+              <button onClick={brief} disabled={busy}>
+                {busy ? 'Fetching and judging…' : 'Brief this flight'}
+              </button>
+              {error && <p className="error">{error}</p>}
+            </div>
+          </section>
+        )}
+
+        {DEMO && busy && <p className="explain">Loading the recorded briefing…</p>}
+        {DEMO && error && <p className="error">{error}</p>}
         {diff && <DiffPanel d={diff} />}
         {briefing && <BriefingView stored={briefing} />}
-        <WbPanel aircraftType={aircraft.type} />
+        {!DEMO && <WbPanel aircraftType={aircraft.type} />}
       </main>
     </>
   );

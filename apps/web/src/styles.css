@@ -106,3 +106,20 @@ code { font-size: 0.8rem; background: #eee; padding: 0 0.25rem; border-radius: 3
 .crop { margin: 0.3rem 0; }
 .crop img { max-width: 100%; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
 .crop figcaption { font-size: 0.75rem; color: var(--muted); }
+
+/* The public demo's explanatory front matter. */
+.about { margin: 0 0 1.5rem; max-width: 54rem; }
+.about .lede { font-size: 1.05rem; }
+.about h3 { font-size: 1rem; margin: 1.4rem 0 0.3rem; }
+.about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 0 2rem; }
+.rules { padding-left: 1.1rem; margin: 0.3rem 0; }
+.rules li { margin-bottom: 0.4rem; }
+.numbers { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.8rem; margin: 0.8rem 0; }
+.numbers div { border-left: 3px solid var(--advisory); padding-left: 0.6rem; }
+.numbers .n { display: block; font-size: 1.4rem; font-weight: 600; }
+.numbers .l { display: block; font-size: 0.8rem; color: var(--muted); }
+.repo { font-size: 0.9rem; }
+.frozen {
+  border: 1px solid var(--marginal); border-left-width: 6px; border-radius: 6px;
+  background: #fffbe8; padding: 0.6rem 0.9rem; margin: 0 0 1rem; font-size: 0.9rem;
+}

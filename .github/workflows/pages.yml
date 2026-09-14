@@ -1,0 +1,68 @@
+# Publish the public demo to GitHub Pages.
+#
+# What gets published is a static build: one briefing, recorded and frozen,
+# read from JSON committed to this repository. There is no API behind it and
+# no database. That is deliberate rather than a shortcut — a public page
+# that fetched live weather would put load on NAV CANADA and the US weather
+# service on behalf of strangers, and a publicly usable "should I go?" tool
+# is exactly the operational use this project disclaims on every screen.
+
+name: Pages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'apps/web/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and let a run in progress finish rather than
+# leaving the site half-published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the demo
+        run: npm run build -w apps/web
+        env:
+          VITE_DEMO: '1'
+          # A project site is served from /<repo>/, so the build needs the prefix.
+          VITE_BASE: /${{ github.event.repository.name }}/
+
+      - name: Fail if the recorded briefing did not ship
+        # The page is nothing without it, and an empty demo would deploy silently.
+        run: test -s apps/web/dist/demo/briefing.json
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
