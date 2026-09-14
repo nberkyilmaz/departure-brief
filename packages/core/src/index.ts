@@ -19,4 +19,5 @@ export * from './llm/index.js';
 export * from './notam/index.js';
 export * from './docs/index.js';
 export * from './wb/index.js';
+export * from './navlog/index.js';
 export * from './verify/index.js';

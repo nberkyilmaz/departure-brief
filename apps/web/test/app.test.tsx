@@ -75,27 +75,30 @@ describe('the published page', () => {
     render(<App />);
     const before = await verdict();
 
-    // A ceiling minimum no September afternoon in Ontario is going to meet.
-    const ceiling = screen.getByLabelText(/Ceiling \(ft AGL\)/i);
-    fireEvent.change(ceiling, { target: { value: '12000' } });
+    // A visibility minimum no forecast is ever going to meet, so the
+    // violation is in the prevailing forecast and the answer is no-go
+    // whatever the weather that day happened to be.
+    const visibility = screen.getByLabelText(/Visibility \(SM\)/i);
+    fireEvent.change(visibility, { target: { value: '99' } });
 
     await verdictBecomes('NO-GO');
     expect(before).not.toBe('NO-GO');
 
     // And it says which limit did it, against the report it was judged on.
-    expect(screen.getAllByText(/ceiling/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/visibility/i).length).toBeGreaterThan(0);
 
     // Put it back, and the verdict comes back with it: nothing is sticky.
-    fireEvent.change(ceiling, { target: { value: '2500' } });
+    fireEvent.change(visibility, { target: { value: '5' } });
     await verdictBecomes(before);
   });
 
   it('will not pretend to know an aerodrome it has no reports for', async () => {
     render(<App />);
     await verdict();
-    fireEvent.change(screen.getByLabelText(/Destination/i), { target: { value: 'CYYZ' } });
+    // Ottawa: a real aerodrome, and not one this page carries reports for.
+    fireEvent.change(screen.getByLabelText(/Destination/i), { target: { value: 'CYOW' } });
     // It says which aerodromes it does have reports for, rather than failing blankly.
-    await waitFor(() => expect(document.querySelector('.error')?.textContent ?? '').toMatch(/CYYZ/), { timeout: 10_000 });
+    await waitFor(() => expect(document.querySelector('.error')?.textContent ?? '').toMatch(/CYOW/), { timeout: 10_000 });
     expect(document.querySelector('.error')!.textContent).toMatch(/CYSN|CYKF|CYHM/);
   });
 
@@ -148,6 +151,29 @@ describe('moving around it', () => {
     // Opening one shows the report itself, not a summary of it.
     fireEvent.click(document.querySelector('.held-row') as HTMLButtonElement);
     expect(document.querySelector('.held .raw')!.textContent!.length).toBeGreaterThan(10);
+  });
+
+  it('works the legs out, and says where a number is missing from', async () => {
+    render(<App />);
+    await verdict();
+
+    go(/Nav log/i);
+    expect(await screen.findByRole('heading', { level: 2, name: /Nav log/i })).toBeTruthy();
+
+    const rows = [...document.querySelectorAll('.navlog-table .leg-name')].map((c) => c.textContent);
+    expect(rows[0]).toBe('CYSN → CYKF');
+    expect(rows.some((r) => r?.includes('alternate'))).toBe(true);
+
+    // Every leg either has a groundspeed or says why it has not.
+    for (const row of document.querySelectorAll('.navlog-table tbody tr')) {
+      const cells = [...row.querySelectorAll('td')].map((c) => c.textContent ?? '');
+      if (cells.length < 12) continue;
+      const groundspeed = cells[8]!;
+      if (groundspeed === '—') expect(row.nextElementSibling?.className).toContain('leg-gaps');
+    }
+
+    // No burn rate has been given, so there is no fuel column and it says so.
+    expect(screen.getByText(/nothing here will invent a figure/i)).toBeTruthy();
   });
 
   it('keeps the verdict in reach from every page', async () => {

@@ -1,0 +1,1606 @@
+{
+ "_recorded": "2026-09-14T05:10Z from aviationweather.gov, verbatim",
+ "metar": [
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-14T05:09:04.404Z",
+   "obsTime": 1789362000,
+   "reportTime": "2026-09-14T05:00:00.000Z",
+   "temp": 13,
+   "dewp": 10,
+   "wdir": 290,
+   "wspd": 7,
+   "visib": 9,
+   "altim": 1018.7,
+   "slp": 1018.6,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 140500Z AUTO 29007KT 9SM CLR 13/10 A3008 RMK SLP186",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "CLR",
+   "clouds": [],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-14T05:09:04.389Z",
+   "obsTime": 1789362000,
+   "reportTime": "2026-09-14T05:00:00.000Z",
+   "temp": 14,
+   "dewp": 10,
+   "wdir": 290,
+   "wspd": 6,
+   "visib": 15,
+   "altim": 1018.7,
+   "slp": 1018.7,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 140500Z 29006KT 15SM FEW030 14/10 A3008 RMK SC1 SC TR SLP187",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "FEW",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 3000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-14T04:09:06.114Z",
+   "obsTime": 1789358400,
+   "reportTime": "2026-09-14T04:00:00.000Z",
+   "temp": 13,
+   "dewp": 10,
+   "wdir": 300,
+   "wspd": 6,
+   "visib": 9,
+   "altim": 1018,
+   "slp": 1018.1,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 140400Z AUTO 30006KT 9SM CLR 13/10 A3006 RMK SLP181",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "CLR",
+   "clouds": [],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-14T04:09:06.096Z",
+   "obsTime": 1789358400,
+   "reportTime": "2026-09-14T04:00:00.000Z",
+   "temp": 15,
+   "dewp": 11,
+   "wdir": 320,
+   "wspd": 6,
+   "visib": 15,
+   "altim": 1018,
+   "slp": 1018.1,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 140400Z 32006KT 15SM FEW027 15/11 A3006 RMK CF1 CF TR SLP181",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "FEW",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 2700
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-14T03:09:06.891Z",
+   "obsTime": 1789354800,
+   "reportTime": "2026-09-14T03:00:00.000Z",
+   "temp": 15,
+   "dewp": 11,
+   "wdir": 310,
+   "wspd": 8,
+   "wgst": 16,
+   "visib": 9,
+   "altim": 1017.7,
+   "slp": 1017.5,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 140300Z AUTO 31008G16KT 9SM FEW028 15/11 A3005 RMK SLP175",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "FEW",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 2800
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-14T03:09:06.875Z",
+   "obsTime": 1789354800,
+   "reportTime": "2026-09-14T03:00:00.000Z",
+   "temp": 16,
+   "dewp": 12,
+   "wdir": 320,
+   "wspd": 9,
+   "visib": 15,
+   "altim": 1017.4,
+   "slp": 1017.3,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 140300Z 32009KT 15SM FEW027 SCT140 16/12 A3004 RMK CF2AC1 SLP173 DENSITY ALT 1000FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "SCT",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 2700
+    },
+    {
+     "cover": "SCT",
+     "base": 14000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-14T02:16:05.904Z",
+   "obsTime": 1789351200,
+   "reportTime": "2026-09-14T02:00:00.000Z",
+   "temp": 18,
+   "dewp": 12,
+   "wdir": 310,
+   "wspd": 10,
+   "wgst": 16,
+   "visib": 15,
+   "altim": 1016,
+   "slp": 1015.8,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 140200Z 31010G16KT 15SM FEW035 FEW100 BKN140 18/12 A3000 RMK CF1AC1AC4 SLP158 DENSITY ALT 1200FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 3500
+    },
+    {
+     "cover": "FEW",
+     "base": 10000
+    },
+    {
+     "cover": "BKN",
+     "base": 14000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-14T02:16:05.922Z",
+   "obsTime": 1789351200,
+   "reportTime": "2026-09-14T02:00:00.000Z",
+   "temp": 15,
+   "dewp": 12,
+   "wdir": 300,
+   "wspd": 6,
+   "visib": 9,
+   "altim": 1016.3,
+   "slp": 1016.1,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 140200Z AUTO 30006KT 9SM CLR 15/12 A3001 RMK SLP161 DENSITY ALT 1300FT",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "CLR",
+   "clouds": [],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-14T01:47:21.661Z",
+   "obsTime": 1789350300,
+   "reportTime": "2026-09-14T01:45:00.000Z",
+   "temp": 18,
+   "dewp": 12,
+   "wdir": 320,
+   "wspd": 14,
+   "visib": 15,
+   "altim": 1015.7,
+   "slp": 1015.5,
+   "qcField": 0,
+   "metarType": "SPECI",
+   "rawOb": "SPECI CYHM 140145Z 32014KT 15SM FEW030 BKN090 BKN140 18/12 A2999 RMK CF1AC4AC2 SLP155 DENSITY ALT 1300FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 3000
+    },
+    {
+     "cover": "BKN",
+     "base": 9000
+    },
+    {
+     "cover": "BKN",
+     "base": 14000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-14T01:08:25.746Z",
+   "obsTime": 1789347600,
+   "reportTime": "2026-09-14T01:00:00.000Z",
+   "temp": 17,
+   "dewp": 12,
+   "wdir": 300,
+   "wspd": 9,
+   "wgst": 18,
+   "visib": 9,
+   "altim": 1015,
+   "slp": 1015,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 140100Z AUTO 30009G18KT 9SM BKN130 OVC150 17/12 A2997 RMK SLP150 DENSITY ALT 1500FT",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "OVC",
+   "clouds": [
+    {
+     "cover": "BKN",
+     "base": 13000
+    },
+    {
+     "cover": "OVC",
+     "base": 15000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYSN",
+   "receiptTime": "2026-09-14T01:08:25.123Z",
+   "obsTime": 1789347600,
+   "reportTime": "2026-09-14T01:00:00.000Z",
+   "temp": 21,
+   "dewp": 13,
+   "wdir": 320,
+   "wspd": 13,
+   "wgst": 18,
+   "visib": 15,
+   "altim": 1013.6,
+   "slp": 1013.4,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYSN 140100Z 32013G18KT 15SM BKN110 21/13 A2993 RMK AC7 LAST STFD OBS/NXT 141100Z SLP134 DENSITY ALT 1100FT",
+   "lat": 43.192,
+   "lon": -79.176,
+   "elev": 96,
+   "name": "St Catharines/Niagara Arpt, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "BKN",
+     "base": 11000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-14T01:08:25.643Z",
+   "obsTime": 1789347600,
+   "reportTime": "2026-09-14T01:00:00.000Z",
+   "temp": 19,
+   "dewp": 11,
+   "wdir": 300,
+   "wspd": 7,
+   "visib": 15,
+   "altim": 1014.6,
+   "slp": 1014.6,
+   "qcField": 0,
+   "wxString": "-SHRA",
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 140100Z 30007KT 15SM -SHRA FEW040 BKN085 BKN110 19/11 A2996 RMK SC1AC5AC2 SC TR CVCTV CLD EMBD SLP146 DENSITY ALT 1400FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 4000
+    },
+    {
+     "cover": "BKN",
+     "base": 8500
+    },
+    {
+     "cover": "BKN",
+     "base": 11000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-14T00:27:12.581Z",
+   "obsTime": 1789345500,
+   "reportTime": "2026-09-14T00:25:00.000Z",
+   "temp": 19,
+   "dewp": 11,
+   "wdir": 290,
+   "wspd": 8,
+   "visib": 15,
+   "altim": 1014.3,
+   "slp": 1014.1,
+   "qcField": 0,
+   "wxString": "-SHRA",
+   "metarType": "SPECI",
+   "rawOb": "SPECI CYHM 140025Z 29008KT 15SM -SHRA BKN090 BKN110 19/11 A2995 RMK AC5AC2 CVCTV CLD EMBD SLP141 DENSITY ALT 1500FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "BKN",
+     "base": 9000
+    },
+    {
+     "cover": "BKN",
+     "base": 11000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYSN",
+   "receiptTime": "2026-09-14T00:08:18.931Z",
+   "obsTime": 1789344000,
+   "reportTime": "2026-09-14T00:00:00.000Z",
+   "temp": 22,
+   "dewp": 14,
+   "wdir": 290,
+   "wspd": 11,
+   "wgst": 18,
+   "visib": 15,
+   "altim": 1011.9,
+   "slp": 1011.8,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYSN 140000Z 29011G18KT 15SM BKN110 BKN150 BKN250 22/14 A2988 RMK AC5AC1CI1 SLP118 DENSITY ALT 1300FT",
+   "lat": 43.192,
+   "lon": -79.176,
+   "elev": 96,
+   "name": "St Catharines/Niagara Arpt, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "BKN",
+     "base": 11000
+    },
+    {
+     "cover": "BKN",
+     "base": 15000
+    },
+    {
+     "cover": "BKN",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-14T00:09:07.288Z",
+   "obsTime": 1789344000,
+   "reportTime": "2026-09-14T00:00:00.000Z",
+   "temp": 20,
+   "dewp": 12,
+   "wdir": 290,
+   "wspd": 6,
+   "visib": 15,
+   "altim": 1013.3,
+   "slp": 1013.2,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 140000Z 29006KT 15SM SCT100 BKN120 20/12 A2992 RMK AC4AC3 SLP132 DENSITY ALT 1500FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "SCT",
+     "base": 10000
+    },
+    {
+     "cover": "BKN",
+     "base": 12000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-14T00:09:07.304Z",
+   "obsTime": 1789344000,
+   "reportTime": "2026-09-14T00:00:00.000Z",
+   "temp": 18,
+   "dewp": 11,
+   "wdir": 290,
+   "wspd": 8,
+   "visib": 9,
+   "altim": 1014,
+   "slp": 1013.7,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 140000Z AUTO 29008KT 9SM OVC130 18/11 A2994 RMK SLP137 DENSITY ALT 1700FT",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "OVC",
+   "clouds": [
+    {
+     "cover": "OVC",
+     "base": 13000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYSN",
+   "receiptTime": "2026-09-13T23:08:23.053Z",
+   "obsTime": 1789340400,
+   "reportTime": "2026-09-13T23:00:00.000Z",
+   "temp": 23,
+   "dewp": 14,
+   "wdir": 300,
+   "wspd": 11,
+   "wgst": 17,
+   "visib": 15,
+   "altim": 1011.6,
+   "slp": 1011.4,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYSN 132300Z 30011G17KT 15SM FEW042 SCT120 BKN250 23/14 A2987 RMK SC1AC3CI3 SLP114 DENSITY ALT 1500FT",
+   "lat": 43.192,
+   "lon": -79.176,
+   "elev": 96,
+   "name": "St Catharines/Niagara Arpt, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 4200
+    },
+    {
+     "cover": "SCT",
+     "base": 12000
+    },
+    {
+     "cover": "BKN",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-13T23:14:16.905Z",
+   "obsTime": 1789340400,
+   "reportTime": "2026-09-13T23:00:00.000Z",
+   "temp": 21,
+   "dewp": 12,
+   "wdir": 280,
+   "wspd": 10,
+   "wgst": 16,
+   "visib": 15,
+   "altim": 1013.3,
+   "slp": 1013.2,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 132300Z 28010G16KT 15SM FEW040 BKN140 BKN230 21/12 A2992 RMK CU1AC5CI1 SLP132 DENSITY ALT 1700FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 4000
+    },
+    {
+     "cover": "BKN",
+     "base": 14000
+    },
+    {
+     "cover": "BKN",
+     "base": 23000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-13T23:14:16.921Z",
+   "obsTime": 1789340400,
+   "reportTime": "2026-09-13T23:00:00.000Z",
+   "temp": 19,
+   "dewp": 11,
+   "wdir": 310,
+   "wspd": 13,
+   "wgst": 20,
+   "visib": 9,
+   "altim": 1013.6,
+   "slp": 1013.5,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 132300Z AUTO 31013G20KT 9SM BKN100 OVC130 19/11 A2993 RMK SLP135 DENSITY ALT 1800FT",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "OVC",
+   "clouds": [
+    {
+     "cover": "BKN",
+     "base": 10000
+    },
+    {
+     "cover": "OVC",
+     "base": 13000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYSN",
+   "receiptTime": "2026-09-13T22:08:24.689Z",
+   "obsTime": 1789336800,
+   "reportTime": "2026-09-13T22:00:00.000Z",
+   "temp": 24,
+   "dewp": 15,
+   "wdir": 300,
+   "wspd": 12,
+   "wgst": 19,
+   "visib": 15,
+   "altim": 1010.9,
+   "slp": 1011,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYSN 132200Z 30012G19KT 15SM FEW043TCU SCT120 BKN250 24/15 A2985 RMK TCU1AC3CI2 SLP110 DENSITY ALT 1600FT",
+   "lat": 43.192,
+   "lon": -79.176,
+   "elev": 96,
+   "name": "St Catharines/Niagara Arpt, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 4300
+    },
+    {
+     "cover": "SCT",
+     "base": 12000
+    },
+    {
+     "cover": "BKN",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-13T22:09:08.689Z",
+   "obsTime": 1789336800,
+   "reportTime": "2026-09-13T22:00:00.000Z",
+   "temp": 23,
+   "dewp": 14,
+   "wdir": 260,
+   "wspd": 10,
+   "wgst": 17,
+   "visib": 15,
+   "altim": 1012.3,
+   "slp": 1012,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 132200Z 26010G17KT 15SM FEW040 FEW100 BKN250 23/14 A2989 RMK CU1AC1CI5 DIST TCU E SLP120 DENSITY ALT 2000FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 4000
+    },
+    {
+     "cover": "FEW",
+     "base": 10000
+    },
+    {
+     "cover": "BKN",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-13T22:09:08.710Z",
+   "obsTime": 1789336800,
+   "reportTime": "2026-09-13T22:00:00.000Z",
+   "temp": 21,
+   "dewp": 12,
+   "wdir": 270,
+   "wspd": 17,
+   "wgst": 22,
+   "visib": 9,
+   "altim": 1013.3,
+   "slp": 1013,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 132200Z AUTO 27017G22KT 9SM SCT170 21/12 A2992 RMK PRESRR SLP130 DENSITY ALT 2000FT",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "SCT",
+   "clouds": [
+    {
+     "cover": "SCT",
+     "base": 17000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYSN",
+   "receiptTime": "2026-09-13T21:08:26.247Z",
+   "obsTime": 1789333200,
+   "reportTime": "2026-09-13T21:00:00.000Z",
+   "temp": 26,
+   "dewp": 16,
+   "wdir": 300,
+   "wspd": 15,
+   "wgst": 22,
+   "visib": 15,
+   "altim": 1009.9,
+   "slp": 1010,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYSN 132100Z 30015G22KT 15SM FEW043TCU FEW120 SCT250 26/16 A2982 RMK TCU1AC1CI2 SLP100 DENSITY ALT 1800FT",
+   "lat": 43.192,
+   "lon": -79.176,
+   "elev": 96,
+   "name": "St Catharines/Niagara Arpt, ON, CA",
+   "cover": "SCT",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 4300
+    },
+    {
+     "cover": "FEW",
+     "base": 12000
+    },
+    {
+     "cover": "SCT",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-13T21:09:07.960Z",
+   "obsTime": 1789333200,
+   "reportTime": "2026-09-13T21:00:00.000Z",
+   "temp": 23,
+   "dewp": 12,
+   "wdir": 270,
+   "wspd": 14,
+   "wgst": 23,
+   "visib": 9,
+   "altim": 1013,
+   "slp": 1012.6,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 132100Z AUTO 27014G23KT 9SM BKN200 BKN230 23/12 A2991 RMK SLP126 DENSITY ALT 2300FT",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "BKN",
+     "base": 20000
+    },
+    {
+     "cover": "BKN",
+     "base": 23000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-13T21:09:07.936Z",
+   "obsTime": 1789333200,
+   "reportTime": "2026-09-13T21:00:00.000Z",
+   "temp": 25,
+   "dewp": 15,
+   "wdir": 290,
+   "wspd": 10,
+   "wgst": 18,
+   "visib": 15,
+   "altim": 1011.9,
+   "slp": 1011.7,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 132100Z 29010G18KT 15SM FEW045 FEW100 BKN250 25/15 A2988 RMK CU1AC1CI4 SLP117 DENSITY ALT 2200FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 4500
+    },
+    {
+     "cover": "FEW",
+     "base": 10000
+    },
+    {
+     "cover": "BKN",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYSN",
+   "receiptTime": "2026-09-13T20:08:30.466Z",
+   "obsTime": 1789329600,
+   "reportTime": "2026-09-13T20:00:00.000Z",
+   "temp": 26,
+   "dewp": 19,
+   "wdir": 300,
+   "wspd": 11,
+   "visib": 15,
+   "altim": 1009.6,
+   "slp": 1009.6,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYSN 132000Z 30011KT 15SM SCT042TCU BKN250 26/19 A2981 RMK TCU3CI3 SLP096 DENSITY ALT 1800FT",
+   "lat": 43.192,
+   "lon": -79.176,
+   "elev": 96,
+   "name": "St Catharines/Niagara Arpt, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "SCT",
+     "base": 4200
+    },
+    {
+     "cover": "BKN",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-13T20:18:25.904Z",
+   "obsTime": 1789329600,
+   "reportTime": "2026-09-13T20:00:00.000Z",
+   "temp": 24,
+   "dewp": 13,
+   "wdir": 270,
+   "wspd": 15,
+   "wgst": 22,
+   "visib": 9,
+   "altim": 1012.3,
+   "slp": 1012,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 132000Z AUTO 27015G22KT 9SM FEW120 24/13 A2989 RMK SLP120 DENSITY ALT 2400FT",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "FEW",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 12000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-13T20:18:25.857Z",
+   "obsTime": 1789329600,
+   "reportTime": "2026-09-13T20:00:00.000Z",
+   "temp": 26,
+   "dewp": 16,
+   "wdir": 270,
+   "wspd": 10,
+   "wgst": 20,
+   "visib": 15,
+   "altim": 1011.6,
+   "slp": 1011.2,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 132000Z 27010G20KT 240V310 15SM FEW045 SCT080 BKN250 26/16 A2987 RMK CU2AC1CI4 DIST TCU E SLP112 DENSITY ALT 2400FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 4500
+    },
+    {
+     "cover": "SCT",
+     "base": 8000
+    },
+    {
+     "cover": "BKN",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-13T19:08:24.275Z",
+   "obsTime": 1789326000,
+   "reportTime": "2026-09-13T19:00:00.000Z",
+   "temp": 27,
+   "dewp": 16,
+   "wdir": 270,
+   "wspd": 13,
+   "wgst": 21,
+   "visib": 15,
+   "altim": 1011.3,
+   "slp": 1011,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 131900Z 27013G21KT 15SM SCT045 BKN250 27/16 A2986 RMK CU3CI4 SLP110 DENSITY ALT 2500FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "SCT",
+     "base": 4500
+    },
+    {
+     "cover": "BKN",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-13T19:08:24.394Z",
+   "obsTime": 1789326000,
+   "reportTime": "2026-09-13T19:00:00.000Z",
+   "temp": 25,
+   "dewp": 13,
+   "wdir": 270,
+   "wspd": 17,
+   "wgst": 23,
+   "visib": 9,
+   "altim": 1011.9,
+   "slp": 1011.4,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 131900Z AUTO 27017G23KT 9SM FEW047 25/13 A2988 RMK SLP114 DENSITY ALT 2600FT",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "FEW",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 4700
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYSN",
+   "receiptTime": "2026-09-13T19:08:24.050Z",
+   "obsTime": 1789326000,
+   "reportTime": "2026-09-13T19:00:00.000Z",
+   "temp": 26,
+   "dewp": 21,
+   "wdir": 330,
+   "wspd": 5,
+   "visib": 12,
+   "altim": 1009.6,
+   "slp": 1009.4,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYSN 131900Z 33005KT 310V010 12SM BKN041TCU BKN250 26/21 A2981 RMK TCU5CI2 SLP094 DENSITY ALT 1800FT",
+   "lat": 43.192,
+   "lon": -79.176,
+   "elev": 96,
+   "name": "St Catharines/Niagara Arpt, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "BKN",
+     "base": 4100
+    },
+    {
+     "cover": "BKN",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYHM",
+   "receiptTime": "2026-09-13T18:09:07.390Z",
+   "obsTime": 1789322400,
+   "reportTime": "2026-09-13T18:00:00.000Z",
+   "temp": 27,
+   "dewp": 18,
+   "wdir": 240,
+   "wspd": 14,
+   "visib": 15,
+   "altim": 1010.9,
+   "slp": 1010.8,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYHM 131800Z 24014KT 220V290 15SM SCT035 BKN250 27/18 A2985 RMK CU4CI3 SLP108 DENSITY ALT 2400FT",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "name": "Hamilton/Munro Intl, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "SCT",
+     "base": 3500
+    },
+    {
+     "cover": "BKN",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYKF",
+   "receiptTime": "2026-09-13T18:09:07.408Z",
+   "obsTime": 1789322400,
+   "reportTime": "2026-09-13T18:00:00.000Z",
+   "temp": 25,
+   "dewp": 14,
+   "wdir": 280,
+   "wspd": 12,
+   "wgst": 19,
+   "visib": 9,
+   "altim": 1011.9,
+   "slp": 1011.4,
+   "qcField": 2,
+   "metarType": "METAR",
+   "rawOb": "METAR CYKF 131800Z AUTO 28012G19KT 240V300 9SM SCT041 25/14 A2988 RMK SLP114 DENSITY ALT 2600FT",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "name": "Waterloo Intl, ON, CA",
+   "cover": "SCT",
+   "clouds": [
+    {
+     "cover": "SCT",
+     "base": 4100
+    }
+   ],
+   "fltCat": "VFR"
+  },
+  {
+   "icaoId": "CYSN",
+   "receiptTime": "2026-09-13T18:08:08.905Z",
+   "obsTime": 1789322400,
+   "reportTime": "2026-09-13T18:00:00.000Z",
+   "temp": 27,
+   "dewp": 21,
+   "wdir": 260,
+   "wspd": 9,
+   "visib": 12,
+   "altim": 1009.9,
+   "slp": 1010,
+   "qcField": 0,
+   "metarType": "METAR",
+   "rawOb": "METAR CYSN 131800Z 26009KT 12SM FEW020 SCT030TCU BKN250 27/21 A2982 RMK CF1TCU3CI2 TCU E-SW MOVG E SLP100 DENSITY ALT 2000FT",
+   "lat": 43.192,
+   "lon": -79.176,
+   "elev": 96,
+   "name": "St Catharines/Niagara Arpt, ON, CA",
+   "cover": "BKN",
+   "clouds": [
+    {
+     "cover": "FEW",
+     "base": 2000
+    },
+    {
+     "cover": "SCT",
+     "base": 3000
+    },
+    {
+     "cover": "BKN",
+     "base": 25000
+    }
+   ],
+   "fltCat": "VFR"
+  }
+ ],
+ "taf": [
+  {
+   "icaoId": "CYHM",
+   "dbPopTime": "2026-09-14T01:08:23.226Z",
+   "bulletinTime": "2026-09-13T23:00:00.000Z",
+   "issueTime": "2026-09-14T01:07:00.000Z",
+   "validTimeFrom": 1789347600,
+   "validTimeTo": 1789430400,
+   "rawTAF": "TAF AMD CYHM 140107Z 1401/1424 30008KT P6SM FEW040 BKN080 BKN110 TEMPO 1401/1402 P6SM -SHRA FM140200 31010G20KT P6SM SCT030 BECMG 1404/1406 31008KT FM140600 30006KT P6SM SKC FM141200 31008KT P6SM FEW030 FM141700 32006KT P6SM SCT050 BECMG 1419/1421 26006KT BKN050 RMK NXT FCST BY 140600Z",
+   "mostRecent": 1,
+   "remarks": " RMK NXT FCST BY 140600Z",
+   "lat": 43.173,
+   "lon": -79.936,
+   "elev": 237,
+   "prior": 5,
+   "name": "Hamilton/Munro Intl",
+   "fcsts": [
+    {
+     "timeFrom": 1789347600,
+     "timeTo": 1789351200,
+     "timeBec": null,
+     "fcstChange": null,
+     "probability": null,
+     "wdir": 300,
+     "wspd": 8,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "FEW",
+       "base": 4000,
+       "type": null
+      },
+      {
+       "cover": "BKN",
+       "base": 8000,
+       "type": null
+      },
+      {
+       "cover": "BKN",
+       "base": 11000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789347600,
+     "timeTo": 1789351200,
+     "timeBec": null,
+     "fcstChange": "TEMPO",
+     "probability": null,
+     "wdir": null,
+     "wspd": null,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": "-SHRA",
+     "notDecoded": null,
+     "clouds": [],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789351200,
+     "timeTo": 1789358400,
+     "timeBec": null,
+     "fcstChange": "FM",
+     "probability": null,
+     "wdir": 310,
+     "wspd": 10,
+     "wgst": 20,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "SCT",
+       "base": 3000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789358400,
+     "timeTo": 1789365600,
+     "timeBec": 1789365600,
+     "fcstChange": "BECMG",
+     "probability": null,
+     "wdir": 310,
+     "wspd": 8,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "SCT",
+       "base": 3000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789365600,
+     "timeTo": 1789387200,
+     "timeBec": null,
+     "fcstChange": "FM",
+     "probability": null,
+     "wdir": 300,
+     "wspd": 6,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "SKC",
+       "base": null,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789387200,
+     "timeTo": 1789405200,
+     "timeBec": null,
+     "fcstChange": "FM",
+     "probability": null,
+     "wdir": 310,
+     "wspd": 8,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "FEW",
+       "base": 3000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789405200,
+     "timeTo": 1789412400,
+     "timeBec": null,
+     "fcstChange": "FM",
+     "probability": null,
+     "wdir": 320,
+     "wspd": 6,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "SCT",
+       "base": 5000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789412400,
+     "timeTo": 1789430400,
+     "timeBec": 1789419600,
+     "fcstChange": "BECMG",
+     "probability": null,
+     "wdir": 260,
+     "wspd": 6,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "BKN",
+       "base": 5000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    }
+   ]
+  },
+  {
+   "icaoId": "CYKF",
+   "dbPopTime": "2026-09-14T01:40:29.162Z",
+   "bulletinTime": "2026-09-14T01:00:00.000Z",
+   "issueTime": "2026-09-14T01:40:00.000Z",
+   "validTimeFrom": 1789351200,
+   "validTimeTo": 1789394400,
+   "rawTAF": "TAF CYKF 140140Z 1402/1414 31010G20KT P6SM FEW030 TEMPO 1402/1407 BKN020 FM140700 31006KT P6SM SKC RMK FCST BASED ON AUTO OBS. NXT FCST BY 140800Z",
+   "mostRecent": 1,
+   "remarks": " RMK FCST BASED ON AUTO OBS. NXT FCST BY 140800Z",
+   "lat": 43.462,
+   "lon": -80.386,
+   "elev": 312,
+   "prior": 5,
+   "name": "Waterloo Intl",
+   "fcsts": [
+    {
+     "timeFrom": 1789351200,
+     "timeTo": 1789369200,
+     "timeBec": null,
+     "fcstChange": null,
+     "probability": null,
+     "wdir": 310,
+     "wspd": 10,
+     "wgst": 20,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "FEW",
+       "base": 3000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789351200,
+     "timeTo": 1789369200,
+     "timeBec": null,
+     "fcstChange": "TEMPO",
+     "probability": null,
+     "wdir": null,
+     "wspd": null,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "BKN",
+       "base": 2000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789369200,
+     "timeTo": 1789394400,
+     "timeBec": null,
+     "fcstChange": "FM",
+     "probability": null,
+     "wdir": 310,
+     "wspd": 6,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "SKC",
+       "base": null,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    }
+   ]
+  },
+  {
+   "icaoId": "CYSN",
+   "dbPopTime": "2026-09-13T19:40:28.083Z",
+   "bulletinTime": "2026-09-13T19:00:00.000Z",
+   "issueTime": "2026-09-13T19:40:00.000Z",
+   "validTimeFrom": 1789329600,
+   "validTimeTo": 1789347600,
+   "rawTAF": "TAF CYSN 131940Z 1320/1401 33005KT P6SM SCT040 BKN250 TEMPO 1320/1323 BKN040 BKN250 FM132300 28012G22KT P6SM OVC100 TEMPO 1323/1401 P6SM -SHRA BKN060 OVC100 BECMG 1323/1401 30015G25KT RMK NXT FCST BY 141300Z",
+   "mostRecent": 1,
+   "remarks": " RMK NXT FCST BY 141300Z",
+   "lat": 43.192,
+   "lon": -79.176,
+   "elev": 96,
+   "prior": 6,
+   "name": "St Catharines/Niagara Arpt",
+   "fcsts": [
+    {
+     "timeFrom": 1789329600,
+     "timeTo": 1789340400,
+     "timeBec": null,
+     "fcstChange": null,
+     "probability": null,
+     "wdir": 330,
+     "wspd": 5,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "SCT",
+       "base": 4000,
+       "type": null
+      },
+      {
+       "cover": "BKN",
+       "base": 25000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789329600,
+     "timeTo": 1789340400,
+     "timeBec": null,
+     "fcstChange": "TEMPO",
+     "probability": null,
+     "wdir": null,
+     "wspd": null,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "BKN",
+       "base": 4000,
+       "type": null
+      },
+      {
+       "cover": "BKN",
+       "base": 25000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789340400,
+     "timeTo": 1789347600,
+     "timeBec": null,
+     "fcstChange": "FM",
+     "probability": null,
+     "wdir": 280,
+     "wspd": 12,
+     "wgst": 22,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "OVC",
+       "base": 10000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789340400,
+     "timeTo": 1789347600,
+     "timeBec": null,
+     "fcstChange": "TEMPO",
+     "probability": null,
+     "wdir": null,
+     "wspd": null,
+     "wgst": null,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": "-SHRA",
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "BKN",
+       "base": 6000,
+       "type": null
+      },
+      {
+       "cover": "OVC",
+       "base": 10000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    },
+    {
+     "timeFrom": 1789340400,
+     "timeTo": 1789347600,
+     "timeBec": 1789347600,
+     "fcstChange": "BECMG",
+     "probability": null,
+     "wdir": 300,
+     "wspd": 15,
+     "wgst": 25,
+     "wshearHgt": null,
+     "wshearDir": null,
+     "wshearSpd": null,
+     "visib": "6+",
+     "altim": null,
+     "vertVis": null,
+     "wxString": null,
+     "notDecoded": null,
+     "clouds": [
+      {
+       "cover": "OVC",
+       "base": 10000,
+       "type": null
+      }
+     ],
+     "icgTurb": [],
+     "temp": []
+    }
+   ]
+  }
+ ]
+}

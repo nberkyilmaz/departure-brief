@@ -7,6 +7,7 @@ import { NOTAM_DECODER_VERSION } from '../notam/decode.js';
 import { notamDocument } from '../notam/describe.js';
 import type { NotamBriefing } from '../notam/flight.js';
 import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
+import { navLog } from '../navlog/compute.js';
 import { evaluateFlight } from '../rules/evaluate.js';
 import { RULES_VERSION } from '../rules/types.js';
 import { contentHash } from './canonical.js';
@@ -84,6 +85,7 @@ export function assembleBriefing(
       reports: reportRefs(allPoints, notams),
     },
     briefing,
+    navlog: navLog(resolved, aircraft?.cruiseFuelGph ?? null),
   };
   return { sha256: contentHash(document), flightKey: flightKey(resolved.plan), asOf: resolved.asOf, createdAt, document };
 }

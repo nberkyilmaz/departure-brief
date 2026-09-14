@@ -58,7 +58,7 @@ describe('solar elevation', () => {
 describe('profile and aircraft parsing', () => {
   it('reads the owner profile', () => {
     expect(profile).toEqual({ version: 1, name: 'default', ceiling: 2500, visibility: 5, crosswind: 15, crosswindIncludesGust: true, maxGustSpread: null, nightAllowed: true });
-    expect(aircraft).toEqual({ type: 'C172', demonstratedCrosswind: null, demonstratedCrosswindSource: null });
+    expect(aircraft).toEqual({ type: 'C172', demonstratedCrosswind: null, demonstratedCrosswindSource: null, cruiseFuelGph: null });
   });
   it('rejects nonsense with a message naming the field', () => {
     expect(() => parsePilotProfile({ ceilingAglFt: -1 })).toThrow('ceilingAglFt');

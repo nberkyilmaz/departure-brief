@@ -467,3 +467,11 @@ summary:focus-visible,
   .strip-leg::before { left: 0.9rem; right: auto; top: 0; bottom: 0; border-top: 0; border-left: 1px dashed var(--line-strong); }
   .strip-body { grid-template-columns: 1fr auto auto; justify-items: start; align-items: center; gap: var(--s3); }
 }
+
+/* The nav log, laid out the way a pilot lays one out. */
+.navlog-page h2 { font-size: 1.3rem; margin: 0 0 var(--s2); }
+.navlog-table { width: 100%; font-variant-numeric: tabular-nums; }
+.navlog-table th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+.navlog-table .leg-name { text-align: left; font-weight: 600; white-space: nowrap; }
+.navlog-table .leg-gaps td { text-align: left; padding-top: 0; border-bottom: 1px solid var(--line); }
+.navlog-table .total td { border-top: 2px solid var(--line-strong); }

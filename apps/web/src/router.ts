@@ -8,11 +8,12 @@
  */
 import { useEffect, useState } from 'react';
 
-export const ROUTES = ['brief', 'reports', 'weight', 'about'] as const;
+export const ROUTES = ['brief', 'navlog', 'reports', 'weight', 'about'] as const;
 export type Route = (typeof ROUTES)[number];
 
 export const TITLES: Readonly<Record<Route, string>> = {
   brief: 'Brief a flight',
+  navlog: 'Nav log',
   reports: 'The reports',
   weight: 'Weight and balance',
   about: 'How this works',

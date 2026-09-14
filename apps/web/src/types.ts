@@ -70,6 +70,8 @@ export interface ProfileInput {
 export interface AircraftInput {
   type: string;
   demonstratedCrosswindKt: number | null;
+  /** Cruise burn, US gallons an hour. Null until somebody supplies it. */
+  cruiseFuelGph: number | null;
 }
 
 export type NotamRank = 'critical' | 'advisory' | 'unverified' | 'not-assessed' | 'irrelevant' | 'out-of-scope';
@@ -146,6 +148,46 @@ export interface PointInputs {
   wind: { station: string; distanceNm: number; altitudeFt: number; sha256: string } | null;
 }
 
+export interface NavLogWind {
+  directionTrue: number;
+  speedKt: number;
+  station: string;
+  distanceNm: number;
+  altitudeFt: number;
+  sha256: string;
+}
+
+export interface NavLogLeg {
+  from: string;
+  to: string;
+  distanceNm: number;
+  trueCourse: number;
+  magneticCourse: number | null;
+  wind: NavLogWind | null;
+  windCorrectionAngle: number | null;
+  trueHeading: number | null;
+  magneticHeading: number | null;
+  groundspeedKt: number | null;
+  minutes: number | null;
+  cumulativeMinutes: number | null;
+  fuelGal: number | null;
+  cumulativeFuelGal: number | null;
+  /** Why a number is missing, in words. */
+  gaps: string[];
+}
+
+export interface NavLog {
+  version: number;
+  tas: number;
+  altitudeFt: number;
+  fuelGph: number | null;
+  legs: NavLogLeg[];
+  totalDistanceNm: number;
+  totalMinutes: number | null;
+  totalFuelGal: number | null;
+  alternate: NavLogLeg | null;
+}
+
 export interface StoredBriefing {
   sha256: string;
   flightKey: string;
@@ -163,6 +205,7 @@ export interface StoredBriefing {
       reports: { kind: string; station: string | null; sha256: string; issuedAt: string | null }[];
     };
     briefing: Briefing;
+    navlog: NavLog;
   };
 }
 

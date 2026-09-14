@@ -25,6 +25,8 @@ export * from './decode/index.js';
 export * from './resolve/index.js';
 export * from './rules/index.js';
 export * from './brief/index.js';
+// The wind triangle, leg by leg: arithmetic over what is already resolved.
+export * from './navlog/index.js';
 export * from './hash/sha256.js';
 // Weight and balance: the computation and the handbook limits it fills in.
 export * from './wb/compute.js';

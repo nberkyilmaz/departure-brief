@@ -156,7 +156,12 @@ export async function loadEngine(base: string): Promise<LocalEngine> {
        * so it is "since you last changed something" — which is the useful
        * reading when the reports are frozen and the minimums are not.
        */
-      const before = previous && previous.sha256 !== briefing.sha256 ? previous : null;
+      /*
+       * Only against the same flight. Change the destination and the
+       * previous briefing is about somewhere else — "what changed" has no
+       * answer, and asking for one throws.
+       */
+      const before = previous && previous.sha256 !== briefing.sha256 && previous.flightKey === briefing.flightKey ? previous : null;
       previous = briefing;
       await store.putBriefing(briefing);
       const diff = before ? diffBriefings(before, briefing) : null;

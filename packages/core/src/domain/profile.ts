@@ -26,6 +26,12 @@ export interface AircraftLimits {
   readonly type: string;
   readonly demonstratedCrosswind: Knots | null;
   /**
+   * Fuel burn at cruise, US gallons an hour. `null` until somebody supplies
+   * it: the handbook prints it against power setting and altitude, and a
+   * figure invented here would come back as a fuel plan.
+   */
+  readonly cruiseFuelGph: number | null;
+  /**
    * Where the demonstrated crosswind was read, when it came out of the
    * aircraft handbook rather than being typed in. Null means the owner
    * stated it, and the finding cites the aircraft file instead.
@@ -60,9 +66,14 @@ export function parseAircraftLimits(input: unknown): AircraftLimits {
   const o = input as Record<string, unknown>;
   if (typeof o['type'] !== 'string' || o['type'].trim() === '') throw new Error('aircraft: "type" is required');
   const x = o['demonstratedCrosswindKt'];
+  const gph = o['cruiseFuelGph'];
+  if (gph !== undefined && gph !== null && !(typeof gph === 'number' && gph > 0)) {
+    throw new Error('aircraft: "cruiseFuelGph" must be a positive number of gallons an hour');
+  }
   return {
     type: o['type'].trim(),
     demonstratedCrosswind: typeof x === 'number' && x > 0 ? (x as Knots) : null,
     demonstratedCrosswindSource: null,
+    cruiseFuelGph: typeof gph === 'number' && gph > 0 ? gph : null,
   };
 }

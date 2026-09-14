@@ -1,6 +1,6 @@
 {
-  "recordedAt": "2026-09-12T20:00:00.000Z",
-  "asOf": "2026-09-12T20:00:00.000Z",
+  "recordedAt": "2026-09-14T05:10:00.000Z",
+  "asOf": "2026-09-14T05:10:00.000Z",
   "model": "qwen2.5:7b",
   "promptVersion": 3,
   "plan": {
@@ -8,7 +8,7 @@
     "route": [],
     "destination": "CYKF",
     "alternate": "CYHM",
-    "departureTime": "2026-09-12T22:00:00Z",
+    "departureTime": "2026-09-14T12:00:00Z",
     "cruise": {
       "tas": 105,
       "altitude": 3500
@@ -360,21 +360,300 @@
           ]
         }
       ]
+    },
+    {
+      "source": "ourairports",
+      "cycle": "2026-09-07",
+      "siteNo": "1990",
+      "siteType": "A",
+      "faaId": "YYZ",
+      "icaoId": "CYYZ",
+      "name": "Toronto Pearson International Airport",
+      "city": "Toronto",
+      "state": "ON",
+      "country": "CA",
+      "lat": 43.675935,
+      "lon": -79.629421,
+      "elevation": 569,
+      "magneticVariation": null,
+      "magneticVariationYear": null,
+      "patternAltitude": null,
+      "runways": [
+        {
+          "id": "05/23",
+          "length": 11120,
+          "width": 200,
+          "surface": "ASP/CONC",
+          "condition": null,
+          "lighting": "LIGHTED",
+          "ends": [
+            {
+              "id": "05",
+              "trueHeading": 47,
+              "lat": 43.67390060424805,
+              "lon": -79.66390228271484,
+              "elevation": 564,
+              "displacedThreshold": 135,
+              "rightHandPattern": false,
+              "ils": null,
+              "tora": null,
+              "toda": null,
+              "asda": null,
+              "lda": null
+            },
+            {
+              "id": "23",
+              "trueHeading": 227,
+              "lat": 43.694698333740234,
+              "lon": -79.63330078125,
+              "elevation": 560,
+              "displacedThreshold": 485,
+              "rightHandPattern": false,
+              "ils": null,
+              "tora": null,
+              "toda": null,
+              "asda": null,
+              "lda": null
+            }
+          ]
+        },
+        {
+          "id": "06L/24R",
+          "length": 9697,
+          "width": 200,
+          "surface": "ASP",
+          "condition": null,
+          "lighting": "LIGHTED",
+          "ends": [
+            {
+              "id": "06L",
+              "trueHeading": 47,
+              "lat": 43.661048889160156,
+              "lon": -79.62342834472656,
+              "elevation": 529,
+              "displacedThreshold": null,
+              "rightHandPattern": false,
+              "ils": null,
+              "tora": null,
+              "toda": null,
+              "asda": null,
+              "lda": null
+            },
+            {
+              "id": "24R",
+              "trueHeading": 227,
+              "lat": 43.678977966308594,
+              "lon": -79.59736633300781,
+              "elevation": 546,
+              "displacedThreshold": 197,
+              "rightHandPattern": false,
+              "ils": null,
+              "tora": null,
+              "toda": null,
+              "asda": null,
+              "lda": null
+            }
+          ]
+        },
+        {
+          "id": "06R/24L",
+          "length": 9000,
+          "width": 200,
+          "surface": "ASP",
+          "condition": null,
+          "lighting": "LIGHTED",
+          "ends": [
+            {
+              "id": "06R",
+              "trueHeading": 47,
+              "lat": 43.65829849243164,
+              "lon": -79.6219253540039,
+              "elevation": 525,
+              "displacedThreshold": null,
+              "rightHandPattern": false,
+              "ils": null,
+              "tora": null,
+              "toda": null,
+              "asda": null,
+              "lda": null
+            },
+            {
+              "id": "24L",
+              "trueHeading": 227,
+              "lat": 43.675289154052734,
+              "lon": -79.59723663330078,
+              "elevation": 547,
+              "displacedThreshold": null,
+              "rightHandPattern": false,
+              "ils": null,
+              "tora": null,
+              "toda": null,
+              "asda": null,
+              "lda": null
+            }
+          ]
+        },
+        {
+          "id": "15L/33R",
+          "length": 11050,
+          "width": 200,
+          "surface": "ASP",
+          "condition": null,
+          "lighting": "LIGHTED",
+          "ends": [
+            {
+              "id": "15L",
+              "trueHeading": 137,
+              "lat": 43.691898345947266,
+              "lon": -79.64219665527344,
+              "elevation": 557,
+              "displacedThreshold": null,
+              "rightHandPattern": false,
+              "ils": null,
+              "tora": null,
+              "toda": null,
+              "asda": null,
+              "lda": null
+            },
+            {
+              "id": "33R",
+              "trueHeading": 317,
+              "lat": 43.66999816894531,
+              "lon": -79.61389923095703,
+              "elevation": 544,
+              "displacedThreshold": null,
+              "rightHandPattern": false,
+              "ils": null,
+              "tora": null,
+              "toda": null,
+              "asda": null,
+              "lda": null
+            }
+          ]
+        },
+        {
+          "id": "15R/33L",
+          "length": 9088,
+          "width": 200,
+          "surface": "ASP",
+          "condition": null,
+          "lighting": "LIGHTED",
+          "ends": [
+            {
+              "id": "15R",
+              "trueHeading": 137,
+              "lat": 43.68579864501953,
+              "lon": -79.65170288085938,
+              "elevation": 551,
+              "displacedThreshold": 588,
+              "rightHandPattern": false,
+              "ils": null,
+              "tora": null,
+              "toda": null,
+              "asda": null,
+              "lda": null
+            },
+            {
+              "id": "33L",
+              "trueHeading": 317,
+              "lat": 43.66749954223633,
+              "lon": -79.62830352783203,
+              "elevation": 544,
+              "displacedThreshold": 588,
+              "rightHandPattern": false,
+              "ils": null,
+              "tora": null,
+              "toda": null,
+              "asda": null,
+              "lda": null
+            }
+          ]
+        }
+      ]
     }
   ],
   "reports": [
     {
-      "sha256": "018e57e654bf0249ce671d49c4defa7b96f0e1a9490e116685ac96692c23114e",
+      "sha256": "02125e91575d1ac04214f1538ec156cc8be930094e6f073a3f1300922bf58c56",
+      "kind": "metar",
+      "source": "awc",
+      "station": "CYKF",
+      "body": "METAR CYKF 140300Z AUTO 31008G16KT 9SM FEW028 15/11 A3005 RMK SLP175",
+      "issuedAt": "2026-09-14T03:00:00.000Z",
+      "upstream": {
+        "icaoId": "CYKF",
+        "receiptTime": "2026-09-14T03:09:06.891Z",
+        "obsTime": 1789354800,
+        "reportTime": "2026-09-14T03:00:00.000Z",
+        "temp": 15,
+        "dewp": 11,
+        "wdir": 310,
+        "wspd": 8,
+        "wgst": 16,
+        "visib": 9,
+        "altim": 1017.7,
+        "slp": 1017.5,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 140300Z AUTO 31008G16KT 9SM FEW028 15/11 A3005 RMK SLP175",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "FEW",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 2800
+          }
+        ],
+        "fltCat": "VFR"
+      },
+      "fetchedFor": [],
+      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
+      "sha256": "02974c2a0419fdd77a1a470791568fe775578ac701d4b34ff4e15e5d47e6ecc0",
       "kind": "metar",
       "source": "awc",
       "station": "CYSN",
-      "body": "METAR CYSN 121900Z 18008KT 15SM BKN072 OVC250 26/19 A2990 RMK AC6CI2 SLP126 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-12T19:00:00.000Z",
+      "body": "METAR CYSN 131800Z 26009KT 12SM FEW020 SCT030TCU BKN250 27/21 A2982 RMK CF1TCU3CI2 TCU E-SW MOVG E SLP100 DENSITY ALT 2000FT",
+      "issuedAt": "2026-09-13T18:00:00.000Z",
       "upstream": {
         "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 121900Z 18008KT 15SM BKN072 OVC250 26/19 A2990 RMK AC6CI2 SLP126 DENSITY ALT 1700FT",
-        "obsTime": 1789239600,
-        "reportTime": "2026-09-12T19:00:00Z"
+        "receiptTime": "2026-09-13T18:08:08.905Z",
+        "obsTime": 1789322400,
+        "reportTime": "2026-09-13T18:00:00.000Z",
+        "temp": 27,
+        "dewp": 21,
+        "wdir": 260,
+        "wspd": 9,
+        "visib": 12,
+        "altim": 1009.9,
+        "slp": 1010,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYSN 131800Z 26009KT 12SM FEW020 SCT030TCU BKN250 27/21 A2982 RMK CF1TCU3CI2 TCU E-SW MOVG E SLP100 DENSITY ALT 2000FT",
+        "lat": 43.192,
+        "lon": -79.176,
+        "elev": 96,
+        "name": "St Catharines/Niagara Arpt, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 2000
+          },
+          {
+            "cover": "SCT",
+            "base": 3000
+          },
+          {
+            "cover": "BKN",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
@@ -430,20 +709,101 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYHM&alpha=notam"
     },
     {
-      "sha256": "05884ed97ae099d1109b0f88d69441742c8c74e4e5bd807b0013d1be5f167581",
+      "sha256": "067c9c4e19a88504918d25ca3713b9b33b4fced871b735342676623b0c2bca5a",
       "kind": "metar",
       "source": "awc",
       "station": "CYHM",
-      "body": "METAR CYHM 121900Z 17006KT 140V200 15SM BKN059 BKN085 BKN230 25/20 A2991 RMK SC5AC1CI1 SLP128 DENSITY ALT 2200FT",
-      "issuedAt": "2026-09-12T19:00:00.000Z",
+      "body": "METAR CYHM 132200Z 26010G17KT 15SM FEW040 FEW100 BKN250 23/14 A2989 RMK CU1AC1CI5 DIST TCU E SLP120 DENSITY ALT 2000FT",
+      "issuedAt": "2026-09-13T22:00:00.000Z",
       "upstream": {
         "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 121900Z 17006KT 140V200 15SM BKN059 BKN085 BKN230 25/20 A2991 RMK SC5AC1CI1 SLP128 DENSITY ALT 2200FT",
-        "obsTime": 1789239600,
-        "reportTime": "2026-09-12T19:00:00Z"
+        "receiptTime": "2026-09-13T22:09:08.689Z",
+        "obsTime": 1789336800,
+        "reportTime": "2026-09-13T22:00:00.000Z",
+        "temp": 23,
+        "dewp": 14,
+        "wdir": 260,
+        "wspd": 10,
+        "wgst": 17,
+        "visib": 15,
+        "altim": 1012.3,
+        "slp": 1012,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 132200Z 26010G17KT 15SM FEW040 FEW100 BKN250 23/14 A2989 RMK CU1AC1CI5 DIST TCU E SLP120 DENSITY ALT 2000FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 4000
+          },
+          {
+            "cover": "FEW",
+            "base": 10000
+          },
+          {
+            "cover": "BKN",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
+      "sha256": "0eea3356cd7038219d7b2204f02010da1efbb7e703c91b4c4d5d2a376fec270b",
+      "kind": "notam",
+      "source": "navcanada-cfps",
+      "station": "CYKF",
+      "body": "(J6276/26 NOTAMN\nQ) CZYZ/QLAAS/IV/NBO/A/000/999/4328N08023W005\nA) CYKF B) 2609151100 C) 2609172100\nE) ALS 26 U/S. APPLY PROC FOR HIGH INTST APCH LGT INOPERATIVE (AIP \nAD 2.22.4)",
+      "issuedAt": "2026-09-13T11:08:15.472Z",
+      "upstream": {
+        "type": "notam",
+        "pk": "1772384",
+        "location": "CYKF",
+        "startValidity": "2026-09-13T11:08:15.472",
+        "endValidity": "2026-09-17T21:00:00",
+        "text": "{\"raw\" : \"(J6276/26 NOTAMN\\nQ) CZYZ/QLAAS/IV/NBO/A/000/999/4328N08023W005\\nA) CYKF B) 2609151100 C) 2609172100\\nE) ALS 26 U/S. APPLY PROC FOR HIGH INTST APCH LGT INOPERATIVE (AIP \\nAD 2.22.4)\", \"english\" : null, \"french\" : null}",
+        "hasError": false,
+        "position": {
+          "pointReference": "CYKF",
+          "radialDistance": 0
+        }
+      },
+      "fetchedFor": [
+        "CYKF"
+      ],
+      "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYKF&alpha=notam"
+    },
+    {
+      "sha256": "0f9fafd943e4023019ffd3de21a8e014a5d3d5e6567ff663b600caece116c630",
+      "kind": "upperwind",
+      "source": "navcanada-cfps",
+      "station": "CYYZ",
+      "body": "[\"FBCN31\", \"KWNO\", \"2026-09-14T01:59:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-14T06:00:00+00:00\", \"2026-09-14T02:00:00+00:00\", \"2026-09-14T09:00:00+00:00\", null, null, null, null, [[53000,290,54,-58,0],[45000,290,72,-53,0],[39000,280,90,-47,0],[34000,270,89,-43,0],[30000,270,82,-39,0],[24000,270,62,-28,0]]]",
+      "issuedAt": "2026-09-14T02:00:00.000Z",
+      "upstream": {
+        "type": "upperwind",
+        "pk": "409685663",
+        "location": "YYZ",
+        "startValidity": "2026-09-14T02:00:00",
+        "endValidity": "2026-09-14T09:00:00",
+        "text": "[\"FBCN31\", \"KWNO\", \"2026-09-14T01:59:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-14T06:00:00+00:00\", \"2026-09-14T02:00:00+00:00\", \"2026-09-14T09:00:00+00:00\", null, null, null, null, [[53000,290,54,-58,0],[45000,290,72,-53,0],[39000,280,90,-47,0],[34000,270,89,-43,0],[30000,270,82,-39,0],[24000,270,62,-28,0]]]",
+        "hasError": false,
+        "position": {
+          "pointReference": "CYYZ",
+          "radialDistance": 0
+        }
+      },
+      "fetchedFor": [
+        "CYYZ"
+      ],
+      "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYYZ&alpha=upperwind"
     },
     {
       "sha256": "1043f2f550ed9013ce4e9e2218ebaa4205398101d4482c1dc654759825a4a7c6",
@@ -471,6 +831,44 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYSN&alpha=notam"
     },
     {
+      "sha256": "12ed8850bae72000ebfc237a25586b909be9d38e6d6a2b38b7d9d2982311e53a",
+      "kind": "metar",
+      "source": "awc",
+      "station": "CYKF",
+      "body": "METAR CYKF 140000Z AUTO 29008KT 9SM OVC130 18/11 A2994 RMK SLP137 DENSITY ALT 1700FT",
+      "issuedAt": "2026-09-14T00:00:00.000Z",
+      "upstream": {
+        "icaoId": "CYKF",
+        "receiptTime": "2026-09-14T00:09:07.304Z",
+        "obsTime": 1789344000,
+        "reportTime": "2026-09-14T00:00:00.000Z",
+        "temp": 18,
+        "dewp": 11,
+        "wdir": 290,
+        "wspd": 8,
+        "visib": 9,
+        "altim": 1014,
+        "slp": 1013.7,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 140000Z AUTO 29008KT 9SM OVC130 18/11 A2994 RMK SLP137 DENSITY ALT 1700FT",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "OVC",
+        "clouds": [
+          {
+            "cover": "OVC",
+            "base": 13000
+          }
+        ],
+        "fltCat": "VFR"
+      },
+      "fetchedFor": [],
+      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
       "sha256": "134092379f2bf0a0f88b458871449a71bff33c95ad916401ab6b09bd767da804",
       "kind": "notam",
       "source": "navcanada-cfps",
@@ -496,145 +894,79 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYSN&alpha=notam"
     },
     {
-      "sha256": "1585cad7165f3a3015cdbd50ed0a7f686dde9bcff50a9b0a530bffc5ea92b3f5",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 131100Z 21005KT 1SM R12/P6000FT/D BR BKN003 OVC013 21/20 A2988 RMK SF5SF3 SLP119 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T11:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 131100Z 21005KT 1SM R12/P6000FT/D BR BKN003 OVC013 21/20 A2988 RMK SF5SF3 SLP119 DENSITY ALT 1700FT",
-        "obsTime": 1789297200,
-        "reportTime": "2026-09-13T11:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "172077dffa5a536b5e758c2238d8064257f39e92c204d92f1238ed871f0457b7",
+      "sha256": "1d41898194fef192958b350a037b0b1912d2cf627e4d7e8b8e6eafa6f198243a",
       "kind": "metar",
       "source": "awc",
       "station": "CYKF",
-      "body": "METAR CYKF 131100Z AUTO 24005KT 3SM BR OVC011 20/20 A2989 RMK SLP119 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T11:00:00.000Z",
+      "body": "METAR CYKF 132000Z AUTO 27015G22KT 9SM FEW120 24/13 A2989 RMK SLP120 DENSITY ALT 2400FT",
+      "issuedAt": "2026-09-13T20:00:00.000Z",
       "upstream": {
         "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 131100Z AUTO 24005KT 3SM BR OVC011 20/20 A2989 RMK SLP119 DENSITY ALT 2000FT",
-        "obsTime": 1789297200,
-        "reportTime": "2026-09-13T11:00:00Z"
+        "receiptTime": "2026-09-13T20:18:25.904Z",
+        "obsTime": 1789329600,
+        "reportTime": "2026-09-13T20:00:00.000Z",
+        "temp": 24,
+        "dewp": 13,
+        "wdir": 270,
+        "wspd": 15,
+        "wgst": 22,
+        "visib": 9,
+        "altim": 1012.3,
+        "slp": 1012,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 132000Z AUTO 27015G22KT 9SM FEW120 24/13 A2989 RMK SLP120 DENSITY ALT 2400FT",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "FEW",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 12000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "1732e84f82b0d3193ad47dfd381bf115cd3f790f1c0e1a28ff6d5b36a14c2f16",
+      "sha256": "26820f567c18947d799d6f608d26ece398c420b9d7eee080d6087afaecfc3b06",
       "kind": "metar",
       "source": "awc",
       "station": "CYKF",
-      "body": "SPECI CYKF 131508Z AUTO 27009KT 9SM SCT017 SCT038 BKN047 23/19 A2992 RMK SLP129 DENSITY ALT 2200FT",
-      "issuedAt": "2026-09-13T15:08:00.000Z",
+      "body": "METAR CYKF 131900Z AUTO 27017G23KT 9SM FEW047 25/13 A2988 RMK SLP114 DENSITY ALT 2600FT",
+      "issuedAt": "2026-09-13T19:00:00.000Z",
       "upstream": {
         "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 131508Z AUTO 27009KT 9SM SCT017 SCT038 BKN047 23/19 A2992 RMK SLP129 DENSITY ALT 2200FT",
-        "obsTime": 1789312080,
-        "reportTime": "2026-09-13T15:08:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "1791f9bc6ba0173797537baf5b8444e186d81b02fa39c9444a6d3b47395ee03d",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 131400Z AUTO 30007KT 250V310 9SM BKN013 22/19 A2991 RMK SLP127 DENSITY ALT 2200FT",
-      "issuedAt": "2026-09-13T14:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 131400Z AUTO 30007KT 250V310 9SM BKN013 22/19 A2991 RMK SLP127 DENSITY ALT 2200FT",
-        "obsTime": 1789308000,
-        "reportTime": "2026-09-13T14:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "2125cc6795e7f92bc7027f4db8e315a8cbb533cd3e3a151dede5f89a60254c0d",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "SPECI CYHM 130739Z 22007KT 2 1/2SM BR OVC003 21/21 A2987 RMK FG2ST6 SLP115 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T07:39:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "SPECI CYHM 130739Z 22007KT 2 1/2SM BR OVC003 21/21 A2987 RMK FG2ST6 SLP115 DENSITY ALT 1700FT",
-        "obsTime": 1789285140,
-        "reportTime": "2026-09-13T07:39:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "239204f415231f73c93394b711002d166409830542d8e71de53df4c88a0b5283",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 130900Z AUTO 22003KT 5SM BR FEW008 20/19 A2986 RMK SLP109 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T09:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 130900Z AUTO 22003KT 5SM BR FEW008 20/19 A2986 RMK SLP109 DENSITY ALT 2000FT",
-        "obsTime": 1789290000,
-        "reportTime": "2026-09-13T09:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "23ef2ab31243fd5f0fed893011595c8082153b350715c614e19e93f4b17a564f",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 130800Z 21006KT 3SM BR BKN004 OVC018 21/21 A2987 RMK SC6SC2 SLP115 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T08:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 130800Z 21006KT 3SM BR BKN004 OVC018 21/21 A2987 RMK SC6SC2 SLP115 DENSITY ALT 1700FT",
-        "obsTime": 1789286400,
-        "reportTime": "2026-09-13T08:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "2829513f6673932886facfe41510b61ced471b8832b398af84a080f28d738598",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 130000Z 19007KT 15SM SCT024 BKN240 21/19 A2989 RMK SC3CI4 SLP122 DENSITY ALT 1800FT",
-      "issuedAt": "2026-09-13T00:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 130000Z 19007KT 15SM SCT024 BKN240 21/19 A2989 RMK SC3CI4 SLP122 DENSITY ALT 1800FT",
-        "obsTime": 1789257600,
-        "reportTime": "2026-09-13T00:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "282d5cf2f5b7b2f80ae9e83afb2a32b7168a3229d5ee8bd02df8a2a1e7924550",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 131200Z AUTO 26004KT 6SM BR BKN009 20/19 A2989 RMK SLP120 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T12:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 131200Z AUTO 26004KT 6SM BR BKN009 20/19 A2989 RMK SLP120 DENSITY ALT 2000FT",
-        "obsTime": 1789300800,
-        "reportTime": "2026-09-13T12:00:00Z"
+        "receiptTime": "2026-09-13T19:08:24.394Z",
+        "obsTime": 1789326000,
+        "reportTime": "2026-09-13T19:00:00.000Z",
+        "temp": 25,
+        "dewp": 13,
+        "wdir": 270,
+        "wspd": 17,
+        "wgst": 23,
+        "visib": 9,
+        "altim": 1011.9,
+        "slp": 1011.4,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 131900Z AUTO 27017G23KT 9SM FEW047 25/13 A2988 RMK SLP114 DENSITY ALT 2600FT",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "FEW",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 4700
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
@@ -719,65 +1051,69 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYSN&alpha=notam"
     },
     {
-      "sha256": "34880e86efef4ecd5dd11a24dcc1d8fa7f00b6ed07ff7fdd55d3f92cdc350d0c",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYSN",
-      "body": "METAR CYSN 131200Z 21006KT 15SM BKN024 BKN074 22/21 A2987 RMK SC5AC2 SLP117 DENSITY ALT 1300FT",
-      "issuedAt": "2026-09-13T12:00:00.000Z",
+      "sha256": "364c1cb09d1bc89a32b51570f8754825c03ad532177026e3c9ac7484ff486927",
+      "kind": "upperwind",
+      "source": "navcanada-cfps",
+      "station": "CYYZ",
+      "body": "[\"FBCN35\", \"KWNO\", \"2026-09-14T01:59:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-15T00:00:00+00:00\", \"2026-09-14T18:00:00+00:00\", \"2026-09-15T06:00:00+00:00\", null, null, null, null, [[39000,330,111,-55,0],[34000,330,103,-45,0],[30000,340,80,-35,0],[24000,340,51,-19,0],[53000,290,17,-61,0],[45000,310,47,-61,0]]]",
+      "issuedAt": "2026-09-14T18:00:00.000Z",
       "upstream": {
-        "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 131200Z 21006KT 15SM BKN024 BKN074 22/21 A2987 RMK SC5AC2 SLP117 DENSITY ALT 1300FT",
-        "obsTime": 1789300800,
-        "reportTime": "2026-09-13T12:00:00Z"
+        "type": "upperwind",
+        "pk": "409685683",
+        "location": "YYZ",
+        "startValidity": "2026-09-14T18:00:00",
+        "endValidity": "2026-09-15T06:00:00",
+        "text": "[\"FBCN35\", \"KWNO\", \"2026-09-14T01:59:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-15T00:00:00+00:00\", \"2026-09-14T18:00:00+00:00\", \"2026-09-15T06:00:00+00:00\", null, null, null, null, [[39000,330,111,-55,0],[34000,330,103,-45,0],[30000,340,80,-35,0],[24000,340,51,-19,0],[53000,290,17,-61,0],[45000,310,47,-61,0]]]",
+        "hasError": false,
+        "position": {
+          "pointReference": "CYYZ",
+          "radialDistance": 0
+        }
       },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+      "fetchedFor": [
+        "CYYZ"
+      ],
+      "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYYZ&alpha=upperwind"
     },
     {
-      "sha256": "34e0040632a3a7b57d9aec29cb38099f5eca4cbc939641d24fcb1527a54fe33e",
+      "sha256": "367514174b3c752bfb852d9b548c3174c6c47ca42756e6910c1c697a23dd36e6",
       "kind": "metar",
       "source": "awc",
       "station": "CYHM",
-      "body": "METAR CYHM 131600Z 27007KT 240V300 10SM SCT025 BKN040 BKN055 26/21 A2990 RMK CU3CU2SC2 SLP123 DENSITY ALT 2300FT",
-      "issuedAt": "2026-09-13T16:00:00.000Z",
+      "body": "SPECI CYHM 140025Z 29008KT 15SM -SHRA BKN090 BKN110 19/11 A2995 RMK AC5AC2 CVCTV CLD EMBD SLP141 DENSITY ALT 1500FT",
+      "issuedAt": "2026-09-14T00:25:00.000Z",
       "upstream": {
         "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 131600Z 27007KT 240V300 10SM SCT025 BKN040 BKN055 26/21 A2990 RMK CU3CU2SC2 SLP123 DENSITY ALT 2300FT",
-        "obsTime": 1789315200,
-        "reportTime": "2026-09-13T16:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "35b328674aaa37805d57573f10a6cc47c8c1fa919ffeba5405ee75edb1280243",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 130500Z 22006KT 7SM OVC003 20/20 A2991 RMK ST8 SLP127 DENSITY ALT 1600FT",
-      "issuedAt": "2026-09-13T05:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 130500Z 22006KT 7SM OVC003 20/20 A2991 RMK ST8 SLP127 DENSITY ALT 1600FT",
-        "obsTime": 1789275600,
-        "reportTime": "2026-09-13T05:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "360c462c35ac6e9cceca9b11823bae026675b2dd068b44a436afb406db0f894b",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 130500Z AUTO 21010KT 9SM OVC009 21/20 A2991 RMK SLP124 DENSITY ALT 2100FT",
-      "issuedAt": "2026-09-13T05:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 130500Z AUTO 21010KT 9SM OVC009 21/20 A2991 RMK SLP124 DENSITY ALT 2100FT",
-        "obsTime": 1789275600,
-        "reportTime": "2026-09-13T05:00:00Z"
+        "receiptTime": "2026-09-14T00:27:12.581Z",
+        "obsTime": 1789345500,
+        "reportTime": "2026-09-14T00:25:00.000Z",
+        "temp": 19,
+        "dewp": 11,
+        "wdir": 290,
+        "wspd": 8,
+        "visib": 15,
+        "altim": 1014.3,
+        "slp": 1014.1,
+        "qcField": 0,
+        "wxString": "-SHRA",
+        "metarType": "SPECI",
+        "rawOb": "SPECI CYHM 140025Z 29008KT 15SM -SHRA BKN090 BKN110 19/11 A2995 RMK AC5AC2 CVCTV CLD EMBD SLP141 DENSITY ALT 1500FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "BKN",
+            "base": 9000
+          },
+          {
+            "cover": "BKN",
+            "base": 11000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
@@ -808,84 +1144,54 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYKF&alpha=notam"
     },
     {
-      "sha256": "3d97296a41d70a57246374751794622c835754492bb5974053f887610e883c51",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 131500Z AUTO 27008KT 9SM BKN017 BKN047 23/19 A2992 RMK SLP129 DENSITY ALT 2200FT",
-      "issuedAt": "2026-09-13T15:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 131500Z AUTO 27008KT 9SM BKN017 BKN047 23/19 A2992 RMK SLP129 DENSITY ALT 2200FT",
-        "obsTime": 1789311600,
-        "reportTime": "2026-09-13T15:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "3da3012252a20caa983209358a49983e1241b94c9b7a28d6b28554da5b5bc495",
-      "kind": "metar",
-      "source": "awc",
+      "sha256": "38c8b1e97a70d68635120c4c67c791c075970cfb84ef486948bb4d8882eb412f",
+      "kind": "notam",
+      "source": "navcanada-cfps",
       "station": "CYHM",
-      "body": "METAR CYHM 131000Z 20006KT 4SM BR OVC004 21/21 A2987 RMK ST8 SLP115 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T10:00:00.000Z",
+      "body": "(S2983/26 NOTAMR S2967/26\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4310N07956W005\nA) CYHM B) 2609140147 C) 2609140947\nE) RSC 06 6/6/6 DRY, DRY, DRY. VALID SEP 14 0147 - SEP 14 0947.\n\nRSC 24 6/6/6 DRY, DRY, DRY. VALID SEP 14 0147 - SEP 14 0947.\n\nRSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 14 0147 - SEP 14 0947.\n\nRSC 30 6/6/6 DRY, DRY, DRY. VALID SEP 14 0147 - SEP 14 0947.\n\nADDN NON-GRF/TALPA INFO:\nCRFI 06 NR/NR/NR.\nCRFI 24 NR/NR/NR.\nCRFI 12 NR/NR/NR.\nCRFI 30 NR/NR/NR.)",
+      "issuedAt": "2026-09-14T01:47:00.000Z",
       "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 131000Z 20006KT 4SM BR OVC004 21/21 A2987 RMK ST8 SLP115 DENSITY ALT 1700FT",
-        "obsTime": 1789293600,
-        "reportTime": "2026-09-13T10:00:00Z"
+        "type": "notam",
+        "pk": "1772706",
+        "location": "CYHM",
+        "startValidity": "2026-09-14T01:47:00",
+        "endValidity": "2026-09-14T09:47:00",
+        "text": "{\"raw\" : \"(S2983/26 NOTAMR S2967/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4310N07956W005\\nA) CYHM B) 2609140147 C) 2609140947\\nE) RSC 06 6/6/6 DRY, DRY, DRY. VALID SEP 14 0147 - SEP 14 0947.\\n\\nRSC 24 6/6/6 DRY, DRY, DRY. VALID SEP 14 0147 - SEP 14 0947.\\n\\nRSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 14 0147 - SEP 14 0947.\\n\\nRSC 30 6/6/6 DRY, DRY, DRY. VALID SEP 14 0147 - SEP 14 0947.\\n\\nADDN NON-GRF/TALPA INFO:\\nCRFI 06 NR/NR/NR.\\nCRFI 24 NR/NR/NR.\\nCRFI 12 NR/NR/NR.\\nCRFI 30 NR/NR/NR.)\", \"english\" : null, \"french\" : null}",
+        "hasError": false,
+        "position": {
+          "pointReference": "CYHM",
+          "radialDistance": 0
+        }
       },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+      "fetchedFor": [
+        "CYHM"
+      ],
+      "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYHM&alpha=notam"
     },
     {
-      "sha256": "3e0471386ba09af9dd18fc127af62f7ec6700614641e3c674d998c3593f907e7",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 131157Z AUTO 25006KT 6SM BR BKN009 20/19 A2989 RMK SLP122 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T11:57:00.000Z",
+      "sha256": "3a983f884606332736c5b42786bfd28d65b0b3c4608b864a6820b03dedbdffc4",
+      "kind": "upperwind",
+      "source": "navcanada-cfps",
+      "station": "CYYZ",
+      "body": "[\"FBCN35\", \"CWAO\", \"2026-09-14T03:30:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-15T00:00:00+00:00\", \"2026-09-14T18:00:00+00:00\", \"2026-09-15T06:00:00+00:00\", null, null, null, null, [[18000,320,37,-7,0],[6000,270,6,5,0],[9000,330,13,7,0],[12000,330,22,4,0],[3000,null,0,null,0]]]",
+      "issuedAt": "2026-09-14T18:00:00.000Z",
       "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 131157Z AUTO 25006KT 6SM BR BKN009 20/19 A2989 RMK SLP122 DENSITY ALT 2000FT",
-        "obsTime": 1789300620,
-        "reportTime": "2026-09-13T11:57:00Z"
+        "type": "upperwind",
+        "pk": "409688078",
+        "location": "YYZ",
+        "startValidity": "2026-09-14T18:00:00",
+        "endValidity": "2026-09-15T06:00:00",
+        "text": "[\"FBCN35\", \"CWAO\", \"2026-09-14T03:30:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-15T00:00:00+00:00\", \"2026-09-14T18:00:00+00:00\", \"2026-09-15T06:00:00+00:00\", null, null, null, null, [[18000,320,37,-7,0],[6000,270,6,5,0],[9000,330,13,7,0],[12000,330,22,4,0],[3000,null,0,null,0]]]",
+        "hasError": false,
+        "position": {
+          "pointReference": "CYYZ",
+          "radialDistance": 0
+        }
       },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "3fb97a51b6aad51b6797b45ce7e3641f15da7cec9c0dee24fd0f5c069cc5ee07",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 121900Z AUTO 17010G16KT 9SM SCT055 26/18 A2990 RMK SLP127 DENSITY ALT 2600FT",
-      "issuedAt": "2026-09-12T19:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 121900Z AUTO 17010G16KT 9SM SCT055 26/18 A2990 RMK SLP127 DENSITY ALT 2600FT",
-        "obsTime": 1789239600,
-        "reportTime": "2026-09-12T19:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "3ff2107c4e1287c8db3906a301f619d2443a34d629b687ad70ba29314d8f9d42",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 130700Z AUTO 22008KT 7SM OVC007 22/20 A2989 RMK SLP118 DENSITY ALT 2100FT",
-      "issuedAt": "2026-09-13T07:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 130700Z AUTO 22008KT 7SM OVC007 22/20 A2989 RMK SLP118 DENSITY ALT 2100FT",
-        "obsTime": 1789282800,
-        "reportTime": "2026-09-13T07:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+      "fetchedFor": [
+        "CYYZ"
+      ],
+      "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYYZ&alpha=upperwind"
     },
     {
       "sha256": "4425e2f75dbaae1fb3b29226264f807fbc779dab08eef9e379eb2aca956720d3",
@@ -913,6 +1219,52 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYHM&alpha=notam"
     },
     {
+      "sha256": "44d3b6775a38deafa4d539a5124b4480a1f0e3d9ca39257bff78f139f8c64a8a",
+      "kind": "metar",
+      "source": "awc",
+      "station": "CYHM",
+      "body": "SPECI CYHM 140145Z 32014KT 15SM FEW030 BKN090 BKN140 18/12 A2999 RMK CF1AC4AC2 SLP155 DENSITY ALT 1300FT",
+      "issuedAt": "2026-09-14T01:45:00.000Z",
+      "upstream": {
+        "icaoId": "CYHM",
+        "receiptTime": "2026-09-14T01:47:21.661Z",
+        "obsTime": 1789350300,
+        "reportTime": "2026-09-14T01:45:00.000Z",
+        "temp": 18,
+        "dewp": 12,
+        "wdir": 320,
+        "wspd": 14,
+        "visib": 15,
+        "altim": 1015.7,
+        "slp": 1015.5,
+        "qcField": 0,
+        "metarType": "SPECI",
+        "rawOb": "SPECI CYHM 140145Z 32014KT 15SM FEW030 BKN090 BKN140 18/12 A2999 RMK CF1AC4AC2 SLP155 DENSITY ALT 1300FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 3000
+          },
+          {
+            "cover": "BKN",
+            "base": 9000
+          },
+          {
+            "cover": "BKN",
+            "base": 14000
+          }
+        ],
+        "fltCat": "VFR"
+      },
+      "fetchedFor": [],
+      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
       "sha256": "47dcc983f4fce07f4845b265cde2cce889e703988c24d7694980c711669c6a60",
       "kind": "notam",
       "source": "navcanada-cfps",
@@ -938,33 +1290,90 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYHM&alpha=notam"
     },
     {
-      "sha256": "4a2ff84c6ac5e02c7272bd7f21f63a339ce7e5ed9a5d8730fded4745544ce543",
+      "sha256": "4f5bc2c9ce518456021d42a80951c59c78998e2b5b81cbba409e75c581808b0a",
       "kind": "metar",
       "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 130837Z AUTO 22005KT 5SM BR FEW009 21/20 A2986 RMK SLP111 DENSITY ALT 2100FT",
-      "issuedAt": "2026-09-13T08:37:00.000Z",
+      "station": "CYHM",
+      "body": "METAR CYHM 140000Z 29006KT 15SM SCT100 BKN120 20/12 A2992 RMK AC4AC3 SLP132 DENSITY ALT 1500FT",
+      "issuedAt": "2026-09-14T00:00:00.000Z",
       "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 130837Z AUTO 22005KT 5SM BR FEW009 21/20 A2986 RMK SLP111 DENSITY ALT 2100FT",
-        "obsTime": 1789288620,
-        "reportTime": "2026-09-13T08:37:00Z"
+        "icaoId": "CYHM",
+        "receiptTime": "2026-09-14T00:09:07.288Z",
+        "obsTime": 1789344000,
+        "reportTime": "2026-09-14T00:00:00.000Z",
+        "temp": 20,
+        "dewp": 12,
+        "wdir": 290,
+        "wspd": 6,
+        "visib": 15,
+        "altim": 1013.3,
+        "slp": 1013.2,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 140000Z 29006KT 15SM SCT100 BKN120 20/12 A2992 RMK AC4AC3 SLP132 DENSITY ALT 1500FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "SCT",
+            "base": 10000
+          },
+          {
+            "cover": "BKN",
+            "base": 12000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "4f6a8627e4d44fc9d149f6a2215a083f25f4df21b311d04fb2d452b3ed773344",
+      "sha256": "5014654cd6c89e9b414e08ab97877965afcc099aa7d7d314d84fd782c3a6548f",
       "kind": "metar",
       "source": "awc",
       "station": "CYHM",
-      "body": "METAR CYHM 130300Z 20005KT 15SM FEW010 20/19 A2990 RMK SC2 SLP125 DENSITY ALT 1600FT",
-      "issuedAt": "2026-09-13T03:00:00.000Z",
+      "body": "METAR CYHM 132100Z 29010G18KT 15SM FEW045 FEW100 BKN250 25/15 A2988 RMK CU1AC1CI4 SLP117 DENSITY ALT 2200FT",
+      "issuedAt": "2026-09-13T21:00:00.000Z",
       "upstream": {
         "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 130300Z 20005KT 15SM FEW010 20/19 A2990 RMK SC2 SLP125 DENSITY ALT 1600FT",
-        "obsTime": 1789268400,
-        "reportTime": "2026-09-13T03:00:00Z"
+        "receiptTime": "2026-09-13T21:09:07.936Z",
+        "obsTime": 1789333200,
+        "reportTime": "2026-09-13T21:00:00.000Z",
+        "temp": 25,
+        "dewp": 15,
+        "wdir": 290,
+        "wspd": 10,
+        "wgst": 18,
+        "visib": 15,
+        "altim": 1011.9,
+        "slp": 1011.7,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 132100Z 29010G18KT 15SM FEW045 FEW100 BKN250 25/15 A2988 RMK CU1AC1CI4 SLP117 DENSITY ALT 2200FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 4500
+          },
+          {
+            "cover": "FEW",
+            "base": 10000
+          },
+          {
+            "cover": "BKN",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
@@ -1020,65 +1429,282 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYHM&alpha=notam"
     },
     {
-      "sha256": "51f35a963f9bf172041e7b69157491325fd4ac9b7aff6a098dcf4f2b6a777425",
+      "sha256": "538ce783ea75b7ba0800001415cafb6bd162f32bdabebfa56b93c0dc747d9e93",
+      "kind": "taf",
+      "source": "awc",
+      "station": "CYHM",
+      "body": "TAF AMD CYHM 140107Z 1401/1424 30008KT P6SM FEW040 BKN080 BKN110 TEMPO 1401/1402 P6SM -SHRA FM140200 31010G20KT P6SM SCT030 BECMG 1404/1406 31008KT FM140600 30006KT P6SM SKC FM141200 31008KT P6SM FEW030 FM141700 32006KT P6SM SCT050 BECMG 1419/1421 26006KT BKN050 RMK NXT FCST BY 140600Z",
+      "issuedAt": "2026-09-14T01:07:00.000Z",
+      "upstream": {
+        "icaoId": "CYHM",
+        "dbPopTime": "2026-09-14T01:08:23.226Z",
+        "bulletinTime": "2026-09-13T23:00:00.000Z",
+        "issueTime": "2026-09-14T01:07:00.000Z",
+        "validTimeFrom": 1789347600,
+        "validTimeTo": 1789430400,
+        "rawTAF": "TAF AMD CYHM 140107Z 1401/1424 30008KT P6SM FEW040 BKN080 BKN110 TEMPO 1401/1402 P6SM -SHRA FM140200 31010G20KT P6SM SCT030 BECMG 1404/1406 31008KT FM140600 30006KT P6SM SKC FM141200 31008KT P6SM FEW030 FM141700 32006KT P6SM SCT050 BECMG 1419/1421 26006KT BKN050 RMK NXT FCST BY 140600Z",
+        "mostRecent": 1,
+        "remarks": " RMK NXT FCST BY 140600Z",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "prior": 5,
+        "name": "Hamilton/Munro Intl",
+        "fcsts": [
+          {
+            "timeFrom": 1789347600,
+            "timeTo": 1789351200,
+            "timeBec": null,
+            "fcstChange": null,
+            "probability": null,
+            "wdir": 300,
+            "wspd": 8,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "FEW",
+                "base": 4000,
+                "type": null
+              },
+              {
+                "cover": "BKN",
+                "base": 8000,
+                "type": null
+              },
+              {
+                "cover": "BKN",
+                "base": 11000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789347600,
+            "timeTo": 1789351200,
+            "timeBec": null,
+            "fcstChange": "TEMPO",
+            "probability": null,
+            "wdir": null,
+            "wspd": null,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": "-SHRA",
+            "notDecoded": null,
+            "clouds": [],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789351200,
+            "timeTo": 1789358400,
+            "timeBec": null,
+            "fcstChange": "FM",
+            "probability": null,
+            "wdir": 310,
+            "wspd": 10,
+            "wgst": 20,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "SCT",
+                "base": 3000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789358400,
+            "timeTo": 1789365600,
+            "timeBec": 1789365600,
+            "fcstChange": "BECMG",
+            "probability": null,
+            "wdir": 310,
+            "wspd": 8,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "SCT",
+                "base": 3000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789365600,
+            "timeTo": 1789387200,
+            "timeBec": null,
+            "fcstChange": "FM",
+            "probability": null,
+            "wdir": 300,
+            "wspd": 6,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "SKC",
+                "base": null,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789387200,
+            "timeTo": 1789405200,
+            "timeBec": null,
+            "fcstChange": "FM",
+            "probability": null,
+            "wdir": 310,
+            "wspd": 8,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "FEW",
+                "base": 3000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789405200,
+            "timeTo": 1789412400,
+            "timeBec": null,
+            "fcstChange": "FM",
+            "probability": null,
+            "wdir": 320,
+            "wspd": 6,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "SCT",
+                "base": 5000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789412400,
+            "timeTo": 1789430400,
+            "timeBec": 1789419600,
+            "fcstChange": "BECMG",
+            "probability": null,
+            "wdir": 260,
+            "wspd": 6,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "BKN",
+                "base": 5000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          }
+        ]
+      },
+      "fetchedFor": [],
+      "request": "https://aviationweather.gov/api/data/taf?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
+      "sha256": "5d1b5cfc7efb6055d11163907454e1704d6838af2ce2a7ef44785b72a61fbdab",
       "kind": "metar",
       "source": "awc",
       "station": "CYKF",
-      "body": "SPECI CYKF 131117Z AUTO 22003KT 200V280 3SM BR OVC009 20/19 A2989 RMK SLP119 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T11:17:00.000Z",
+      "body": "METAR CYKF 140400Z AUTO 30006KT 9SM CLR 13/10 A3006 RMK SLP181",
+      "issuedAt": "2026-09-14T04:00:00.000Z",
       "upstream": {
         "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 131117Z AUTO 22003KT 200V280 3SM BR OVC009 20/19 A2989 RMK SLP119 DENSITY ALT 2000FT",
-        "obsTime": 1789298220,
-        "reportTime": "2026-09-13T11:17:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "57abdaef34c74a7e4f5e513c8c1d2d01efafec10ff09d8a23aa94f0d69ff2447",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 130700Z 22008KT 3/4SM R12/P6000FT/U BR VV001 21/20 A2989 RMK FG8 SLP121 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T07:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 130700Z 22008KT 3/4SM R12/P6000FT/U BR VV001 21/20 A2989 RMK FG8 SLP121 DENSITY ALT 1700FT",
-        "obsTime": 1789282800,
-        "reportTime": "2026-09-13T07:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "5bc8d9b383f78cb631b6f200cf92d5069a78ae0bff2ebcfb5db31b664662233b",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 130939Z AUTO 22003KT 3SM BR SCT008 20/19 A2988 RMK SLP116 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T09:39:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 130939Z AUTO 22003KT 3SM BR SCT008 20/19 A2988 RMK SLP116 DENSITY ALT 2000FT",
-        "obsTime": 1789292340,
-        "reportTime": "2026-09-13T09:39:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "5db6d9d73d648ff856cf46e19fad27a6bd16ef9d32815360ea4a4cae79e26da8",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 130100Z 20007KT 15SM BKN016 21/20 A2990 RMK SC7 SLP126 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T01:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 130100Z 20007KT 15SM BKN016 21/20 A2990 RMK SC7 SLP126 DENSITY ALT 1700FT",
-        "obsTime": 1789261200,
-        "reportTime": "2026-09-13T01:00:00Z"
+        "receiptTime": "2026-09-14T04:09:06.114Z",
+        "obsTime": 1789358400,
+        "reportTime": "2026-09-14T04:00:00.000Z",
+        "temp": 13,
+        "dewp": 10,
+        "wdir": 300,
+        "wspd": 6,
+        "visib": 9,
+        "altim": 1018,
+        "slp": 1018.1,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 140400Z AUTO 30006KT 9SM CLR 13/10 A3006 RMK SLP181",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "CLR",
+        "clouds": [],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
@@ -1109,22 +1735,6 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYKF&alpha=notam"
     },
     {
-      "sha256": "5ead1ed27c6997994973ab24b49e914a6f864d4fa5ade34541b3018c102ba1de",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 131300Z AUTO 25006KT 9SM BKN009 21/19 A2991 RMK SLP127 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T13:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 131300Z AUTO 25006KT 9SM BKN009 21/19 A2991 RMK SLP127 DENSITY ALT 2000FT",
-        "obsTime": 1789304400,
-        "reportTime": "2026-09-13T13:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
       "sha256": "5fd98d919a9475d6c8e54042075598f54cb6bbed401846bdb0b05ff9d46a72cb",
       "kind": "notam",
       "source": "navcanada-cfps",
@@ -1150,81 +1760,181 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYSN&alpha=notam"
     },
     {
-      "sha256": "62d93d2da14d2e1d80f761c02c2a96ec8ed59184db494ee4738db88cf0defd8a",
+      "sha256": "6236a9f7f1cb4f25dcdf81e0d267f2cef3467956ad754ab79379943e5689d6af",
       "kind": "metar",
       "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 131342Z AUTO 24007KT 9SM BKN011 22/19 A2991 RMK SLP127 DENSITY ALT 2200FT",
-      "issuedAt": "2026-09-13T13:42:00.000Z",
+      "station": "CYSN",
+      "body": "METAR CYSN 140000Z 29011G18KT 15SM BKN110 BKN150 BKN250 22/14 A2988 RMK AC5AC1CI1 SLP118 DENSITY ALT 1300FT",
+      "issuedAt": "2026-09-14T00:00:00.000Z",
       "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 131342Z AUTO 24007KT 9SM BKN011 22/19 A2991 RMK SLP127 DENSITY ALT 2200FT",
-        "obsTime": 1789306920,
-        "reportTime": "2026-09-13T13:42:00Z"
+        "icaoId": "CYSN",
+        "receiptTime": "2026-09-14T00:08:18.931Z",
+        "obsTime": 1789344000,
+        "reportTime": "2026-09-14T00:00:00.000Z",
+        "temp": 22,
+        "dewp": 14,
+        "wdir": 290,
+        "wspd": 11,
+        "wgst": 18,
+        "visib": 15,
+        "altim": 1011.9,
+        "slp": 1011.8,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYSN 140000Z 29011G18KT 15SM BKN110 BKN150 BKN250 22/14 A2988 RMK AC5AC1CI1 SLP118 DENSITY ALT 1300FT",
+        "lat": 43.192,
+        "lon": -79.176,
+        "elev": 96,
+        "name": "St Catharines/Niagara Arpt, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "BKN",
+            "base": 11000
+          },
+          {
+            "cover": "BKN",
+            "base": 15000
+          },
+          {
+            "cover": "BKN",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "6380a6d92b890de727f38bb59c33d3a6a4ec4d03ca960009abb42cd283256d42",
+      "sha256": "698afb283a816e2b79e9713dec538ce20c7f06fefaf3af81fcb62aeca0c53f20",
       "kind": "metar",
       "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 131432Z AUTO 28009KT 9SM SCT013 BKN021 BKN030 BKN160 23/19 A2992 RMK SLP128 DENSITY ALT 2300FT",
-      "issuedAt": "2026-09-13T14:32:00.000Z",
+      "station": "CYHM",
+      "body": "METAR CYHM 132300Z 28010G16KT 15SM FEW040 BKN140 BKN230 21/12 A2992 RMK CU1AC5CI1 SLP132 DENSITY ALT 1700FT",
+      "issuedAt": "2026-09-13T23:00:00.000Z",
       "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 131432Z AUTO 28009KT 9SM SCT013 BKN021 BKN030 BKN160 23/19 A2992 RMK SLP128 DENSITY ALT 2300FT",
-        "obsTime": 1789309920,
-        "reportTime": "2026-09-13T14:32:00Z"
+        "icaoId": "CYHM",
+        "receiptTime": "2026-09-13T23:14:16.905Z",
+        "obsTime": 1789340400,
+        "reportTime": "2026-09-13T23:00:00.000Z",
+        "temp": 21,
+        "dewp": 12,
+        "wdir": 280,
+        "wspd": 10,
+        "wgst": 16,
+        "visib": 15,
+        "altim": 1013.3,
+        "slp": 1013.2,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 132300Z 28010G16KT 15SM FEW040 BKN140 BKN230 21/12 A2992 RMK CU1AC5CI1 SLP132 DENSITY ALT 1700FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 4000
+          },
+          {
+            "cover": "BKN",
+            "base": 14000
+          },
+          {
+            "cover": "BKN",
+            "base": 23000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "667bfcef849b147044dab32c7470b78c21b17ebdb1d0945fb8b5104538261854",
+      "sha256": "6d274ec654027ef4cf0dcf6fa3f581bc6620d33143392656009012eb845e8f13",
       "kind": "metar",
       "source": "awc",
       "station": "CYKF",
-      "body": "SPECI CYKF 131424Z AUTO 27007KT 9SM SCT013 SCT030 BKN160 22/19 A2992 RMK SLP128 DENSITY ALT 2200FT",
-      "issuedAt": "2026-09-13T14:24:00.000Z",
+      "body": "METAR CYKF 132200Z AUTO 27017G22KT 9SM SCT170 21/12 A2992 RMK PRESRR SLP130 DENSITY ALT 2000FT",
+      "issuedAt": "2026-09-13T22:00:00.000Z",
       "upstream": {
         "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 131424Z AUTO 27007KT 9SM SCT013 SCT030 BKN160 22/19 A2992 RMK SLP128 DENSITY ALT 2200FT",
-        "obsTime": 1789309440,
-        "reportTime": "2026-09-13T14:24:00Z"
+        "receiptTime": "2026-09-13T22:09:08.710Z",
+        "obsTime": 1789336800,
+        "reportTime": "2026-09-13T22:00:00.000Z",
+        "temp": 21,
+        "dewp": 12,
+        "wdir": 270,
+        "wspd": 17,
+        "wgst": 22,
+        "visib": 9,
+        "altim": 1013.3,
+        "slp": 1013,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 132200Z AUTO 27017G22KT 9SM SCT170 21/12 A2992 RMK PRESRR SLP130 DENSITY ALT 2000FT",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "SCT",
+        "clouds": [
+          {
+            "cover": "SCT",
+            "base": 17000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "6acdc25edd48a1fc982cf4dd243d066bc9902ef56dd2afab7377f700e5b86941",
+      "sha256": "6e45303bb1df90221b58b570a7c9ed23a33fd4b7c2eab06cf10c9077f55a2c20",
       "kind": "metar",
       "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 130800Z AUTO 23007KT 7SM OVC009 21/20 A2988 RMK SLP114 DENSITY ALT 2100FT",
-      "issuedAt": "2026-09-13T08:00:00.000Z",
+      "station": "CYSN",
+      "body": "METAR CYSN 132200Z 30012G19KT 15SM FEW043TCU SCT120 BKN250 24/15 A2985 RMK TCU1AC3CI2 SLP110 DENSITY ALT 1600FT",
+      "issuedAt": "2026-09-13T22:00:00.000Z",
       "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 130800Z AUTO 23007KT 7SM OVC009 21/20 A2988 RMK SLP114 DENSITY ALT 2100FT",
-        "obsTime": 1789286400,
-        "reportTime": "2026-09-13T08:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "700791f68080c6d4c744fc427ddc3f00b7fd111ceb22415ecd90e419434ecc9c",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 130100Z AUTO 18007KT 9SM FEW022 21/18 A2990 RMK SLP125 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T01:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 130100Z AUTO 18007KT 9SM FEW022 21/18 A2990 RMK SLP125 DENSITY ALT 2000FT",
-        "obsTime": 1789261200,
-        "reportTime": "2026-09-13T01:00:00Z"
+        "icaoId": "CYSN",
+        "receiptTime": "2026-09-13T22:08:24.689Z",
+        "obsTime": 1789336800,
+        "reportTime": "2026-09-13T22:00:00.000Z",
+        "temp": 24,
+        "dewp": 15,
+        "wdir": 300,
+        "wspd": 12,
+        "wgst": 19,
+        "visib": 15,
+        "altim": 1010.9,
+        "slp": 1011,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYSN 132200Z 30012G19KT 15SM FEW043TCU SCT120 BKN250 24/15 A2985 RMK TCU1AC3CI2 SLP110 DENSITY ALT 1600FT",
+        "lat": 43.192,
+        "lon": -79.176,
+        "elev": 96,
+        "name": "St Catharines/Niagara Arpt, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 4300
+          },
+          {
+            "cover": "SCT",
+            "base": 12000
+          },
+          {
+            "cover": "BKN",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
@@ -1255,128 +1965,48 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYHM&alpha=notam"
     },
     {
-      "sha256": "74193e7e150f4d116aa212b12fd707cea00b63c4c9e04b6436044ddea55fc392",
+      "sha256": "76096d9b1787a022a5b1dd6ac4ead6371114dc2c2b92e948772099571ce3081a",
       "kind": "metar",
       "source": "awc",
       "station": "CYHM",
-      "body": "SPECI CYHM 131135Z 21005KT 1SM BR OVC002 21/20 A2989 RMK ST8 SLP120 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T11:35:00.000Z",
+      "body": "METAR CYHM 132000Z 27010G20KT 240V310 15SM FEW045 SCT080 BKN250 26/16 A2987 RMK CU2AC1CI4 DIST TCU E SLP112 DENSITY ALT 2400FT",
+      "issuedAt": "2026-09-13T20:00:00.000Z",
       "upstream": {
         "icaoId": "CYHM",
-        "rawOb": "SPECI CYHM 131135Z 21005KT 1SM BR OVC002 21/20 A2989 RMK ST8 SLP120 DENSITY ALT 1700FT",
-        "obsTime": 1789299300,
-        "reportTime": "2026-09-13T11:35:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "7761929c884ad91c9400198ae08f25a6a41d57bbb82fc77043ed3a72e329c451",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "SPECI CYHM 130640Z 21008KT 3/4SM R12/P6000FT/D BR VV001 21/20 A2990 RMK FG8 SLP122 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T06:40:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "SPECI CYHM 130640Z 21008KT 3/4SM R12/P6000FT/D BR VV001 21/20 A2990 RMK FG8 SLP122 DENSITY ALT 1700FT",
-        "obsTime": 1789281600,
-        "reportTime": "2026-09-13T06:40:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "7776b0f8aecef097e18c0adb35e4bbab3d08f9c4af326d61d95d4860fa5a4dca",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 130202Z AUTO 18007KT 9SM BKN009 OVC012 21/19 A2991 RMK SLP126 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T02:02:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 130202Z AUTO 18007KT 9SM BKN009 OVC012 21/19 A2991 RMK SLP126 DENSITY ALT 2000FT",
-        "obsTime": 1789264920,
-        "reportTime": "2026-09-13T02:02:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "785db7a201deb4d9d077729e8ffad2e5019ab22ba78e46e55b397b0bc8fb7e03",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "SPECI CYHM 130548Z 20006KT 2SM BR OVC001 20/20 A2990 RMK FG3ST5 SLP122 DENSITY ALT 1600FT",
-      "issuedAt": "2026-09-13T05:48:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "SPECI CYHM 130548Z 20006KT 2SM BR OVC001 20/20 A2990 RMK FG3ST5 SLP122 DENSITY ALT 1600FT",
-        "obsTime": 1789278480,
-        "reportTime": "2026-09-13T05:48:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "7860ee1ee6253ac478e3edf193f61c7bf557b104ee977590ff33a0c892769312",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 130030Z AUTO 18006KT 9SM BKN024 OVC030 22/18 A2989 RMK SLP121 DENSITY ALT 2100FT",
-      "issuedAt": "2026-09-13T00:30:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 130030Z AUTO 18006KT 9SM BKN024 OVC030 22/18 A2989 RMK SLP121 DENSITY ALT 2100FT",
-        "obsTime": 1789259400,
-        "reportTime": "2026-09-13T00:30:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "7a9fcffcda720b85ad5998c9c8655d504f3043a0b5f8704318d8c4fe1be4557d",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 130300Z AUTO 20007KT 9SM OVC009 21/19 A2991 RMK SLP125 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T03:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 130300Z AUTO 20007KT 9SM OVC009 21/19 A2991 RMK SLP125 DENSITY ALT 2000FT",
-        "obsTime": 1789268400,
-        "reportTime": "2026-09-13T03:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "7b9fcc95247dd966181b47fd17d7e639503dd8e4ca503bfcfbee487f2bf4aa0c",
-      "kind": "taf",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "TAF CYHM 121742Z 1218/1318 18008KT P6SM SCT080 BKN200 FM122100 21008KT P6SM BKN040 FM130000 21008KT P6SM BKN015 TEMPO 1300/1302 P6SM -SHRA FM130600 22007KT P6SM SCT006 OVC010 PROB30 1306/1312 2SM BR OVC005 FM131200 25008KT P6SM FEW006 OVC012 FM131400 25008KT P6SM BKN015 BECMG 1314/1316 SCT040 RMK NXT FCST BY 130000Z",
-      "issuedAt": "2026-09-12T17:42:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawTAF": "TAF CYHM 121742Z 1218/1318 18008KT P6SM SCT080 BKN200 FM122100 21008KT P6SM BKN040 FM130000 21008KT P6SM BKN015 TEMPO 1300/1302 P6SM -SHRA FM130600 22007KT P6SM SCT006 OVC010 PROB30 1306/1312 2SM BR OVC005 FM131200 25008KT P6SM FEW006 OVC012 FM131400 25008KT P6SM BKN015 BECMG 1314/1316 SCT040 RMK NXT FCST BY 130000Z",
-        "issueTime": "2026-09-12T17:42:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/taf?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "7d00b6df95e0aa5534ab8756ad8908a29e17eade47f68c857b7face40072adc9",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "SPECI CYHM 131429Z 24007KT 7SM FEW025 SCT030 SCT080 24/21 A2990 RMK CF1SC2AC1 HZ SLP125 DENSITY ALT 2100FT",
-      "issuedAt": "2026-09-13T14:29:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "SPECI CYHM 131429Z 24007KT 7SM FEW025 SCT030 SCT080 24/21 A2990 RMK CF1SC2AC1 HZ SLP125 DENSITY ALT 2100FT",
-        "obsTime": 1789309740,
-        "reportTime": "2026-09-13T14:29:00Z"
+        "receiptTime": "2026-09-13T20:18:25.857Z",
+        "obsTime": 1789329600,
+        "reportTime": "2026-09-13T20:00:00.000Z",
+        "temp": 26,
+        "dewp": 16,
+        "wdir": 270,
+        "wspd": 10,
+        "wgst": 20,
+        "visib": 15,
+        "altim": 1011.6,
+        "slp": 1011.2,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 132000Z 27010G20KT 240V310 15SM FEW045 SCT080 BKN250 26/16 A2987 RMK CU2AC1CI4 DIST TCU E SLP112 DENSITY ALT 2400FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 4500
+          },
+          {
+            "cover": "SCT",
+            "base": 8000
+          },
+          {
+            "cover": "BKN",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
@@ -1407,22 +2037,6 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYSN&alpha=notam"
     },
     {
-      "sha256": "7f89c6f87cfa6e9563ff9703c28f13570cce9c5a3f2d08a6c9dbe917845242dc",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 130400Z AUTO 21010KT 9SM OVC009 21/19 A2990 RMK SLP123 DENSITY ALT 2100FT",
-      "issuedAt": "2026-09-13T04:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 130400Z AUTO 21010KT 9SM OVC009 21/19 A2990 RMK SLP123 DENSITY ALT 2100FT",
-        "obsTime": 1789272000,
-        "reportTime": "2026-09-13T04:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
       "sha256": "81b06233190fd4c79f3d62a2e591d18ebc78a6ecc0b0c2ecf9359abf4b460e5f",
       "kind": "notam",
       "source": "navcanada-cfps",
@@ -1448,19 +2062,100 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYKF&alpha=notam"
     },
     {
-      "sha256": "836442e05fd81ed112583c8d58a2148c793a73b32f5fc03b35d1275d55f03bb9",
-      "kind": "taf",
+      "sha256": "81e6fe51824a3f921f93994204d7c75134c05537e6fa54310c2ad3c8f1f9eb01",
+      "kind": "metar",
       "source": "awc",
       "station": "CYKF",
-      "body": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
-      "issuedAt": "2026-09-12T19:40:00.000Z",
+      "body": "METAR CYKF 140200Z AUTO 30006KT 9SM CLR 15/12 A3001 RMK SLP161 DENSITY ALT 1300FT",
+      "issuedAt": "2026-09-14T02:00:00.000Z",
       "upstream": {
         "icaoId": "CYKF",
-        "rawTAF": "TAF CYKF 121940Z 1220/1308 17010G20KT P6SM SCT050 BKN240 TEMPO 1220/1223 BKN050 FM122300 21010KT P6SM BKN025 TEMPO 1223/1224 BKN020 FM130000 21008KT P6SM SCT008 BKN015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 130200Z",
-        "issueTime": "2026-09-12T19:40:00Z"
+        "receiptTime": "2026-09-14T02:16:05.922Z",
+        "obsTime": 1789351200,
+        "reportTime": "2026-09-14T02:00:00.000Z",
+        "temp": 15,
+        "dewp": 12,
+        "wdir": 300,
+        "wspd": 6,
+        "visib": 9,
+        "altim": 1016.3,
+        "slp": 1016.1,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 140200Z AUTO 30006KT 9SM CLR 15/12 A3001 RMK SLP161 DENSITY ALT 1300FT",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "CLR",
+        "clouds": [],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/taf?ids=CYSN,CYKF,CYHM&format=json"
+      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
+      "sha256": "8467d0f8ae77e6fd707cd7c500c65046e24c063a7d33baf0081787fd5e2c7ed5",
+      "kind": "metar",
+      "source": "awc",
+      "station": "CYHM",
+      "body": "METAR CYHM 140400Z 32006KT 15SM FEW027 15/11 A3006 RMK CF1 CF TR SLP181",
+      "issuedAt": "2026-09-14T04:00:00.000Z",
+      "upstream": {
+        "icaoId": "CYHM",
+        "receiptTime": "2026-09-14T04:09:06.096Z",
+        "obsTime": 1789358400,
+        "reportTime": "2026-09-14T04:00:00.000Z",
+        "temp": 15,
+        "dewp": 11,
+        "wdir": 320,
+        "wspd": 6,
+        "visib": 15,
+        "altim": 1018,
+        "slp": 1018.1,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 140400Z 32006KT 15SM FEW027 15/11 A3006 RMK CF1 CF TR SLP181",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "FEW",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 2700
+          }
+        ],
+        "fltCat": "VFR"
+      },
+      "fetchedFor": [],
+      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
+      "sha256": "857c6d2525452eb29e8ef589b4a50eebe5fee8ec841da08b8f7f890023856ad0",
+      "kind": "notam",
+      "source": "navcanada-cfps",
+      "station": "CYKF",
+      "body": "(A9255/26 NOTAMR A9238/26\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4328N08023W005\nA) CYKF B) 2609140425 C) 2609141225\nE) RSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 14 0424 - SEP 14 1224.\n\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 14 0424 - SEP 14 1224.\n\nRSC 14/32 DRY. VALID SEP 14 0424 - SEP 14 1224.\n\nADDN NON-GRF/TALPA INFO:\nCRFI 08 NR/NR/NR.\nCRFI 26 NR/NR/NR.\nCRFI 14/32 NR.\n\nRMK: TWY ALL DRY.\nRMK: APN ALL DRY.)",
+      "issuedAt": "2026-09-14T04:25:00.000Z",
+      "upstream": {
+        "type": "notam",
+        "pk": "1772742",
+        "location": "CYKF",
+        "startValidity": "2026-09-14T04:25:00",
+        "endValidity": "2026-09-14T12:25:00",
+        "text": "{\"raw\" : \"(A9255/26 NOTAMR A9238/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4328N08023W005\\nA) CYKF B) 2609140425 C) 2609141225\\nE) RSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 14 0424 - SEP 14 1224.\\n\\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 14 0424 - SEP 14 1224.\\n\\nRSC 14/32 DRY. VALID SEP 14 0424 - SEP 14 1224.\\n\\nADDN NON-GRF/TALPA INFO:\\nCRFI 08 NR/NR/NR.\\nCRFI 26 NR/NR/NR.\\nCRFI 14/32 NR.\\n\\nRMK: TWY ALL DRY.\\nRMK: APN ALL DRY.)\", \"english\" : null, \"french\" : null}",
+        "hasError": false,
+        "position": {
+          "pointReference": "CYKF",
+          "radialDistance": 0
+        }
+      },
+      "fetchedFor": [
+        "CYKF"
+      ],
+      "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYKF&alpha=notam"
     },
     {
       "sha256": "86429ffa8d015deef756c3e943452e092d0fb531a8a0958068dcefb0a69678b0",
@@ -1486,38 +2181,6 @@
         "CYKF"
       ],
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYKF&alpha=notam"
-    },
-    {
-      "sha256": "89b163434b5da19502ecbc2a83667346cbf1e22228aeb9c78d84d2bd2de20939",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 130600Z AUTO 21007KT 9SM OVC009 21/20 A2990 RMK SLP122 DENSITY ALT 2100FT",
-      "issuedAt": "2026-09-13T06:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 130600Z AUTO 21007KT 9SM OVC009 21/20 A2990 RMK SLP122 DENSITY ALT 2100FT",
-        "obsTime": 1789279200,
-        "reportTime": "2026-09-13T06:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "8ca56713d608570f196637070967c764af1d35e4a04e90a03808e90a79341e14",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 131500Z 25009KT 7SM BKN020 BKN080 25/21 A2991 RMK CU6AC1 HZ SLP127 DENSITY ALT 2200FT",
-      "issuedAt": "2026-09-13T15:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 131500Z 25009KT 7SM BKN020 BKN080 25/21 A2991 RMK CU6AC1 HZ SLP127 DENSITY ALT 2200FT",
-        "obsTime": 1789311600,
-        "reportTime": "2026-09-13T15:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
       "sha256": "8e7e2cb0a08b750fde88e33c2fb3e84e2fe15e33df951bae81761350bcc2f617",
@@ -1570,97 +2233,108 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYKF&alpha=notam"
     },
     {
-      "sha256": "9391fefc9d636d1bf344f39eebc94e3fb6184621d95f72c602fc1b148f382e70",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "SPECI CYHM 130717Z 23009KT 1 1/2SM BR VV001 21/20 A2989 RMK FG8 SLP119 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T07:17:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "SPECI CYHM 130717Z 23009KT 1 1/2SM BR VV001 21/20 A2989 RMK FG8 SLP119 DENSITY ALT 1700FT",
-        "obsTime": 1789283820,
-        "reportTime": "2026-09-13T07:17:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "93d778ae07e2d260bb25cf6b97d79a60e024cd1cdea9b5648e2761218310d30d",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 131300Z 23006KT 1 3/4SM BR BKN006 22/22 A2990 RMK ST7 SLP125 DENSITY ALT 1800FT",
-      "issuedAt": "2026-09-13T13:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 131300Z 23006KT 1 3/4SM BR BKN006 22/22 A2990 RMK ST7 SLP125 DENSITY ALT 1800FT",
-        "obsTime": 1789304400,
-        "reportTime": "2026-09-13T13:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "959507b31fb59f28f209e0352bd2916f0cea426e3d2a0ee5e0830552c6e37525",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYSN",
-      "body": "METAR CYSN 130000Z 21005KT 15SM SCT031 BKN250 22/20 A2987 RMK SC3CI3 SLP116 DENSITY ALT 1300FT",
-      "issuedAt": "2026-09-13T00:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 130000Z 21005KT 15SM SCT031 BKN250 22/20 A2987 RMK SC3CI3 SLP116 DENSITY ALT 1300FT",
-        "obsTime": 1789257600,
-        "reportTime": "2026-09-13T00:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "9622baab1735e86087fb71d7b723a738423803876a3fed9f0326fa95eb4f46bc",
+      "sha256": "934a4b0d4f3fcb6637d297be9869d32af1aeb457176d0673cac1b520d1b895ad",
       "kind": "metar",
       "source": "awc",
       "station": "CYKF",
-      "body": "METAR CYKF 130200Z AUTO 18009KT 9SM OVC012 21/19 A2991 RMK SLP126 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T02:00:00.000Z",
+      "body": "METAR CYKF 131800Z AUTO 28012G19KT 240V300 9SM SCT041 25/14 A2988 RMK SLP114 DENSITY ALT 2600FT",
+      "issuedAt": "2026-09-13T18:00:00.000Z",
       "upstream": {
         "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 130200Z AUTO 18009KT 9SM OVC012 21/19 A2991 RMK SLP126 DENSITY ALT 2000FT",
-        "obsTime": 1789264800,
-        "reportTime": "2026-09-13T02:00:00Z"
+        "receiptTime": "2026-09-13T18:09:07.408Z",
+        "obsTime": 1789322400,
+        "reportTime": "2026-09-13T18:00:00.000Z",
+        "temp": 25,
+        "dewp": 14,
+        "wdir": 280,
+        "wspd": 12,
+        "wgst": 19,
+        "visib": 9,
+        "altim": 1011.9,
+        "slp": 1011.4,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 131800Z AUTO 28012G19KT 240V300 9SM SCT041 25/14 A2988 RMK SLP114 DENSITY ALT 2600FT",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "SCT",
+        "clouds": [
+          {
+            "cover": "SCT",
+            "base": 4100
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "96d08452a2d8dba58cc1ae36ef5466b99f7827f17a6e7f5fb3ba17253597f3cb",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 130051Z AUTO 19007KT 9SM SCT024 21/18 A2990 RMK SLP123 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T00:51:00.000Z",
+      "sha256": "94f7399f4afb1606601542ab04ab953f900a1493d64fdfc63594cf3d19914839",
+      "kind": "upperwind",
+      "source": "navcanada-cfps",
+      "station": "CYYZ",
+      "body": "[\"FBCN33\", \"CWAO\", \"2026-09-14T03:30:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-14T12:00:00+00:00\", \"2026-09-14T09:00:00+00:00\", \"2026-09-14T18:00:00+00:00\", null, null, null, null, [[12000,310,33,-3,0],[6000,300,8,2,0],[3000,340,10,null,0],[18000,310,37,-16,0],[9000,310,26,0,0]]]",
+      "issuedAt": "2026-09-14T09:00:00.000Z",
       "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 130051Z AUTO 19007KT 9SM SCT024 21/18 A2990 RMK SLP123 DENSITY ALT 2000FT",
-        "obsTime": 1789260660,
-        "reportTime": "2026-09-13T00:51:00Z"
+        "type": "upperwind",
+        "pk": "409687913",
+        "location": "YYZ",
+        "startValidity": "2026-09-14T09:00:00",
+        "endValidity": "2026-09-14T17:59:59",
+        "text": "[\"FBCN33\", \"CWAO\", \"2026-09-14T03:30:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-14T12:00:00+00:00\", \"2026-09-14T09:00:00+00:00\", \"2026-09-14T18:00:00+00:00\", null, null, null, null, [[12000,310,33,-3,0],[6000,300,8,2,0],[3000,340,10,null,0],[18000,310,37,-16,0],[9000,310,26,0,0]]]",
+        "hasError": false,
+        "position": {
+          "pointReference": "CYYZ",
+          "radialDistance": 0
+        }
       },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+      "fetchedFor": [
+        "CYYZ"
+      ],
+      "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYYZ&alpha=upperwind"
     },
     {
-      "sha256": "9b791db1207dfa01c3e7a2e751d5ea30fbda66f3d8d3d0353edd199956165780",
+      "sha256": "99178cb91f50fea7838ac28cc31e89797e51173ace84446cc971274c8b441259",
       "kind": "metar",
       "source": "awc",
-      "station": "CYSN",
-      "body": "METAR CYSN 122200Z 19006KT 15SM OVC051 24/20 A2987 RMK SC8 SLP116 DENSITY ALT 1600FT",
-      "issuedAt": "2026-09-12T22:00:00.000Z",
+      "station": "CYHM",
+      "body": "METAR CYHM 131900Z 27013G21KT 15SM SCT045 BKN250 27/16 A2986 RMK CU3CI4 SLP110 DENSITY ALT 2500FT",
+      "issuedAt": "2026-09-13T19:00:00.000Z",
       "upstream": {
-        "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 122200Z 19006KT 15SM OVC051 24/20 A2987 RMK SC8 SLP116 DENSITY ALT 1600FT",
-        "obsTime": 1789250400,
-        "reportTime": "2026-09-12T22:00:00Z"
+        "icaoId": "CYHM",
+        "receiptTime": "2026-09-13T19:08:24.275Z",
+        "obsTime": 1789326000,
+        "reportTime": "2026-09-13T19:00:00.000Z",
+        "temp": 27,
+        "dewp": 16,
+        "wdir": 270,
+        "wspd": 13,
+        "wgst": 21,
+        "visib": 15,
+        "altim": 1011.3,
+        "slp": 1011,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 131900Z 27013G21KT 15SM SCT045 BKN250 27/16 A2986 RMK CU3CI4 SLP110 DENSITY ALT 2500FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "SCT",
+            "base": 4500
+          },
+          {
+            "cover": "BKN",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
@@ -1691,44 +2365,88 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYKF&alpha=notam"
     },
     {
-      "sha256": "9f88edad14f60f49cf4440c85ca3f68156a7c2b4c2b25448965e5fc5fdc59201",
-      "kind": "taf",
+      "sha256": "a28ec11e77b698017c178e5e754172f575a6eeed58b1b57f81018b56a83fd800",
+      "kind": "metar",
       "source": "awc",
       "station": "CYSN",
-      "body": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
-      "issuedAt": "2026-09-12T19:40:00.000Z",
+      "body": "METAR CYSN 132000Z 30011KT 15SM SCT042TCU BKN250 26/19 A2981 RMK TCU3CI3 SLP096 DENSITY ALT 1800FT",
+      "issuedAt": "2026-09-13T20:00:00.000Z",
       "upstream": {
         "icaoId": "CYSN",
-        "rawTAF": "TAF CYSN 121940Z 1220/1301 19008KT P6SM BKN080 BKN240 FM122100 20010KT P6SM BKN060 TEMPO 1221/1224 BKN030 FM130000 20008KT P6SM BKN030 TEMPO 1300/1301 BKN020 RMK NXT FCST BY 131300Z",
-        "issueTime": "2026-09-12T19:40:00Z"
+        "receiptTime": "2026-09-13T20:08:30.466Z",
+        "obsTime": 1789329600,
+        "reportTime": "2026-09-13T20:00:00.000Z",
+        "temp": 26,
+        "dewp": 19,
+        "wdir": 300,
+        "wspd": 11,
+        "visib": 15,
+        "altim": 1009.6,
+        "slp": 1009.6,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYSN 132000Z 30011KT 15SM SCT042TCU BKN250 26/19 A2981 RMK TCU3CI3 SLP096 DENSITY ALT 1800FT",
+        "lat": 43.192,
+        "lon": -79.176,
+        "elev": 96,
+        "name": "St Catharines/Niagara Arpt, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "SCT",
+            "base": 4200
+          },
+          {
+            "cover": "BKN",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/taf?ids=CYSN,CYKF,CYHM&format=json"
+      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "a3101fc3b0754ced5c7bcf53a1dadc3172dbf49800027db9fdca1056b8f1d42a",
-      "kind": "notam",
-      "source": "navcanada-cfps",
-      "station": "CYHM",
-      "body": "(S2881/26 NOTAMR S2860/26\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4310N07956W005\nA) CYHM B) 2609121527 C) 2609122327\nE) RSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 12 1527 - SEP 12 2327.\n\nRSC 30 6/6/6 DRY, DRY, DRY. VALID SEP 12 1527 - SEP 12 2327.\n\nADDN NON-GRF/TALPA INFO:\nCRFI 12 NR/NR/NR.\nCRFI 30 NR/NR/NR.)",
-      "issuedAt": "2026-09-12T15:27:00.000Z",
+      "sha256": "a4aa43b37a3b9eeaaacd2c9d883c49d83bd17baf5f40d1579c572c8b291d6295",
+      "kind": "metar",
+      "source": "awc",
+      "station": "CYSN",
+      "body": "METAR CYSN 131900Z 33005KT 310V010 12SM BKN041TCU BKN250 26/21 A2981 RMK TCU5CI2 SLP094 DENSITY ALT 1800FT",
+      "issuedAt": "2026-09-13T19:00:00.000Z",
       "upstream": {
-        "type": "notam",
-        "pk": "1772079",
-        "location": "CYHM",
-        "startValidity": "2026-09-12T15:27:00",
-        "endValidity": "2026-09-12T23:27:00",
-        "text": "{\"raw\" : \"(S2881/26 NOTAMR S2860/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4310N07956W005\\nA) CYHM B) 2609121527 C) 2609122327\\nE) RSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 12 1527 - SEP 12 2327.\\n\\nRSC 30 6/6/6 DRY, DRY, DRY. VALID SEP 12 1527 - SEP 12 2327.\\n\\nADDN NON-GRF/TALPA INFO:\\nCRFI 12 NR/NR/NR.\\nCRFI 30 NR/NR/NR.)\", \"english\" : null, \"french\" : null}",
-        "hasError": false,
-        "position": {
-          "pointReference": "CYHM",
-          "radialDistance": 0
-        }
+        "icaoId": "CYSN",
+        "receiptTime": "2026-09-13T19:08:24.050Z",
+        "obsTime": 1789326000,
+        "reportTime": "2026-09-13T19:00:00.000Z",
+        "temp": 26,
+        "dewp": 21,
+        "wdir": 330,
+        "wspd": 5,
+        "visib": 12,
+        "altim": 1009.6,
+        "slp": 1009.4,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYSN 131900Z 33005KT 310V010 12SM BKN041TCU BKN250 26/21 A2981 RMK TCU5CI2 SLP094 DENSITY ALT 1800FT",
+        "lat": 43.192,
+        "lon": -79.176,
+        "elev": 96,
+        "name": "St Catharines/Niagara Arpt, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "BKN",
+            "base": 4100
+          },
+          {
+            "cover": "BKN",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
       },
-      "fetchedFor": [
-        "CYHM"
-      ],
-      "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYHM&alpha=notam"
+      "fetchedFor": [],
+      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
       "sha256": "a6ba0102117cc6bad2f2dbe13d53dc641c401c1a8e8576d01ec9fe61197c4b14",
@@ -1758,145 +2476,222 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYSN&alpha=notam"
     },
     {
-      "sha256": "a7468ca5fbf679c7e21061dc64f6133e129482e1ebf1f02e72a04bcc831b1030",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 130911Z AUTO 24004KT 4SM BR BKN008 20/19 A2987 RMK SLP113 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T09:11:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 130911Z AUTO 24004KT 4SM BR BKN008 20/19 A2987 RMK SLP113 DENSITY ALT 2000FT",
-        "obsTime": 1789290660,
-        "reportTime": "2026-09-13T09:11:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "ad98c2e6ff7843e4d4a561540b35de37d7c114d62ebc6eb953df213621a1d6a0",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYSN",
-      "body": "METAR CYSN 131400Z 23012KT 15SM SCT014 BKN075 25/22 A2987 RMK CU5AC2 SLP117 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T14:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 131400Z 23012KT 15SM SCT014 BKN075 25/22 A2987 RMK CU5AC2 SLP117 DENSITY ALT 1700FT",
-        "obsTime": 1789308000,
-        "reportTime": "2026-09-13T14:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "afdfaa5cefc8a031462a43916e9a70e0fec7d2fe2470204f2fddf1ff626a57d7",
+      "sha256": "ab66a8c249b4c1f8d7befceaadcd95f18597a1ab04a779f00a1d24068da28fce",
       "kind": "metar",
       "source": "awc",
       "station": "CYHM",
-      "body": "METAR CYHM 122300Z 19007KT 15SM FEW035 OVC070 22/19 A2988 RMK SC2AC6 SLP121 DENSITY ALT 1900FT",
-      "issuedAt": "2026-09-12T23:00:00.000Z",
+      "body": "METAR CYHM 131800Z 24014KT 220V290 15SM SCT035 BKN250 27/18 A2985 RMK CU4CI3 SLP108 DENSITY ALT 2400FT",
+      "issuedAt": "2026-09-13T18:00:00.000Z",
       "upstream": {
         "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 122300Z 19007KT 15SM FEW035 OVC070 22/19 A2988 RMK SC2AC6 SLP121 DENSITY ALT 1900FT",
-        "obsTime": 1789254000,
-        "reportTime": "2026-09-12T23:00:00Z"
+        "receiptTime": "2026-09-13T18:09:07.390Z",
+        "obsTime": 1789322400,
+        "reportTime": "2026-09-13T18:00:00.000Z",
+        "temp": 27,
+        "dewp": 18,
+        "wdir": 240,
+        "wspd": 14,
+        "visib": 15,
+        "altim": 1010.9,
+        "slp": 1010.8,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 131800Z 24014KT 220V290 15SM SCT035 BKN250 27/18 A2985 RMK CU4CI3 SLP108 DENSITY ALT 2400FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "SCT",
+            "base": 3500
+          },
+          {
+            "cover": "BKN",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "b3e680c999d07757a74444df260a9a37322aff28faf967b4a341c899897416d0",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYSN",
-      "body": "METAR CYSN 131500Z 23011G16KT 12SM SCT015 BKN021 BKN044 BKN080 27/22 A2988 RMK CF3CU2SC1AC1 SLP118 DENSITY ALT 1800FT",
-      "issuedAt": "2026-09-13T15:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 131500Z 23011G16KT 12SM SCT015 BKN021 BKN044 BKN080 27/22 A2988 RMK CF3CU2SC1AC1 SLP118 DENSITY ALT 1800FT",
-        "obsTime": 1789311600,
-        "reportTime": "2026-09-13T15:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "b4803c21c3dcdb7530e91dd6f77f2d616cb851f467c5fafabb244968a3829195",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "SPECI CYHM 130651Z 21007KT 3/8SM R12/5500VP6000FT/U FG VV001 21/20 A2989 RMK FG8 SLP121 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T06:51:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "SPECI CYHM 130651Z 21007KT 3/8SM R12/5500VP6000FT/U FG VV001 21/20 A2989 RMK FG8 SLP121 DENSITY ALT 1700FT",
-        "obsTime": 1789282260,
-        "reportTime": "2026-09-13T06:51:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "b84219dc7513f588297b1c009d0e713072261eca1172dcfe975814a324eebabd",
+      "sha256": "abe2c69cc921cc1abe3406060e3d52759b5c765a1d5df255bfaed952c18a3bfe",
       "kind": "metar",
       "source": "awc",
       "station": "CYKF",
-      "body": "METAR CYKF 131600Z AUTO 28009G19KT 250V310 9SM SCT021 SCT027 BKN037 24/18 A2992 RMK SLP129 DENSITY ALT 2300FT",
-      "issuedAt": "2026-09-13T16:00:00.000Z",
+      "body": "METAR CYKF 140100Z AUTO 30009G18KT 9SM BKN130 OVC150 17/12 A2997 RMK SLP150 DENSITY ALT 1500FT",
+      "issuedAt": "2026-09-14T01:00:00.000Z",
       "upstream": {
         "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 131600Z AUTO 28009G19KT 250V310 9SM SCT021 SCT027 BKN037 24/18 A2992 RMK SLP129 DENSITY ALT 2300FT",
-        "obsTime": 1789315200,
-        "reportTime": "2026-09-13T16:00:00Z"
+        "receiptTime": "2026-09-14T01:08:25.746Z",
+        "obsTime": 1789347600,
+        "reportTime": "2026-09-14T01:00:00.000Z",
+        "temp": 17,
+        "dewp": 12,
+        "wdir": 300,
+        "wspd": 9,
+        "wgst": 18,
+        "visib": 9,
+        "altim": 1015,
+        "slp": 1015,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 140100Z AUTO 30009G18KT 9SM BKN130 OVC150 17/12 A2997 RMK SLP150 DENSITY ALT 1500FT",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "OVC",
+        "clouds": [
+          {
+            "cover": "BKN",
+            "base": 13000
+          },
+          {
+            "cover": "OVC",
+            "base": 15000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "b8ee6f2a479db93c75c65eef30fb9c878eed3405b0b22b5913ffd6e12444170e",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYSN",
-      "body": "METAR CYSN 122100Z 18006KT 15SM SCT062 BKN090 OVC250 25/20 A2987 RMK SC3AC4CI1 SLP115 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-12T21:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 122100Z 18006KT 15SM SCT062 BKN090 OVC250 25/20 A2987 RMK SC3AC4CI1 SLP115 DENSITY ALT 1700FT",
-        "obsTime": 1789246800,
-        "reportTime": "2026-09-12T21:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "bae03f3c76881fab0431b5f155baabd151eade3d1f22b8e41a2233932725f1e1",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 122300Z AUTO 16008KT 9SM CLR 23/18 A2988 RMK SLP120 DENSITY ALT 2300FT",
-      "issuedAt": "2026-09-12T23:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 122300Z AUTO 16008KT 9SM CLR 23/18 A2988 RMK SLP120 DENSITY ALT 2300FT",
-        "obsTime": 1789254000,
-        "reportTime": "2026-09-12T23:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "bda6c999412a6aa7b1fbfb07189e72e68e6c38fd871287b91099662e09b370dc",
+      "sha256": "b6569f4e50adeb03435095a06f503e51dcd1c8d410809b9743d7ef0c6c7966e9",
       "kind": "metar",
       "source": "awc",
       "station": "CYHM",
-      "body": "METAR CYHM 131200Z 20005KT 3/4SM R12/P6000FT/N BR OVC002 21/21 A2989 RMK FG4ST4 SLP122 DENSITY ALT 1700FT",
-      "issuedAt": "2026-09-13T12:00:00.000Z",
+      "body": "METAR CYHM 140200Z 31010G16KT 15SM FEW035 FEW100 BKN140 18/12 A3000 RMK CF1AC1AC4 SLP158 DENSITY ALT 1200FT",
+      "issuedAt": "2026-09-14T02:00:00.000Z",
       "upstream": {
         "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 131200Z 20005KT 3/4SM R12/P6000FT/N BR OVC002 21/21 A2989 RMK FG4ST4 SLP122 DENSITY ALT 1700FT",
-        "obsTime": 1789300800,
-        "reportTime": "2026-09-13T12:00:00Z"
+        "receiptTime": "2026-09-14T02:16:05.904Z",
+        "obsTime": 1789351200,
+        "reportTime": "2026-09-14T02:00:00.000Z",
+        "temp": 18,
+        "dewp": 12,
+        "wdir": 310,
+        "wspd": 10,
+        "wgst": 16,
+        "visib": 15,
+        "altim": 1016,
+        "slp": 1015.8,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 140200Z 31010G16KT 15SM FEW035 FEW100 BKN140 18/12 A3000 RMK CF1AC1AC4 SLP158 DENSITY ALT 1200FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 3500
+          },
+          {
+            "cover": "FEW",
+            "base": 10000
+          },
+          {
+            "cover": "BKN",
+            "base": 14000
+          }
+        ],
+        "fltCat": "VFR"
+      },
+      "fetchedFor": [],
+      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
+      "sha256": "b957c0ecd28e198416f56d3221967956059043e802966d64bf354206e6e19863",
+      "kind": "metar",
+      "source": "awc",
+      "station": "CYSN",
+      "body": "METAR CYSN 132300Z 30011G17KT 15SM FEW042 SCT120 BKN250 23/14 A2987 RMK SC1AC3CI3 SLP114 DENSITY ALT 1500FT",
+      "issuedAt": "2026-09-13T23:00:00.000Z",
+      "upstream": {
+        "icaoId": "CYSN",
+        "receiptTime": "2026-09-13T23:08:23.053Z",
+        "obsTime": 1789340400,
+        "reportTime": "2026-09-13T23:00:00.000Z",
+        "temp": 23,
+        "dewp": 14,
+        "wdir": 300,
+        "wspd": 11,
+        "wgst": 17,
+        "visib": 15,
+        "altim": 1011.6,
+        "slp": 1011.4,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYSN 132300Z 30011G17KT 15SM FEW042 SCT120 BKN250 23/14 A2987 RMK SC1AC3CI3 SLP114 DENSITY ALT 1500FT",
+        "lat": 43.192,
+        "lon": -79.176,
+        "elev": 96,
+        "name": "St Catharines/Niagara Arpt, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 4200
+          },
+          {
+            "cover": "SCT",
+            "base": 12000
+          },
+          {
+            "cover": "BKN",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
+      },
+      "fetchedFor": [],
+      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
+      "sha256": "ba88c4ffc628174c7beac3f20835c8956a51f09ae4692e9f89c3545c38822c31",
+      "kind": "metar",
+      "source": "awc",
+      "station": "CYHM",
+      "body": "METAR CYHM 140300Z 32009KT 15SM FEW027 SCT140 16/12 A3004 RMK CF2AC1 SLP173 DENSITY ALT 1000FT",
+      "issuedAt": "2026-09-14T03:00:00.000Z",
+      "upstream": {
+        "icaoId": "CYHM",
+        "receiptTime": "2026-09-14T03:09:06.875Z",
+        "obsTime": 1789354800,
+        "reportTime": "2026-09-14T03:00:00.000Z",
+        "temp": 16,
+        "dewp": 12,
+        "wdir": 320,
+        "wspd": 9,
+        "visib": 15,
+        "altim": 1017.4,
+        "slp": 1017.3,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 140300Z 32009KT 15SM FEW027 SCT140 16/12 A3004 RMK CF2AC1 SLP173 DENSITY ALT 1000FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "SCT",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 2700
+          },
+          {
+            "cover": "SCT",
+            "base": 14000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
@@ -1929,106 +2724,78 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYSN&alpha=notam"
     },
     {
-      "sha256": "c0b8331f423fc2179efe6492605ce3984c87248d004e47bc0ece55fcecb4c98e",
+      "sha256": "c1ed5fffe5d52421c8440cda0b98836a9a84eac1a05f4a5396fa223ec4b33e87",
       "kind": "metar",
       "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 131000Z AUTO 22004KT 3SM BR FEW011 19/19 A2988 RMK SLP116 DENSITY ALT 1900FT",
-      "issuedAt": "2026-09-13T10:00:00.000Z",
+      "station": "CYHM",
+      "body": "METAR CYHM 140500Z 29006KT 15SM FEW030 14/10 A3008 RMK SC1 SC TR SLP187",
+      "issuedAt": "2026-09-14T05:00:00.000Z",
       "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 131000Z AUTO 22004KT 3SM BR FEW011 19/19 A2988 RMK SLP116 DENSITY ALT 1900FT",
-        "obsTime": 1789293600,
-        "reportTime": "2026-09-13T10:00:00Z"
+        "icaoId": "CYHM",
+        "receiptTime": "2026-09-14T05:09:04.389Z",
+        "obsTime": 1789362000,
+        "reportTime": "2026-09-14T05:00:00.000Z",
+        "temp": 14,
+        "dewp": 10,
+        "wdir": 290,
+        "wspd": 6,
+        "visib": 15,
+        "altim": 1018.7,
+        "slp": 1018.7,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 140500Z 29006KT 15SM FEW030 14/10 A3008 RMK SC1 SC TR SLP187",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "FEW",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 3000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "c18d39019ff06339a8c7a124162fa69bc4dbd98f893e47c1229ce20e54005ca6",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 130116Z AUTO 18006KT 9SM BKN014 21/19 A2991 RMK SLP126 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T01:16:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 130116Z AUTO 18006KT 9SM BKN014 21/19 A2991 RMK SLP126 DENSITY ALT 2000FT",
-        "obsTime": 1789262160,
-        "reportTime": "2026-09-13T01:16:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "c24c812beacb7633e80476d69fe5ae95ac88520548b21ee1112e7fe1236b3d7c",
+      "sha256": "c5e9d2c108f55d071e83ebdc2ee48d74223841783db8c07fa6398210f90d76f1",
       "kind": "metar",
       "source": "awc",
       "station": "CYSN",
-      "body": "METAR CYSN 131100Z 22004KT 15SM BKN020 21/20 A2986 RMK SC7 SLP112 DENSITY ALT 1200FT",
-      "issuedAt": "2026-09-13T11:00:00.000Z",
+      "body": "METAR CYSN 140100Z 32013G18KT 15SM BKN110 21/13 A2993 RMK AC7 LAST STFD OBS/NXT 141100Z SLP134 DENSITY ALT 1100FT",
+      "issuedAt": "2026-09-14T01:00:00.000Z",
       "upstream": {
         "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 131100Z 22004KT 15SM BKN020 21/20 A2986 RMK SC7 SLP112 DENSITY ALT 1200FT",
-        "obsTime": 1789297200,
-        "reportTime": "2026-09-13T11:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "c3c87afd1361b3984f8e27584e6b5a749546ab0b411fbe9f2b3ed25c265d4433",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYSN",
-      "body": "METAR CYSN 131300Z CCA 23010KT 15SM FEW013 FEW049 SCT078 24/22 A2987 RMK SF1SC1AC2 SLP116 DENSITY ALT 1600FT",
-      "issuedAt": "2026-09-13T13:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 131300Z CCA 23010KT 15SM FEW013 FEW049 SCT078 24/22 A2987 RMK SF1SC1AC2 SLP116 DENSITY ALT 1600FT",
-        "obsTime": 1789304400,
-        "reportTime": "2026-09-13T13:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "c4fd18b670a06e480c360bb509f50e9e29a2c16054138c6dc32edeedfdd55250",
-      "kind": "notam",
-      "source": "navcanada-cfps",
-      "station": "CYKF",
-      "body": "(A9080/26 NOTAMR A9044/26\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4328N08023W005\nA) CYKF B) 2609121636 C) 2609130036\nE) RSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 12 1635 - SEP 13 0035.\n\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 12 1635 - SEP 13 0035.\n\nRSC 14/32 DRY. VALID SEP 12 1635 - SEP 13 0035.\n\nADDN NON-GRF/TALPA INFO:\nCRFI 08 NR/NR/NR.\nCRFI 26 NR/NR/NR.\nCRFI 14/32 NR.\n\nRMK: TWY ALL DRY.\nRMK: APN ALL DRY.)",
-      "issuedAt": "2026-09-12T16:36:00.000Z",
-      "upstream": {
-        "type": "notam",
-        "pk": "1772117",
-        "location": "CYKF",
-        "startValidity": "2026-09-12T16:36:00",
-        "endValidity": "2026-09-13T00:36:00",
-        "text": "{\"raw\" : \"(A9080/26 NOTAMR A9044/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4328N08023W005\\nA) CYKF B) 2609121636 C) 2609130036\\nE) RSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 12 1635 - SEP 13 0035.\\n\\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 12 1635 - SEP 13 0035.\\n\\nRSC 14/32 DRY. VALID SEP 12 1635 - SEP 13 0035.\\n\\nADDN NON-GRF/TALPA INFO:\\nCRFI 08 NR/NR/NR.\\nCRFI 26 NR/NR/NR.\\nCRFI 14/32 NR.\\n\\nRMK: TWY ALL DRY.\\nRMK: APN ALL DRY.)\", \"english\" : null, \"french\" : null}",
-        "hasError": false,
-        "position": {
-          "pointReference": "CYKF",
-          "radialDistance": 0
-        }
-      },
-      "fetchedFor": [
-        "CYKF"
-      ],
-      "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYKF&alpha=notam"
-    },
-    {
-      "sha256": "c5fbec69e2f66f2e00b49b4c0c3b889373182ae31fcbb1de4b983c27275b0412",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYSN",
-      "body": "METAR CYSN 130100Z 23005KT 15SM SCT075 BKN250 22/20 A2988 RMK AC3CI2 LAST STFD OBS/NXT 131100Z SLP119 DENSITY ALT 1300FT",
-      "issuedAt": "2026-09-13T01:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 130100Z 23005KT 15SM SCT075 BKN250 22/20 A2988 RMK AC3CI2 LAST STFD OBS/NXT 131100Z SLP119 DENSITY ALT 1300FT",
-        "obsTime": 1789261200,
-        "reportTime": "2026-09-13T01:00:00Z"
+        "receiptTime": "2026-09-14T01:08:25.123Z",
+        "obsTime": 1789347600,
+        "reportTime": "2026-09-14T01:00:00.000Z",
+        "temp": 21,
+        "dewp": 13,
+        "wdir": 320,
+        "wspd": 13,
+        "wgst": 18,
+        "visib": 15,
+        "altim": 1013.6,
+        "slp": 1013.4,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYSN 140100Z 32013G18KT 15SM BKN110 21/13 A2993 RMK AC7 LAST STFD OBS/NXT 141100Z SLP134 DENSITY ALT 1100FT",
+        "lat": 43.192,
+        "lon": -79.176,
+        "elev": 96,
+        "name": "St Catharines/Niagara Arpt, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "BKN",
+            "base": 11000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
@@ -2159,86 +2926,6 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYHM&alpha=notam"
     },
     {
-      "sha256": "cc00ae15d37c7745d5efcacad8f5e14e2c68a4b58bfa45ad8b9cffcd3fa7f937",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 130600Z 20006KT 1 1/2SM BR VV001 20/20 A2989 RMK FG8 SLP121 DENSITY ALT 1600FT",
-      "issuedAt": "2026-09-13T06:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 130600Z 20006KT 1 1/2SM BR VV001 20/20 A2989 RMK FG8 SLP121 DENSITY ALT 1600FT",
-        "obsTime": 1789279200,
-        "reportTime": "2026-09-13T06:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "cf68c63da50fd57707869d305c5aa2c8f73c8ddbfc8bd58fad93b6d1a01d9cd8",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 130200Z 20007KT 15SM FEW220 20/20 A2991 RMK CI1 SLP127 DENSITY ALT 1600FT",
-      "issuedAt": "2026-09-13T02:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 130200Z 20007KT 15SM FEW220 20/20 A2991 RMK CI1 SLP127 DENSITY ALT 1600FT",
-        "obsTime": 1789264800,
-        "reportTime": "2026-09-13T02:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "d3ed3714ffea19faeb7e9feb95512d4af0de3155117cb7788286700bd9cef871",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 130825Z AUTO 24006KT 6SM BR SCT009 21/20 A2987 RMK SLP114 DENSITY ALT 2100FT",
-      "issuedAt": "2026-09-13T08:25:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 130825Z AUTO 24006KT 6SM BR SCT009 21/20 A2987 RMK SLP114 DENSITY ALT 2100FT",
-        "obsTime": 1789287900,
-        "reportTime": "2026-09-13T08:25:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "d4e976dda7510b2c0e5005628baa577cb2c9430d109083fa8bfe17a03aa2ac55",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 131400Z 23008KT 4SM HZ SCT010 BKN070 23/21 A2990 RMK SC4AC3 SLP126 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T14:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 131400Z 23008KT 4SM HZ SCT010 BKN070 23/21 A2990 RMK SC4AC3 SLP126 DENSITY ALT 2000FT",
-        "obsTime": 1789308000,
-        "reportTime": "2026-09-13T14:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "d548d012ba806feb373e9b1479e9059ced7779f289bd3e1a042e3eddc15b02f2",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 122200Z 17009KT 15SM FEW048 BKN062 24/19 A2987 RMK SC1SC6 SLP117 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-12T22:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 122200Z 17009KT 15SM FEW048 BKN062 24/19 A2987 RMK SC1SC6 SLP117 DENSITY ALT 2000FT",
-        "obsTime": 1789250400,
-        "reportTime": "2026-09-12T22:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
       "sha256": "d79d4a418cd46b6c53f60e377ff57b44aaf36bdbe0c34cbc2442c9ab963413a0",
       "kind": "notam",
       "source": "navcanada-cfps",
@@ -2266,186 +2953,584 @@
       "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYSN&alpha=notam"
     },
     {
-      "sha256": "d936d1fd595e6f626c8988fc70e21465be26a6cb9a3d181349c3d3b6df9144b6",
+      "sha256": "dc5dde875868b21c87666b7c5b45e69e5f332a96a3e84114bda6467a12b857f0",
       "kind": "metar",
       "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 130900Z 19006KT 3SM BR OVC003 21/21 A2987 RMK ST8 SLP114 DENSITY ALT 1800FT",
-      "issuedAt": "2026-09-13T09:00:00.000Z",
+      "station": "CYKF",
+      "body": "METAR CYKF 132100Z AUTO 27014G23KT 9SM BKN200 BKN230 23/12 A2991 RMK SLP126 DENSITY ALT 2300FT",
+      "issuedAt": "2026-09-13T21:00:00.000Z",
       "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 130900Z 19006KT 3SM BR OVC003 21/21 A2987 RMK ST8 SLP114 DENSITY ALT 1800FT",
-        "obsTime": 1789290000,
-        "reportTime": "2026-09-13T09:00:00Z"
+        "icaoId": "CYKF",
+        "receiptTime": "2026-09-13T21:09:07.960Z",
+        "obsTime": 1789333200,
+        "reportTime": "2026-09-13T21:00:00.000Z",
+        "temp": 23,
+        "dewp": 12,
+        "wdir": 270,
+        "wspd": 14,
+        "wgst": 23,
+        "visib": 9,
+        "altim": 1013,
+        "slp": 1012.6,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 132100Z AUTO 27014G23KT 9SM BKN200 BKN230 23/12 A2991 RMK SLP126 DENSITY ALT 2300FT",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "BKN",
+            "base": 20000
+          },
+          {
+            "cover": "BKN",
+            "base": 23000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "dbc20c1eef82fe3994b15363c76cabdd28aea014792461fdf0d773d86a2750b0",
+      "sha256": "e06b5c9959424528f7799f4ef683be1fca1a321d89ee5e25c3a3859abfef0df6",
+      "kind": "metar",
+      "source": "awc",
+      "station": "CYKF",
+      "body": "METAR CYKF 140500Z AUTO 29007KT 9SM CLR 13/10 A3008 RMK SLP186",
+      "issuedAt": "2026-09-14T05:00:00.000Z",
+      "upstream": {
+        "icaoId": "CYKF",
+        "receiptTime": "2026-09-14T05:09:04.404Z",
+        "obsTime": 1789362000,
+        "reportTime": "2026-09-14T05:00:00.000Z",
+        "temp": 13,
+        "dewp": 10,
+        "wdir": 290,
+        "wspd": 7,
+        "visib": 9,
+        "altim": 1018.7,
+        "slp": 1018.6,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 140500Z AUTO 29007KT 9SM CLR 13/10 A3008 RMK SLP186",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "CLR",
+        "clouds": [],
+        "fltCat": "VFR"
+      },
+      "fetchedFor": [],
+      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
+      "sha256": "e0cd83aa38c2e88fd65f920e7f4bd42d1d217d8d0fc99482494c81c031ec04dc",
+      "kind": "metar",
+      "source": "awc",
+      "station": "CYKF",
+      "body": "METAR CYKF 132300Z AUTO 31013G20KT 9SM BKN100 OVC130 19/11 A2993 RMK SLP135 DENSITY ALT 1800FT",
+      "issuedAt": "2026-09-13T23:00:00.000Z",
+      "upstream": {
+        "icaoId": "CYKF",
+        "receiptTime": "2026-09-13T23:14:16.921Z",
+        "obsTime": 1789340400,
+        "reportTime": "2026-09-13T23:00:00.000Z",
+        "temp": 19,
+        "dewp": 11,
+        "wdir": 310,
+        "wspd": 13,
+        "wgst": 20,
+        "visib": 9,
+        "altim": 1013.6,
+        "slp": 1013.5,
+        "qcField": 2,
+        "metarType": "METAR",
+        "rawOb": "METAR CYKF 132300Z AUTO 31013G20KT 9SM BKN100 OVC130 19/11 A2993 RMK SLP135 DENSITY ALT 1800FT",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "name": "Waterloo Intl, ON, CA",
+        "cover": "OVC",
+        "clouds": [
+          {
+            "cover": "BKN",
+            "base": 10000
+          },
+          {
+            "cover": "OVC",
+            "base": 13000
+          }
+        ],
+        "fltCat": "VFR"
+      },
+      "fetchedFor": [],
+      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
+      "sha256": "e4a677fb825c51630b471843d1ea583fb3dd9ed9e5b452e8b5fa8341c8ba3fe6",
       "kind": "metar",
       "source": "awc",
       "station": "CYSN",
-      "body": "METAR CYSN 122300Z 18009KT 15SM OVC037 24/20 A2986 RMK SC8 SLP113 DENSITY ALT 1600FT",
-      "issuedAt": "2026-09-12T23:00:00.000Z",
+      "body": "METAR CYSN 132100Z 30015G22KT 15SM FEW043TCU FEW120 SCT250 26/16 A2982 RMK TCU1AC1CI2 SLP100 DENSITY ALT 1800FT",
+      "issuedAt": "2026-09-13T21:00:00.000Z",
       "upstream": {
         "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 122300Z 18009KT 15SM OVC037 24/20 A2986 RMK SC8 SLP113 DENSITY ALT 1600FT",
-        "obsTime": 1789254000,
-        "reportTime": "2026-09-12T23:00:00Z"
+        "receiptTime": "2026-09-13T21:08:26.247Z",
+        "obsTime": 1789333200,
+        "reportTime": "2026-09-13T21:00:00.000Z",
+        "temp": 26,
+        "dewp": 16,
+        "wdir": 300,
+        "wspd": 15,
+        "wgst": 22,
+        "visib": 15,
+        "altim": 1009.9,
+        "slp": 1010,
+        "qcField": 0,
+        "metarType": "METAR",
+        "rawOb": "METAR CYSN 132100Z 30015G22KT 15SM FEW043TCU FEW120 SCT250 26/16 A2982 RMK TCU1AC1CI2 SLP100 DENSITY ALT 1800FT",
+        "lat": 43.192,
+        "lon": -79.176,
+        "elev": 96,
+        "name": "St Catharines/Niagara Arpt, ON, CA",
+        "cover": "SCT",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 4300
+          },
+          {
+            "cover": "FEW",
+            "base": 12000
+          },
+          {
+            "cover": "SCT",
+            "base": 25000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "dc54904ee684cc55e6c845fd91650020af966491593ad5b6fc531a41754cf75c",
+      "sha256": "f23773da6c5114bcf80bda51782cd00c0bbebbc1a1afc136ebc4353ab2e6dec8",
+      "kind": "upperwind",
+      "source": "navcanada-cfps",
+      "station": "CYYZ",
+      "body": "[\"FBCN33\", \"KWNO\", \"2026-09-14T01:59:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-14T12:00:00+00:00\", \"2026-09-14T09:00:00+00:00\", \"2026-09-14T18:00:00+00:00\", null, null, null, null, [[24000,310,50,-27,0],[30000,310,55,-37,0],[34000,300,57,-43,0],[39000,300,68,-44,0],[45000,300,53,-54,0],[53000,290,36,-61,0]]]",
+      "issuedAt": "2026-09-14T09:01:00.000Z",
+      "upstream": {
+        "type": "upperwind",
+        "pk": "409685662",
+        "location": "YYZ",
+        "startValidity": "2026-09-14T09:01:00",
+        "endValidity": "2026-09-14T17:59:59",
+        "text": "[\"FBCN33\", \"KWNO\", \"2026-09-14T01:59:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-14T12:00:00+00:00\", \"2026-09-14T09:00:00+00:00\", \"2026-09-14T18:00:00+00:00\", null, null, null, null, [[24000,310,50,-27,0],[30000,310,55,-37,0],[34000,300,57,-43,0],[39000,300,68,-44,0],[45000,300,53,-54,0],[53000,290,36,-61,0]]]",
+        "hasError": false,
+        "position": {
+          "pointReference": "CYYZ",
+          "radialDistance": 0
+        }
+      },
+      "fetchedFor": [
+        "CYYZ"
+      ],
+      "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYYZ&alpha=upperwind"
+    },
+    {
+      "sha256": "f9a4e8023aae7fb57bf956c079f6adaa182af92e9fb3ff02ac34b1ae4f441332",
       "kind": "metar",
       "source": "awc",
       "station": "CYHM",
-      "body": "SPECI CYHM 130348Z 20006KT 10SM OVC005 20/20 A2991 RMK ST8 SLP127 DENSITY ALT 1600FT",
-      "issuedAt": "2026-09-13T03:48:00.000Z",
+      "body": "METAR CYHM 140100Z 30007KT 15SM -SHRA FEW040 BKN085 BKN110 19/11 A2996 RMK SC1AC5AC2 SC TR CVCTV CLD EMBD SLP146 DENSITY ALT 1400FT",
+      "issuedAt": "2026-09-14T01:00:00.000Z",
       "upstream": {
         "icaoId": "CYHM",
-        "rawOb": "SPECI CYHM 130348Z 20006KT 10SM OVC005 20/20 A2991 RMK ST8 SLP127 DENSITY ALT 1600FT",
-        "obsTime": 1789271280,
-        "reportTime": "2026-09-13T03:48:00Z"
+        "receiptTime": "2026-09-14T01:08:25.643Z",
+        "obsTime": 1789347600,
+        "reportTime": "2026-09-14T01:00:00.000Z",
+        "temp": 19,
+        "dewp": 11,
+        "wdir": 300,
+        "wspd": 7,
+        "visib": 15,
+        "altim": 1014.6,
+        "slp": 1014.6,
+        "qcField": 0,
+        "wxString": "-SHRA",
+        "metarType": "METAR",
+        "rawOb": "METAR CYHM 140100Z 30007KT 15SM -SHRA FEW040 BKN085 BKN110 19/11 A2996 RMK SC1AC5AC2 SC TR CVCTV CLD EMBD SLP146 DENSITY ALT 1400FT",
+        "lat": 43.173,
+        "lon": -79.936,
+        "elev": 237,
+        "name": "Hamilton/Munro Intl, ON, CA",
+        "cover": "BKN",
+        "clouds": [
+          {
+            "cover": "FEW",
+            "base": 4000
+          },
+          {
+            "cover": "BKN",
+            "base": 8500
+          },
+          {
+            "cover": "BKN",
+            "base": 11000
+          }
+        ],
+        "fltCat": "VFR"
       },
       "fetchedFor": [],
       "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
     },
     {
-      "sha256": "ddc145c4feefaf27849fd0357a0527cc103253f536fbcedc58b6152fbd76ed2a",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "SPECI CYHM 131351Z 25009KT 3SM HZ SCT010 BKN070 23/21 A2990 RMK SC4AC3 SLP126 DENSITY ALT 2000FT",
-      "issuedAt": "2026-09-13T13:51:00.000Z",
+      "sha256": "fca0893a67ae863d46ffc2c1314c2cbcba96a5f58b01cf0927d61dc76808a991",
+      "kind": "upperwind",
+      "source": "navcanada-cfps",
+      "station": "CYYZ",
+      "body": "[\"FBCN31\", \"CWAO\", \"2026-09-14T03:20:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-14T06:00:00+00:00\", \"2026-09-14T02:00:00+00:00\", \"2026-09-14T09:00:00+00:00\", null, null, null, null, [[9000,290,23,1,0],[6000,330,21,5,0],[3000,330,24,null,0],[18000,280,48,-15,0],[12000,280,38,-4,0]]]",
+      "issuedAt": "2026-09-14T02:00:00.000Z",
       "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "SPECI CYHM 131351Z 25009KT 3SM HZ SCT010 BKN070 23/21 A2990 RMK SC4AC3 SLP126 DENSITY ALT 2000FT",
-        "obsTime": 1789307460,
-        "reportTime": "2026-09-13T13:51:00Z"
+        "type": "upperwind",
+        "pk": "409687831",
+        "location": "YYZ",
+        "startValidity": "2026-09-14T02:00:00",
+        "endValidity": "2026-09-14T08:59:59",
+        "text": "[\"FBCN31\", \"CWAO\", \"2026-09-14T03:20:00+00:00\", \"2026-09-14T00:00:00+00:00\", \"2026-09-14T06:00:00+00:00\", \"2026-09-14T02:00:00+00:00\", \"2026-09-14T09:00:00+00:00\", null, null, null, null, [[9000,290,23,1,0],[6000,330,21,5,0],[3000,330,24,null,0],[18000,280,48,-15,0],[12000,280,38,-4,0]]]",
+        "hasError": false,
+        "position": {
+          "pointReference": "CYYZ",
+          "radialDistance": 0
+        }
       },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+      "fetchedFor": [
+        "CYYZ"
+      ],
+      "request": "https://plan.navcanada.ca/weather/api/alpha/?site=CYYZ&alpha=upperwind"
     },
     {
-      "sha256": "e35befba9aab5360a2b55a60a0eb007347564c806d4c2e76191b1ee93f310667",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 122200Z AUTO 17008KT 9SM OVC050 24/17 A2988 RMK SLP120 DENSITY ALT 2400FT",
-      "issuedAt": "2026-09-12T22:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 122200Z AUTO 17008KT 9SM OVC050 24/17 A2988 RMK SLP120 DENSITY ALT 2400FT",
-        "obsTime": 1789250400,
-        "reportTime": "2026-09-12T22:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "e65aec0499935b0c4b23f46dc7fc47d8f7b1c0779450432035db440a92f8b1c4",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 131551Z AUTO 27010G15KT 230V300 9SM BKN019 BKN027 BKN034 24/19 A2992 RMK SLP127 DENSITY ALT 2400FT",
-      "issuedAt": "2026-09-13T15:51:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 131551Z AUTO 27010G15KT 230V300 9SM BKN019 BKN027 BKN034 24/19 A2992 RMK SLP127 DENSITY ALT 2400FT",
-        "obsTime": 1789314660,
-        "reportTime": "2026-09-13T15:51:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "e983b4db1a0752cce52607d4a932c43cc65a88adc5d26d4ede121b4a95862ace",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYHM",
-      "body": "METAR CYHM 130400Z 21007KT 8SM OVC004 20/20 A2991 RMK ST8 SLP127 DENSITY ALT 1600FT",
-      "issuedAt": "2026-09-13T04:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYHM",
-        "rawOb": "METAR CYHM 130400Z 21007KT 8SM OVC004 20/20 A2991 RMK ST8 SLP127 DENSITY ALT 1600FT",
-        "obsTime": 1789272000,
-        "reportTime": "2026-09-13T04:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "ec82feded10b56a80ef164f509a6cc219fde61b1f465396d7fd3df1d1460b010",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 131039Z AUTO 24005KT 3SM BR BKN011 BKN066 20/19 A2989 RMK SLP119 DENSITY ALT 1900FT",
-      "issuedAt": "2026-09-13T10:39:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 131039Z AUTO 24005KT 3SM BR BKN011 BKN066 20/19 A2989 RMK SLP119 DENSITY ALT 1900FT",
-        "obsTime": 1789295940,
-        "reportTime": "2026-09-13T10:39:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "f0313f327c6192a9cb1b8a285eb5bde976baff85e6a413fb09db52e7958da396",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "METAR CYKF 130000Z AUTO 16006KT 9SM SCT032 22/19 A2989 RMK SLP122 DENSITY ALT 2200FT",
-      "issuedAt": "2026-09-13T00:00:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "METAR CYKF 130000Z AUTO 16006KT 9SM SCT032 22/19 A2989 RMK SLP122 DENSITY ALT 2200FT",
-        "obsTime": 1789257600,
-        "reportTime": "2026-09-13T00:00:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "fc172546a0debde2e192d214ba614b36581476d8430c57cabdd7b5196349fead",
-      "kind": "metar",
-      "source": "awc",
-      "station": "CYKF",
-      "body": "SPECI CYKF 131340Z AUTO 24007KT 9SM SCT011 SCT014 22/19 A2991 RMK SLP127 DENSITY ALT 2200FT",
-      "issuedAt": "2026-09-13T13:40:00.000Z",
-      "upstream": {
-        "icaoId": "CYKF",
-        "rawOb": "SPECI CYKF 131340Z AUTO 24007KT 9SM SCT011 SCT014 22/19 A2991 RMK SLP127 DENSITY ALT 2200FT",
-        "obsTime": 1789306800,
-        "reportTime": "2026-09-13T13:40:00Z"
-      },
-      "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
-    },
-    {
-      "sha256": "fd59048253a39dd16c4465f45fe1e8eb108dbc2fd24963ac751449b51ad00395",
-      "kind": "metar",
+      "sha256": "fdb9b6abe98ca45fe7562e7e5387c6b961cb5b2e2fe637062420486a7deaf713",
+      "kind": "taf",
       "source": "awc",
       "station": "CYSN",
-      "body": "METAR CYSN 131600Z 32010KT 15SM SCT015 BKN021 BKN077 24/21 A2987 RMK CF3CU3AC1 SLP115 DENSITY ALT 1500FT",
-      "issuedAt": "2026-09-13T16:00:00.000Z",
+      "body": "TAF CYSN 131940Z 1320/1401 33005KT P6SM SCT040 BKN250 TEMPO 1320/1323 BKN040 BKN250 FM132300 28012G22KT P6SM OVC100 TEMPO 1323/1401 P6SM -SHRA BKN060 OVC100 BECMG 1323/1401 30015G25KT RMK NXT FCST BY 141300Z",
+      "issuedAt": "2026-09-13T19:40:00.000Z",
       "upstream": {
         "icaoId": "CYSN",
-        "rawOb": "METAR CYSN 131600Z 32010KT 15SM SCT015 BKN021 BKN077 24/21 A2987 RMK CF3CU3AC1 SLP115 DENSITY ALT 1500FT",
-        "obsTime": 1789315200,
-        "reportTime": "2026-09-13T16:00:00Z"
+        "dbPopTime": "2026-09-13T19:40:28.083Z",
+        "bulletinTime": "2026-09-13T19:00:00.000Z",
+        "issueTime": "2026-09-13T19:40:00.000Z",
+        "validTimeFrom": 1789329600,
+        "validTimeTo": 1789347600,
+        "rawTAF": "TAF CYSN 131940Z 1320/1401 33005KT P6SM SCT040 BKN250 TEMPO 1320/1323 BKN040 BKN250 FM132300 28012G22KT P6SM OVC100 TEMPO 1323/1401 P6SM -SHRA BKN060 OVC100 BECMG 1323/1401 30015G25KT RMK NXT FCST BY 141300Z",
+        "mostRecent": 1,
+        "remarks": " RMK NXT FCST BY 141300Z",
+        "lat": 43.192,
+        "lon": -79.176,
+        "elev": 96,
+        "prior": 6,
+        "name": "St Catharines/Niagara Arpt",
+        "fcsts": [
+          {
+            "timeFrom": 1789329600,
+            "timeTo": 1789340400,
+            "timeBec": null,
+            "fcstChange": null,
+            "probability": null,
+            "wdir": 330,
+            "wspd": 5,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "SCT",
+                "base": 4000,
+                "type": null
+              },
+              {
+                "cover": "BKN",
+                "base": 25000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789329600,
+            "timeTo": 1789340400,
+            "timeBec": null,
+            "fcstChange": "TEMPO",
+            "probability": null,
+            "wdir": null,
+            "wspd": null,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "BKN",
+                "base": 4000,
+                "type": null
+              },
+              {
+                "cover": "BKN",
+                "base": 25000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789340400,
+            "timeTo": 1789347600,
+            "timeBec": null,
+            "fcstChange": "FM",
+            "probability": null,
+            "wdir": 280,
+            "wspd": 12,
+            "wgst": 22,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "OVC",
+                "base": 10000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789340400,
+            "timeTo": 1789347600,
+            "timeBec": null,
+            "fcstChange": "TEMPO",
+            "probability": null,
+            "wdir": null,
+            "wspd": null,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": "-SHRA",
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "BKN",
+                "base": 6000,
+                "type": null
+              },
+              {
+                "cover": "OVC",
+                "base": 10000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789340400,
+            "timeTo": 1789347600,
+            "timeBec": 1789347600,
+            "fcstChange": "BECMG",
+            "probability": null,
+            "wdir": 300,
+            "wspd": 15,
+            "wgst": 25,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "OVC",
+                "base": 10000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          }
+        ]
       },
       "fetchedFor": [],
-      "request": "https://aviationweather.gov/api/data/metar?ids=CYSN,CYKF,CYHM&format=json"
+      "request": "https://aviationweather.gov/api/data/taf?ids=CYSN,CYKF,CYHM&format=json"
+    },
+    {
+      "sha256": "fe3ce3138639f34c0984713d5e9648cfaef2d6e25fe3926c2f1a457caa770a08",
+      "kind": "taf",
+      "source": "awc",
+      "station": "CYKF",
+      "body": "TAF CYKF 140140Z 1402/1414 31010G20KT P6SM FEW030 TEMPO 1402/1407 BKN020 FM140700 31006KT P6SM SKC RMK FCST BASED ON AUTO OBS. NXT FCST BY 140800Z",
+      "issuedAt": "2026-09-14T01:40:00.000Z",
+      "upstream": {
+        "icaoId": "CYKF",
+        "dbPopTime": "2026-09-14T01:40:29.162Z",
+        "bulletinTime": "2026-09-14T01:00:00.000Z",
+        "issueTime": "2026-09-14T01:40:00.000Z",
+        "validTimeFrom": 1789351200,
+        "validTimeTo": 1789394400,
+        "rawTAF": "TAF CYKF 140140Z 1402/1414 31010G20KT P6SM FEW030 TEMPO 1402/1407 BKN020 FM140700 31006KT P6SM SKC RMK FCST BASED ON AUTO OBS. NXT FCST BY 140800Z",
+        "mostRecent": 1,
+        "remarks": " RMK FCST BASED ON AUTO OBS. NXT FCST BY 140800Z",
+        "lat": 43.462,
+        "lon": -80.386,
+        "elev": 312,
+        "prior": 5,
+        "name": "Waterloo Intl",
+        "fcsts": [
+          {
+            "timeFrom": 1789351200,
+            "timeTo": 1789369200,
+            "timeBec": null,
+            "fcstChange": null,
+            "probability": null,
+            "wdir": 310,
+            "wspd": 10,
+            "wgst": 20,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "FEW",
+                "base": 3000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789351200,
+            "timeTo": 1789369200,
+            "timeBec": null,
+            "fcstChange": "TEMPO",
+            "probability": null,
+            "wdir": null,
+            "wspd": null,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "BKN",
+                "base": 2000,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          },
+          {
+            "timeFrom": 1789369200,
+            "timeTo": 1789394400,
+            "timeBec": null,
+            "fcstChange": "FM",
+            "probability": null,
+            "wdir": 310,
+            "wspd": 6,
+            "wgst": null,
+            "wshearHgt": null,
+            "wshearDir": null,
+            "wshearSpd": null,
+            "visib": "6+",
+            "altim": null,
+            "vertVis": null,
+            "wxString": null,
+            "notDecoded": null,
+            "clouds": [
+              {
+                "cover": "SKC",
+                "base": null,
+                "type": null
+              }
+            ],
+            "icgTurb": [],
+            "temp": []
+          }
+        ]
+      },
+      "fetchedFor": [],
+      "request": "https://aviationweather.gov/api/data/taf?ids=CYSN,CYKF,CYHM&format=json"
     }
   ],
   "assessments": [
     {
+      "notamSha256": "511ccce0890fe65b8a46f4714675f050820aa444bd8c07d0c21863cb44e59fb9",
+      "contextHash": "2e8e348b0059218fda20cd9e39c2799555b12c0edb81abd6bc0c0ebe80545689",
+      "promptVersion": 3,
+      "model": "qwen2.5:7b",
+      "assessment": {
+        "relevance": "critical",
+        "category": "taxiway",
+        "affects": [
+          "departure",
+          "arrival"
+        ],
+        "plain_text": "Taxiway B is closed.",
+        "cited_span": "TWY B CLSD",
+        "rationale": "The closure of taxiway B affects both departure and arrival at CYHM, the alternate aerodrome, and there are no other routes available."
+      },
+      "citation": "exact",
+      "provider": "fixture:ollama",
+      "usage": {
+        "input": 919,
+        "output": 93
+      },
+      "createdAt": "2026-09-14T05:10:00.000Z"
+    },
+    {
       "notamSha256": "c71590cd9bd15bb30ed25522eaca20cc963e0102daf93bdf643058a9aa37dbcf",
-      "contextHash": "8c469e0b02516030e74fc2211cde74b6fc2cc0726993db21f27cec79e2f26c22",
+      "contextHash": "2e8e348b0059218fda20cd9e39c2799555b12c0edb81abd6bc0c0ebe80545689",
       "promptVersion": 3,
       "model": "qwen2.5:7b",
       "assessment": {
@@ -2464,11 +3549,11 @@
         "input": 990,
         "output": 135
       },
-      "createdAt": "2026-09-12T20:00:00.000Z"
+      "createdAt": "2026-09-14T05:10:00.000Z"
     },
     {
       "notamSha256": "5dc853cf2113b897c1d6ffad681ab996fdbfe0ab50ff49022d2ea37cda13fc88",
-      "contextHash": "8c469e0b02516030e74fc2211cde74b6fc2cc0726993db21f27cec79e2f26c22",
+      "contextHash": "2e8e348b0059218fda20cd9e39c2799555b12c0edb81abd6bc0c0ebe80545689",
       "promptVersion": 3,
       "model": "qwen2.5:7b",
       "assessment": {
@@ -2477,7 +3562,7 @@
         "affects": [
           "arrival"
         ],
-        "plain_text": "Runway 08/26 has non-standard markings at CYKF.",
+        "plain_text": "Runway 08/26 has non-standard markings.",
         "cited_span": "RWY 08/26 NON STANDARD MARKINGS",
         "rationale": "The non-standard markings on the runway could affect the pilot's ability to correctly identify and use the runway during arrival, making it critical information for this flight."
       },
@@ -2485,13 +3570,13 @@
       "provider": "fixture:ollama",
       "usage": {
         "input": 928,
-        "output": 107
+        "output": 104
       },
-      "createdAt": "2026-09-12T20:00:00.000Z"
+      "createdAt": "2026-09-14T05:10:00.000Z"
     },
     {
       "notamSha256": "81b06233190fd4c79f3d62a2e591d18ebc78a6ecc0b0c2ecf9359abf4b460e5f",
-      "contextHash": "8c469e0b02516030e74fc2211cde74b6fc2cc0726993db21f27cec79e2f26c22",
+      "contextHash": "2e8e348b0059218fda20cd9e39c2799555b12c0edb81abd6bc0c0ebe80545689",
       "promptVersion": 3,
       "model": "qwen2.5:7b",
       "assessment": {
@@ -2502,19 +3587,42 @@
         ],
         "plain_text": "A mobile crane within 66ft radius centered on 432641N 0802319W, aprx 570ft before threshold 32 and 4580ft southwest extended runway centerline, 120ft AGL, 1136ft AMSL, lit but not painted.",
         "cited_span": "LGTD, NOT PAINTED.",
-        "rationale": "The mobile crane is within 3nm of the departure aerodrome CYKF and is not marked, posing a risk to the flight."
+        "rationale": "The mobile crane is within 3nm of the departure aerodrome CYKF and is not marked, posing a risk to the unmarked obstacle criteria."
       },
       "citation": "exact",
       "provider": "fixture:ollama",
       "usage": {
         "input": 1010,
-        "output": 160
+        "output": 163
       },
-      "createdAt": "2026-09-12T20:00:00.000Z"
+      "createdAt": "2026-09-14T05:10:00.000Z"
+    },
+    {
+      "notamSha256": "1043f2f550ed9013ce4e9e2218ebaa4205398101d4482c1dc654759825a4a7c6",
+      "contextHash": "2e8e348b0059218fda20cd9e39c2799555b12c0edb81abd6bc0c0ebe80545689",
+      "promptVersion": 3,
+      "model": "qwen2.5:7b",
+      "assessment": {
+        "relevance": "critical",
+        "category": "taxiway",
+        "affects": [
+          "departure"
+        ],
+        "plain_text": "Taxiway D is closed.",
+        "cited_span": "TWY D CLSD.",
+        "rationale": "The closure of taxiway D affects the departure from CYSN, as it blocks a route the flight might use, making an alternative route necessary."
+      },
+      "citation": "exact",
+      "provider": "fixture:ollama",
+      "usage": {
+        "input": 922,
+        "output": 92
+      },
+      "createdAt": "2026-09-14T05:10:00.000Z"
     },
     {
       "notamSha256": "7d4b1c93ff9bc9607f1a75cba7ff3eb781377300c18cd9864f0755d0db88907e",
-      "contextHash": "8c469e0b02516030e74fc2211cde74b6fc2cc0726993db21f27cec79e2f26c22",
+      "contextHash": "2e8e348b0059218fda20cd9e39c2799555b12c0edb81abd6bc0c0ebe80545689",
       "promptVersion": 3,
       "model": "qwen2.5:7b",
       "assessment": {
@@ -2533,101 +3641,31 @@
         "input": 999,
         "output": 209
       },
-      "createdAt": "2026-09-12T20:00:00.000Z"
+      "createdAt": "2026-09-14T05:10:00.000Z"
     },
     {
-      "notamSha256": "a3101fc3b0754ced5c7bcf53a1dadc3172dbf49800027db9fdca1056b8f1d42a",
-      "contextHash": "8c469e0b02516030e74fc2211cde74b6fc2cc0726993db21f27cec79e2f26c22",
+      "notamSha256": "857c6d2525452eb29e8ef589b4a50eebe5fee8ec841da08b8f7f890023856ad0",
+      "contextHash": "2e8e348b0059218fda20cd9e39c2799555b12c0edb81abd6bc0c0ebe80545689",
       "promptVersion": 3,
       "model": "qwen2.5:7b",
       "assessment": {
-        "relevance": "critical",
+        "relevance": "irrelevant",
         "category": "runway",
         "affects": [
           "departure",
           "arrival"
         ],
-        "plain_text": "Runway 12 and 30 are dry, dry, dry from 15:27 to 23:27 UTC on 12 Sep.",
-        "cited_span": "RSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 12 1527 - SEP 12 2327.",
-        "rationale": "The runway surface condition is relevant as it affects the safety and performance of the aircraft during takeoff and landing."
-      },
-      "citation": "exact",
-      "provider": "fixture:ollama",
-      "usage": {
-        "input": 1029,
-        "output": 149
-      },
-      "createdAt": "2026-09-12T20:00:00.000Z"
-    },
-    {
-      "notamSha256": "c4fd18b670a06e480c360bb509f50e9e29a2c16054138c6dc32edeedfdd55250",
-      "contextHash": "8c469e0b02516030e74fc2211cde74b6fc2cc0726993db21f27cec79e2f26c22",
-      "promptVersion": 3,
-      "model": "qwen2.5:7b",
-      "assessment": {
-        "relevance": "advisory",
-        "category": "runway",
-        "affects": [
-          "arrival"
-        ],
-        "plain_text": "Runway surface conditions are dry at CYKF for runways RSC 08, RSC 26, and RSC 14/32 from 16:35 on 12/09/2026 to 00:35 on 13/09/2026.",
-        "cited_span": "RSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 12 1635 - SEP 13 0035.",
-        "rationale": "The NOTAM provides runway surface conditions for the arrival runway at the destination aerodrome, which is relevant to the flight's arrival phase."
+        "plain_text": "Runway surface conditions are dry at all runways during the relevant time period.",
+        "cited_span": "RSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 14 0424 - SEP 14 1224.",
+        "rationale": "The runway surface conditions are dry, which does not affect the flight as the aircraft is a C172 and VFR with basic equipment, and dry conditions are standard for VFR operations."
       },
       "citation": "exact",
       "provider": "fixture:ollama",
       "usage": {
         "input": 1089,
-        "output": 190
+        "output": 147
       },
-      "createdAt": "2026-09-12T20:00:00.000Z"
-    },
-    {
-      "notamSha256": "511ccce0890fe65b8a46f4714675f050820aa444bd8c07d0c21863cb44e59fb9",
-      "contextHash": "8c469e0b02516030e74fc2211cde74b6fc2cc0726993db21f27cec79e2f26c22",
-      "promptVersion": 3,
-      "model": "qwen2.5:7b",
-      "assessment": {
-        "relevance": "advisory",
-        "category": "taxiway",
-        "affects": [
-          "departure",
-          "arrival"
-        ],
-        "plain_text": "Taxiway B is closed at CYHM.",
-        "cited_span": "TWY B CLSD",
-        "rationale": "The closure of taxiway B at the alternate aerodrome CYHM affects the ground routing, but there are other taxiways available."
-      },
-      "citation": "exact",
-      "provider": "fixture:ollama",
-      "usage": {
-        "input": 919,
-        "output": 96
-      },
-      "createdAt": "2026-09-12T20:00:00.000Z"
-    },
-    {
-      "notamSha256": "1043f2f550ed9013ce4e9e2218ebaa4205398101d4482c1dc654759825a4a7c6",
-      "contextHash": "8c469e0b02516030e74fc2211cde74b6fc2cc0726993db21f27cec79e2f26c22",
-      "promptVersion": 3,
-      "model": "qwen2.5:7b",
-      "assessment": {
-        "relevance": "advisory",
-        "category": "taxiway",
-        "affects": [
-          "departure"
-        ],
-        "plain_text": "Taxiway D is closed.",
-        "cited_span": "TWY D CLSD",
-        "rationale": "The closure of taxiway D affects the departure from CYSN, as it blocks a route the flight might use."
-      },
-      "citation": "exact",
-      "provider": "fixture:ollama",
-      "usage": {
-        "input": 922,
-        "output": 87
-      },
-      "createdAt": "2026-09-12T20:00:00.000Z"
+      "createdAt": "2026-09-14T05:10:00.000Z"
     }
   ]
 }

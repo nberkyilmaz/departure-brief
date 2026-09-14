@@ -30,10 +30,20 @@ export async function latestTaf(store: Store, station: string, asOf: Date): Prom
 }
 
 /**
- * The forecast that governs a position at instant `t`, as known at `asOf`:
- * the position's own TAF if it is an airport that has one, otherwise the
- * nearest TAF within `NEARBY_RADIUS_NM`, labelled as such. `null` when
- * nothing is within reach — the caller must say so, not guess.
+ * The forecast that governs a position at instant `t`, as known at `asOf`.
+ *
+ * The position's own TAF when it has one that covers `t`; otherwise the
+ * nearest one within `NEARBY_RADIUS_NM` that does, labelled as borrowed.
+ *
+ * The order matters, and it took real data to get right. Part-time
+ * stations — CYSN among them — publish a TAF that expires overnight, and a
+ * briefing that stopped at "the field has a TAF" would answer "no forecast
+ * covers your departure" while a valid one sat thirty-six miles away at
+ * Hamilton. A pilot would use Hamilton's. So does this, and it says so.
+ *
+ * When nothing covers `t`, the field's own expired TAF is returned anyway,
+ * so the briefing can show what it had and why it was not enough. `null`
+ * only when there is no forecast within reach at all.
  */
 export async function forecastAt(
   store: Store,
@@ -42,25 +52,29 @@ export async function forecastAt(
   t: Date,
   asOf: Date,
 ): Promise<WaypointForecast | null> {
+  let own: WaypointForecast | null = null;
   if (ownStation) {
-    const own = await latestTaf(store, ownStation, asOf);
-    if (own && own.report.issuedAt) {
-      return {
+    const found = await latestTaf(store, ownStation, asOf);
+    if (found && found.report.issuedAt) {
+      own = {
         station: ownStation,
         source: 'own',
         distance: nm(0),
-        report: own.report,
-        taf: own.taf,
-        resolved: resolveTaf(own.taf, own.report.issuedAt, t),
+        report: found.report,
+        taf: found.taf,
+        resolved: resolveTaf(found.taf, found.report.issuedAt, t),
       };
+      if (own.resolved.prevailing) return own;
     }
   }
+
   const nearby = await store.listAirportsNear(position.lat, position.lon, NEARBY_RADIUS_NM);
+  let expired: WaypointForecast | null = null;
   for (const airport of nearby) {
     if (!airport.icaoId || airport.icaoId === ownStation) continue;
     const found = await latestTaf(store, airport.icaoId, asOf);
     if (!found || !found.report.issuedAt) continue;
-    return {
+    const candidate: WaypointForecast = {
       station: airport.icaoId,
       source: 'nearby',
       distance: distanceNm(position, airport),
@@ -68,6 +82,11 @@ export async function forecastAt(
       taf: found.taf,
       resolved: resolveTaf(found.taf, found.report.issuedAt, t),
     };
+    if (candidate.resolved.prevailing) return candidate;
+    // Nearest first, so the first one that does not cover `t` is the best
+    // of a bad set — kept only in case nothing better turns up.
+    expired ??= candidate;
   }
-  return null;
+
+  return own ?? expired;
 }

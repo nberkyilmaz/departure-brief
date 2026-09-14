@@ -10,7 +10,7 @@ export const defaultProfile: ProfileInput = {
   nightAllowed: true,
 };
 
-export const defaultAircraft: AircraftInput = { type: 'C172', demonstratedCrosswindKt: null };
+export const defaultAircraft: AircraftInput = { type: 'C172', demonstratedCrosswindKt: null, cruiseFuelGph: null };
 
 export function ProfileForm({
   profile,
@@ -51,6 +51,20 @@ export function ProfileForm({
         <label>
           Aircraft
           <input value={aircraft.type} onChange={(e) => onAircraft({ ...aircraft, type: e.target.value })} />
+        </label>
+        <label>
+          Cruise fuel burn (gal/h)
+          <input
+            type="number"
+            step={0.5}
+            min={0}
+            value={aircraft.cruiseFuelGph ?? ''}
+            placeholder="from the POH"
+            onChange={(e) => onAircraft({ ...aircraft, cruiseFuelGph: e.target.value === '' ? null : Number(e.target.value) })}
+          />
+          <span className="field-note-line">
+            <span className="field-note">fills in the nav log's fuel column; nothing here will guess it</span>
+          </span>
         </label>
         <label>
           POH demonstrated crosswind (kt)

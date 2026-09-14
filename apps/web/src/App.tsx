@@ -6,6 +6,7 @@ import { loadEngine, type LocalEngine } from './engine.js';
 import { FlightForm, defaultPlan, planProblems } from './FlightForm.js';
 import { FlightLine } from './FlightLine.js';
 import { Nav } from './Nav.js';
+import { NavLogPage } from './NavLogPage.js';
 import { ProfileForm, defaultAircraft, defaultProfile } from './ProfileForm.js';
 import { ReportsPage } from './ReportsPage.js';
 import { hrefFor, useRoute } from './router.js';
@@ -225,6 +226,8 @@ export function App() {
             )}
           </>
         )}
+
+        {route === 'navlog' && <NavLogPage briefing={briefing} />}
 
         {route === 'reports' && <ReportsPage held={engine?.reports ?? []} briefing={briefing} recordedAt={DEMO ? recordedText : null} />}
 

@@ -1,6 +1,7 @@
 import type { FlightPlan } from '../domain/flight.js';
 import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
 import type { NotamDocument } from '../notam/describe.js';
+import type { NavLog } from '../navlog/compute.js';
 import type { Briefing } from '../rules/types.js';
 import type { ReportKind } from '../store/types.js';
 
@@ -57,6 +58,8 @@ export interface BriefingDocument {
     readonly reports: readonly BriefingReportRef[];
   };
   readonly briefing: Briefing;
+  /** The wind triangle, leg by leg, from the same resolved flight. */
+  readonly navlog: NavLog;
 }
 
 export interface StoredBriefing {

@@ -38,8 +38,12 @@ const fixtures = join(core, 'test', 'fixtures');
 const out = join(root, 'apps', 'web', 'public', 'demo');
 
 /** The moment the demo is frozen at: when these reports were recorded. */
-const AS_OF = new Date('2026-09-12T20:00:00Z');
+const AS_OF = new Date('2026-09-14T05:10:00Z');
 const SITES = ['CYSN', 'CYKF', 'CYHM'] as const;
+/** The upper wind site the route borrows from; none of the three publishes its own. */
+const WIND_SITE = 'CYYZ';
+/** Recorded fixtures, by the day they were taken. */
+const DAY = '2026-09-14';
 const MODEL = 'qwen2.5:7b';
 
 /** Serves only what was recorded; anything else is a 204, as a quiet upstream would be. */
@@ -47,8 +51,18 @@ const replay: HttpClient = {
   async get(url) {
     const notam = /site=([A-Z0-9]{3,4})&alpha=notam$/.exec(url);
     if (notam) {
-      const p = join(fixtures, 'notam', 'navcanada', '2026-09-12', `${notam[1]}.json`);
+      const p = join(fixtures, 'notam', 'navcanada', DAY, `${notam[1]}.json`);
       return existsSync(p) ? { status: 200, body: readFileSync(p, 'utf8'), headers: {} } : { status: 204, body: '', headers: {} };
+    }
+    if (url.includes('alpha=upperwind')) {
+      // One request can ask about several sites; answer for the ones recorded.
+      const sites = [...url.matchAll(/site=([A-Z0-9]{3,4})/g)].map((m) => m[1]!);
+      const data: unknown[] = [];
+      for (const site of sites) {
+        const p = join(fixtures, 'fetch', 'navcanada', 'upperwind', DAY, `${site}.json`);
+        if (existsSync(p)) data.push(...(JSON.parse(readFileSync(p, 'utf8')) as { data: unknown[] }).data);
+      }
+      return { status: 200, body: JSON.stringify({ meta: { count: { upperwind: data.length } }, data }), headers: {} };
     }
     return { status: 204, body: '', headers: {} };
   },
@@ -85,7 +99,7 @@ const collect = (reports: readonly RawReport[], request: string, fetchedFor: str
 };
 
 // The METARs and TAFs these fields were reporting when the corpus was taken.
-const liveWeather = join(fixtures, 'fetch', 'awc', 'demo-cysn-cykf-cyhm.json');
+const liveWeather = join(fixtures, 'fetch', 'awc', `demo-${DAY}.json`);
 if (existsSync(liveWeather)) {
   // The fixture holds the upstream records verbatim, so they are served as they were received.
   const recorded = JSON.parse(readFileSync(liveWeather, 'utf8')) as { metar: unknown[]; taf: unknown[] };
@@ -104,13 +118,16 @@ if (existsSync(liveWeather)) {
 }
 
 /*
- * The owner's own flight, moved to a departure the recorded weather covers:
- * these TAFs were issued at 1940Z on 12 September and run to 0100Z on the
- * 13th, so a 15:00Z departure two days later would sit outside them and the
- * demo would show nothing but "no forecast covers this". Everything else —
- * route, aircraft, personal minimums, reports — is exactly as it is.
+ * The owner's own flight, at a departure the recorded weather covers: a
+ * 12:00Z departure is eight in the morning at home, and the forecasts
+ * recorded at 05:10Z run out past it. Everything else — route, aircraft,
+ * personal minimums, every report — is exactly as it is.
+ *
+ * CYSN's own TAF had already expired by then, because it is a part-time
+ * station. The briefing borrows Hamilton's and says so, which is the right
+ * answer and worth a visitor seeing.
  */
-const planJson = { ...JSON.parse(readFileSync(join(root, 'flights', 'demo-cysn-cykf.json'), 'utf8')), departureTime: '2026-09-12T22:00:00Z' };
+const planJson = { ...JSON.parse(readFileSync(join(root, 'flights', 'demo-cysn-cykf.json'), 'utf8')), departureTime: '2026-09-14T12:00:00Z' };
 const profileJson = JSON.parse(readFileSync(join(root, 'profiles', 'default.json'), 'utf8'));
 const aircraftJson = JSON.parse(readFileSync(join(root, 'aircraft', 'c172.json'), 'utf8'));
 const plan = parseFlightPlan(planJson);
@@ -132,6 +149,15 @@ for (const site of SITES) {
   await storeAndDecode(store, fetched.reports, fetched.request, AS_OF, site);
   collect(fetched.reports, fetched.request, site);
 }
+
+/*
+ * Upper winds, which none of the three aerodromes publishes: the flight
+ * borrows Toronto's column, forty miles away, exactly as a briefing over
+ * the live service would.
+ */
+const winds = await cfps.upperWinds([WIND_SITE]);
+await storeAndDecode(store, winds.reports, winds.request, AS_OF, WIND_SITE);
+collect(winds.reports, winds.request, WIND_SITE);
 
 const resolved = await resolveFlight(store, plan, AS_OF);
 
@@ -170,7 +196,7 @@ const bundle: DemoBundle = {
   plan: planJson,
   profile: profileJson,
   aircraft: aircraftJson,
-  airports: airports.filter((a) => SITES.includes(a.icaoId as (typeof SITES)[number])),
+  airports: airports.filter((a) => a.icaoId !== null && ([...SITES, WIND_SITE] as string[]).includes(a.icaoId)),
   reports: [...bundled.values()].sort((a, b) => a.sha256.localeCompare(b.sha256)),
   assessments: notams.items.map((i) => i.assessment).filter((a): a is NonNullable<typeof a> => a !== null),
 };
@@ -187,3 +213,5 @@ console.log(`  NOTAMs: ${briefing.document.notams?.items.length ?? 0}${counts ? 
 console.log(`  ranked by ${briefing.document.notams?.model ?? 'no model'}`);
 console.log(`  weight and balance: ${wb ? `${wb.figures.length} figures, ${wb.review.length} in review` : 'none'}`);
 console.log(`  bundle: ${bundle.reports.length} reports, ${bundle.airports.length} aerodromes, ${bundle.assessments.length} recorded model answers`);
+const log = briefing.document.navlog;
+console.log(`  nav log: ${log.legs.length} leg(s), ${log.totalMinutes ?? '—'} min, ${log.legs.filter((l) => l.wind).length} with a wind`);
