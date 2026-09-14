@@ -15,6 +15,13 @@ function Zulu({ iso }: { iso: string }) {
 /** The raw report with the cited span highlighted. This is the grounding; it is never hidden. */
 function Source({ c }: { c: Citation }) {
   if (!c.raw) return null;
+  /*
+   * A hazard advisory is stored as the record the service sent, and the
+   * bulletin is a field inside it. The bulletin is the artefact a pilot
+   * reads, so that is what is shown — quoted from the record, not instead
+   * of it.
+   */
+  if (c.kind === 'sigmet' && c.text) return <pre className="raw">{c.text}</pre>;
   if (!c.span) return <pre className="raw">{c.raw}</pre>;
   return (
     <pre className="raw">
