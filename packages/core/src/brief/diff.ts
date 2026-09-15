@@ -11,12 +11,13 @@
  * second copy of the limits, and it stays true for rules added later.
  */
 
-import type { BasisKind, Finding, PointVerdict, Severity, Verdict } from '../rules/types.js';
+import type { FlightCategory } from '../decode/metar/derive.js';
+import type { BasisKind, Finding, PointReview, Attention } from '../rules/types.js';
 import type { NotamDocumentItem } from '../notam/describe.js';
 import type { BriefingDocument, BriefingReportRef } from './types.js';
 
-/** Worse is a larger number. `advisory` never moves a verdict, so it sits with `ok`. */
-const WEIGHT: Record<Severity, number> = { ok: 0, advisory: 0, marginal: 1, 'no-go': 2 };
+/** More wanting of attention is a larger number. */
+const WEIGHT: Record<Attention, number> = { routine: 0, note: 0, caution: 1, alert: 2 };
 
 export type FindingChangeKind = 'appeared' | 'resolved' | 'worsened' | 'eased' | 'restated';
 
@@ -28,15 +29,17 @@ export interface FindingChange {
   readonly before: Finding | null;
   readonly after: Finding | null;
   /**
-   * True when the change crosses the go/no-go boundary — a limit newly
-   * breached or newly met. These are the lines that matter.
+   * True when a limit was newly crossed, or newly met again. These are the
+   * lines to read first — not because they decide anything, but because
+   * they are where the situation actually moved.
    */
   readonly crossesLimit: boolean;
 }
 
 export interface PointDiff {
   readonly waypoint: string;
-  readonly verdict: { readonly from: Verdict; readonly to: Verdict } | null;
+  /** `null` when the flight category did not move. */
+  readonly category: { readonly from: FlightCategory | null; readonly to: FlightCategory | null } | null;
   readonly changes: readonly FindingChange[];
 }
 
@@ -60,10 +63,8 @@ function notableRank(rank: string | null): boolean {
 }
 
 export interface BriefingDiff {
-  readonly from: { readonly sha256: string; readonly asOf: string; readonly verdict: Verdict };
-  readonly to: { readonly sha256: string; readonly asOf: string; readonly verdict: Verdict };
-  /** `null` when the overall verdict did not move. */
-  readonly verdict: { readonly from: Verdict; readonly to: Verdict } | null;
+  readonly from: { readonly sha256: string; readonly asOf: string };
+  readonly to: { readonly sha256: string; readonly asOf: string };
   readonly points: readonly PointDiff[];
   readonly alternate: PointDiff | null;
   readonly notams: readonly NotamChange[];
@@ -104,17 +105,17 @@ function findingChanges(before: readonly Finding[], after: readonly Finding[]): 
   for (const [key, f] of a) {
     const was = b.get(key);
     if (!was) {
-      changes.push({ kind: 'appeared', ...common(f), before: null, after: f, crossesLimit: WEIGHT[f.severity] > 0 });
+      changes.push({ kind: 'appeared', ...common(f), before: null, after: f, crossesLimit: WEIGHT[f.attention] > 0 });
       continue;
     }
-    const from = WEIGHT[was.severity];
-    const to = WEIGHT[f.severity];
+    const from = WEIGHT[was.attention];
+    const to = WEIGHT[f.attention];
     if (to > from) changes.push({ kind: 'worsened', ...common(f), before: was, after: f, crossesLimit: from === 0 });
     else if (to < from) changes.push({ kind: 'eased', ...common(f), before: was, after: f, crossesLimit: to === 0 });
     else if (was.summary !== f.summary) changes.push({ kind: 'restated', ...common(f), before: was, after: f, crossesLimit: false });
   }
   for (const [key, f] of b) {
-    if (!a.has(key)) changes.push({ kind: 'resolved', ...common(f), before: f, after: null, crossesLimit: WEIGHT[f.severity] > 0 });
+    if (!a.has(key)) changes.push({ kind: 'resolved', ...common(f), before: f, after: null, crossesLimit: WEIGHT[f.attention] > 0 });
   }
   // Threshold crossings first, then worsening before easing, then by waypoint.
   const rank: Record<FindingChangeKind, number> = { worsened: 0, appeared: 1, eased: 2, resolved: 3, restated: 4 };
@@ -123,10 +124,12 @@ function findingChanges(before: readonly Finding[], after: readonly Finding[]): 
   );
 }
 
-function pointDiff(before: PointVerdict | undefined, after: PointVerdict): PointDiff {
+function pointDiff(before: PointReview | undefined, after: PointReview): PointDiff {
   const changes = findingChanges(before?.findings ?? [], after.findings);
-  const verdict = before && before.verdict !== after.verdict ? { from: before.verdict, to: after.verdict } : null;
-  return { waypoint: after.waypoint, verdict, changes };
+  // The category moving — VFR to MVFR, say — is the most compact statement
+  // of "the weather here is not what it was".
+  const category = before && before.category !== after.category ? { from: before.category, to: after.category } : null;
+  return { waypoint: after.waypoint, category, changes };
 }
 
 function notamChanges(before: BriefingDocument, after: BriefingDocument): NotamChange[] {
@@ -184,17 +187,14 @@ export function diffBriefings(
   const removed = [...bReports.values()].filter((r) => !aReports.has(r.sha256));
 
   const notams = notamChanges(before.document, after.document);
-  const verdict = before.document.briefing.verdict !== after.document.briefing.verdict ? { from: before.document.briefing.verdict, to: after.document.briefing.verdict } : null;
 
   const material =
-    verdict !== null ||
     notams.some((n) => n.notable) ||
-    [...points, ...(alternate ? [alternate] : [])].some((p) => p.verdict !== null || p.changes.some((c) => c.kind !== 'restated'));
+    [...points, ...(alternate ? [alternate] : [])].some((p) => p.category !== null || p.changes.some((c) => c.kind !== 'restated'));
 
   return {
-    from: { sha256: before.sha256, asOf: before.document.asOf, verdict: before.document.briefing.verdict },
-    to: { sha256: after.sha256, asOf: after.document.asOf, verdict: after.document.briefing.verdict },
-    verdict,
+    from: { sha256: before.sha256, asOf: before.document.asOf },
+    to: { sha256: after.sha256, asOf: after.document.asOf },
     points,
     alternate,
     notams,

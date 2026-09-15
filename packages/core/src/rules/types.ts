@@ -1,17 +1,29 @@
+import type { FlightCategory } from '../decode/metar/derive.js';
 import type { Span } from '../decode/span.js';
 
 /** Bump when a rule's meaning or a finding's shape changes. */
-export const RULES_VERSION = 4;
-
-export type Verdict = 'go' | 'marginal' | 'no-go';
+export const RULES_VERSION = 5;
 
 /**
- * `ok` — the check passed; `advisory` — worth knowing, no verdict impact;
- * `marginal` — a violation in an overlay (`TEMPO`, `PROB`, in-window
- * `BECMG`) or a soft limit; `no-go` — a violation in the prevailing forecast
- * or the observation.
+ * How much attention a line deserves — an ordering, not a decision.
+ *
+ * This tool does not tell a pilot whether to fly. It reports what the
+ * products say, compares it against the limits that pilot set, and puts the
+ * things that deserve a second look at the top. The words are deliberately
+ * about reading rather than about going:
+ *
+ * `routine` — measured, and within the limit you set.
+ * `note`    — worth knowing: a forecast borrowed from a neighbour, night,
+ *             the wind at cruise.
+ * `caution` — a limit crossed in a temporary or probabilistic period, or a
+ *             hazard near but not on the route.
+ * `alert`   — a limit crossed in the prevailing conditions or the
+ *             observation, or a hazard reported where you are going.
+ *
+ * An `alert` is not "do not go". It is "you asked to be told about this, and
+ * here it is, with the report it came from".
  */
-export type Severity = 'ok' | 'advisory' | 'marginal' | 'no-go';
+export type Attention = 'routine' | 'note' | 'caution' | 'alert';
 
 /** Where a finding's inputs came from. The raw text and span are the grounding. */
 export interface Citation {
@@ -36,7 +48,7 @@ export type BasisKind = 'prevailing' | 'overlay' | 'observed' | 'forecast' | 'ti
 export interface Finding {
   /** Stable rule identifier, e.g. `personal.ceiling`, `crosswind.personal`, `vfr.visibility`. */
   readonly rule: string;
-  readonly severity: Severity;
+  readonly attention: Attention;
   /** One line a pilot can read; numbers and sources included. */
   readonly summary: string;
   readonly waypoint: string;
@@ -49,10 +61,19 @@ export interface Finding {
   readonly citations: readonly Citation[];
 }
 
-export interface PointVerdict {
+/**
+ * Everything known about one point on the route at the time the aircraft
+ * will be there. No verdict: the flight category is an objective
+ * classification of ceiling and visibility, the same one every weather
+ * service publishes, and the findings are what a pilot reads.
+ */
+export interface PointReview {
   readonly waypoint: string;
   readonly at: string;
-  readonly verdict: Verdict;
+  /** VFR, MVFR, IFR or LIFR from ceiling and visibility; `null` when neither is reported. */
+  readonly category: FlightCategory | null;
+  /** The same for the prevailing forecast, when this point has one. */
+  readonly forecastCategory: FlightCategory | null;
   readonly night: boolean;
   readonly findings: readonly Finding[];
 }
@@ -62,17 +83,15 @@ export interface Briefing {
   readonly profile: { readonly name: string; readonly version: number };
   readonly aircraft: string | null;
   readonly asOf: string;
-  readonly verdict: Verdict;
-  readonly points: readonly PointVerdict[];
-  readonly alternate: PointVerdict | null;
+  readonly points: readonly PointReview[];
+  readonly alternate: PointReview | null;
 }
 
-export function worst(...verdicts: readonly Verdict[]): Verdict {
-  if (verdicts.includes('no-go')) return 'no-go';
-  if (verdicts.includes('marginal')) return 'marginal';
-  return 'go';
-}
+/** Most wanting of attention first. Used for ordering, never for deciding. */
+export const ATTENTION_ORDER: readonly Attention[] = ['alert', 'caution', 'note', 'routine'];
 
-export function verdictOf(findings: readonly Finding[]): Verdict {
-  return worst(...findings.map((f) => (f.severity === 'no-go' ? 'no-go' : f.severity === 'marginal' ? 'marginal' : 'go')));
+/** The most attention any of these findings asks for, or `null` when there are none. */
+export function mostAttention(findings: readonly Finding[]): Attention | null {
+  for (const level of ATTENTION_ORDER) if (findings.some((f) => f.attention === level)) return level;
+  return null;
 }

@@ -1,5 +1,5 @@
 {
-  "sha256": "c03a2eacbdaaf16db809bc20ab68248130115c41e5ce193aa45378d04ff25148",
+  "sha256": "27f29107d26680a1b3b6853c5f9df66a50c7d8fb4cdea9763113e5a2ead5d4ac",
   "flightKey": "2db28f15a53797611048abac4805a57e8c357aa159f299eee95f11bf8031b9c4",
   "asOf": "2026-09-14T05:10:00.000Z",
   "createdAt": "2026-09-14T05:10:00.000Z",
@@ -31,6 +31,7 @@
       "crosswind": 15,
       "crosswindIncludesGust": true,
       "maxGustSpread": null,
+      "maxWind": null,
       "nightAllowed": true
     },
     "aircraft": {
@@ -46,7 +47,7 @@
     },
     "asOf": "2026-09-14T05:10:00.000Z",
     "versions": {
-      "rules": 4,
+      "rules": 5,
       "metarDecoder": 2,
       "tafDecoder": 1,
       "notamDecoder": 1,
@@ -1784,24 +1785,24 @@
       ]
     },
     "briefing": {
-      "rulesVersion": 4,
+      "rulesVersion": 5,
       "profile": {
         "name": "default",
         "version": 1
       },
       "aircraft": "C172",
       "asOf": "2026-09-14T05:10:00.000Z",
-      "verdict": "go",
       "points": [
         {
           "waypoint": "CYSN",
           "at": "2026-09-14T12:00:00.000Z",
-          "verdict": "go",
+          "category": "VFR",
+          "forecastCategory": "VFR",
           "night": false,
           "findings": [
             {
               "rule": "personal.ceiling",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "no ceiling (FEW030); personal minimum 2500 ft AGL",
               "waypoint": "CYSN",
               "basis": "prevailing (TAF CYHM, 33 nm away)",
@@ -1835,7 +1836,7 @@
             },
             {
               "rule": "personal.visibility",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "visibility >6 SM meets personal minimum 5 SM",
               "waypoint": "CYSN",
               "basis": "prevailing (TAF CYHM, 33 nm away)",
@@ -1868,8 +1869,44 @@
               ]
             },
             {
+              "rule": "wind.surface",
+              "attention": "routine",
+              "summary": "wind from 310°T at 8 kt — below your 15 kt crosswind limit whatever the runway",
+              "waypoint": "CYSN",
+              "basis": "prevailing (TAF CYHM, 33 nm away)",
+              "basisKind": "prevailing",
+              "at": "2026-09-14T12:00:00.000Z",
+              "values": {
+                "speedKt": 8,
+                "gustKt": null,
+                "crosswindLimit": 15,
+                "comparedAgainst": 8
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYHM",
+                  "raw": "TAF AMD CYHM 140107Z 1401/1424 30008KT P6SM FEW040 BKN080 BKN110 TEMPO 1401/1402 P6SM -SHRA FM140200 31010G20KT P6SM SCT030 BECMG 1404/1406 31008KT FM140600 30006KT P6SM SKC FM141200 31008KT P6SM FEW030 FM141700 32006KT P6SM SCT050 BECMG 1419/1421 26006KT BKN050 RMK NXT FCST BY 140600Z",
+                  "span": {
+                    "start": 183,
+                    "end": 190
+                  },
+                  "text": "31008KT",
+                  "sha256": "538ce783ea75b7ba0800001415cafb6bd162f32bdabebfa56b93c0dc747d9e93"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
               "rule": "crosswind.personal",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "wind 31008KT: 4 kt crosswind (sustained component on runway 29, 276°T) within personal limit 15 kt",
               "waypoint": "CYSN",
               "basis": "prevailing (TAF CYHM, 33 nm away)",
@@ -1975,7 +2012,7 @@
             },
             {
               "rule": "crosswind.demonstrated",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "4 kt crosswind within C172 demonstrated 15 kt",
               "waypoint": "CYSN",
               "basis": "prevailing (TAF CYHM, 33 nm away)",
@@ -2009,7 +2046,7 @@
             },
             {
               "rule": "vfr.visibility",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "visibility >6 SM meets CARs 602.114 (control zone) minimum 3 SM",
               "waypoint": "CYSN",
               "basis": "prevailing (TAF CYHM, 33 nm away)",
@@ -2044,7 +2081,7 @@
             },
             {
               "rule": "forecast.borrowed",
-              "severity": "advisory",
+              "attention": "note",
               "summary": "CYSN has no TAF; conditions above are from CYHM, 33 nm away",
               "waypoint": "CYSN",
               "basis": "forecast",
@@ -2058,7 +2095,7 @@
             },
             {
               "rule": "personal.ceiling",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "ceiling 11000 ft AGL meets personal minimum 2500 ft",
               "waypoint": "CYSN",
               "basis": "observed 01:00Z",
@@ -2092,7 +2129,7 @@
             },
             {
               "rule": "personal.visibility",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "visibility 15 SM meets personal minimum 5 SM",
               "waypoint": "CYSN",
               "basis": "observed 01:00Z",
@@ -2125,8 +2162,45 @@
               ]
             },
             {
+              "rule": "wind.surface",
+              "attention": "caution",
+              "summary": "wind from 320°T at 13 kt gusting 18 — more than your 15 kt crosswind limit in total, so any runway more than 56° off the wind is outside it",
+              "waypoint": "CYSN",
+              "basis": "observed 01:00Z",
+              "basisKind": "observed",
+              "at": "2026-09-14T12:00:00.000Z",
+              "values": {
+                "speedKt": 13,
+                "gustKt": 18,
+                "crosswindLimit": 15,
+                "comparedAgainst": 18,
+                "anglePastLimitDeg": 56
+              },
+              "citations": [
+                {
+                  "kind": "metar",
+                  "station": "CYSN",
+                  "raw": "METAR CYSN 140100Z 32013G18KT 15SM BKN110 21/13 A2993 RMK AC7 LAST STFD OBS/NXT 141100Z SLP134 DENSITY ALT 1100FT",
+                  "span": {
+                    "start": 19,
+                    "end": 29
+                  },
+                  "text": "32013G18KT",
+                  "sha256": "c5e9d2c108f55d071e83ebdc2ee48d74223841783db8c07fa6398210f90d76f1"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
               "rule": "crosswind.personal",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "wind 32013G18KT: 11 kt crosswind (gust component on runway 01, 358°T) within personal limit 15 kt",
               "waypoint": "CYSN",
               "basis": "observed 01:00Z",
@@ -2232,7 +2306,7 @@
             },
             {
               "rule": "crosswind.demonstrated",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "11 kt crosswind within C172 demonstrated 15 kt",
               "waypoint": "CYSN",
               "basis": "observed 01:00Z",
@@ -2266,7 +2340,7 @@
             },
             {
               "rule": "vfr.visibility",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "visibility 15 SM meets CARs 602.114 (control zone) minimum 3 SM",
               "waypoint": "CYSN",
               "basis": "observed 01:00Z",
@@ -2301,7 +2375,7 @@
             },
             {
               "rule": "vfr.ceiling",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "ceiling 11000 ft meets CARs 602.114 (control zone) 1000 ft",
               "waypoint": "CYSN",
               "basis": "observed 01:00Z",
@@ -2336,7 +2410,7 @@
             },
             {
               "rule": "vfr.cloudClearance",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "BKN110 base 11321 ft MSL is 7821 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
               "waypoint": "CYSN",
               "basis": "observed 01:00Z",
@@ -2372,7 +2446,7 @@
             },
             {
               "rule": "wind.aloft",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "wind at 3,500 ft: 333°T at 10 kt, +2 °C, from CYYZ 35 nm away",
               "waypoint": "CYSN",
               "basis": "FBCN33 upper wind",
@@ -2428,7 +2502,7 @@
                 }
               ],
               "rule": "daylight.margin",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "last light 23:56Z (sunset 23:28Z) — 11 h 57 min of daylight after arrival",
               "values": {
                 "marginMinutes": 717,
@@ -2441,12 +2515,13 @@
         {
           "waypoint": "CYKF",
           "at": "2026-09-14T12:31:30.378Z",
-          "verdict": "go",
+          "category": "VFR",
+          "forecastCategory": "VFR",
           "night": false,
           "findings": [
             {
               "rule": "personal.ceiling",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "no ceiling (SKC); personal minimum 2500 ft AGL",
               "waypoint": "CYKF",
               "basis": "prevailing",
@@ -2480,7 +2555,7 @@
             },
             {
               "rule": "personal.visibility",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "visibility >6 SM meets personal minimum 5 SM",
               "waypoint": "CYKF",
               "basis": "prevailing",
@@ -2513,8 +2588,44 @@
               ]
             },
             {
+              "rule": "wind.surface",
+              "attention": "routine",
+              "summary": "wind from 310°T at 6 kt — below your 15 kt crosswind limit whatever the runway",
+              "waypoint": "CYKF",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-14T12:31:30.378Z",
+              "values": {
+                "speedKt": 6,
+                "gustKt": null,
+                "crosswindLimit": 15,
+                "comparedAgainst": 6
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 140140Z 1402/1414 31010G20KT P6SM FEW030 TEMPO 1402/1407 BKN020 FM140700 31006KT P6SM SKC RMK FCST BASED ON AUTO OBS. NXT FCST BY 140800Z",
+                  "span": {
+                    "start": 82,
+                    "end": 89
+                  },
+                  "text": "31006KT",
+                  "sha256": "fe3ce3138639f34c0984713d5e9648cfaef2d6e25fe3926c2f1a457caa770a08"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
               "rule": "crosswind.personal",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "wind 31006KT: 1 kt crosswind (sustained component on runway 32, 318°T) within personal limit 15 kt",
               "waypoint": "CYKF",
               "basis": "prevailing",
@@ -2602,7 +2713,7 @@
             },
             {
               "rule": "crosswind.demonstrated",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "1 kt crosswind within C172 demonstrated 15 kt",
               "waypoint": "CYKF",
               "basis": "prevailing",
@@ -2636,7 +2747,7 @@
             },
             {
               "rule": "vfr.visibility",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "visibility >6 SM meets CARs 602.114 (control zone) minimum 3 SM",
               "waypoint": "CYKF",
               "basis": "prevailing",
@@ -2671,7 +2782,7 @@
             },
             {
               "rule": "personal.ceiling",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "no ceiling (CLR); personal minimum 2500 ft AGL",
               "waypoint": "CYKF",
               "basis": "observed 05:00Z",
@@ -2705,7 +2816,7 @@
             },
             {
               "rule": "personal.visibility",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "visibility 9 SM meets personal minimum 5 SM",
               "waypoint": "CYKF",
               "basis": "observed 05:00Z",
@@ -2738,8 +2849,44 @@
               ]
             },
             {
+              "rule": "wind.surface",
+              "attention": "routine",
+              "summary": "wind from 290°T at 7 kt — below your 15 kt crosswind limit whatever the runway",
+              "waypoint": "CYKF",
+              "basis": "observed 05:00Z",
+              "basisKind": "observed",
+              "at": "2026-09-14T12:31:30.378Z",
+              "values": {
+                "speedKt": 7,
+                "gustKt": null,
+                "crosswindLimit": 15,
+                "comparedAgainst": 7
+              },
+              "citations": [
+                {
+                  "kind": "metar",
+                  "station": "CYKF",
+                  "raw": "METAR CYKF 140500Z AUTO 29007KT 9SM CLR 13/10 A3008 RMK SLP186",
+                  "span": {
+                    "start": 24,
+                    "end": 31
+                  },
+                  "text": "29007KT",
+                  "sha256": "e06b5c9959424528f7799f4ef683be1fca1a321d89ee5e25c3a3859abfef0df6"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
               "rule": "crosswind.personal",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "wind 29007KT: 3 kt crosswind (sustained component on runway 32, 318°T) within personal limit 15 kt",
               "waypoint": "CYKF",
               "basis": "observed 05:00Z",
@@ -2827,7 +2974,7 @@
             },
             {
               "rule": "crosswind.demonstrated",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "3 kt crosswind within C172 demonstrated 15 kt",
               "waypoint": "CYKF",
               "basis": "observed 05:00Z",
@@ -2861,7 +3008,7 @@
             },
             {
               "rule": "vfr.visibility",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "visibility 9 SM meets CARs 602.114 (control zone) minimum 3 SM",
               "waypoint": "CYKF",
               "basis": "observed 05:00Z",
@@ -2896,7 +3043,7 @@
             },
             {
               "rule": "wind.aloft",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "wind at 3,500 ft: 333°T at 10 kt, +2 °C, from CYYZ 35 nm away",
               "waypoint": "CYKF",
               "basis": "FBCN33 upper wind",
@@ -2952,7 +3099,7 @@
                 }
               ],
               "rule": "daylight.margin",
-              "severity": "ok",
+              "attention": "routine",
               "summary": "last light 00:02Z (sunset 23:33Z) — 11 h 31 min of daylight after arrival",
               "values": {
                 "marginMinutes": 691,
@@ -2966,12 +3113,13 @@
       "alternate": {
         "waypoint": "CYHM",
         "at": "2026-09-14T12:46:29.121Z",
-        "verdict": "go",
+        "category": "VFR",
+        "forecastCategory": "VFR",
         "night": false,
         "findings": [
           {
             "rule": "personal.ceiling",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "no ceiling (FEW030); personal minimum 2500 ft AGL",
             "waypoint": "CYHM",
             "basis": "prevailing",
@@ -3005,7 +3153,7 @@
           },
           {
             "rule": "personal.visibility",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "visibility >6 SM meets personal minimum 5 SM",
             "waypoint": "CYHM",
             "basis": "prevailing",
@@ -3038,8 +3186,44 @@
             ]
           },
           {
+            "rule": "wind.surface",
+            "attention": "routine",
+            "summary": "wind from 310°T at 8 kt — below your 15 kt crosswind limit whatever the runway",
+            "waypoint": "CYHM",
+            "basis": "prevailing",
+            "basisKind": "prevailing",
+            "at": "2026-09-14T12:46:29.121Z",
+            "values": {
+              "speedKt": 8,
+              "gustKt": null,
+              "crosswindLimit": 15,
+              "comparedAgainst": 8
+            },
+            "citations": [
+              {
+                "kind": "taf",
+                "station": "CYHM",
+                "raw": "TAF AMD CYHM 140107Z 1401/1424 30008KT P6SM FEW040 BKN080 BKN110 TEMPO 1401/1402 P6SM -SHRA FM140200 31010G20KT P6SM SCT030 BECMG 1404/1406 31008KT FM140600 30006KT P6SM SKC FM141200 31008KT P6SM FEW030 FM141700 32006KT P6SM SCT050 BECMG 1419/1421 26006KT BKN050 RMK NXT FCST BY 140600Z",
+                "span": {
+                  "start": 183,
+                  "end": 190
+                },
+                "text": "31008KT",
+                "sha256": "538ce783ea75b7ba0800001415cafb6bd162f32bdabebfa56b93c0dc747d9e93"
+              },
+              {
+                "kind": "profile",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "default v1",
+                "sha256": null
+              }
+            ]
+          },
+          {
             "rule": "crosswind.personal",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "wind 31008KT: 3 kt crosswind (sustained component on runway 30, 287°T) within personal limit 15 kt",
             "waypoint": "CYHM",
             "basis": "prevailing",
@@ -3127,7 +3311,7 @@
           },
           {
             "rule": "crosswind.demonstrated",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "3 kt crosswind within C172 demonstrated 15 kt",
             "waypoint": "CYHM",
             "basis": "prevailing",
@@ -3161,7 +3345,7 @@
           },
           {
             "rule": "vfr.visibility",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "visibility >6 SM meets CARs 602.114 (control zone) minimum 3 SM",
             "waypoint": "CYHM",
             "basis": "prevailing",
@@ -3196,7 +3380,7 @@
           },
           {
             "rule": "personal.ceiling",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "no ceiling (FEW030); personal minimum 2500 ft AGL",
             "waypoint": "CYHM",
             "basis": "observed 05:00Z",
@@ -3230,7 +3414,7 @@
           },
           {
             "rule": "personal.visibility",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "visibility 15 SM meets personal minimum 5 SM",
             "waypoint": "CYHM",
             "basis": "observed 05:00Z",
@@ -3263,8 +3447,44 @@
             ]
           },
           {
+            "rule": "wind.surface",
+            "attention": "routine",
+            "summary": "wind from 290°T at 6 kt — below your 15 kt crosswind limit whatever the runway",
+            "waypoint": "CYHM",
+            "basis": "observed 05:00Z",
+            "basisKind": "observed",
+            "at": "2026-09-14T12:46:29.121Z",
+            "values": {
+              "speedKt": 6,
+              "gustKt": null,
+              "crosswindLimit": 15,
+              "comparedAgainst": 6
+            },
+            "citations": [
+              {
+                "kind": "metar",
+                "station": "CYHM",
+                "raw": "METAR CYHM 140500Z 29006KT 15SM FEW030 14/10 A3008 RMK SC1 SC TR SLP187",
+                "span": {
+                  "start": 19,
+                  "end": 26
+                },
+                "text": "29006KT",
+                "sha256": "c1ed5fffe5d52421c8440cda0b98836a9a84eac1a05f4a5396fa223ec4b33e87"
+              },
+              {
+                "kind": "profile",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "default v1",
+                "sha256": null
+              }
+            ]
+          },
+          {
             "rule": "crosswind.personal",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "wind 29006KT: 0 kt crosswind (sustained component on runway 30, 287°T) within personal limit 15 kt",
             "waypoint": "CYHM",
             "basis": "observed 05:00Z",
@@ -3352,7 +3572,7 @@
           },
           {
             "rule": "crosswind.demonstrated",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "0 kt crosswind within C172 demonstrated 15 kt",
             "waypoint": "CYHM",
             "basis": "observed 05:00Z",
@@ -3386,7 +3606,7 @@
           },
           {
             "rule": "vfr.visibility",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "visibility 15 SM meets CARs 602.114 (control zone) minimum 3 SM",
             "waypoint": "CYHM",
             "basis": "observed 05:00Z",
@@ -3421,7 +3641,7 @@
           },
           {
             "rule": "wind.aloft",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "wind at 3,500 ft: 333°T at 10 kt, +2 °C, from CYYZ 33 nm away",
             "waypoint": "CYHM",
             "basis": "FBCN33 upper wind",
@@ -3477,7 +3697,7 @@
               }
             ],
             "rule": "daylight.margin",
-            "severity": "ok",
+            "attention": "routine",
             "summary": "last light 23:59Z (sunset 23:31Z) — 11 h 13 min of daylight after arrival",
             "values": {
               "marginMinutes": 673,

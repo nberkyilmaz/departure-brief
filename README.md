@@ -16,7 +16,7 @@ flight, judged against the weather and NOTAMs those aerodromes were actually
 publishing on 12 September 2026. The page is static and fetches nothing.
 
 Hold Short answers one question about a planned flight: **given this route, at
-this time, in this aircraft — should I go, and why?** It decodes the raw
+this time, in this aircraft — what would I want to know?** It decodes the raw
 products a pilot already reads, resolves them to each point along the route at
 the time you'll actually be there, and evaluates the result against your own
 personal minimums, showing the source behind every finding.
@@ -24,7 +24,7 @@ personal minimums, showing the source behind every finding.
 ## Why this exists
 
 Existing tools are excellent at fetching and displaying. Ask any of them
-"should I go?" and they hand you raw data and wish you luck. Aggregation is
+for everything at once and they hand you raw data and wish you luck. Aggregation is
 commodity; the reasoning layer is the gap.
 
 ## Status
@@ -93,7 +93,7 @@ npm run holdshort -- nasr <dir>           # load a NASR cycle's APT CSV files �
 npm run holdshort -- ourairports <dir> --country CA   # OurAirports snapshot — everywhere else (see src/fetch/ourairports.ts)
 npm run holdshort -- airport CYSN         # runways with true headings (and magnetic variation where the source has it)
 npm run holdshort -- resolve flights/demo-cysn-cykf.json --fetch   # conditions at each waypoint at its ETA, cited
-npm run holdshort -- brief flights/demo-cysn-cykf.json --fetch     # go / marginal / no-go per waypoint against profiles/default.json
+npm run holdshort -- brief flights/demo-cysn-cykf.json --fetch     # every point, classified and compared against profiles/default.json
 npm run holdshort -- notams flights/demo-cysn-cykf.json --fetch    # every NOTAM for the flight, classified and (with a model) ranked
 npm run holdshort -- diff flights/demo-cysn-cykf.json --fetch      # brief again and say what changed since last time
 npm run holdshort -- verify --fetch                                # did the forecasts your briefings relied on turn out to be right?

@@ -18,6 +18,12 @@ export interface PilotProfile {
   readonly crosswindIncludesGust: boolean;
   /** Largest acceptable gust spread (gust − sustained); `null` for no limit. */
   readonly maxGustSpread: Knots | null;
+  /**
+   * Highest total wind, whatever direction it is from — compared against the
+   * gust when one is reported. `null` for no limit, in which case the wind
+   * is reported and left to the pilot, which is the point of the tool.
+   */
+  readonly maxWind: Knots | null;
   readonly nightAllowed: boolean;
 }
 
@@ -57,6 +63,7 @@ export function parsePilotProfile(input: unknown): PilotProfile {
     crosswind: positive(o, 'crosswindKt') as Knots,
     crosswindIncludesGust: o['crosswindIncludesGust'] !== false,
     maxGustSpread: typeof spread === 'number' && spread > 0 ? (spread as Knots) : null,
+    maxWind: typeof o['maxWindKt'] === 'number' && (o['maxWindKt'] as number) > 0 ? (o['maxWindKt'] as Knots) : null,
     nightAllowed: o['nightAllowed'] !== false,
   };
 }

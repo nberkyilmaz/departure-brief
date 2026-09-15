@@ -67,31 +67,30 @@ async function brief(store: MemoryStore, asOf: Date, p = profile) {
 }
 
 describe('diffBriefings', () => {
-  it('an unchanged situation is quiet: same hash, no verdict move, nothing to report', async () => {
+  it('an unchanged situation is quiet: same hash, no category move, nothing to report', async () => {
     const store = await seeded();
     const b = await brief(store, T_AFTER);
     const again = await brief(store, T_AFTER);
     expect(again.sha256).toBe(b.sha256);
     const d = diffBriefings(b, again);
     expect(d.quiet).toBe(true);
-    expect(d.verdict).toBeNull();
     expect(d.points.every((p) => p.changes.length === 0)).toBe(true);
     expect(d.reports.added).toEqual([]);
     expect(diffText(d)).toContain('Nothing material changed');
   });
 
-  it('a forecast arriving where there was none moves the verdict and resolves the coverage findings', async () => {
+  it('a forecast arriving where there was none resolves the coverage findings', async () => {
     const store = await seeded();
     const before = await brief(store, T_NO_FORECAST);
     const after = await brief(store, T_AFTER);
-    expect(before.document.briefing.verdict).toBe('marginal');
-    expect(after.document.briefing.verdict).toBe('go');
+    // Before the TAFs arrive there is nothing to classify a forecast by;
+    // afterwards there is, and the coverage findings resolve.
+    expect(before.document.briefing.points.every((p) => p.forecastCategory === null)).toBe(true);
+    expect(after.document.briefing.points.some((p) => p.forecastCategory !== null)).toBe(true);
 
     const d = diffBriefings(before, after);
     expect(d.quiet).toBe(false);
-    expect(d.verdict).toEqual({ from: 'marginal', to: 'go' });
     const teb = d.points.find((p) => p.waypoint === 'KTEB')!;
-    expect(teb.verdict).toEqual({ from: 'marginal', to: 'go' });
     const resolvedCoverage = teb.changes.find((c) => c.rule === 'forecast.coverage')!;
     expect(resolvedCoverage.kind).toBe('resolved');
     expect(resolvedCoverage.crossesLimit).toBe(true);
@@ -103,8 +102,9 @@ describe('diffBriefings', () => {
     expect(d.reports.removed.map((r) => [r.station, r.issuedAt])).toEqual([['KJFK', '2026-09-07T10:51:00.000Z']]);
 
     const text = diffText(d);
-    expect(text).toContain('VERDICT MARGINAL -> GO');
-    expect(text).toContain('KTEB: MARGINAL -> GO');
+    expect(text).toContain('KTEB');
+    // The coverage finding resolving is the news, marked as gone.
+    expect(text).toMatch(/gone\s+\[forecast\]/);
   });
 
   it('a newer observation of the same field is matched to the old one, not counted as a new finding', async () => {
@@ -140,10 +140,10 @@ describe('diffBriefings', () => {
     const crossing = d.alternate!.changes.find((c) => c.rule === 'crosswind.personal' && c.basisKind === 'observed')!;
     expect(crossing.kind).toBe('worsened');
     expect(crossing.crossesLimit).toBe(true);
-    expect(crossing.before!.severity).toBe('ok');
+    expect(crossing.before!.attention).toBe('routine');
     // Marginal rather than no-go: that observation is over 90 minutes before
     // the alternate's ETA, so it is context, not hard evidence.
-    expect(crossing.after!.severity).toBe('marginal');
+    expect(crossing.after!.attention).toBe('caution');
     expect(d.quiet).toBe(false);
     expect(diffText(d)).toContain('**');
   });

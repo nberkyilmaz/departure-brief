@@ -40,30 +40,32 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
-/**
- * The verdict the page is showing right now, or null before there is one.
- * Scoped to the briefing itself: the panel above it, which says what a
- * change did, carries the previous verdict in the same kind of badge.
- */
-function currentVerdict(): string | null {
-  return document.querySelector('#verdict .verdict.big')?.textContent ?? null;
+/** The flight categories the briefing is showing, in route order. */
+function categories(): string[] {
+  return [...document.querySelectorAll('#verdict .point h3 .category:not(.forecast)')].map((e) => e.textContent ?? '');
 }
 
-/** Waits for a verdict to be on the page, and returns it. */
-async function verdict(): Promise<string> {
-  await waitFor(() => expect(currentVerdict()).not.toBeNull(), { timeout: 10_000 });
-  return currentVerdict()!;
+/** How many lines are asking to be read, at each level. */
+function attentionCounts(): { alert: number; caution: number } {
+  return {
+    alert: document.querySelectorAll('#verdict .finding.alert').length,
+    caution: document.querySelectorAll('#verdict .finding.caution').length,
+  };
 }
 
-/** Waits until the verdict is something other than what it was. */
-async function verdictBecomes(want: string): Promise<void> {
-  await waitFor(() => expect(currentVerdict()).toBe(want), { timeout: 10_000 });
+/** Waits for the briefing to be on the page. */
+async function briefed(): Promise<void> {
+  await waitFor(() => expect(document.querySelector('#verdict .point')).not.toBeNull(), { timeout: 10_000 });
 }
 
 describe('the published page', () => {
   it('briefs the recorded flight in the browser, with no server', async () => {
     render(<App />);
-    expect(await verdict()).toMatch(/^(GO|MARGINAL|NO-GO)$/);
+    await briefed();
+    // A classification of what was reported, not a decision about the flight.
+    for (const c of categories()) expect(c).toMatch(/^(VFR|MVFR|IFR|LIFR)$/);
+    // And nothing anywhere tells the pilot whether to go.
+    expect(document.body.textContent).not.toMatch(/\bNO-GO\b/);
 
     // Not a picture of a briefing: the reports it was judged on are here,
     // and every finding can be opened to the span it cites.
@@ -71,30 +73,29 @@ describe('the published page', () => {
     expect(screen.getByText(/Not for operational use\./i)).toBeTruthy();
   });
 
-  it('rebuilds the verdict when a personal minimum changes', async () => {
+  it('flags more when a personal minimum tightens, and the sky is unchanged', async () => {
     render(<App />);
-    const before = await verdict();
+    await briefed();
+    const before = attentionCounts();
+    const sky = categories();
 
-    // A visibility minimum no forecast is ever going to meet, so the
-    // violation is in the prevailing forecast and the answer is no-go
-    // whatever the weather that day happened to be.
+    // A visibility minimum no forecast is ever going to meet.
     const visibility = screen.getByLabelText(/Visibility \(SM\)/i);
     fireEvent.change(visibility, { target: { value: '99' } });
 
-    await verdictBecomes('NO-GO');
-    expect(before).not.toBe('NO-GO');
-
-    // And it says which limit did it, against the report it was judged on.
+    await waitFor(() => expect(attentionCounts().alert).toBeGreaterThan(before.alert), { timeout: 10_000 });
+    // The pilot's limit moved; the weather did not, so the category cannot.
+    expect(categories()).toEqual(sky);
     expect(screen.getAllByText(/visibility/i).length).toBeGreaterThan(0);
 
-    // Put it back, and the verdict comes back with it: nothing is sticky.
+    // Put it back, and the flag goes with it: nothing is sticky.
     fireEvent.change(visibility, { target: { value: '5' } });
-    await verdictBecomes(before);
+    await waitFor(() => expect(attentionCounts().alert).toBe(before.alert), { timeout: 10_000 });
   });
 
   it('will not pretend to know an aerodrome it has no reports for', async () => {
     render(<App />);
-    await verdict();
+    await briefed();
     // Ottawa: a real aerodrome, and not one this page carries reports for.
     fireEvent.change(screen.getByLabelText(/Destination/i), { target: { value: 'CYOW' } });
     // It says which aerodromes it does have reports for, rather than failing blankly.
@@ -102,14 +103,14 @@ describe('the published page', () => {
     expect(document.querySelector('.error')!.textContent).toMatch(/CYSN|CYKF|CYHM/);
   });
 
-  it('shows the route as a strip, with the verdict at each point', async () => {
+  it('shows the route as a strip, with the category at each point', async () => {
     render(<App />);
-    await verdict();
+    await briefed();
     const points = [...document.querySelectorAll('.strip-point')];
     // Departure, destination and the alternate, in that order.
     expect(points.map((p) => p.querySelector('.strip-id')!.textContent)).toEqual(['CYSN', 'CYKF', 'alternate CYHM']);
-    // Each carries its own verdict, which is not necessarily the flight's.
-    for (const p of points) expect(p.querySelector('.verdict')!.textContent).toMatch(/^(GO|MARGINAL|NO-GO)$/);
+    // Each carries its own classification, which is a fact about that field.
+    for (const p of points) expect(p.querySelector('.category')!.textContent).toMatch(/^(VFR|MVFR|IFR|LIFR|—)$/);
     // And the distance between them, from the resolver's own numbers.
     expect(document.querySelectorAll('.strip-leg').length).toBe(points.length - 1);
     expect(document.querySelector('.strip-leg')!.textContent).toMatch(/^\d+ nm$/);
@@ -117,7 +118,7 @@ describe('the published page', () => {
 
   it('says plainly that the weather is frozen and it fetches nothing', async () => {
     render(<App />);
-    await verdict();
+    await briefed();
     expect(screen.getByText(/The weather here is frozen/i)).toBeTruthy();
     expect(screen.getByText(/rebuilt in your browser/i)).toBeTruthy();
   });
@@ -140,7 +141,7 @@ describe('moving around it', () => {
 
   it('opens the reports it was judged on, in the words they arrived in', async () => {
     render(<App />);
-    await verdict();
+    await briefed();
 
     go(/The reports/i);
 
@@ -155,7 +156,7 @@ describe('moving around it', () => {
 
   it('works the legs out, and says where a number is missing from', async () => {
     render(<App />);
-    await verdict();
+    await briefed();
 
     go(/Nav log/i);
     expect(await screen.findByRole('heading', { level: 2, name: /Nav log/i })).toBeTruthy();
@@ -176,21 +177,27 @@ describe('moving around it', () => {
     expect(screen.getByText(/nothing here will invent a figure/i)).toBeTruthy();
   });
 
-  it('keeps the verdict in reach from every page', async () => {
+  it('carries what is waiting to be read from every page, as a count and not a verdict', async () => {
     render(<App />);
-    const before = await verdict();
+    await briefed();
+    const waiting = attentionCounts().alert + attentionCounts().caution;
 
     go(/Weight and balance/i);
     await waitFor(() => expect(document.querySelector('.wb')).not.toBeNull());
 
-    // The briefing is no longer on screen, so the verdict rides in the navigation.
-    expect(currentVerdict()).toBeNull();
-    const chip = document.querySelector('.nav-verdict')!;
-    expect(chip.textContent).toBe(before);
-    expect(chip.getAttribute('href')).toBe('#/brief');
+    const chip = document.querySelector('.nav-attention');
+    if (waiting === 0) {
+      // Nothing to read is not something to badge.
+      expect(chip).toBeNull();
+      return;
+    }
+    // A count of what is waiting, never a word about whether to go.
+    expect(chip!.textContent).toMatch(/^\d+ to look at$/);
+    expect(chip!.textContent).not.toMatch(/GO|NO-GO|MARGINAL/);
+    expect(chip!.getAttribute('href')).toBe('#/brief');
 
-    window.location.hash = chip.getAttribute('href')!;
-    await waitFor(() => expect(currentVerdict()).toBe(before));
+    window.location.hash = chip!.getAttribute('href')!;
+    await waitFor(() => expect(document.querySelector('#verdict .point')).not.toBeNull());
   });
 
   it('lands on the page an address names, and says which one it is on', async () => {

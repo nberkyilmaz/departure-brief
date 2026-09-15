@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { NotamPanel } from './NotamPanel.js';
 import { RouteStrip } from './RouteStrip.js';
 import { hhmmZ, local, zulu } from './time.js';
-import type { Citation, Finding, PointVerdict, StoredBriefing, Verdict } from './types.js';
+import type { Attention, Citation, FlightCategory, Finding, PointReview, StoredBriefing } from './types.js';
 
 function Zulu({ iso }: { iso: string }) {
   return (
@@ -37,9 +37,9 @@ function FindingRow({ f, waypoint = null }: { f: Finding; waypoint?: string | nu
   const sources = f.citations.filter((c) => c.raw);
   const others = f.citations.filter((c) => !c.raw && c.text);
   return (
-    <li className={`finding ${f.severity}`}>
+    <li className={`finding ${f.attention}`}>
       <button className="row" onClick={() => setOpen(!open)} aria-expanded={open}>
-        <span className={`badge ${f.severity}`}>{f.severity}</span>
+        <span className={`badge ${f.attention}`}>{f.attention}</span>
         <span className="basis">
           {waypoint ? <b>{waypoint}</b> : null} {f.basis}
         </span>
@@ -63,38 +63,35 @@ function FindingRow({ f, waypoint = null }: { f: Finding; waypoint?: string | nu
   );
 }
 
-const WEIGHT: Record<string, number> = { 'no-go': 0, marginal: 1, advisory: 2, ok: 3 };
+const WEIGHT: Record<string, number> = { 'alert': 0, marginal: 1, advisory: 2, ok: 3 };
 
 /** A waypoint, and what to call it when it is the alternate rather than a leg. */
 interface LabelledPoint {
-  readonly point: PointVerdict;
+  readonly point: PointReview;
   readonly label: string | null;
 }
 
 /**
  * The reasons the verdict is what it is, and nothing else.
  *
- * A briefing produces dozens of findings and most of them say a limit was
- * met. Leading with all of them buries the two that matter. This shows only
- * what moved the verdict, worst first, with the detail one tap away — the
- * rest is still below, in full.
+ * A briefing produces dozens of lines and most of them say a limit was met.
+ * Leading with all of them buries the two worth reading. This shows what
+ * asked for attention, most first, with the detail one tap away — the rest
+ * is still below, in full.
+ *
+ * It does not say what to do. It says what to look at.
  */
-function Why({ verdict, points }: { verdict: Verdict; points: readonly LabelledPoint[] }) {
+function Why({ points }: { points: readonly LabelledPoint[] }) {
   const driving = points
-    .flatMap(({ point, label }) => point.findings.filter((f) => f.severity === 'no-go' || f.severity === 'marginal').map((f) => ({ f, where: `${label ? `${label} ` : ''}${point.waypoint}` })))
-    .sort((a, b) => WEIGHT[a.f.severity]! - WEIGHT[b.f.severity]!);
+    .flatMap(({ point, label }) => point.findings.filter((f) => f.attention === 'alert' || f.attention === 'caution').map((f) => ({ f, where: `${label ? `${label} ` : ''}${point.waypoint}` })))
+    .sort((a, b) => WEIGHT[a.f.attention]! - WEIGHT[b.f.attention]!);
 
   if (driving.length === 0) {
-    return (
-      <p className="why-none">
-        Nothing crossed your limits. {verdict === 'go' ? 'Every check below met them' : 'The verdict comes from the checks below'}, and each one shows the
-        report it was judged on.
-      </p>
-    );
+    return <p className="why-none">Nothing crossed your limits. Every check below is shown in full, each with the report it was read from.</p>;
   }
   return (
     <div className="why">
-      <h3>Why</h3>
+      <h3>Worth a look</h3>
       <ul className="findings">
         {driving.map(({ f, where }, i) => (
           <FindingRow key={i} f={f} waypoint={where} />
@@ -137,13 +134,19 @@ function Gaps({ stored }: { stored: StoredBriefing }) {
   );
 }
 
-function Point({ p, label }: { p: PointVerdict; label: string | null }) {
-  const driving = p.findings.filter((f) => f.severity === 'no-go' || f.severity === 'marginal');
-  const rest = p.findings.filter((f) => f.severity !== 'no-go' && f.severity !== 'marginal');
+function Point({ p, label }: { p: PointReview; label: string | null }) {
+  const driving = p.findings.filter((f) => f.attention === 'alert' || f.attention === 'caution');
+  const rest = p.findings.filter((f) => f.attention !== 'alert' && f.attention !== 'caution');
   return (
-    <section className={`point ${p.verdict}`}>
+    <section className={`point ${(p.category ?? 'unknown').toLowerCase()}`}>
       <h3>
-        <span className={`verdict ${p.verdict}`}>{p.verdict.toUpperCase()}</span> {label ? `${label} ` : ''}
+        {p.category && <span className={`category ${p.category.toLowerCase()}`}>{p.category}</span>}
+        {p.forecastCategory && p.forecastCategory !== p.category && (
+          <span className={`category forecast ${p.forecastCategory.toLowerCase()}`} title="the prevailing forecast at your ETA">
+            {p.forecastCategory} forecast
+          </span>
+        )}
+        {label ? `${label} ` : ''}
         {p.waypoint} <span className="at">at</span> <Zulu iso={p.at} /> {p.night && <span className="night">night</span>}
       </h3>
       {driving.length > 0 && (
@@ -178,7 +181,7 @@ export function BriefingView({ stored }: { stored: StoredBriefing }) {
   return (
     <section className="briefing" id="verdict">
       <h2>
-        <span className={`verdict big ${b.verdict}`}>{b.verdict.toUpperCase()}</span>
+        <span className="briefing-title">Your briefing</span>
         <span className="meta">
           as of <Zulu iso={b.asOf} /> · profile {b.profile.name} v{b.profile.version}
           {b.aircraft ? ` · ${b.aircraft}` : ''} · rules v{b.rulesVersion} · briefing <code title="content hash">{stored.sha256.slice(0, 12)}</code>
@@ -187,12 +190,15 @@ export function BriefingView({ stored }: { stored: StoredBriefing }) {
 
       <RouteStrip stored={stored} />
 
-      <Why verdict={b.verdict} points={points} />
+      <Why points={points} />
       <Gaps stored={stored} />
 
       <p className="explain">
-        A violation in the prevailing forecast or a current observation is <b>no-go</b>; the same violation inside a TEMPO, PROB or an in-progress BECMG is{' '}
-        <b>marginal</b>. Every line opens to the report text it was judged on. Nothing is hidden — collapsing changes what you see first, never what exists.
+        <b>This does not decide whether to fly.</b> It reports what the products say and compares them against the limits you set. A limit crossed in the
+        prevailing forecast or a current observation reads as an <b>alert</b>; the same crossed inside a TEMPO, PROB or an in-progress BECMG reads as a{' '}
+        <b>caution</b>, because the product is less certain. VFR, MVFR, IFR and LIFR are the standard classification of ceiling and visibility — a fact about
+        the sky, not a judgement about your flight. Every line opens to the report text it was read from. Nothing is hidden: collapsing changes what you see
+        first, never what exists.
       </p>
 
       {points.map(({ point, label }) => (

@@ -1,14 +1,15 @@
 import { hrefFor, ROUTES, TITLES, type Route } from './router.js';
-import type { Verdict } from './types.js';
+import type { Attention } from './types.js';
 
 /**
  * The four things this does, and the answer to the one that matters.
  *
- * The verdict rides along in the navigation once there is one, so that a
- * reader who has wandered off to the raw reports or the loading sheet can
- * still see what the flight came out as, and get back to it in one tap.
+ * What most wants reading rides along in the navigation, so somebody who
+ * has wandered off to the loading sheet still knows the briefing had
+ * something in it, and gets back in one tap. It is a count, not a verdict:
+ * "two things to look at", never "do not go".
  */
-export function Nav({ route, verdict }: { route: Route; verdict: Verdict | null }) {
+export function Nav({ route, attention }: { route: Route; attention: { level: Attention; count: number } | null }) {
   return (
     <nav className="nav" aria-label="Sections">
       <ul>
@@ -20,9 +21,9 @@ export function Nav({ route, verdict }: { route: Route; verdict: Verdict | null 
           </li>
         ))}
       </ul>
-      {verdict && route !== 'brief' && (
-        <a className={`verdict nav-verdict ${verdict}`} href={hrefFor('brief')}>
-          {verdict.toUpperCase()}
+      {attention && route !== 'brief' && (
+        <a className={`nav-attention ${attention.level}`} href={hrefFor('brief')}>
+          {attention.count} to look at
         </a>
       )}
     </nav>

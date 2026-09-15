@@ -63,7 +63,7 @@ describe('assembleBriefing', () => {
     const b = assembleBriefing(resolved, profile, aircraft);
     const d = b.document;
     expect(d.format).toBe(2);
-    expect(d.versions).toEqual({ rules: 4, metarDecoder: 2, tafDecoder: 1, notamDecoder: 1, notamPrompt: 3 });
+    expect(d.versions).toEqual({ rules: 5, metarDecoder: 2, tafDecoder: 1, notamDecoder: 1, notamPrompt: 3 });
     expect(d.notams).toBeNull();
     expect(d.asOf).toBe('2026-09-07T12:30:00.000Z');
     expect(d.inputs.points.map((p) => p.waypoint)).toEqual(['KTEB', 'N07', 'KHPN']);
@@ -73,7 +73,11 @@ describe('assembleBriefing', () => {
     expect(d.inputs.reports).toHaveLength(6);
     expect(d.inputs.reports.map((r) => r.kind).sort()).toEqual(['metar', 'metar', 'metar', 'taf', 'taf', 'taf']);
     for (const r of d.inputs.reports) expect(await store.getRaw(r.sha256)).not.toBeNull();
-    expect(d.briefing.verdict).toBe('go');
+    // No verdict: the classification of what was reported, and nothing rolled up.
+    // N07 has no observation of its own, so it has no observed category — a
+    // blank, not a guess.
+    expect(d.briefing.points.map((p) => p.category)).toEqual(['VFR', null, 'VFR']);
+    expect('verdict' in d.briefing).toBe(false);
   });
 
   it('a different profile is a different briefing of the same flight', async () => {

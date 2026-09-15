@@ -11,8 +11,10 @@ import type { StoredBriefing } from './types.js';
  * departure end or waiting at the far end two hours later.
  *
  * It is built only from what the briefing already says. Nothing here is a
- * new judgement; the colours are the verdicts and the distances are the
- * cumulative ones the resolver worked out.
+ * new judgement: the colours are the flight categories, which classify what
+ * was reported, and the distances are the resolver's own cumulative ones.
+ * Where a field has no observation of its own, the forecast category stands
+ * in — labelled as such by the briefing below.
  */
 export function RouteStrip({ stored }: { stored: StoredBriefing }) {
   const b = stored.document.briefing;
@@ -40,7 +42,7 @@ export function RouteStrip({ stored }: { stored: StoredBriefing }) {
   return (
     <ol className="strip" aria-label="The route, and the verdict at each point">
       {legs.map(({ point, fromPrevious, label }) => (
-        <li key={point.waypoint + point.at} className={`strip-point ${point.verdict}`}>
+        <li key={point.waypoint + point.at} className={`strip-point ${(point.category ?? point.forecastCategory ?? "unknown").toLowerCase()}`}>
           {fromPrevious !== null && <span className="strip-leg">{fromPrevious} nm</span>}
           <a href={`#verdict`} className="strip-body">
             <span className="strip-id">
@@ -51,7 +53,7 @@ export function RouteStrip({ stored }: { stored: StoredBriefing }) {
               {hhmmZ(point.at)}
               {point.night && <span className="night">night</span>}
             </span>
-            <span className={`verdict ${point.verdict}`}>{point.verdict.toUpperCase()}</span>
+            <span className={`category ${(point.category ?? point.forecastCategory ?? "unknown").toLowerCase()}`}>{point.category ?? point.forecastCategory ?? "—"}</span>
           </a>
         </li>
       ))}

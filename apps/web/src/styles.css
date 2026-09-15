@@ -14,12 +14,24 @@
   --line: #dedbd3;
   --line-strong: #c6c2b8;
 
-  /* Meaning. Each one is a verdict or a severity; none is decoration. */
+  /*
+   * Meaning. Each one is an attention level or a flight category; none is
+   * decoration.
+   *
+   * The categories use the colours every weather service uses — green VFR,
+   * blue MVFR, red IFR, magenta LIFR — because a pilot already reads them
+   * that way and inventing a scheme would be worse than useless.
+   */
   --ok: #2f7a37;
   --advisory: #3f6493;
   --marginal: #a35c00;
   --nogo: #b3261e;
   --mark: #ffe680;
+  --vfr: #2f7a37;
+  --mvfr: #1c62b5;
+  --ifr: #b3261e;
+  --lifr: #8b2c8b;
+  --unknown: #6b6b66;
 
   /* One spacing scale, so nothing is spaced by eye. */
   --s1: 0.25rem;
@@ -60,6 +72,11 @@
     --marginal: #e0a145;
     --nogo: #f0736a;
     --mark: #6b5d1f;
+    --vfr: #6fbf73;
+    --mvfr: #7da7dd;
+    --ifr: #f0736a;
+    --lifr: #d98fd9;
+    --unknown: #8a8a84;
     --shadow: 0 1px 2px rgb(0 0 0 / 40%);
   }
 }
@@ -475,3 +492,71 @@ summary:focus-visible,
 .navlog-table .leg-name { text-align: left; font-weight: 600; white-space: nowrap; }
 .navlog-table .leg-gaps td { text-align: left; padding-top: 0; border-bottom: 1px solid var(--line); }
 .navlog-table .total td { border-top: 2px solid var(--line-strong); }
+
+/*
+ * The flight category: the standard classification of ceiling and
+ * visibility. A fact about the sky, not a judgement about the flight, so it
+ * is stated plainly rather than shouted.
+ */
+.category {
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: var(--unknown);
+}
+.category.vfr { background: var(--vfr); }
+.category.mvfr { background: var(--mvfr); }
+.category.ifr { background: var(--ifr); }
+.category.lifr { background: var(--lifr); }
+/* The forecast's category, when it differs from what is being observed. */
+.category.forecast { background: transparent; color: var(--fg); border: 1px solid currentColor; font-weight: 500; }
+.category.forecast.vfr { color: var(--vfr); }
+.category.forecast.mvfr { color: var(--mvfr); }
+.category.forecast.ifr { color: var(--ifr); }
+.category.forecast.lifr { color: var(--lifr); }
+
+.briefing-title { font-size: 1.15rem; }
+
+/* A point's stripe is its category. */
+.point.vfr { border-left-color: var(--vfr); }
+.point.mvfr { border-left-color: var(--mvfr); }
+.point.ifr { border-left-color: var(--ifr); }
+.point.lifr { border-left-color: var(--lifr); }
+.point.unknown { border-left-color: var(--unknown); }
+.strip-point.vfr .strip-body { border-top-color: var(--vfr); }
+.strip-point.mvfr .strip-body { border-top-color: var(--mvfr); }
+.strip-point.ifr .strip-body { border-top-color: var(--ifr); }
+.strip-point.lifr .strip-body { border-top-color: var(--lifr); }
+.strip-point.unknown .strip-body { border-top-color: var(--unknown); }
+
+/*
+ * Attention: how much a line wants reading. Deliberately quieter than the
+ * old verdict badges — an alert is "read this", not "do not go".
+ */
+.badge.routine { background: var(--muted); }
+.badge.note { background: var(--advisory); }
+.badge.caution { background: var(--marginal); }
+.badge.alert { background: var(--nogo); }
+.finding.alert { border-left: 3px solid var(--nogo); }
+.finding.caution { border-left: 3px solid var(--marginal); }
+
+/* What is waiting on the briefing page, from wherever the reader is. */
+.nav-attention {
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  background: var(--marginal);
+}
+.nav-attention.alert { background: var(--nogo); }
+.nav-attention:hover { opacity: 0.85; }
+
+@media (prefers-color-scheme: dark) {
+  .category, .nav-attention { color: #15151a; }
+  .category.forecast { color: var(--fg); }
+}

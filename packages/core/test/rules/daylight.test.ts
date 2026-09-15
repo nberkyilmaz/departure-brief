@@ -22,7 +22,7 @@ describe('checkDaylight', () => {
   it('says when last light is and how much of it is left', () => {
     const at = new Date(DUSK.getTime() - 4 * 3_600_000);
     const f = only(checkDaylight({ waypoint: 'CYKF', position: CYKF, at, nightAllowed: true }));
-    expect(f.severity).toBe('ok');
+    expect(f.attention).toBe('routine');
     // Waterloo's last light that evening is after midnight Zulu, which is
     // the case the "next event" framing exists for.
     expect(f.summary).toMatch(/last light \d{2}:\d{2}Z/);
@@ -33,11 +33,11 @@ describe('checkDaylight', () => {
   it('speaks up when the margin is thin', () => {
     const at = new Date(DUSK.getTime() - 30 * 60_000);
     const f = only(checkDaylight({ waypoint: 'CYKF', position: CYKF, at, nightAllowed: true }));
-    expect(f.severity).toBe('advisory');
+    expect(f.attention).toBe('note');
     expect(f.values['marginMinutes']).toBe(30);
     // An hour is the line; either side of it behaves.
     const roomy = only(checkDaylight({ waypoint: 'CYKF', position: CYKF, at: new Date(DUSK.getTime() - (THIN_MARGIN_MINUTES + 5) * 60_000), nightAllowed: true }));
-    expect(roomy.severity).toBe('ok');
+    expect(roomy.attention).toBe('routine');
   });
 
   it('says so when the pilot does not fly at night and the light is going', () => {
@@ -46,7 +46,7 @@ describe('checkDaylight', () => {
     expect(f.summary).toContain('does not fly at night');
     // Still advisory: whether twenty minutes is enough is the pilot's call,
     // and the night rules answer the legal half of it separately.
-    expect(f.severity).toBe('advisory');
+    expect(f.attention).toBe('note');
   });
 
   it('reports first light instead when it is already dark', () => {

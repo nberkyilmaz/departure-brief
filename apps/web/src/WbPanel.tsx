@@ -200,9 +200,9 @@ export function WbPanel({
         </>
       )}
       {result && (
-        <div className={`point ${result.verdict === 'within-limits' ? 'go' : 'no-go'}`}>
+        <div className={`point ${result.verdict === 'within-limits' ? 'vfr' : 'ifr'}`}>
           <h3>
-            <span className={`verdict ${result.verdict === 'within-limits' ? 'go' : 'no-go'}`}>{result.verdict === 'within-limits' ? 'WITHIN LIMITS' : 'OUTSIDE LIMITS'}</span>
+            <span className={`category ${result.verdict === 'within-limits' ? 'vfr' : 'ifr'}`}>{result.verdict === 'within-limits' ? 'WITHIN LIMITS' : 'OUTSIDE LIMITS'}</span>
             <span className="at">
               {result.totalWeightLb} lb · CG {result.cgIn} in · {result.category} category (forward limit {result.limits.forwardArmIn} in at this weight, aft{' '}
               {result.limits.aftArmIn} in, max {result.limits.maxWeightLb} lb)
@@ -241,7 +241,7 @@ export function WbPanel({
             {result.findings.map((f, i) => (
               <li key={`${f.rule}-${i}`} className="finding">
                 <div className="row wb-row">
-                  <span className={`badge ${f.severity === 'ok' ? 'ok' : 'no-go'}`}>{f.severity}</span>
+                  <span className={`badge ${f.severity === 'routine' ? 'routine' : 'alert'}`}>{f.severity}</span>
                   <span className="summary">{f.summary}</span>
                 </div>
                 <div className="detail">

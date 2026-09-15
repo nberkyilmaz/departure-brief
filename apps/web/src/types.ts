@@ -5,8 +5,14 @@
  * side of the core package.
  */
 
-export type Verdict = 'go' | 'marginal' | 'no-go';
-export type Severity = 'ok' | 'advisory' | 'marginal' | 'no-go';
+/**
+ * How much attention a line deserves — an ordering, not a decision. The tool
+ * reports; the pilot decides.
+ */
+export type Attention = 'routine' | 'note' | 'caution' | 'alert';
+
+/** The standard classification of ceiling and visibility. A fact, not an opinion. */
+export type FlightCategory = 'VFR' | 'MVFR' | 'IFR' | 'LIFR';
 export type AirspaceClass = 'control-zone' | 'controlled' | 'uncontrolled' | 'B' | 'C' | 'D' | 'E' | 'G';
 
 export interface Citation {
@@ -20,7 +26,7 @@ export interface Citation {
 
 export interface Finding {
   rule: string;
-  severity: Severity;
+  attention: Attention;
   summary: string;
   waypoint: string;
   basis: string;
@@ -29,10 +35,13 @@ export interface Finding {
   citations: Citation[];
 }
 
-export interface PointVerdict {
+export interface PointReview {
   waypoint: string;
   at: string;
-  verdict: Verdict;
+  /** From the observation at the field, when it has one. */
+  category: FlightCategory | null;
+  /** From the prevailing forecast governing this point at its ETA. */
+  forecastCategory: FlightCategory | null;
   night: boolean;
   findings: Finding[];
 }
@@ -42,9 +51,8 @@ export interface Briefing {
   profile: { name: string; version: number };
   aircraft: string | null;
   asOf: string;
-  verdict: Verdict;
-  points: PointVerdict[];
-  alternate: PointVerdict | null;
+  points: PointReview[];
+  alternate: PointReview | null;
 }
 
 export interface FlightPlanInput {
@@ -122,14 +130,14 @@ export interface FindingChange {
 
 export interface PointDiff {
   waypoint: string;
-  verdict: { from: Verdict; to: Verdict } | null;
+  /** Null when the flight category did not move. */
+  category: { from: FlightCategory | null; to: FlightCategory | null } | null;
   changes: FindingChange[];
 }
 
 export interface BriefingDiff {
-  from: { sha256: string; asOf: string; verdict: Verdict };
-  to: { sha256: string; asOf: string; verdict: Verdict };
-  verdict: { from: Verdict; to: Verdict } | null;
+  from: { sha256: string; asOf: string };
+  to: { sha256: string; asOf: string };
   points: PointDiff[];
   alternate: PointDiff | null;
   notams: { kind: 'new' | 'gone' | 'rank-changed'; id: string | null; sha256: string; from: string | null; to: string | null; summary: string; notable: boolean }[];
@@ -241,6 +249,6 @@ export interface LoadingResult {
   cgIn: number;
   category: 'normal' | 'utility';
   limits: { maxWeightLb: number; forwardArmIn: number; aftArmIn: number };
-  findings: { rule: string; severity: 'ok' | 'no-go'; summary: string; citations: DocumentCitation[] }[];
+  findings: { rule: string; severity: 'routine' | 'alert'; summary: string; citations: DocumentCitation[] }[];
   verdict: 'within-limits' | 'outside-limits';
 }

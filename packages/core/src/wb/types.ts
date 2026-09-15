@@ -119,7 +119,8 @@ export interface LoadingResult {
 
 export interface WbFinding {
   readonly rule: 'wb.weight' | 'wb.cg.forward' | 'wb.cg.aft' | 'wb.station' | 'wb.baggage';
-  readonly severity: 'ok' | 'no-go';
+  /** `alert` where a published limit is exceeded; this states the fact, it does not decide the flight. */
+  readonly severity: 'routine' | 'alert';
   readonly summary: string;
   readonly values: Readonly<Record<string, number>>;
   readonly citations: readonly DocumentCitation[];

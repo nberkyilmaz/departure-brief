@@ -65,10 +65,10 @@ export function checkDaylight(ctx: DaylightContext): Finding[] {
   };
 
   if (events.allDay) {
-    return [{ ...base, rule: 'daylight.margin', severity: 'ok', summary: 'the sun does not set here today', values: { allDay: true } }];
+    return [{ ...base, rule: 'daylight.margin', attention: 'routine', summary: 'the sun does not set here today', values: { allDay: true } }];
   }
   if (events.allNight) {
-    return [{ ...base, rule: 'daylight.margin', severity: 'ok', summary: 'the sun does not rise here today — the whole flight is at night', values: { allNight: true } }];
+    return [{ ...base, rule: 'daylight.margin', attention: 'routine', summary: 'the sun does not rise here today — the whole flight is at night', values: { allNight: true } }];
   }
 
   const dusk = events.civilDusk;
@@ -86,7 +86,7 @@ export function checkDaylight(ctx: DaylightContext): Finding[] {
       {
         ...base,
         rule: 'daylight.margin',
-        severity: 'ok',
+        attention: 'routine',
         summary: `night here; first light ${hhmm(dawn!)}, in ${since(ctx.at, dawn!)}`,
         values: { night: true, civilDawn: dawn!.toISOString() },
       },
@@ -105,7 +105,7 @@ export function checkDaylight(ctx: DaylightContext): Finding[] {
        * belongs to the pilot. Whether they fly at night changes what the
        * margin means, so it changes what is said, not how loudly.
        */
-      severity: thin ? 'advisory' : 'ok',
+      attention: thin ? 'note' : 'routine',
       summary: `last light ${hhmm(dusk)}${events.sunset ? ` (sunset ${hhmm(events.sunset)})` : ''} — ${since(ctx.at, dusk)} of daylight after arrival${
         thin && !ctx.nightAllowed ? ', and this profile does not fly at night' : ''
       }`,

@@ -87,7 +87,7 @@ describe('POST /api/briefings', () => {
     expect(res.statusCode).toBe(201);
     const b = res.json() as StoredBriefing;
     expect(b.sha256).toMatch(/^[0-9a-f]{64}$/);
-    expect(b.document.briefing.verdict).toBe('go');
+    expect(b.document.briefing.points.map((p) => p.category)).toEqual(['VFR', null, 'VFR']);
     expect(b.document.briefing.points.map((p) => p.waypoint)).toEqual(['KTEB', 'N07', 'KHPN']);
     expect(b.document.inputs.reports.length).toBe(6);
 
@@ -177,7 +177,7 @@ describe('POST /api/briefings', () => {
     const res = await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan, profile, fetch: false, asOf: '2026-09-07T12:30:00Z' } });
     expect(res.statusCode).toBe(201);
     const b = res.json() as StoredBriefing;
-    expect(b.document.briefing.verdict).toBe('marginal');
+    expect(b.document.briefing.points.every((p) => p.forecastCategory === null)).toBe(true);
     expect(b.document.inputs.reports).toEqual([]);
   });
 });
@@ -190,13 +190,15 @@ describe('GET /api/briefings/:sha256/diff', () => {
     expect(none.statusCode).toBe(404);
     expect(none.json().error).toContain('no earlier briefing');
 
-    // Later, with the TAFs known: marginal → go.
+    // Later, with the TAFs known: the coverage findings resolve.
     const second = (await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan, profile, asOf: '2026-09-07T12:30:00Z' } })).json() as StoredBriefing;
     const res = await app.inject({ method: 'GET', url: `/api/briefings/${second.sha256}/diff` });
     expect(res.statusCode).toBe(200);
     const d = res.json();
-    expect(d.verdict).toEqual({ from: 'marginal', to: 'go' });
     expect(d.quiet).toBe(false);
+    // What changed is stated as changes, with no verdict rolled up over them.
+    expect('verdict' in d).toBe(false);
+    expect(d.points.flatMap((p: { changes: { kind: string; rule: string }[] }) => p.changes).some((c: { kind: string; rule: string }) => c.kind === 'resolved' && c.rule === 'forecast.coverage')).toBe(true);
     expect(d.from.sha256).toBe(first.sha256);
 
     // An explicit `against`, and an unknown one.

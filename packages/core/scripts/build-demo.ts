@@ -208,7 +208,7 @@ if (wb) writeFileSync(join(out, 'wb.json'), JSON.stringify(wb, null, 2) + '\n');
 
 const counts = briefing.document.notams?.counts;
 console.log(`demo written to ${out}`);
-console.log(`  verdict ${briefing.document.briefing.verdict}, ${briefing.document.inputs.reports.length} reports cited`);
+console.log(`  ${briefing.document.briefing.points.map((p) => `${p.waypoint} ${p.category ?? '—'}`).join(', ')}; ${briefing.document.inputs.reports.length} reports cited`);
 console.log(`  NOTAMs: ${briefing.document.notams?.items.length ?? 0}${counts ? ` (${Object.entries(counts).filter(([, n]) => n > 0).map(([k, n]) => `${n} ${k}`).join(', ')})` : ''}`);
 console.log(`  ranked by ${briefing.document.notams?.model ?? 'no model'}`);
 console.log(`  weight and balance: ${wb ? `${wb.figures.length} figures, ${wb.review.length} in review` : 'none'}`);

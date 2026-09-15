@@ -11,7 +11,7 @@ const LABEL: Record<FindingChange['kind'], string> = {
 
 function Change({ c }: { c: FindingChange }) {
   const f = c.after ?? c.before!;
-  const severity = c.kind === 'worsened' || (c.kind === 'appeared' && c.crossesLimit) ? 'no-go' : c.kind === 'eased' || c.kind === 'resolved' ? 'ok' : 'advisory';
+  const severity = c.kind === 'worsened' || (c.kind === 'appeared' && c.crossesLimit) ? 'alert' : c.kind === 'eased' || c.kind === 'resolved' ? 'ok' : 'note';
   return (
     <li className={`change ${c.crossesLimit ? 'crosses' : ''}`}>
       <span className={`badge ${severity}`}>{LABEL[c.kind]}</span>
@@ -19,7 +19,7 @@ function Change({ c }: { c: FindingChange }) {
       <span className="summary">
         {c.kind === 'worsened' || c.kind === 'eased' ? (
           <>
-            <s>{c.before!.severity}</s> {c.after!.severity}: {c.after!.summary}
+            <s>{c.before!.attention}</s> {c.after!.attention}: {c.after!.summary}
           </>
         ) : (
           f.summary
@@ -31,17 +31,17 @@ function Change({ c }: { c: FindingChange }) {
 
 function Point({ p, label }: { p: PointDiff; label?: string }) {
   const material = p.changes.filter((c) => c.kind !== 'restated');
-  if (!p.verdict && material.length === 0) return null;
+  if (!p.category && material.length === 0) return null;
   return (
     <div className="diff-point">
       <h4>
         {label}
         {p.waypoint}
-        {p.verdict && (
+        {p.category && (
           <>
             {' '}
-            <span className={`verdict ${p.verdict.from}`}>{p.verdict.from.toUpperCase()}</span> →{' '}
-            <span className={`verdict ${p.verdict.to}`}>{p.verdict.to.toUpperCase()}</span>
+            <span className={`category ${(p.category.from ?? 'unknown').toLowerCase()}`}>{p.category.from ?? '—'}</span> →{' '}
+            <span className={`category ${(p.category.to ?? 'unknown').toLowerCase()}`}>{p.category.to ?? '—'}</span>
           </>
         )}
       </h4>
@@ -68,14 +68,6 @@ export function DiffPanel({ d }: { d: BriefingDiff }) {
           {w}
         </p>
       ))}
-      {d.verdict ? (
-        <p className="verdict-move">
-          <span className={`verdict big ${d.verdict.from}`}>{d.verdict.from.toUpperCase()}</span> →{' '}
-          <span className={`verdict big ${d.verdict.to}`}>{d.verdict.to.toUpperCase()}</span>
-        </p>
-      ) : (
-        <p className="explain">Verdict unchanged: {d.to.verdict.toUpperCase()}.</p>
-      )}
       {d.quiet ? (
         <p className="explain">Nothing material changed. Values moved without crossing any of your limits.</p>
       ) : (
@@ -91,7 +83,7 @@ export function DiffPanel({ d }: { d: BriefingDiff }) {
           <ul className="findings">
             {newNotams.map((n) => (
               <li key={n.sha256} className={`change ${n.notable ? 'crosses' : ''}`}>
-                <span className={`badge ${n.notable ? 'no-go' : 'advisory'}`}>new</span>
+                <span className={`badge ${n.notable ? 'alert' : 'note'}`}>new</span>
                 <span className="basis">{n.id}</span>
                 <span className="summary">{n.summary}</span>
               </li>

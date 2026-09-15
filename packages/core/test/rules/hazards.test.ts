@@ -57,7 +57,7 @@ describe('checkHazards', () => {
     const f = findings[0]!;
     expect(f.rule).toBe('hazard.onRoute');
     // A SIGMET is a warning to everything in the air.
-    expect(f.severity).toBe(sample.decoded.kind === 'airmet' ? 'marginal' : 'no-go');
+    expect(f.attention).toBe(sample.decoded.kind === 'airmet' ? 'caution' : 'alert');
     expect(f.summary).toContain('your route goes through it');
     expect(f.citations[0]!.raw).toBe(sample.report.body);
     expect(f.citations[0]!.text).toBe(sample.decoded.bulletin!.value);
@@ -101,7 +101,7 @@ describe('checkHazards', () => {
     const findings = checkHazards(ctx(through), ALL);
     for (const f of findings) {
       if (f.rule === 'hazard.near') {
-        expect(f.severity).toBe('advisory');
+        expect(f.attention).toBe('note');
         expect(Number(f.values['distanceNm'])).toBeLessThanOrEqual(NEAR_HAZARD_NM);
       }
     }

@@ -26,6 +26,18 @@ import type { AircraftInput, BriefingDiff, FlightPlanInput, ProfileInput, Stored
 const DEMO = import.meta.env.VITE_DEMO === '1';
 const base = import.meta.env.BASE_URL;
 
+/**
+ * How much of the briefing wants reading: the count of lines asking for
+ * attention, and the most any of them asks for. A count, never a verdict.
+ */
+function attentionOf(b: StoredBriefing | null): { level: 'caution' | 'alert'; count: number } | null {
+  if (!b) return null;
+  const points = [...b.document.briefing.points, ...(b.document.briefing.alternate ? [b.document.briefing.alternate] : [])];
+  const wanting = points.flatMap((p) => p.findings.filter((f) => f.attention === 'alert' || f.attention === 'caution'));
+  if (wanting.length === 0) return null;
+  return { level: wanting.some((f) => f.attention === 'alert') ? 'alert' : 'caution', count: wanting.length };
+}
+
 /** How long to wait after a change before rebuilding the briefing, locally. */
 const SETTLE_MS = 250;
 
@@ -159,7 +171,7 @@ export function App() {
             <a href={hrefFor('brief')}>Hold Short</a>
           </h1>
           <p className="tagline">Stop before the line and brief before you cross it.</p>
-          <Nav route={route} verdict={briefing?.document.briefing.verdict ?? null} />
+          <Nav route={route} attention={attentionOf(briefing)} />
         </header>
 
         {route === 'brief' && (

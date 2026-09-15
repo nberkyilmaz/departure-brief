@@ -13,7 +13,7 @@
  * checks already read.
  */
 import type { WaypointWind } from '../resolve/wind.js';
-import type { Citation, Finding, Severity } from './types.js';
+import type { Citation, Finding, Attention } from './types.js';
 
 /** The temperature at or below which ice is possible in visible moisture. */
 export const FREEZING_C = 0;
@@ -71,7 +71,7 @@ export function checkWindAloft(ctx: WindAloftContext, w: WaypointWind | null): F
 
   findings.push({
     rule: 'wind.aloft',
-    severity: 'ok',
+    attention: 'routine',
     summary: `wind at ${altitude}: ${windText(w.wind)}${w.wind.tempC !== null ? `, ${w.wind.tempC > 0 ? '+' : ''}${w.wind.tempC} °C` : ''}${borrowed}${reach}`,
     waypoint: ctx.waypoint,
     basis,
@@ -90,10 +90,9 @@ export function checkWindAloft(ctx: WindAloftContext, w: WaypointWind | null): F
   });
 
   if (w.wind.tempC !== null && w.wind.tempC <= FREEZING_C) {
-    const severity: Severity = 'advisory';
     findings.push({
       rule: 'wind.freezing',
-      severity,
+      attention: 'note' as Attention,
       summary: `${w.wind.tempC} °C at ${altitude} — at or below freezing, so ice is possible in cloud or precipitation at cruise`,
       waypoint: ctx.waypoint,
       basis,

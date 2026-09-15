@@ -10,14 +10,14 @@ export function About({ recordedAt, aerodromes }: { recordedAt: string; aerodrom
     <section className="about" id="about">
       <h2>What this is</h2>
       <p className="lede">
-        Hold Short answers one question about a planned flight: <b>given this route, at this time, in this aircraft — should I go, and why?</b> It decodes the
-        raw products a pilot already reads, resolves them to each point along the route at the time the aircraft will actually be there, and judges the result
-        against that pilot's own personal minimums — showing the source behind every finding.
+        Hold Short puts in front of a pilot everything they would look at before a flight, in one place, with the report behind every line. It decodes the raw
+        products, resolves them to each point along the route at the time the aircraft will actually be there, and compares them against that pilot's own
+        personal minimums. <b>It does not decide whether to fly.</b> That is the pilot's, and this exists to make sure nothing they needed was missed.
       </p>
 
       <p>
-        Existing tools are excellent at fetching and displaying. Ask any of them "should I go?" and they hand you raw data and wish you luck. Aggregation is
-        commodity; the reasoning layer is the gap.
+        Existing tools are excellent at fetching and displaying, and leave the reader to hold a dozen products in their head at once. The gap is not more data:
+        it is the work of relating it — this forecast, at the time you will be there, against the limits you set, with the line it came from still attached.
       </p>
 
       <div className="about-grid">
@@ -46,10 +46,11 @@ export function About({ recordedAt, aerodromes }: { recordedAt: string; aerodrom
               <b>No model anywhere near the decoders.</b> A METAR has exactly one correct parse. Non-determinism there is a defect, not a trade-off.
             </li>
             <li>
-              <b>Nothing is ever hidden.</b> Relevance ranking changes order and what is collapsed. A model error must degrade to noise, never to a missing item.
+              <b>Nothing is ever hidden.</b> Ranking changes order and what is collapsed, never what exists. A model error must degrade to noise, never to a
+              missing item.
             </li>
             <li>
-              <b>Every finding cites its source.</b> Not the report — the span within it. A verdict without the raw text beside it is worse than no verdict.
+              <b>Every line cites its source.</b> Not the report — the span within it. A statement without the text it came from is worse than silence.
             </li>
             <li>
               <b>Zulu internally, always.</b> Local time exists only at the display edge.

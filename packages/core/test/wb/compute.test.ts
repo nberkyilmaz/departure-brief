@@ -49,29 +49,29 @@ describe('computeLoading', () => {
     expect(byLabel['Rear passengers']).toBe(24.8);
     expect(byLabel['Baggage area 1']).toBe(1.0);
     expect(r.findings.map((f) => [f.rule, f.severity])).toEqual([
-      ['wb.weight', 'ok'],
-      ['wb.cg.forward', 'ok'],
-      ['wb.cg.aft', 'ok'],
+      ['wb.weight', 'routine'],
+      ['wb.cg.forward', 'routine'],
+      ['wb.cg.aft', 'routine'],
     ]);
   });
 
   it('flags over-weight, an aft CG, and a baggage area over its limit, each citing the limit it broke', () => {
     const heavy = computeLoading(spec, { ...sampleLoading, stations: { front: 400, rear: 400, bag1: 120, bag2: 50 }, fuelGal: { fuel: 38 } });
     expect(heavy.verdict).toBe('outside-limits');
-    expect(heavy.findings.find((f) => f.rule === 'wb.weight')!.severity).toBe('no-go');
+    expect(heavy.findings.find((f) => f.rule === 'wb.weight')!.severity).toBe('alert');
     expect(heavy.findings.find((f) => f.rule === 'wb.baggage')!.summary).toContain('combined 120 lb');
     expect(heavy.totalWeightLb).toBe(1366 + 15 + 228 + 400 + 400 + 120 + 50);
 
     // Light up front, everything in the back: aft of 47.3.
     const aft = computeLoading(spec, { ...sampleLoading, stations: { front: 120, rear: 340, bag1: 120, bag2: 0 }, fuelGal: { fuel: 10 } });
     expect(aft.cgIn).toBeGreaterThan(47.3);
-    expect(aft.findings.find((f) => f.rule === 'wb.cg.aft')!.severity).toBe('no-go');
+    expect(aft.findings.find((f) => f.rule === 'wb.cg.aft')!.severity).toBe('alert');
     expect(aft.verdict).toBe('outside-limits');
 
     // Utility category: 2000 lb and 40.5 in aft; the sample loading is well outside it.
     const util = computeLoading(spec, { ...sampleLoading, category: 'utility' });
     expect(util.limits).toEqual({ maxWeightLb: 2000, forwardArmIn: 35.5, aftArmIn: 40.5 });
-    expect(util.findings.filter((f) => f.severity === 'no-go').map((f) => f.rule)).toEqual(['wb.weight', 'wb.cg.aft']);
+    expect(util.findings.filter((f) => f.severity === 'alert').map((f) => f.rule)).toEqual(['wb.weight', 'wb.cg.aft']);
   });
 
   it('a forward CG is caught against the sloped limit', () => {

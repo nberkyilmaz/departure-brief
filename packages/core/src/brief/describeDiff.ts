@@ -12,9 +12,9 @@ function changeLine(c: FindingChange): string {
     case 'resolved':
       return `${mark} gone    [${f.basis}] ${c.before!.summary}`;
     case 'worsened':
-      return `${mark} worse   [${f.basis}] ${c.before!.severity} ${ARROW} ${c.after!.severity}: ${c.after!.summary}`;
+      return `${mark} worse   [${f.basis}] ${c.before!.attention} ${ARROW} ${c.after!.attention}: ${c.after!.summary}`;
     case 'eased':
-      return `${mark} better  [${f.basis}] ${c.before!.severity} ${ARROW} ${c.after!.severity}: ${c.after!.summary}`;
+      return `${mark} better  [${f.basis}] ${c.before!.attention} ${ARROW} ${c.after!.attention}: ${c.after!.summary}`;
     case 'restated':
       return `     same    [${f.basis}] ${c.after!.summary}`;
   }
@@ -22,8 +22,8 @@ function changeLine(c: FindingChange): string {
 
 function pointLines(p: PointDiff, label = ''): string[] {
   const material = p.changes.filter((c) => c.kind !== 'restated');
-  if (!p.verdict && material.length === 0) return [];
-  const head = p.verdict ? `${label}${p.waypoint}: ${p.verdict.from.toUpperCase()} ${ARROW} ${p.verdict.to.toUpperCase()}` : `${label}${p.waypoint}:`;
+  if (!p.category && material.length === 0) return [];
+  const head = p.category ? `${label}${p.waypoint}: ${p.category.from ?? '—'} ${ARROW} ${p.category.to ?? '—'}` : `${label}${p.waypoint}:`;
   return [head, ...material.map(changeLine)];
 }
 
@@ -34,7 +34,7 @@ function pointLines(p: PointDiff, label = ''): string[] {
 export function diffText(d: BriefingDiff): string {
   const lines: string[] = [
     `Since your ${toZulu(new Date(d.from.asOf))} briefing (now ${toZulu(new Date(d.to.asOf))})`,
-    d.verdict ? `VERDICT ${d.verdict.from.toUpperCase()} ${ARROW} ${d.verdict.to.toUpperCase()}` : `verdict unchanged: ${d.to.verdict.toUpperCase()}`,
+
   ];
   for (const w of d.warnings) lines.push(`! ${w}`);
   if (d.quiet) {

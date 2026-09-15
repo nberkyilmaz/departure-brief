@@ -62,7 +62,7 @@ describe('the demo bundle', () => {
     const rebuilt = await rebuild(bundle);
     // Compared field by field first, so a failure says what moved rather
     // than only that two hashes differ.
-    expect(rebuilt.document.briefing.verdict).toBe(published.document.briefing.verdict);
+    expect(rebuilt.document.briefing.points.map((p) => p.category)).toEqual(published.document.briefing.points.map((p) => p.category));
     expect(rebuilt.document.briefing.points).toEqual(published.document.briefing.points);
     expect(rebuilt.document.notams?.counts).toEqual(published.document.notams?.counts);
     expect(rebuilt.document.inputs.reports).toEqual(published.document.inputs.reports);

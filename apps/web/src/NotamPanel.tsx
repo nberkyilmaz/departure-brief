@@ -89,7 +89,7 @@ export function NotamPanel({ doc }: { doc: NotamDocument }) {
       {groups.map((g) => (
         <details key={g.rank} open={OPEN_BY_DEFAULT.has(g.rank)} className={`notam-group ${g.rank}`}>
           <summary>
-            <span className={`badge ${g.rank === 'critical' ? 'no-go' : g.rank === 'advisory' ? 'marginal' : g.rank === 'unverified' ? 'marginal' : 'advisory'}`}>{g.items.length}</span> {TITLE[g.rank]}
+            <span className={`badge ${g.rank === 'critical' ? 'alert' : g.rank === 'advisory' || g.rank === 'unverified' ? 'caution' : 'note'}`}>{g.items.length}</span> {TITLE[g.rank]}
           </summary>
           <ul className="findings">
             {g.items.map((n) => (

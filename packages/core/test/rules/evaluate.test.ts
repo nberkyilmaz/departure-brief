@@ -57,7 +57,7 @@ describe('solar elevation', () => {
 
 describe('profile and aircraft parsing', () => {
   it('reads the owner profile', () => {
-    expect(profile).toEqual({ version: 1, name: 'default', ceiling: 2500, visibility: 5, crosswind: 15, crosswindIncludesGust: true, maxGustSpread: null, nightAllowed: true });
+    expect(profile).toEqual({ version: 1, name: 'default', ceiling: 2500, visibility: 5, crosswind: 15, crosswindIncludesGust: true, maxGustSpread: null, maxWind: null, nightAllowed: true });
     expect(aircraft).toEqual({ type: 'C172', demonstratedCrosswind: null, demonstratedCrosswindSource: null, cruiseFuelGph: null });
   });
   it('rejects nonsense with a message naming the field', () => {
@@ -71,7 +71,7 @@ describe('evaluateFlight', () => {
     const store = await seededStore();
     const resolved = await resolveFlight(store, plan, new Date('2026-09-07T12:30:00Z'));
     const b = evaluateFlight(resolved, profile, aircraft);
-    expect(b.rulesVersion).toBe(4);
+    expect(b.rulesVersion).toBe(5);
     expect(b.profile).toEqual({ name: 'default', version: 1 });
     expect(b.aircraft).toBe('C172');
     expect(b.points.map((p) => p.waypoint)).toEqual(['KTEB', 'N07', 'KHPN']);
@@ -79,12 +79,14 @@ describe('evaluateFlight', () => {
       expect(p.findings.length).toBeGreaterThan(0);
       for (const f of p.findings) {
         expect(f.waypoint).toBe(p.waypoint);
-        if (f.severity !== 'advisory') expect(f.citations.length).toBeGreaterThan(0);
+        if (f.attention !== 'note') expect(f.citations.length).toBeGreaterThan(0);
         for (const c of f.citations) if (c.span && c.raw) expect(c.raw.slice(c.span.start, c.span.end)).toBe(c.text);
       }
     }
     // Recorded conditions were VFR everywhere: 35004KT P6SM SKC and the like.
-    expect(b.verdict).toBe('go');
+    // The category says what the sky was; nothing says what to do about it.
+    expect(b.points.map((p) => p.category)).toEqual(['VFR', null, 'VFR']);
+    expect(b.points.every((p) => p.findings.every((f) => f.attention !== 'alert'))).toBe(true);
     // N07 borrowed KTEB's TAF and says so; it has no runways in the crosswind check? It does (NASR) — and no METAR.
     const n07 = b.points[1]!;
     expect(n07.findings.some((f) => f.rule === 'forecast.borrowed')).toBe(true);
@@ -94,28 +96,31 @@ describe('evaluateFlight', () => {
     // KTEB's TAF was `35004KT P6SM SKC`: nothing to clear, so no cloud-clearance finding — and none faked.
     expect(kteb.findings.map((f) => f.rule)).toEqual(expect.arrayContaining(['personal.ceiling', 'personal.visibility', 'crosswind.personal', 'vfr.visibility']));
     expect(kteb.findings.some((f) => f.rule === 'vfr.cloudClearance')).toBe(false);
-    expect(kteb.findings.find((f) => f.basis.startsWith('observed'))!.severity).not.toBe('marginal');
+    expect(kteb.findings.find((f) => f.basis.startsWith('observed'))!.attention).not.toBe('caution');
   });
 
-  it('a stricter profile turns the same flight into a no-go with the prevailing finding cited', async () => {
+  it('a stricter profile raises the same flight to an alert, with the prevailing finding cited', async () => {
     const store = await seededStore();
     const resolved = await resolveFlight(store, plan, new Date('2026-09-07T12:30:00Z'));
     // KTEB's 35004KT is 13° off runway 01: about 0.9 kt across. Half a knot is the only way to trip it.
     const strict = parsePilotProfile({ name: 'strict', ceilingAglFt: 2500, visibilitySm: 5, crosswindKt: 0.5 });
     const b = evaluateFlight(resolved, strict, null);
-    expect(b.verdict).toBe('no-go');
-    const f = b.points[0]!.findings.find((f) => f.rule === 'crosswind.personal' && f.severity === 'no-go')!;
+    // The sky did not change, so the category does not either — only what
+    // this pilot asked to be told about it.
+    expect(b.points[0]!.category).toBe('VFR');
+    expect(b.points.some((p) => p.findings.some((f) => f.attention === 'alert'))).toBe(true);
+    const f = b.points[0]!.findings.find((f) => f.rule === 'crosswind.personal' && f.attention === 'alert')!;
     expect(f.basis).toBe('prevailing');
     expect(f.citations[0]!.kind).toBe('taf');
     expect(f.citations[0]!.text).toMatch(/^\d{5}KT$/);
   });
 
-  it('with nothing known as of an early time, every point is marginal for lack of a forecast', async () => {
+  it('with nothing known as of an early time, every point says so rather than passing quietly', async () => {
     const store = await seededStore();
     const resolved = await resolveFlight(store, plan, new Date('2026-09-07T11:00:00Z'));
     const b = evaluateFlight(resolved, profile, aircraft);
-    expect(b.verdict).toBe('marginal');
     expect(b.points.every((p) => p.findings.some((f) => f.rule === 'forecast.coverage'))).toBe(true);
+    expect(b.points.every((p) => p.forecastCategory === null)).toBe(true);
   });
 
   it('is deterministic and renders', async () => {
@@ -123,8 +128,10 @@ describe('evaluateFlight', () => {
     const resolved = await resolveFlight(store, plan, new Date('2026-09-07T12:30:00Z'));
     expect(evaluateFlight(resolved, profile, aircraft)).toEqual(evaluateFlight(resolved, profile, aircraft));
     const text = briefingText(evaluateFlight(resolved, profile, aircraft));
-    expect(text).toContain('VERDICT: GO');
+    // No verdict line: the profile it was judged against, and then the facts.
+    expect(text).not.toMatch(/VERDICT/i);
+    expect(text).toContain('profile default v1');
     expect(text).toContain('not an official briefing');
-    expect(text).toMatch(/ok\s+\[prevailing\] .*← "/);
+    expect(text).toMatch(/·\s+\[prevailing\] .*← "/);
   });
 });

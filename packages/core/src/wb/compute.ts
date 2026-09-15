@@ -82,7 +82,7 @@ export function computeLoading(spec: WeightBalanceSpec, loading: Loading): Loadi
       if (s.fuel && gal > s.fuel.usableGal.value + 1e-9) {
         findings.push({
           rule: 'wb.station',
-          severity: 'no-go',
+          severity: 'alert',
           summary: `${s.label}: ${gal} gal exceeds the usable ${s.fuel.usableGal.value} gal`,
           values: { gal, usableGal: s.fuel.usableGal.value },
           citations: [s.fuel.usableGal.source].filter((c): c is DocumentCitation => c !== null),
@@ -97,7 +97,7 @@ export function computeLoading(spec: WeightBalanceSpec, loading: Loading): Loadi
       if (s.maxLb && weightLb > s.maxLb.value + 1e-9) {
         findings.push({
           rule: 'wb.station',
-          severity: 'no-go',
+          severity: 'alert',
           summary: `${s.label}: ${weightLb} lb exceeds the ${s.maxLb.value} lb limit`,
           values: { weightLb, maxLb: s.maxLb.value },
           citations: [s.maxLb.source].filter((c): c is DocumentCitation => c !== null),
@@ -113,7 +113,7 @@ export function computeLoading(spec: WeightBalanceSpec, loading: Loading): Loadi
   if (spec.baggageCombinedMaxLb && baggageLb > spec.baggageCombinedMaxLb.value + 1e-9) {
     findings.push({
       rule: 'wb.baggage',
-      severity: 'no-go',
+      severity: 'alert',
       summary: `baggage ${baggageLb} lb exceeds the combined ${spec.baggageCombinedMaxLb.value} lb limit`,
       values: { baggageLb, maxLb: spec.baggageCombinedMaxLb.value },
       citations: [spec.baggageCombinedMaxLb.source].filter((c): c is DocumentCitation => c !== null),
@@ -136,7 +136,7 @@ export function computeLoading(spec: WeightBalanceSpec, loading: Loading): Loadi
 
   findings.push({
     rule: 'wb.weight',
-    severity: totalWeightLb > maxWeightLb + 1e-9 ? 'no-go' : 'ok',
+    severity: totalWeightLb > maxWeightLb + 1e-9 ? 'alert' : 'routine',
     summary:
       totalWeightLb > maxWeightLb
         ? `takeoff weight ${totalWeightLb} lb exceeds the ${loading.category} category maximum ${maxWeightLb} lb by ${round1(totalWeightLb - maxWeightLb)} lb`
@@ -153,7 +153,7 @@ export function computeLoading(spec: WeightBalanceSpec, loading: Loading): Loadi
   const beyondNote = beyondStatedLine ? ` (the forward limit is only stated up to ${heaviestStated} lb, so this is the limit there, not at ${totalWeightLb} lb)` : '';
   findings.push({
     rule: 'wb.cg.forward',
-    severity: cgIn < forwardArmIn - 1e-9 ? 'no-go' : 'ok',
+    severity: cgIn < forwardArmIn - 1e-9 ? 'alert' : 'routine',
     summary:
       (cgIn < forwardArmIn
         ? `CG ${cgIn} in is forward of the ${forwardArmIn} in forward limit at ${totalWeightLb} lb`
@@ -163,7 +163,7 @@ export function computeLoading(spec: WeightBalanceSpec, loading: Loading): Loadi
   });
   findings.push({
     rule: 'wb.cg.aft',
-    severity: cgIn > aftArmIn + 1e-9 ? 'no-go' : 'ok',
+    severity: cgIn > aftArmIn + 1e-9 ? 'alert' : 'routine',
     summary: cgIn > aftArmIn ? `CG ${cgIn} in is behind the ${aftArmIn} in aft limit` : `CG ${cgIn} in is ahead of the ${aftArmIn} in aft limit`,
     values: { cgIn, aftArmIn },
     citations: cite(env.aftArmIn),
@@ -177,7 +177,7 @@ export function computeLoading(spec: WeightBalanceSpec, loading: Loading): Loadi
     category: loading.category,
     limits: { maxWeightLb, forwardArmIn, aftArmIn },
     findings,
-    verdict: findings.some((f) => f.severity === 'no-go') ? 'outside-limits' : 'within-limits',
+    verdict: findings.some((f) => f.severity === 'alert') ? 'outside-limits' : 'within-limits',
   };
 }
 
@@ -186,7 +186,7 @@ export function loadingText(r: LoadingResult): string {
   lines.push(`${'item'.padEnd(46)}${'lb'.padStart(8)}${'arm in'.padStart(9)}${'mom/1000'.padStart(10)}`);
   for (const row of r.rows) lines.push(`${row.label.padEnd(46)}${row.weightLb.toFixed(1).padStart(8)}${row.armIn.toFixed(1).padStart(9)}${row.momentPer1000.toFixed(1).padStart(10)}`);
   lines.push(`${'TOTAL'.padEnd(46)}${r.totalWeightLb.toFixed(1).padStart(8)}${r.cgIn.toFixed(1).padStart(9)}${r.totalMomentPer1000.toFixed(1).padStart(10)}`);
-  lines.push('', `VERDICT: ${r.verdict === 'within-limits' ? 'WITHIN LIMITS' : 'OUTSIDE LIMITS'}`);
+  lines.push('', `RESULT: ${r.verdict === 'within-limits' ? 'WITHIN LIMITS' : 'OUTSIDE LIMITS'}`);
   for (const f of r.findings) {
     lines.push(`  ${f.severity.padEnd(6)} ${f.summary}`);
     for (const c of f.citations) lines.push(`         ← ${c.filename} p.${c.page}: "${c.citedText}"`);

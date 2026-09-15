@@ -1,5 +1,5 @@
 import { EMPTY_CONDITIONS, type Conditions } from '../decode/conditions.js';
-import type { DecodedMetar } from '../decode/metar/index.js';
+import { ceilingOf, flightCategory, flightCategoryOf, visibilityStatuteMiles, type DecodedMetar } from '../decode/metar/index.js';
 import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
 import { isNight } from '../domain/sun.js';
 import { toZulu } from '../domain/time.js';
@@ -8,7 +8,7 @@ import { checkConditions, checkNight, type CheckContext } from './checks.js';
 import { checkDaylight } from './daylight.js';
 import { checkHazards } from './hazards.js';
 import { checkWindAloft } from './windAloft.js';
-import { RULES_VERSION, verdictOf, worst, type Briefing, type Finding, type PointVerdict } from './types.js';
+import { RULES_VERSION, type Briefing, type Finding, type PointReview } from './types.js';
 
 /** A METAR's body as forecast-shaped conditions, so the same checks apply. */
 export function metarConditions(m: DecodedMetar): Conditions {
@@ -23,6 +23,9 @@ export function metarConditions(m: DecodedMetar): Conditions {
 }
 
 const hhmm = (d: Date) => toZulu(d).slice(11, 16) + 'Z';
+
+/** Prevailing visibility in statute miles, or null when none was forecast. */
+const visibilityOf = (c: Conditions) => (c.visibility ? visibilityStatuteMiles(c.visibility.value) : null);
 
 /** How long a METAR is treated as describing "now" for a point's ETA. */
 export const OBSERVATION_WINDOW_MS = 90 * 60_000;
@@ -40,7 +43,7 @@ function evaluatePoint(
   profile: PilotProfile,
   aircraft: AircraftLimits | null,
   previous: ResolvedPoint | null,
-): PointVerdict {
+): PointReview {
   const w = p.point.waypoint;
   const at = p.point.eta;
   const night = isNight(w.position, at);
@@ -61,15 +64,15 @@ function evaluatePoint(
     const source = { kind: 'taf' as const, station: p.forecast.station, raw: f.raw, sha256: p.forecast.report.sha256 };
     const borrowed = p.forecast.source === 'nearby' ? ` (TAF ${p.forecast.station}, ${Math.round(p.forecast.distance)} nm away)` : '';
     if (f.prevailing) {
-      findings.push(...checkConditions({ ...base, basis: `prevailing${borrowed}`, basisKind: 'prevailing', violation: 'no-go', source }, f.prevailing.conditions));
+      findings.push(...checkConditions({ ...base, basis: `prevailing${borrowed}`, basisKind: 'prevailing', violation: 'alert', source }, f.prevailing.conditions));
       for (const o of f.overlays) {
         const label = `${o.probability ? `PROB${o.probability} ` : ''}${o.kind === 'PROB' ? '' : o.kind} ${hhmm(o.window.from)}–${hhmm(o.window.to)}`.replace(/\s+/g, ' ').trim();
-        findings.push(...checkConditions({ ...base, basis: `${label}${borrowed}`, basisKind: 'overlay', violation: 'marginal', source }, o.conditions));
+        findings.push(...checkConditions({ ...base, basis: `${label}${borrowed}`, basisKind: 'overlay', violation: 'caution', source }, o.conditions));
       }
     } else {
       findings.push({
         rule: 'forecast.coverage',
-        severity: 'marginal',
+        attention: 'caution',
         summary: `TAF ${p.forecast.station} does not cover ${toZulu(at)}${f.outsideValidity ? ' (outside its validity)' : ''} — no forecast to evaluate`,
         waypoint: w.id,
         basis: 'forecast',
@@ -82,7 +85,7 @@ function evaluatePoint(
     if (p.forecast.source === 'nearby') {
       findings.push({
         rule: 'forecast.borrowed',
-        severity: 'advisory',
+        attention: 'note',
         summary: `${w.id} has no TAF; conditions above are from ${p.forecast.station}, ${Math.round(p.forecast.distance)} nm away`,
         waypoint: w.id,
         basis: 'forecast',
@@ -95,7 +98,7 @@ function evaluatePoint(
   } else {
     findings.push({
       rule: 'forecast.coverage',
-      severity: 'marginal',
+      attention: 'caution',
       summary: `no TAF for ${w.id} and none within reach — nothing to evaluate at ETA`,
       waypoint: w.id,
       basis: 'forecast',
@@ -113,7 +116,7 @@ function evaluatePoint(
       basis: `observed ${hhmm(p.metar.report.issuedAt)}`,
       basisKind: 'observed',
       // A current observation is hard evidence at departure; hours before an ETA it is context.
-      violation: Math.abs(age) <= OBSERVATION_WINDOW_MS ? 'no-go' : 'marginal',
+      violation: Math.abs(age) <= OBSERVATION_WINDOW_MS ? 'alert' : 'caution',
       source: { kind: 'metar', station: p.metar.decoded.station?.value ?? null, raw: p.metar.report.body, sha256: p.metar.report.sha256 },
     };
     findings.push(...checkConditions(ctx, metarConditions(p.metar.decoded)));
@@ -143,9 +146,18 @@ function evaluatePoint(
     ),
   );
 
-  findings.push(...checkNight({ ...base, basis: 'time', basisKind: 'time', violation: 'no-go', source: { kind: 'taf', station: null, raw: '', sha256: null } }));
+  findings.push(...checkNight({ ...base, basis: 'time', basisKind: 'time', violation: 'alert', source: { kind: 'taf', station: null, raw: '', sha256: null } }));
 
-  return { waypoint: w.id, at: at.toISOString(), verdict: verdictOf(findings), night, findings };
+  /*
+   * The category is an objective classification of what the products say —
+   * the same one every weather service publishes — not a judgement about
+   * this flight. The observation and the forecast are reported separately,
+   * because a field that is VFR now and forecast IFR at your arrival is two
+   * different facts and collapsing them would lose the one that matters.
+   */
+  const observed = p.metar ? flightCategory(p.metar.decoded) : null;
+  const forecast = p.forecast?.resolved.prevailing ? flightCategoryOf(ceilingOf(p.forecast.resolved.prevailing.conditions.sky)?.value ?? null, visibilityOf(p.forecast.resolved.prevailing.conditions)) : null;
+  return { waypoint: w.id, at: at.toISOString(), category: observed, forecastCategory: forecast, night, findings };
 }
 
 /**
@@ -161,8 +173,6 @@ export function evaluateFlight(flight: ResolvedFlight, profile: PilotProfile, ai
     profile: { name: profile.name, version: profile.version },
     aircraft: aircraft?.type ?? null,
     asOf: flight.asOf.toISOString(),
-    // The alternate informs the decision but does not by itself ground the flight.
-    verdict: worst(...points.map((p) => p.verdict)),
     points,
     alternate,
   };

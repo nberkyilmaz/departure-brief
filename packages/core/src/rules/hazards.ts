@@ -16,7 +16,7 @@ import type { DecodedSigmet, SigmetHazard } from '../decode/sigmet/types.js';
 import type { LatLon } from '../domain/geo.js';
 import { areaIsTestable, routeDistanceToAreaNm } from '../domain/polygon.js';
 import type { HazardAdvisory } from '../resolve/hazards.js';
-import type { Citation, Finding, Severity } from './types.js';
+import type { Citation, Finding, Attention } from './types.js';
 
 export type { HazardAdvisory };
 
@@ -107,7 +107,7 @@ export function checkHazards(ctx: HazardContext, advisories: readonly HazardAdvi
        */
       findings.push({
         rule: 'hazard.untestable',
-        severity: 'advisory',
+        attention: 'note',
         summary: `${describe(d)} — ${problem.reason}, so whether your route goes through it has to be checked by eye`,
         waypoint: ctx.waypoint,
         basis: d.kind === 'airmet' ? 'AIRMET' : 'SIGMET',
@@ -123,10 +123,10 @@ export function checkHazards(ctx: HazardContext, advisories: readonly HazardAdvi
     if (distance > NEAR_HAZARD_NM) continue;
 
     const crossing = distance === 0;
-    const severity: Severity = !crossing ? 'advisory' : d.kind === 'airmet' ? 'marginal' : 'no-go';
+    const attention: Attention = !crossing ? 'note' : d.kind === 'airmet' ? 'caution' : 'alert';
     findings.push({
       rule: crossing ? 'hazard.onRoute' : 'hazard.near',
-      severity,
+      attention,
       summary: `${describe(d)} — ${crossing ? 'your route goes through it' : `your route passes ${Math.round(distance)} nm from it`}`,
       waypoint: ctx.waypoint,
       basis: d.kind === 'airmet' ? 'AIRMET' : 'SIGMET',
