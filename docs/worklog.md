@@ -11,43 +11,32 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
 
 ---
 
-## Where we are (updated 2026-09-14, paused mid-change)
+## Where we are (updated 2026-09-15)
 
-**The product has changed shape. Read this before touching the code.**
+**This tool does not decide whether to fly.** It reports what the products
+say, compares them against the limits the pilot set, and puts what deserves
+a second look first. Where a summary is needed it is the flight category —
+VFR, MVFR, IFR, LIFR — which classifies ceiling and visibility the way every
+weather service does: a fact about the sky, not an opinion about the flight.
 
-The owner's words, on 14 September: *"we should take out the go no go thing,
-its peoples decision we are not deciding it for them. We are providing
-information."*
+**The site** at <https://nberkyilmaz.github.io/holdshort/> carries the whole
+of Canada: 1,504 aerodromes, every station that was reporting at 21:37Z on
+15 September, upper winds for the seventeen sites that publish them, and
+NOTAMs for six fields. 222 KB gzipped. It runs the pipeline in the browser,
+so changing a personal minimum rebuilds the briefing in front of you. What
+it cannot do is fetch — neither weather service allows a page to call it
+directly — so the reports are frozen at that instant and the page says so.
 
-So the single go/no-go verdict is being removed. What replaces it is not a
-softer verdict — it is nothing. The tool reports what the products say,
-compares them against the limits this pilot set, puts the things that deserve
-a second look first, and leaves the decision where it belongs.
+**Next, in the owner's order:** the nearest reporting station when a field's
+own is asleep (CYSN → KIAG); report age shown in colour; takeoff and landing
+distance from the POH; a page per aerodrome; the API live on a host; a
+domain.
 
-**The design that was agreed, and half-written when work stopped:**
-
-- `Severity = 'ok' | 'advisory' | 'marginal' | 'no-go'` becomes
-  `Attention = 'routine' | 'note' | 'caution' | 'alert'`. The old words are
-  the decision; the new ones are about reading. An `alert` is not "do not
-  go" — it is "you asked to be told about this, and here it is, with the
-  report it came from".
-- `Briefing.verdict` and `PointVerdict.verdict` go away. `PointVerdict`
-  becomes `PointReview`, carrying `category: FlightCategory | null` — VFR,
-  MVFR, IFR or LIFR from ceiling and visibility. That is an objective
-  classification every weather service publishes, not an opinion, and
-  `flightCategoryOf` in `decode/metar/derive.ts` already computes it.
-- `worst()` and `verdictOf()` are deleted. Nothing aggregates.
-- `RULES_VERSION` goes to 5.
-- A half-written migration script is at
-  `<scratchpad>/no-verdict.py` — but it is only the first of the eight files
-  that need it, so re-deriving it is probably cleaner than finding it.
-
-Twenty-five files reference the verdict: `rules/types.ts`, `rules/checks.ts`
-(`ctx.violation` becomes `'alert' | 'caution'`), `rules/evaluate.ts`,
-`rules/describe.ts`, `brief/diff.ts`, `brief/describeDiff.ts`,
-`brief/assemble.ts`, then the web app (`types.ts`, `BriefingView.tsx`,
-`RouteStrip.tsx`, `Nav.tsx`, `DiffPanel.tsx`, `App.tsx`, `styles.css`), then
-the tests and `About.tsx`.
+**Still open from the audit** (`docs/worklog.md`, session 18 and the audit
+notes): nothing loads the airports table on a deployed instance, `pg.Pool`
+has no error listener, the rate limiter keys on a proxy IP, the NOTAM eval
+gate cannot fail on model quality, CFPS NOTAMs ignore the freshness window,
+and there is no fuel planning.
 
 ---
 
@@ -1451,3 +1440,62 @@ had just dropped into the repo root.
   clean.
 - Nothing in force over Ontario this morning, so the demo shows no hazards
   — which is the correct answer and not an empty feature.
+
+---
+
+## Session 19 — 2026-09-15 — The tool stops deciding
+
+215. **The go/no-go verdict is gone, and nothing replaced it.** The owner's
+     reasoning, which is right: *"its peoples decision we are not deciding it
+     for them. We are providing information."*
+216. `Severity` — ok, advisory, marginal, no-go — became `Attention`:
+     routine, note, caution, alert. The old words are the decision; the new
+     ones are about reading. An alert is not "do not go", it is "you asked to
+     be told about this, and here it is, with the report it came from".
+217. Where a summary is genuinely needed it is the flight category, which
+     `flightCategoryOf` already computed for forecast verification and which
+     every weather service publishes. Each point carries what was observed
+     and, separately, what the prevailing forecast says at the ETA — "VFR
+     now, IFR when you get there" is two facts, and collapsing them loses the
+     one that matters. `worst()` and `verdictOf()` are deleted. Nothing
+     aggregates. The diff compares categories and findings.
+218. Twenty-five files, and the tests with them. The navigation now carries
+     a count — "3 to look at" — rather than a badge that says GO.
+219. **And the engine now reads what it decodes**, which was the audit's
+     first finding and the reason the rest mattered less. `checkConditions`
+     ran four checks; present weather and total wind reached `Conditions` and
+     were never looked at. Now:
+     - `+TSRA FZRA` produces two alerts, "a thunderstorm with heavy rain" and
+       "freezing rain", each quoting its own group. A group inside a TEMPO
+       drops one step, because the product is less certain.
+     - `BKN///` and `VV///` are an alert saying there is a ceiling and its
+       height was not measured, so it cannot be compared with a minimum —
+       where before they read as a clear sky.
+     - The surface wind is reported and set against a total wind limit when
+       the pilot has set one, and otherwise against what their crosswind
+       limit implies: at 60 kt, any runway more than 14° off the wind is
+       outside a 15 kt limit. That is arithmetic on their number, not an
+       opinion of ours.
+220. Weight and balance still says WITHIN LIMITS or OUTSIDE LIMITS, because
+     that is a fact about a published envelope — but it stopped borrowing the
+     flight's vocabulary to say it.
+221. **The page carries the country now.** The four aerodromes were never a
+     data limit: every Canadian station reporting at one instant is 235
+     METARs and 118 forecasts, smaller than the NOTAM half of what was
+     already shipped. With 1,504 aerodromes in the bundle a visitor can brief
+     almost any Canadian pair, borrowing the nearest forecast within 60 nm.
+222. Recording it taught two things. A bounding-box request returns whoever
+     was reporting at that moment, which leaves out the part-time fields
+     between observations — including CYSN; asked for by name, with history,
+     they come back. And the first attempt mixed two days, because the clock
+     crossed midnight Zulu between requests: a snapshot of no particular
+     moment. Re-recorded whole.
+223. The upstream metadata record is left out of the published bundle. It
+     decides nothing, the page never shows it, and a report is named by the
+     hash of its body — so omitting it changes no identity, only what a
+     visitor downloads: 293 KB gzipped down to 222 KB.
+
+### State at end of session 19
+
+- 750 tests across three workspaces, typecheck clean.
+- Nothing anywhere tells a pilot whether to fly.

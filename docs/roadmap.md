@@ -53,18 +53,16 @@ official briefing.
 
 ## Next
 
-### 0. Take the verdict out, and judge what is decoded — in progress
+### 0. Take the verdict out, and judge what is decoded — done
 
-The go/no-go verdict is being removed in favour of reporting. In the same
-pass, the rules engine has to start reading what the decoders already hand
-it: present weather (thunderstorms, freezing rain, fog, snow), total wind
-speed, and indeterminate ceilings (`BKN///`, `VV///`). Today a heavy
-thunderstorm with freezing rain produces three lines saying everything is
-fine, because no rule reads the weather groups.
+Done. The verdict is gone; attention levels replaced severities; the flight
+category is the only summary, and it classifies rather than judges. The
+rules engine now reads the present weather, the total wind and indeterminate
+ceilings it was handed and ignored.
 
-Then, in order: report age shown in colour; the nearest reporting station
-when a field's own is asleep; takeoff and landing distance from the POH;
-a page per aerodrome; fuel planning; airspace.
+Next, in order: the nearest reporting station when a field's own is asleep;
+report age shown in colour; takeoff and landing distance from the POH; a
+page per aerodrome; fuel planning; airspace.
 
 ### 1. Make the site usable — done, except for live weather
 
