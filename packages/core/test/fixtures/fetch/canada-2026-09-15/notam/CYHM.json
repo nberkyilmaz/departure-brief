@@ -1,19 +1,19 @@
 {
  "meta": {
-  "now": "2026-09-14T14:30:38.635",
+  "now": "2026-09-15T21:37:48.717",
   "count": {
-   "notam": 16
+   "notam": 15
   },
   "messages": []
  },
  "data": [
   {
    "type": "notam",
-   "pk": "1772814",
+   "pk": "1773857",
    "location": "CYHM",
-   "startValidity": "2026-09-14T11:37:21.032",
-   "endValidity": "2026-09-15T21:00:00",
-   "text": "{\"raw\" : \"(D3897/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4310N07956W005\\nA) CYHM B) 2609141138 C) 2609152100\\nD) SEP 14 1138-2100, SEP 15 1100-2100\\nE) RWY 06/24 CLSD AVBL AS TWY BTN RWY 12/30 AND TWY F. \\nACFT LIMITED TO AGN II AUTH NORTH OF RWY 12/30.)\", \"english\" : null, \"french\" : null}",
+   "startValidity": "2026-09-15T21:01:00",
+   "endValidity": "2026-09-16T05:01:00",
+   "text": "{\"raw\" : \"(S3124/26 NOTAMR S3099/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4310N07956W005\\nA) CYHM B) 2609152101 C) 2609160501\\nE) RSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 15 2058 - SEP 16 0458.\\n\\nRSC 30 6/6/6 DRY, DRY, DRY. VALID SEP 15 2058 - SEP 16 0458.\\n\\nADDN NON-GRF/TALPA INFO:\\nCRFI 12 NR/NR/NR.\\nCRFI 30 NR/NR/NR.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYHM",
@@ -27,19 +27,6 @@
    "startValidity": "2026-09-14T11:35:53.512",
    "endValidity": "2026-09-30T17:00:00",
    "text": "{\"raw\" : \"(D3896/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4310N07956W005\\nA) CYHM B) 2609142100 C) 2609301700\\nD) SEP 14 2100-1100, SEP 15 2100-30 1700\\nE) RWY 06/24 CLSD AVBL AS TWY BTN TWY C AND TWY F. \\nACFT LIMITED TO AGN II AUTH NORTH OF RWY 12/30.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYHM",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772757",
-   "location": "CYHM",
-   "startValidity": "2026-09-14T07:29:00",
-   "endValidity": "2026-09-14T15:29:00",
-   "text": "{\"raw\" : \"(S2994/26 NOTAMR S2983/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4310N07956W005\\nA) CYHM B) 2609140729 C) 2609141529\\nE) RSC 06 6/6/6 DRY, DRY, DRY. VALID SEP 14 0729 - SEP 14 1529.\\n\\nRSC 24 6/6/6 DRY, DRY, DRY. VALID SEP 14 0729 - SEP 14 1529.\\n\\nRSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 14 0729 - SEP 14 1529.\\n\\nRSC 30 6/6/6 DRY, DRY, DRY. VALID SEP 14 0729 - SEP 14 1529.\\n\\nADDN NON-GRF/TALPA INFO:\\nCRFI 06 NR/NR/NR.\\nCRFI 24 NR/NR/NR.\\nCRFI 12 NR/NR/NR.\\nCRFI 30 NR/NR/NR.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYHM",

@@ -1,12 +1,25 @@
 {
  "meta": {
-  "now": "2026-09-14T14:30:34.422",
+  "now": "2026-09-15T21:37:44.499",
   "count": {
-   "notam": 10
+   "notam": 11
   },
   "messages": []
  },
  "data": [
+  {
+   "type": "notam",
+   "pk": "1773714",
+   "location": "CYSN",
+   "startValidity": "2026-09-15T17:21:21.082",
+   "endValidity": "2026-09-19T22:00:00",
+   "text": "{\"raw\" : \"(J6338/26 NOTAMN\\nQ) CZYZ/QMNXX/IV/NBO/A/000/999/4312N07910W005\\nA) CYSN B) 2609171400 C) 2609192200\\nE) APN PRKG AVBL 48HR PPR 905-684-7447 EXT 102)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  },
   {
    "type": "notam",
    "pk": "1771368",

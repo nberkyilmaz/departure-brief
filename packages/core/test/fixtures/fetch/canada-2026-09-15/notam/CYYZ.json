@@ -1,12 +1,168 @@
 {
  "meta": {
-  "now": "2026-09-14T14:30:40.972",
+  "now": "2026-09-15T21:37:50.831",
   "count": {
-   "notam": 44
+   "notam": 35
   },
   "messages": []
  },
  "data": [
+  {
+   "type": "notam",
+   "pk": "1773860",
+   "location": "CYYZ",
+   "startValidity": "2026-09-15T21:09:00",
+   "endValidity": "2026-09-16T05:09:00",
+   "text": "{\"raw\" : \"(S3125/26 NOTAMR S3108/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609152109 C) 2609160509\\nE) RSC 05 6/6/6 DRY, DRY, DRY. VALID SEP 15 2040 - SEP 16 0440.\\n\\nRSC 23 6/6/6 DRY, DRY, DRY. VALID SEP 15 2040 - SEP 16 0440.\\n\\nRSC 06L 6/6/6 DRY, DRY, DRY. VALID SEP 15 2039 - SEP 16 0439.\\n\\nRSC 24R 6/6/6 DRY, DRY, DRY. VALID SEP 15 2039 - SEP 16 0439.\\n\\nRSC 06R 6/6/6 DRY, DRY, DRY. VALID SEP 15 2039 - SEP 16 0439.\\n\\nRSC 24L 6/6/6 DRY, DRY, DRY. VALID SEP 15 2039 - SEP 16 0439.\\n\\nRSC 15L 6/6/6 DRY, DRY, DRY. VALID SEP 15 2040 - SEP 16 0440.\\n\\nRSC 33R 6/6/6 DRY, DRY, DRY. VALID SEP 15 2040 - SEP 16 0440.\\n\\nRSC 15R 6/6/6 DRY, DRY, DRY. VALID SEP 15 2040 - SEP 16 0440.\\n\\nRSC 33L 6/6/6 DRY, DRY, DRY. VALID SEP 15 2040 - SEP 16 0440.\\n\\nADDN NON-GRF/TALPA INFO:)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773700",
+   "location": "CYYZ",
+   "startValidity": "2026-09-15T16:48:45.735",
+   "endValidity": "2026-09-17T18:00:00",
+   "text": "{\"raw\" : \"(D3932/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609171400 C) 2609171800\\nE) RWY 06L/24R CLSD AVBL AS TWY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773638",
+   "location": "CYYZ",
+   "startValidity": "2026-09-15T14:57:28.618",
+   "endValidity": "2026-09-16T08:00:00",
+   "text": "{\"raw\" : \"(D3930/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609160601 C) 2609160800\\nE) TWY B3,\\n TWY B BTN TWY B1 AND TWY V,\\n TWY T BTN RWY 15L/33R AND TWY A CLSD.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773637",
+   "location": "CYYZ",
+   "startValidity": "2026-09-15T14:56:37.633",
+   "endValidity": "2026-09-16T10:00:00",
+   "text": "{\"raw\" : \"(D3929/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609160801 C) 2609161000\\nE) TWY B BTN TWY T AND TWY C,\\n TWY V BTN RWY 15L/33R AND TWY A,\\n TWY D BTN THR 33R AND TWY A,\\n TWY C BTN TWY C2 AND TWY A CLSD.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773635",
+   "location": "CYYZ",
+   "startValidity": "2026-09-15T14:53:40.423",
+   "endValidity": "2026-09-16T06:00:00",
+   "text": "{\"raw\" : \"(D3928/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609160401 C) 2609160600\\nE) TWY B1 BTN RWY 15L/33R AND TWY A,\\n TWY B BTN TWY B2 AND TWY B3,\\n TWY S BTN RWY 15L/33R AND A CLSD.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773534",
+   "location": "CYYZ",
+   "startValidity": "2026-09-15T13:09:22.415",
+   "endValidity": "2026-09-19T20:00:00",
+   "text": "{\"raw\" : \"(D3924/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609171300 C) 2609192000\\nD) DAILY 1300-2000\\nE) TWY C BTN TWY C1 AND TWY C3,\\n TWY D3 BTN RWY 06L/24R AND TWY D CLSD.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773466",
+   "location": "CYYZ",
+   "startValidity": "2026-09-15T12:00:02.025",
+   "endValidity": "2026-09-17T19:00:00",
+   "text": "{\"raw\" : \"(D3923/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609171200 C) 2609171900\\nE) TWY FA,\\n TWY F BTN TWY F1 AND TWY F2 CLSD.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773430",
+   "location": "CYYZ",
+   "startValidity": "2026-09-15T10:33:47.854",
+   "endValidity": "2026-09-17T10:00:00",
+   "text": "{\"raw\" : \"(D3922/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609160401 C) 2609171000\\nD) SEP 16 0401-1000, SEP 17 0601-1000\\nE) RWY 05/23 CLSD.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773394",
+   "location": "CYYZ",
+   "startValidity": "2026-09-15T05:24:09.309",
+   "endValidity": "2026-09-17T10:00:00",
+   "text": "{\"raw\" : \"(D3919/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609160600 C) 2609171000\\nD) DAILY 0600-1000\\nE) RWY 15L/33R CLSD AVBL AS TWY SOUTH OF TWY H.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773383",
+   "location": "CYYZ",
+   "startValidity": "2026-09-15T04:24:25.964",
+   "endValidity": "2026-09-17T08:00:00",
+   "text": "{\"raw\" : \"(D3915/26 NOTAMN\\nQ) CZYZ/QMXLT/IV/M/A/000/999/4341N07938W005\\nA) CYYZ B) 2609170401 C) 2609170800\\nE) TWY A BTN TWY AK AND TWY AL NOT AVBL TO ACFT WITH WINGSPAN\\nGREATER THAN 118FT)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773319",
+   "location": "CYYZ",
+   "startValidity": "2026-09-14T23:12:00",
+   "endValidity": "2026-09-23T14:00:00",
+   "text": "{\"raw\" : \"(D3913/26 NOTAMR D3802/26\\nQ) CZYZ/QLAAS/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609142312 C) 2609231400\\nE) ALS 06R AND 24L U/S. \\nAPPLY PROC FOR HIGH INTST APCH LGT INOPERATIVE (AIP AD 2.22.4)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773286",
+   "location": "CYYZ",
+   "startValidity": "2026-09-14T22:09:53.289",
+   "endValidity": "2026-09-16T18:00:00",
+   "text": "{\"raw\" : \"(D3912/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609161400 C) 2609161800\\nE) TWY H BTN RWY 15R/33L AND TWY H2 CLSD.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
   {
    "type": "notam",
    "pk": "1772993",
@@ -35,240 +191,6 @@
   },
   {
    "type": "notam",
-   "pk": "1772980",
-   "location": "CYYZ",
-   "startValidity": "2026-09-14T14:22:00",
-   "endValidity": "2026-09-14T22:22:00",
-   "text": "{\"raw\" : \"(S3021/26 NOTAMR S2998/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609141422 C) 2609142222\\nE) RSC 05 6/6/6 DRY, DRY, DRY. VALID SEP 14 1422 - SEP 14 2222.\\n\\nRSC 23 6/6/6 DRY, DRY, DRY. VALID SEP 14 1422 - SEP 14 2222.\\n\\nRSC 06L 6/6/6 DRY, DRY, DRY. VALID SEP 14 1421 - SEP 14 2221.\\n\\nRSC 24R 6/6/6 DRY, DRY, DRY. VALID SEP 14 1421 - SEP 14 2221.\\n\\nRSC 06R 6/6/6 DRY, DRY, DRY. VALID SEP 14 1421 - SEP 14 2221.\\n\\nRSC 24L 6/6/6 DRY, DRY, DRY. VALID SEP 14 1421 - SEP 14 2221.\\n\\nRSC 15L 6/6/6 DRY, DRY, DRY. VALID SEP 14 1422 - SEP 14 2222.\\n\\nRSC 33R 6/6/6 DRY, DRY, DRY. VALID SEP 14 1422 - SEP 14 2222.\\n\\nRSC 15R 6/6/6 DRY, DRY, DRY. VALID SEP 14 1421 - SEP 14 2221.\\n\\nRSC 33L 6/6/6 DRY, DRY, DRY. VALID SEP 14 1421 - SEP 14 2221.\\n\\nADDN NON-GRF/TALPA INFO:)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772695",
-   "location": "CYYZ",
-   "startValidity": "2026-09-14T00:58:56.900",
-   "endValidity": "2026-09-16T10:00:00",
-   "text": "{\"raw\" : \"(D3893/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609141400 C) 2609161000\\nD) SEP 14 1400-1800, SEP 15-16 0401-1000\\nE) RWY 05/23 CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772693",
-   "location": "CYYZ",
-   "startValidity": "2026-09-14T00:53:02.060",
-   "endValidity": "2026-09-14T18:45:00",
-   "text": "{\"raw\" : \"(D3891/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609141400 C) 2609141845\\nE) TWY H4 AND TWY H6,\\n TWY H BTN TWY H2 AND THR 05 CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772691",
-   "location": "CYYZ",
-   "startValidity": "2026-09-14T00:50:41.294",
-   "endValidity": "2026-09-14T18:00:00",
-   "text": "{\"raw\" : \"(D3889/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609141400 C) 2609141800\\nE) TWY J2 AND TWY Q,\\n TWY J BTN TWY JC AND THR 05 CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772552",
-   "location": "CYYZ",
-   "startValidity": "2026-09-13T17:11:23.423",
-   "endValidity": "2026-09-15T18:00:00",
-   "text": "{\"raw\" : \"(D3887/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609151400 C) 2609151800\\nE) RWY 06L/24R CLSD AVBL AS TWY.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772551",
-   "location": "CYYZ",
-   "startValidity": "2026-09-13T17:11:05.155",
-   "endValidity": "2026-09-15T20:00:00",
-   "text": "{\"raw\" : \"(D3886/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609151400 C) 2609152000\\nE) TWY C BTN TWY D3 AND TWY D5 CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772550",
-   "location": "CYYZ",
-   "startValidity": "2026-09-13T17:10:27.026",
-   "endValidity": "2026-09-15T20:00:00",
-   "text": "{\"raw\" : \"(D3885/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609150701 C) 2609152000\\nD) DAILY 0701-1000 1400-2000\\nE) TWY C3 CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772452",
-   "location": "CYYZ",
-   "startValidity": "2026-09-13T13:18:22.866",
-   "endValidity": "2026-09-15T21:00:00",
-   "text": "{\"raw\" : \"(D3882/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609141200 C) 2609152100\\nD) DAILY 1200-2100\\nE) TWY TC CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772451",
-   "location": "CYYZ",
-   "startValidity": "2026-09-13T13:17:56.064",
-   "endValidity": "2026-09-15T21:00:00",
-   "text": "{\"raw\" : \"(D3881/26 NOTAMN\\nQ) CZYZ/QFIXX/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609141200 C) 2609152100\\nD) DAILY 1200-2100\\nE) CENTRAL DEICING FACILITY PAD 6 CLSD)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772401",
-   "location": "CYYZ",
-   "startValidity": "2026-09-13T11:56:56.106",
-   "endValidity": "2026-09-15T18:00:00",
-   "text": "{\"raw\" : \"(D3878/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609151200 C) 2609151800\\nE) TWY C1,\\n TWY C BTN TWY B AND TWY D3,\\n TWY A BTN TWY D AND RWY 06L/24R CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772399",
-   "location": "CYYZ",
-   "startValidity": "2026-09-13T11:56:06.990",
-   "endValidity": "2026-09-15T21:00:00",
-   "text": "{\"raw\" : \"(D3877/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609151200 C) 2609152100\\nE) TWY G,\\n TWY H BTN TWY E AND TWY F CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772348",
-   "location": "CYYZ",
-   "startValidity": "2026-09-13T06:54:55.068",
-   "endValidity": "2026-09-15T08:00:00",
-   "text": "{\"raw\" : \"(D3876/26 NOTAMN\\nQ) CZYZ/QMXLT/IV/M/A/000/999/4341N07938W005\\nA) CYYZ B) 2609150401 C) 2609150800\\nE) TWY D BTN TWY DP AND TWY DR NOT AVBL TO ACFT WITH WINGSPAN\\nGREATER THAN 118FT)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772342",
-   "location": "CYYZ",
-   "startValidity": "2026-09-13T06:24:43.828",
-   "endValidity": "2026-09-15T07:00:00",
-   "text": "{\"raw\" : \"(D3874/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609150401 C) 2609150700\\nE) TWY C2,\\n TWY C BTN TWY C4 AND TWY A,\\n TWY D4 BTN TWY C4 AND TWY D,\\n TWY E BTN RWY 06L/24R AND TWY D,\\n TWY B BTN TWY C AND TWY D CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772341",
-   "location": "CYYZ",
-   "startValidity": "2026-09-13T06:21:15.849",
-   "endValidity": "2026-09-15T10:00:00",
-   "text": "{\"raw\" : \"(D3873/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609150701 C) 2609151000\\nE) TWY C1,\\n TWY A BTN TWY C1 AND TWY D,\\n TWY C BTN TWY B AND TWY C5,\\n TWY D3 BTN RWY 06L/24R AND TWY D,\\n TWY D5 BTN RWY 06L/24R AND TWY D CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772335",
-   "location": "CYYZ",
-   "startValidity": "2026-09-13T05:09:34.149",
-   "endValidity": "2026-09-16T10:00:00",
-   "text": "{\"raw\" : \"(D3869/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609150600 C) 2609161000\\nD) DAILY 0600-1000\\nE) RWY 15L/33R CLSD AVBL AS TWY SOUTH OF TWY H.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772193",
-   "location": "CYYZ",
-   "startValidity": "2026-09-12T20:18:45.972",
-   "endValidity": "2026-09-14T22:00:00",
-   "text": "{\"raw\" : \"(D3868/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609142000 C) 2609142200\\nE) TWY E BTN TWY T AND TWY V CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1772184",
-   "location": "CYYZ",
-   "startValidity": "2026-09-12T20:00:42.483",
-   "endValidity": "2026-09-14T22:00:00",
-   "text": "{\"raw\" : \"(D3867/26 NOTAMN\\nQ) CZYZ/QFIAU/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609142000 C) 2609142200\\nE) CDF PAD 2, CDF PAD 3 AND CDF PAD 4 CLSD)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1771992",
-   "location": "CYYZ",
-   "startValidity": "2026-09-12T12:22:45.395",
-   "endValidity": "2026-09-15T21:00:00",
-   "text": "{\"raw\" : \"(D3859/26 NOTAMN\\nQ) CZYZ/QFILT/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609141200 C) 2609152100\\nD) DAILY 1200-2100\\nE) CENTRAL DE-ICING FACILITY (CDF) \\nTAXILANE 1 BTN CDF PAD 4 AND CDF PAD 6, \\nCDF PAD 5, CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
    "pk": "1771988",
    "location": "CYYZ",
    "startValidity": "2026-09-12T12:16:58.101",
@@ -282,37 +204,11 @@
   },
   {
    "type": "notam",
-   "pk": "1771987",
-   "location": "CYYZ",
-   "startValidity": "2026-09-12T12:16:02.538",
-   "endValidity": "2026-09-15T21:00:00",
-   "text": "{\"raw\" : \"(D3857/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609141200 C) 2609152100\\nD) DAILY 1200-2100\\nE) TWY T BTN TWY E AND TWY F CLSD.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
    "pk": "1771368",
    "location": null,
    "startValidity": "2026-09-11T12:19:36.891",
    "endValidity": "2026-09-18T10:59:00",
    "text": "{\"raw\" : \"(G3263/26 NOTAMN\\nQ) CZXX/QGWAU/IV/NBO/E/000/999/4442N08439W294\\nA) CZWG CZYZ B) 2609140400 C) 2609181059\\nD) DAILY 0400-1059\\nE) GPS INTERFERENCE EXER\\nRADIUS 294NM CENTRE 444202N 0843838W FL400-UNL, \\n242NM RADIUS AT FL250,\\n177NM RADIUS AT 10000FT AMSL,\\n137NM RADIUS AT 4000FT AGL,\\n80NM RADIUS AT 50FT AGL. \\nGNSS SIGNAL MAY BE PERIODICALLY INTERRUPTED. INFORM ATC OF ANY\\nADVERSE IMPACT.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1769829",
-   "location": "CYYZ",
-   "startValidity": "2026-09-08T23:58:00",
-   "endValidity": "2026-09-15T04:01:00",
-   "text": "{\"raw\" : \"(D3802/26 NOTAMR D3750/26\\nQ) CZYZ/QLAAS/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609082358 C) 2609150401\\nE) ALS 06R AND 24L U/S. \\nAPPLY PROC FOR HIGH INTST APCH LGT INOPERATIVE (AIP AD 2.22.4)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYYZ",
@@ -417,19 +313,6 @@
    "startValidity": "2026-08-21T13:28:04.265",
    "endValidity": "2026-11-01T23:00:00",
    "text": "{\"raw\" : \"(D3362/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/007/4340N07938W005\\nA) CYYZ B) 2608241000 C) 2611012300\\nE) MOBILE CRANE WITHIN 628FT RADIUS CENTRED ON 434025N 0793737W APRX \\n530FT BEYOND DTHR 33L AND 1830FT NE RCL. 120FT AGL 681FT AMSL. \\nLGTD, PAINTED.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYYZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1755299",
-   "location": "CYYZ",
-   "startValidity": "2026-08-14T18:42:00",
-   "endValidity": "2026-09-14T21:00:00",
-   "text": "{\"raw\" : \"(D3207/26 NOTAMR D2718/26\\nQ) CZYZ/QOBCE/IV/M/AE/000/007/4339N07938W005\\nA) CYYZ B) 2608141842 C) 2609142100\\nD) DAILY 1200-2100\\nE) MOBILE CRANE WITHIN 70FT RADIUS CENTRED ON 433924N 0793812W APRX \\n3640FT BFR THR 06L AND 1250FT NW EXTENDED RCL. 100FT AGL 628FT \\nAMSL. LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYYZ",

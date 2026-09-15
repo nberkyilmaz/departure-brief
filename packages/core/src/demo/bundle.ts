@@ -25,7 +25,13 @@ export interface BundledReport {
   readonly station: string | null;
   readonly body: string;
   readonly issuedAt: string | null;
-  readonly upstream: unknown;
+  /**
+   * The service's own metadata record. Omitted from a published bundle: it
+   * decides nothing, the page never shows it, and a report is named by the
+   * hash of its body — so leaving it out changes no identity, only half a
+   * megabyte of what a visitor downloads.
+   */
+  readonly upstream?: unknown;
   readonly fetchedFor: readonly string[];
   readonly request: string;
 }
@@ -61,7 +67,7 @@ function reportOf(b: BundledReport): RawReport {
     station: b.station,
     body: b.body,
     issuedAt: b.issuedAt === null ? null : new Date(b.issuedAt),
-    upstream: b.upstream,
+    upstream: b.upstream ?? null,
   });
 }
 

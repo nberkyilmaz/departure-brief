@@ -1,6 +1,6 @@
 {
  "meta": {
-  "now": "2026-09-14T14:30:43.145",
+  "now": "2026-09-15T21:37:52.946",
   "count": {
    "notam": 26
   },
@@ -9,11 +9,24 @@
  "data": [
   {
    "type": "notam",
-   "pk": "1772797",
+   "pk": "1773733",
    "location": "CYTZ",
-   "startValidity": "2026-09-14T11:11:00",
-   "endValidity": "2026-09-14T19:11:00",
-   "text": "{\"raw\" : \"(A9268/26 NOTAMN\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609141111 C) 2609141911\\nE) RSC 06/24 DRY. VALID SEP 14 1111 - SEP 14 1911.\\n\\nRSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 14 1111 - SEP 14 1911.\\n\\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 14 1111 - SEP 14 1911.\\n\\nADDN NON-GRF/TALPA INFO:)\", \"english\" : null, \"french\" : null}",
+   "startValidity": "2026-09-15T18:01:00",
+   "endValidity": "2026-09-16T02:01:00",
+   "text": "{\"raw\" : \"(A9490/26 NOTAMR A9414/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609151801 C) 2609160201\\nE) RSC 06/24 DRY. VALID SEP 15 1751 - SEP 16 0151.\\n\\nRSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 15 1751 - SEP 16 0151.\\n\\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 15 1751 - SEP 16 0151.\\n\\nADDN NON-GRF/TALPA INFO:)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773152",
+   "location": "CYTZ",
+   "startValidity": "2026-09-14T18:17:11.286",
+   "endValidity": "2026-09-20T11:00:00",
+   "text": "{\"raw\" : \"(J6311/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609150300 C) 2609201100\\nD) SEP 15 0300-1015, SEP 16-19 0300-1000, SEP 20 0200-1100\\nE) RWY 06/24 AND RWY 08/26 CLSD DUE CONST)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYTZ",
@@ -27,19 +40,6 @@
    "startValidity": "2026-09-11T22:37:08.689",
    "endValidity": "2026-09-20T11:00:00",
    "text": "{\"raw\" : \"(J6256/26 NOTAMN\\nQ) CZYZ/QFPXX/IV/BO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609120300 C) 2609201100\\nD) SEP 12 0300-1015, SEP 13 0200-1100, SEP 15-19 0300-1000,       \\nSEP 20 0200-1100\\nE) MEDEVAC HEL TO OPR FM TEMPO NON-INSTR FATO 433748N 0792348W\\n(APRX 2001FT BEYOND THR 08 N SIDE TWY F, DIAMETER 82FT,\\nASPH, LGTD). ARR/DEP 107DEG TO 231DEG CLOCKWISE FR FATO.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYTZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1771726",
-   "location": "CYTZ",
-   "startValidity": "2026-09-11T19:44:55.549",
-   "endValidity": "2026-09-20T11:00:00",
-   "text": "{\"raw\" : \"(J6253/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609120300 C) 2609201100\\nD) SEP 12 0300-1015, SEP 13 0200-1100, SEP 15-19 0300-1000,        \\nSEP 20 0200-1100\\nE) RWY 06/24 AND RWY 08/26 CLSD DUE CONST)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYTZ",

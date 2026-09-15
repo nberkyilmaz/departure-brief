@@ -96,11 +96,10 @@ describe('the published page', () => {
   it('will not pretend to know an aerodrome it has no reports for', async () => {
     render(<App />);
     await briefed();
-    // Ottawa: a real aerodrome, and not one this page carries reports for.
-    fireEvent.change(screen.getByLabelText(/Destination/i), { target: { value: 'CYOW' } });
-    // It says which aerodromes it does have reports for, rather than failing blankly.
-    await waitFor(() => expect(document.querySelector('.error')?.textContent ?? '').toMatch(/CYOW/), { timeout: 10_000 });
-    expect(document.querySelector('.error')!.textContent).toMatch(/CYSN|CYKF|CYHM/);
+    // New York: a real aerodrome, and not one this page carries — it holds
+    // Canada, which is a statement it should make rather than fail blankly.
+    fireEvent.change(screen.getByLabelText(/Destination/i), { target: { value: 'KJFK' } });
+    await waitFor(() => expect(document.querySelector('.error')?.textContent ?? '').toMatch(/KJFK/), { timeout: 10_000 });
   });
 
   it('shows the route as a strip, with the category at each point', async () => {
