@@ -52,7 +52,7 @@ the Ohio region with a health check on `/api/health`.
 Set the two secrets in the dashboard:
 
 - `DATABASE_URL` — the Neon string.
-- `HOLDSHORT_USER_AGENT` — `holdshort/0.1 (your.email@example.com)`. Put a
+- `DEPBRIEF_USER_AGENT` — `depbrief/0.1 (your.email@example.com)`. Put a
   real address in it. Both weather services ask for one, and it is the
   difference between being throttled politely and being blocked.
 
@@ -170,49 +170,34 @@ put a `Date` inside their output, and both are revived at the read site now.
 
 ## The domain
 
-`holdshort.com`, `.org`, `.net`, `.dev` and `.app` are all taken. Two things
-worth knowing, both checked against the registries on 19 September 2026:
+All three of `departurebrief.com`, `departurebrief.ca` and
+`departurebrief.dev` were free when checked directly at the registries on
+19 September 2026 — Verisign's RDAP for `.com`, CIRA's for `.ca`, Google's
+for `.dev`, each returning 404 with a known-registered control returning
+200, so the 404 means what it says.
 
-### holdshort.ca is dying, and may be catchable for nothing
+**Register `departurebrief.com` at Cloudflare Registrar: $10.46 a year,
+first year and every year.** Cloudflare sells at wholesale with no markup
+and no promotional first year, which is the whole trap in domain pricing —
+`holdshort.xyz`, for comparison, is $1.00 to register at Namecheap and
+$19.48 to renew. Take the `.ca` too if you want it ($9.19, and `.ca`
+requires Canadian presence, which you have); it is the better address for a
+CARs-first tool built by a Canadian, and $9 is not a decision.
 
-RDAP at CIRA's own endpoint returns:
+### Why the project is not called Hold Short any more
 
-```
-status:      client transfer prohibited, pending delete, redemption period,
-             server hold, server renew prohibited, server update prohibited
-registered:  2025-08-04     expired: 2026-08-04     last changed: 2026-09-15
-```
+`holdshort.com` belongs to **Holdshort Aviation Systems, LLC** — aircraft
+scheduling software for flight schools and flying clubs. Registered in July
+2004, renewed through 2032, with all four registrar locks set and a live
+service behind a DigitalOcean load balancer. Not a domain that is for sale,
+and more to the point, an operating aviation-software company with the same
+name in the same industry.
 
-It expired six weeks ago, has come out of redemption, and is flagged
-**pending delete** — CIRA's To Be Released list. CIRA releases those in a
-session every Wednesday at 19:00 UTC, and the rule that pushes anything
-deleted after Monday 07:00 UTC into the following week's session puts the
-expected release at **Wednesday 23 September, 19:00 UTC**.
-
-[Webnames.ca](https://www.webnames.ca) takes TBR backorders at no charge and
-bills only the ordinary .ca price if the catch succeeds. If several
-registrars request the same name CIRA picks at random, so it is a free
-lottery ticket rather than a purchase. Confirm the date against CIRA's TBR
-list before relying on it.
-
-`.ca` requires Canadian presence, which you have.
-
-### holdshort.page is available today
-
-RDAP at Google's registry returns 404 for it (and 200 for `web.dev`, so the
-endpoint is live and the 404 means what it says).
-
-**$10.20 a year at Cloudflare Registrar, first year and every year** —
-Cloudflare sells at wholesale with no markup and no promotional first year.
-Compare `holdshort.xyz`, where Namecheap charges $1.00 to register and
-$19.48 to renew.
-
-Other names that are free to take: `holdshortapp.ca`, `flyholdshort.com`,
-`holdshortbriefing.com`, `shortfinal.ca` (all $9–11/year flat at
-Cloudflare). `holdshort.io` is available but renews at **$50/year**, which
-fails the "very small cost" test on its own, and the ISO code behind `.io`
-is unsettled after the Chagos agreement — an avoidable question to attach to
-a link on a résumé.
+This project is not competing with them — they do scheduling, this does
+pre-flight information, and "hold short" is a standard ATC instruction that
+nobody owns. But on a résumé the cost is real: anyone searching the name
+finds their product first. Renamed on 19 September 2026, before a domain was
+attached rather than after.
 
 ### DNS, once you have one
 
@@ -230,7 +215,7 @@ CNAME www   nberkyilmaz.github.io.
 ```
 
 The `www` target is the **user** host. A CNAME target is a hostname and
-cannot carry a path, so it is never `nberkyilmaz.github.io/holdshort`.
+cannot carry a path, so it is never `nberkyilmaz.github.io/departure-brief`.
 
 The API subdomain:
 
@@ -252,12 +237,12 @@ DNS-only (grey cloud): proxying breaks Render's hostname validation.
 
 2. **[`.github/workflows/pages.yml`](../.github/workflows/pages.yml)** sets
    `VITE_BASE: /${{ github.event.repository.name }}/`, because a project
-   site is served from `/holdshort/`. On a custom domain the site is at the
+   site is served from `/departure-brief/`. On a custom domain the site is at the
    root, and leaving that line ships a page whose script, stylesheet and
    recorded reports all 404. Change it to `/` or delete it —
    `apps/web/vite.config.ts` already defaults to `/`.
 
-3. **`HOLDSHORT_ALLOWED_ORIGINS`** on the Render service: add
+3. **`DEPBRIEF_ALLOWED_ORIGINS`** on the Render service: add
    `https://<domain>`, comma separated. The page and the API are different
    origins, and an origin that is not on that list is refused by the browser
    before the server sees it.
@@ -271,6 +256,17 @@ site is unreachable rather than merely insecure. Wait; do not change DNS.
 
 ## Running it yourself
 
+> **If you had the database before the rename**, its role and database are
+> still called `holdshort` and the new default connection string looks for
+> `depbrief`. One command each, once:
+>
+> ```sh
+> docker exec holdshort-db-1 psql -U holdshort -d postgres >   -c "ALTER DATABASE holdshort RENAME TO depbrief;" >   -c "ALTER ROLE holdshort RENAME TO depbrief;"
+> ```
+>
+> Or throw it away and start clean — it holds nothing but fetched weather and
+> a few test rows: `docker compose down -v && npm run db:up`.
+
 ```sh
 npm ci
 npm run db:up                 # Postgres on 5433, from docker-compose.yml
@@ -282,11 +278,11 @@ npm start -w apps/api
 Or the container exactly as the host runs it:
 
 ```sh
-docker build -t holdshort .
+docker build -t depbrief .
 docker run --rm -p 3000:3000 \
-  -e DATABASE_URL=postgres://holdshort:holdshort@host.docker.internal:5433/holdshort \
-  -e HOLDSHORT_USER_AGENT='holdshort/0.1 (you@example.com)' \
-  holdshort
+  -e DATABASE_URL=postgres://depbrief:depbrief@host.docker.internal:5433/depbrief \
+  -e DEPBRIEF_USER_AGENT='depbrief/0.1 (you@example.com)' \
+  depbrief
 ```
 
 CI builds the image on every push, so a Dockerfile that would fail on the

@@ -1,5 +1,5 @@
 {
-  "name": "@holdshort/web",
+  "name": "@depbrief/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@holdshort/core": "*",
+    "@depbrief/core": "*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

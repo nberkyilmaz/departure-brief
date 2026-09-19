@@ -17,5 +17,5 @@ export default defineConfig({
    * with everything else. Only the `judge` entry point is imported, which
    * is the half of the package that never reaches for Node.
    */
-  optimizeDeps: { exclude: ['@holdshort/core'] },
+  optimizeDeps: { exclude: ['@depbrief/core'] },
 });

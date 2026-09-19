@@ -193,12 +193,12 @@ const resolved = await resolveFlight(store, plan, AS_OF);
 
 /*
  * The recorded model answers, replayed: no model runs when the demo is
- * built from committed fixtures. With HOLDSHORT_LLM=ollama set, a missing
+ * built from committed fixtures. With DEPBRIEF_LLM=ollama set, a missing
  * answer is fetched once and written into the same fixture directory, so
  * the next build needs nothing again.
  */
 const llmDir = join(fixtures, 'llm', MODEL.replace(/[^a-z0-9.-]/gi, '_'));
-const recording = process.env['HOLDSHORT_LLM'] === 'ollama';
+const recording = process.env['DEPBRIEF_LLM'] === 'ollama';
 const provider = recording
   ? new RecordingProvider(new OllamaProvider(), llmDir)
   : existsSync(llmDir)

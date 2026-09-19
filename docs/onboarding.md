@@ -7,9 +7,15 @@ should have everything needed to pick up work without further context.
 
 ## 1. What this is
 
-Hold Short is a **flight briefing decision-support tool**. It answers one
-question about a planned flight: *given this route, at this time, in this
-aircraft — should I go, and why?*
+Departure Brief is a **pre-flight information tool**. It answers one question
+about a planned flight: *given this route, at this time, in this aircraft —
+what would I want to know?*
+
+Deliberately not *should I go*. The verdict was removed in session 19: the
+decision belongs to the pilot, and a tool that issues one invites a pilot to
+stop reading. What this does instead is report what the products say, compare
+them against the limits that pilot set, and put what deserves a second look
+first.
 
 It decodes the raw products a pilot already reads (METAR, TAF, PIREP, NOTAM),
 resolves them to each point along the route **at the time the aircraft will
@@ -103,9 +109,9 @@ Inside `packages/core`:
 | `src/docs/` | Scanned documents → word boxes. `reader/render.ts` (pdf.js + @napi-rs/canvas; JBIG2 scans need the wasm path), `reader/ocr.ts` (tesseract.js; tries the page sideways when the upright reading is poor; boxes always in scanned-page pixels), `reader/ingest.ts` (content-addressed cache under `data/docs/<sha>/`), `lines.ts` (reading lines, rotation-aware), `align.ts` (a cited figure must be in the cited tokens; OCR confusions allowed and marked), `extract/wb.ts` (the W&B extraction prompt, schema, alignment), `crop.ts` (the cited region, boxed, for review) |
 | `src/verify/` | Did the TAF verify? `record.ts` (what a briefing's forecasts assert, and matching an observation to a moment), `score.ts` (direction of the miss, per-station reliability, the sentence a pilot would read), `run.ts` (record and match as operations), `types.ts` (append-only checks and outcomes) |
 | `src/wb/` | `types.ts` (`WeightBalanceSpec`: every figure with its page citation; review queue), `compute.ts` (loading → CG, checked against the forward line and aft limit; every finding cites its page) |
-| `src/cli/docs.ts` | `holdshort doc ingest|find|page|wb <pdf>` and `holdshort wb <spec.json> …` |
-| `src/cli/main.ts` | `npm run holdshort -- fetch KJFK`, `nasr <dir>`, `ourairports <dir>`, `airport KJFK`, `resolve` / `brief <flight.json> [--fetch] [--as-of ISO] [--json]`, `decode "<report>"`; `--memory` runs without Postgres |
-| `.env.example` | `DATABASE_URL`, `HOLDSHORT_USER_AGENT`, FAA NOTAM credentials, optional HTTP cache dir, `HOLDSHORT_LLM`/`OLLAMA_MODEL`, `HOLDSHORT_DOC_CACHE` |
+| `src/cli/docs.ts` | `depbrief doc ingest|find|page|wb <pdf>` and `depbrief wb <spec.json> …` |
+| `src/cli/main.ts` | `npm run depbrief -- fetch KJFK`, `nasr <dir>`, `ourairports <dir>`, `airport KJFK`, `resolve` / `brief <flight.json> [--fetch] [--as-of ISO] [--json]`, `decode "<report>"`; `--memory` runs without Postgres |
+| `.env.example` | `DATABASE_URL`, `DEPBRIEF_USER_AGENT`, FAA NOTAM credentials, optional HTTP cache dir, `DEPBRIEF_LLM`/`OLLAMA_MODEL`, `DEPBRIEF_DOC_CACHE` |
 | `scripts/corpus-report.ts` | `npm run corpus:metar` / `corpus:taf` — unparsed tokens across a corpus by frequency; how the long tail is worked down |
 | `test/fixtures/fetch/` | Recorded AWC responses (2026-09-07) and a verbatim four-airport slice of the 2026-09-03 NASR cycle |
 | `test/fixtures/metar/`, `test/fixtures/taf/` | 5,060 METARs and 2,957 TAFs, all real, from AWC on 2026-09-07 (worldwide bulk caches plus a US METAR sample) |
@@ -179,7 +185,7 @@ being newer than the 546.92 driver — so start the server on Vulkan:
 
 ```bash
 OLLAMA_VULKAN=1 CUDA_VISIBLE_DEVICES=-1 ollama serve
-HOLDSHORT_LLM=ollama npm run eval:notam -- --record     # ranks, records fixtures, scores
+DEPBRIEF_LLM=ollama npm run eval:notam -- --record     # ranks, records fixtures, scores
 ```
 
 The recorded answers under `packages/core/test/fixtures/llm/` make the
@@ -198,12 +204,12 @@ reading. Prefer that move to another prompt revision.
 ### 5b. Step 7 — aircraft document ingestion (M6b) — done, and what is left
 
 ```bash
-npm run holdshort -- doc ingest C172MPOH.pdf            # OCR the scan into word boxes (cached under data/docs/)
-npm run holdshort -- doc find C172MPOH.pdf "crosswind"  # search the text, with page numbers
-HOLDSHORT_LLM=ollama OLLAMA_MODEL=qwen2.5vl:3b   npm run holdshort -- doc wb C172MPOH.pdf --pages 17,18,42,88,90 --type C172
-npm run holdshort -- wb confirm aircraft/c172.wb.json cgAftNormalIn=47.3 'cgForwardNormal[1]=2300@38.5'
-npm run holdshort -- wb confirm aircraft/c172.wb.json frontSeatArmIn=37 --pages 88 --on-my-word
-npm run holdshort -- wb aircraft/c172.wb.json --empty 1454 --empty-moment 57.6 --front 340 --fuel 38
+npm run depbrief -- doc ingest C172MPOH.pdf            # OCR the scan into word boxes (cached under data/docs/)
+npm run depbrief -- doc find C172MPOH.pdf "crosswind"  # search the text, with page numbers
+DEPBRIEF_LLM=ollama OLLAMA_MODEL=qwen2.5vl:3b   npm run depbrief -- doc wb C172MPOH.pdf --pages 17,18,42,88,90 --type C172
+npm run depbrief -- wb confirm aircraft/c172.wb.json cgAftNormalIn=47.3 'cgForwardNormal[1]=2300@38.5'
+npm run depbrief -- wb confirm aircraft/c172.wb.json frontSeatArmIn=37 --pages 88 --on-my-word
+npm run depbrief -- wb aircraft/c172.wb.json --empty 1454 --empty-moment 57.6 --front 340 --fuel 38
 ```
 
 A figure is used only if the line the model quoted is on that page, the
@@ -244,9 +250,9 @@ npm start                           # API + web app on http://127.0.0.1:3000
 
 ```bash
 npm run db:up                                                        # Docker Desktop must be running
-npm run holdshort -- ourairports data/raw/ourairports/2026-09-07 --country CA   # see src/fetch/ourairports.ts for the download
-npm run holdshort -- nasr data/raw/nasr/2026-09-03                   # US fields; see src/fetch/nasr.ts
-npm run holdshort -- brief flights/demo-cysn-cykf.json --fetch
+npm run depbrief -- ourairports data/raw/ourairports/2026-09-07 --country CA   # see src/fetch/ourairports.ts for the download
+npm run depbrief -- nasr data/raw/nasr/2026-09-03                   # US fields; see src/fetch/nasr.ts
+npm run depbrief -- brief flights/demo-cysn-cykf.json --fetch
 ```
 
 ### The decoders, for reference
@@ -369,8 +375,8 @@ Verified on the development machine:
 | Node | v22.23.2 |
 | npm | 10.9.8 |
 | Docker | 27.0.3 |
-| Postgres | via Compose, **port 5433**, user/pass/db all `holdshort` |
-| No local `psql` | use `docker compose exec db psql -U holdshort` |
+| Postgres | via Compose, **port 5433**, user/pass/db all `depbrief` |
+| No local `psql` | use `docker compose exec db psql -U depbrief` |
 
 **Two machines are available:**
 

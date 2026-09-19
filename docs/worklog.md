@@ -13,6 +13,11 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
 
 ## Where we are (updated 2026-09-19)
 
+**The project is called Departure Brief.** It was Hold Short until session
+22; `holdshort.com` turned out to belong to an operating aviation-software
+company, which is a poor thing to share a name with on a résumé. Renamed
+before a domain was attached rather than after.
+
 **This tool does not decide whether to fly.** It reports what the products
 say, compares them against the limits the pilot set, and puts what deserves
 a second look first. Where a summary is needed it is the flight category.
@@ -22,16 +27,14 @@ station reporting at 00:52Z on 19 September, upper winds for seventeen
 sites, NOTAMs for six fields. Eight routes, a page per aerodrome, the whole
 pipeline running in the browser.
 
-**The API is ready to go live.** It was not before — four things behaved
-differently on a host than on a laptop and each was a live instance that
-would have looked fine and not been. A container built from this repository,
-pointed at an empty database, now loads 27,560 aerodromes by itself and
-serves a briefing of CYSN that reads KIAG at eleven miles. Proved, not
-assumed: session 21.
+**The API is ready to go live.** A container built from this repository,
+pointed at an empty database, loads 27,560 aerodromes by itself and serves a
+briefing of CYSN that reads KIAG at eleven miles. Proved, not assumed:
+session 21.
 
-**Waiting on the owner:** a Neon account, a Render account, and a domain —
-none of which anybody else can create. `docs/deploy.md` has the steps and
-what each free tier actually costs.
+**Waiting on the owner:** a Neon account, a Render account, and registering
+`departurebrief.com` — none of which anybody else can create.
+`docs/deploy.md` has the steps and what each free tier actually costs.
 
 **Left to build:** POH takeoff and landing distances, in the constrained
 form session 20 established.
@@ -346,7 +349,7 @@ clean, so it needs redoing.
 44. `src/fetch/ingest.ts` — `storeAndDecode` (decode once per decoder
     version, ever) and `ingestStation`.
 45. `src/cli/main.ts` — `fetch`, `decode`; `--memory`; reads `.env` via
-    `process.loadEnvFile`. `.env.example` added. `npm run holdshort`.
+    `process.loadEnvFile`. `.env.example` added. `npm run depbrief`.
 46. Test run: two failures because AWC returns stations in a different order
     than requested — expectations made order-independent. CLI smoke test
     against the live API in `--memory` mode: KJFK/KTEB fetched and decoded,
@@ -393,7 +396,7 @@ clean, so it needs redoing.
     fake "NEWER" 2026-10-01 KJFK, four "(OLD)" 2026-08-06 airports), which
     then won `getAirport('KJFK')` — that is why the first NASR load said
     19,407 not 19,411. Fix: the test now creates and uses a dedicated
-    `holdshort_test` database and truncates after itself; deleted the five
+    `depbrief_test` database and truncates after itself; deleted the five
     synthetic rows from the dev database and confirmed 19,411 real rows and
     the real KJFK remain. Verified afterwards: dev DB untouched by a test
     run, test DB empty after it.
@@ -569,7 +572,7 @@ clean, so it needs redoing.
     crosswinds as ties and prefers headwind; four wrong expectations of
     mine (sin 20°; `SKC` gives no cloud-clearance finding; 2 kt limit not
     tripped by 0.9 kt; the reciprocal legitimately ranks second).
-82. Live: `holdshort brief flights/demo-cysn-cykf.json --fetch` → GO at
+82. Live: `depbrief brief flights/demo-cysn-cykf.json --fetch` → GO at
     CYSN, CYKF and CYHM, 8 cited findings per point (prevailing + observed
     14:00Z), CARs 602.114 control-zone row applied. 513 tests.
 83. Docs: plan step 4 done with decisions and deferrals (alternate rules,
@@ -691,7 +694,7 @@ clean, so it needs redoing.
 104. Briefing document format 1 → 2: adds `notams` and the NOTAM decoder and
      prompt versions. Web gained `NotamPanel` — grouped by rank, each item
      expanding to the raw NOTAM with the model's cited span highlighted.
-105. Verified live: `holdshort notams flights/demo-cysn-cykf.json --fetch`
+105. Verified live: `depbrief notams flights/demo-cysn-cykf.json --fetch`
      → 31 NOTAMs, Q-codes in English ("Runway · Closed"), classification
      reasons per item, FIR-wide ones folded across three sites, 3
      out-of-scope by schedule. 576 tests, 2 skipped (the eval gate).
@@ -730,7 +733,7 @@ clean, so it needs redoing.
      across briefings when the readable basis differs (`observed 1051Z` vs
      `observed 1151Z`). The diff falls back to parsing `basis` for older
      briefings, with a test that deletes the field.
-111. `src/brief/diff.ts` + `describeDiff.ts`; `holdshort diff`;
+111. `src/brief/diff.ts` + `describeDiff.ts`; `depbrief diff`;
      `GET /api/briefings/:sha256/diff`; a web `DiffPanel`.
 112. Tests built on the recorded six-hour KJFK history so the "weather
      changed" cases are real: 33005KT → 34007KT is 2.4 → 4.4 kt of
@@ -902,7 +905,7 @@ had just dropped into the repo root.
 ### The loop closed
 
 133. The review queue listed 22 figures and offered no way to act on them,
-     so the loading computation could never run. Added `holdshort wb
+     so the loading computation could never run. Added `depbrief wb
      confirm`: the owner gives a figure they have read off the page, and the
      handbook still has to agree. It records which of three things it could
      establish — stated beside words naming the field, printed on a page the
@@ -950,7 +953,7 @@ had just dropped into the repo root.
      queryable, so the US half is buildable — but the owner flies in Canada,
      so step 10 was the better next move, and it needed no new data at all.
 139. A briefing now records what each waypoint's forecast asserted for that
-     waypoint's ETA, and `holdshort verify` later pairs each prediction with
+     waypoint's ETA, and `depbrief verify` later pairs each prediction with
      the observation nearest its moment. Both halves are written once, so a
      second run only adds; a moment with nothing within 35 minutes keeps
      waiting rather than being paired with something far off.
@@ -1025,7 +1028,7 @@ had just dropped into the repo root.
      been registered or deployed — both need the owner's accounts.
 150. `packages/core/scripts/build-demo.ts` builds the demo payload from
      committed fixtures alone: no network, no database, no model at run
-     time. Given `HOLDSHORT_LLM=ollama` it records any answer it lacks into
+     time. Given `DEPBRIEF_LLM=ollama` it records any answer it lacks into
      the fixture directory, so the next build needs nothing again.
 151. Recorded 78 real METARs and 3 TAFs for CYSN, CYKF and CYHM as a
      fixture, verbatim as the weather service returned them. The
@@ -1195,7 +1198,7 @@ had just dropped into the repo root.
      from 0 to 200 bytes — where a wrong implementation of the padding shows
      up — and on multi-byte text. Every briefing hash in the suite came out
      unchanged, which is the real proof.
-177. With that, `@holdshort/core/judge`: decode, resolve, judge, assemble,
+177. With that, `@depbrief/core/judge`: decode, resolve, judge, assemble,
      NOTAM ranking, weight and balance, the in-memory store, and nothing
      that reaches for a database, a file, a PDF or the network. 145 KB
      bundled. A test walks the import graph from it and fails if anything
@@ -1606,7 +1609,7 @@ actually was: every place the code assumed it was running on a laptop.
 ### The four that would have shipped broken
 
 235. **Nothing loaded the airports table.** The only way in was to download
-     two CSVs by hand and run `holdshort ourairports <dir>`, which is fine
+     two CSVs by hand and run `depbrief ourairports <dir>`, which is fine
      at a keyboard and impossible on a host — a deployed instance starts
      with an empty database and no shell, and an empty airports table is not
      slow, it is broken: a briefing needs a field's position before it can
@@ -1716,7 +1719,7 @@ actually was: every place the code assumed it was running on a laptop.
      after thirty days, which is why the blueprint does not create one), the
      exact DNS records, and the three things in this repository that must
      change when a domain is attached — the most important being
-     `pages.yml`'s `VITE_BASE`, which is `/holdshort/` for a project site
+     `pages.yml`'s `VITE_BASE`, which is `/departure-brief/` for a project site
      and would 404 every asset on a custom domain.
 
 246. And one the CI gate caught on its first run, which is what it is for:
@@ -1737,3 +1740,77 @@ actually was: every place the code assumed it was running on a laptop.
 - A container that boots from nothing into a working instance.
 - Everything remaining on the API is an account only the owner can open.
 
+---
+
+## Session 22 — 2026-09-19 — A name that is only ours
+
+247. **Hold Short is Holdshort Aviation Systems, LLC.** Asked whether the
+     `.com` could simply be bought, the registry said what nobody had
+     checked: registered July 2004, renewed through **2032**, all four
+     registrar locks set, and a live service behind a DigitalOcean load
+     balancer serving aircraft scheduling software for flight schools and
+     flying clubs. Not a domain for sale at any sensible price — and, more
+     to the point, an operating company with this project's name in this
+     project's industry.
+
+     The project is not competing with them; they schedule aeroplanes, this
+     reads weather, and "hold short" is a standard ATC instruction nobody
+     owns. But the cost is real on a résumé: anyone searching the name finds
+     their product first. Renamed rather than discovered later.
+
+248. **Departure Brief**, chosen from names verified free at the registries
+     rather than guessed — Verisign's RDAP for `.com`, CIRA's for `.ca`,
+     Google's for `.dev`, each with a known-registered control returning 200
+     so that a 404 meant what it said. All three of `departurebrief.com`,
+     `.ca` and `.dev` are available. Technical identifier `depbrief`
+     throughout: the npm scope, the CLI, the `DEPBRIEF_` environment prefix,
+     the database, the image tag.
+
+249. The rename was mechanical but two things in it were not. The real NASR
+     records under `data/` contain twenty-seven airport remarks that say
+     "hold short" because an airport actually said it, and those are
+     upstream data — never touched. And the docs discuss `holdshort.ca`,
+     `holdshort.com` and the rest as *facts about those domains*; rewriting
+     those would have falsified the record, so they are held aside and the
+     domain section says plainly why the name changed.
+
+250. One mistake worth recording: the first pass guarded on the string
+     `holdshort`, so three files carrying only the spaced form — the page's
+     own `<title>`, the router's home label, and the spec's heading —
+     were skipped entirely. Caught by grepping for what should have been
+     zero and finding three.
+
+### The words that had not followed the product
+
+251. The verdict came out of the engine in session 19. The words around it
+     never moved. The page's `<title>` still asked **"should I go, and
+     why?"**, its description still said the tool "answers whether a planned
+     flight should be flown" and "judges the result", the onboarding still
+     called it a decision-support tool, and the spec's heading still said
+     Decision Support. Every one of those describes something this
+     deliberately stopped being eight sessions ago, and the title is the
+     first thing anybody reads.
+
+     Fixed with the name, because a rename is when you read your own copy.
+     The page is now "Departure Brief — everything you look at before a
+     flight", and the README leads with the thing that is actually true:
+     it does not decide whether to fly, it makes sure nothing was missed.
+
+### And the history
+
+252. **Commit messages normalised across the whole branch**, which is why
+     every SHA before this session changed. The rewrite touched messages
+     only: the rewritten branch was diffed against a backup tag and the
+     trees are byte-identical, all 51 commits surviving with their bodies
+     intact. Force-pushed once, deliberately, on a repository with one
+     contributor and no clones.
+253. The repository is `nberkyilmaz/departure-brief` now; GitHub keeps a
+     permanent redirect from the old path, and `pages.yml` derives
+     `VITE_BASE` from the repository name, so the published site followed
+     without a workflow change.
+
+### State at end of session 22
+
+- 812 tests, typecheck clean, the web app builds.
+- No trace of the old name outside two deliberate factual references and
+  the upstream data that legitimately contains the phrase.

@@ -2,12 +2,12 @@
  * Document commands: read a scanned PDF into word boxes, search it, and
  * extract weight-and-balance data from it with the page as witness.
  *
- *   holdshort doc ingest <pdf>                          OCR every page (cached by content hash)
- *   holdshort doc find <pdf> <regex>                    lines matching, with page numbers
- *   holdshort doc page <pdf> <n>                        one page's lines with token ids
- *   holdshort doc wb <pdf> --pages 88,90 --type C172 [--out aircraft/c172.wb.json]
+ *   depbrief doc ingest <pdf>                          OCR every page (cached by content hash)
+ *   depbrief doc find <pdf> <regex>                    lines matching, with page numbers
+ *   depbrief doc page <pdf> <n>                        one page's lines with token ids
+ *   depbrief doc wb <pdf> --pages 88,90 --type C172 [--out aircraft/c172.wb.json]
  *                                                       extract W&B figures; unverifiable ones go to review
- *   holdshort wb <spec.json> --empty <lb> --empty-moment <per1000> [--front 340] [--rear 0]
+ *   depbrief wb <spec.json> --empty <lb> --empty-moment <per1000> [--front 340] [--rear 0]
  *                [--bag1 0] [--bag2 0] [--fuel 38] [--utility]
  *                                                       compute a loading against the extracted limits
  */
@@ -23,7 +23,7 @@ import { assembleWeightBalance, isCgPointName, missingFrom, type NamedFigure } f
 import { computeLoading, IncompleteSpecError, loadingText } from '../wb/compute.js';
 import type { DocumentCitation, Loading, ReviewItem, WeightBalanceSpec } from '../wb/types.js';
 
-const CACHE_DIR = process.env['HOLDSHORT_DOC_CACHE'] ?? 'data/docs';
+const CACHE_DIR = process.env['DEPBRIEF_DOC_CACHE'] ?? 'data/docs';
 
 function option(args: string[], name: string): string | null {
   const i = args.indexOf(name);
@@ -86,10 +86,10 @@ function usage(): never {
   console.error(
     [
       'usage:',
-      '  holdshort doc ingest|find|page <pdf> ...',
-      '  holdshort doc wb <pdf> --pages 17,18 --type C172 [--out aircraft/c172.wb.json] [--no-image] [--image-px 900]',
-      '  holdshort wb <spec.json> --empty <lb> --empty-moment <per1000> [--front lb] [--rear lb] [--bag1 lb] [--bag2 lb] [--fuel gal] [--utility] [--json]',
-      '  holdshort wb confirm <spec.json> <field>=<value> [...] [--pages 17,18] [--on-my-word]',
+      '  depbrief doc ingest|find|page <pdf> ...',
+      '  depbrief doc wb <pdf> --pages 17,18 --type C172 [--out aircraft/c172.wb.json] [--no-image] [--image-px 900]',
+      '  depbrief wb <spec.json> --empty <lb> --empty-moment <per1000> [--front lb] [--rear lb] [--bag1 lb] [--bag2 lb] [--fuel gal] [--utility] [--json]',
+      '  depbrief wb confirm <spec.json> <field>=<value> [...] [--pages 17,18] [--on-my-word]',
       '        a CG limit point is written weight@arm, such as cgForwardNormal[1]=2300@38.5',
     ].join('\n'),
   );
@@ -105,7 +105,7 @@ async function extractWb(pdf: string, args: string[]): Promise<void> {
   const out = option(args, '--out') ?? `aircraft/${type.toLowerCase()}.wb.json`;
   const llm = llmFromEnv();
   if (!llm) {
-    console.error('no model configured: set HOLDSHORT_LLM=ollama and OLLAMA_MODEL (a vision model such as qwen2.5vl:3b reads the page image too)');
+    console.error('no model configured: set DEPBRIEF_LLM=ollama and OLLAMA_MODEL (a vision model such as qwen2.5vl:3b reads the page image too)');
     process.exit(2);
   }
   const doc = await loadDocument(pdf, pages);
@@ -174,8 +174,8 @@ const CONFIRMED_NOTE = 'confirmed by hand against the handbook';
  * says what it states; the handbook still has to agree. Same three checks,
  * with the owner as the proposer instead of a model.
  *
- *   holdshort wb confirm aircraft/c172.wb.json cgAftNormalIn=47.3 frontSeatArmIn=37
- *   holdshort wb confirm aircraft/c172.wb.json cgForwardNormal[1]=2300@38.5
+ *   depbrief wb confirm aircraft/c172.wb.json cgAftNormalIn=47.3 frontSeatArmIn=37
+ *   depbrief wb confirm aircraft/c172.wb.json cgForwardNormal[1]=2300@38.5
  */
 async function confirmFigures(args: string[]): Promise<void> {
   const file = args[0];
@@ -187,7 +187,7 @@ async function confirmFigures(args: string[]): Promise<void> {
   }
   const doc = readCachedDocument(CACHE_DIR, spec.source.documentSha256);
   if (!doc) {
-    console.error(`${spec.source.filename} is not in ${CACHE_DIR}; run "holdshort doc ingest ${spec.source.filename}" first`);
+    console.error(`${spec.source.filename} is not in ${CACHE_DIR}; run "depbrief doc ingest ${spec.source.filename}" first`);
     process.exit(2);
   }
   /*

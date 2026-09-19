@@ -7,7 +7,7 @@
  * it says whether it believes a proxy's headers, and it opens its port
  * before the slow parts of boot so a health check has something to talk to.
  */
-import { AwcClient, createHttpClient, ensureAirportData, llmFromEnv, NavCanadaClient, PostgresStore } from '@holdshort/core';
+import { AwcClient, createHttpClient, ensureAirportData, llmFromEnv, NavCanadaClient, PostgresStore } from '@depbrief/core';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,7 +16,7 @@ import { buildServer, type InstanceStatus } from './server.js';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 for (const env of [join(root, '.env'), '.env']) if (existsSync(env)) process.loadEnvFile(env);
 
-const userAgent = process.env.HOLDSHORT_USER_AGENT ?? 'holdshort/0.1 (+https://github.com/holdshort)';
+const userAgent = process.env.DEPBRIEF_USER_AGENT ?? 'depbrief/0.1 (+https://github.com/nberkyilmaz/departure-brief)';
 
 /**
  * What the instance can say about itself, kept here rather than in the
@@ -39,13 +39,13 @@ const store = await PostgresStore.connect(undefined, {
 });
 const http = createHttpClient({
   userAgent,
-  cache: process.env.HOLDSHORT_HTTP_CACHE ? { dir: process.env.HOLDSHORT_HTTP_CACHE, ttlMs: 5 * 60_000 } : null,
+  cache: process.env.DEPBRIEF_HTTP_CACHE ? { dir: process.env.DEPBRIEF_HTTP_CACHE, ttlMs: 5 * 60_000 } : null,
   // The airport snapshot is 17 MB; the default ten seconds is for a METAR.
-  timeoutMs: Number(process.env.HOLDSHORT_HTTP_TIMEOUT_MS ?? 60_000),
+  timeoutMs: Number(process.env.DEPBRIEF_HTTP_TIMEOUT_MS ?? 60_000),
 });
 const llm = llmFromEnv();
 
-const origins = (process.env.HOLDSHORT_ALLOWED_ORIGINS ?? '')
+const origins = (process.env.DEPBRIEF_ALLOWED_ORIGINS ?? '')
   .split(',')
   .map((o) => o.trim())
   .filter((o) => o !== '');
@@ -57,7 +57,7 @@ const app = buildServer({
   llm,
   staticDir: join(root, 'apps', 'web', 'dist'),
   aircraftDir: join(root, 'aircraft'),
-  docCacheDir: process.env.HOLDSHORT_DOC_CACHE ?? join(root, 'data', 'docs'),
+  docCacheDir: process.env.DEPBRIEF_DOC_CACHE ?? join(root, 'data', 'docs'),
   // `true`, or the proxy's address. Unset, the rate limiter counts every
   // visitor behind a proxy as the proxy and refuses the twenty-first
   // briefing of the minute to whoever happens to ask for it. Set, it
@@ -68,7 +68,7 @@ const app = buildServer({
   status: () => status,
   logger: true,
 });
-app.log.info(`NOTAM relevance model: ${llm?.description ?? 'none (set HOLDSHORT_LLM=ollama)'}`);
+app.log.info(`NOTAM relevance model: ${llm?.description ?? 'none (set DEPBRIEF_LLM=ollama)'}`);
 
 const port = Number(process.env.PORT ?? 3000);
 const host = process.env.HOST ?? '127.0.0.1';

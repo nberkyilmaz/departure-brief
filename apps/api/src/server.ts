@@ -30,7 +30,7 @@ import {
   type NavCanadaClient,
   type Store,
   type WeightBalanceSpec,
-} from '@holdshort/core';
+} from '@depbrief/core';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { existsSync, readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
@@ -115,7 +115,7 @@ export interface ServerDeps {
   readonly status?: () => Promise<InstanceStatus> | InstanceStatus;
   /** Where `<type>.wb.json` weight-and-balance specs live (default `aircraft`). */
   readonly aircraftDir?: string;
-  /** The document cache written by `holdshort doc ingest` (default `data/docs`); page crops are served from it. */
+  /** The document cache written by `depbrief doc ingest` (default `data/docs`); page crops are served from it. */
   readonly docCacheDir?: string;
   readonly logger?: boolean;
 }
@@ -218,7 +218,7 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
 
   /**
    * How the forecasts this store has seen turned out, per station. Reading
-   * only — pairing is a background job (`holdshort verify`), because it
+   * only — pairing is a background job (`depbrief verify`), because it
    * needs observations that may not exist yet and this must not fetch.
    */
   app.get<{ Querystring: { station?: string; since?: string; limit?: string } }>('/api/verification', async (req, reply) => {
@@ -436,7 +436,7 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
   /** The aircraft type's weight-and-balance data as extracted from its POH, every figure with its page. */
   app.get<{ Params: { type: string } }>('/api/aircraft/:type/wb', async (req, reply) => {
     const p = specPath(req.params.type);
-    if (!p || !existsSync(p)) return reply.code(404).send({ error: `no weight-and-balance data for ${req.params.type}; run holdshort doc wb <poh.pdf> --type ${req.params.type}` });
+    if (!p || !existsSync(p)) return reply.code(404).send({ error: `no weight-and-balance data for ${req.params.type}; run depbrief doc wb <poh.pdf> --type ${req.params.type}` });
     return JSON.parse(readFileSync(p, 'utf8')) as WeightBalanceSpec;
   });
 
@@ -474,7 +474,7 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
       if (!/^[0-9a-f]{64}$/.test(req.params.sha256)) return reply.code(400).send({ error: 'bad document id' });
       const page = Number(req.params.page);
       const img = pageImagePath(docCacheDir, req.params.sha256, page);
-      if (!Number.isInteger(page) || !existsSync(img)) return reply.code(404).send({ error: 'no such page image; run holdshort doc ingest' });
+      if (!Number.isInteger(page) || !existsSync(img)) return reply.code(404).send({ error: 'no such page image; run depbrief doc ingest' });
       const box = { x: Number(req.query.x), y: Number(req.query.y), w: Number(req.query.w), h: Number(req.query.h) };
       if (![box.x, box.y, box.w, box.h].every(Number.isFinite)) return reply.code(400).send({ error: 'x, y, w, h are required' });
       if (box.w <= 0 || box.h <= 0 || box.w > 20_000 || box.h > 20_000 || box.x < 0 || box.y < 0) return reply.code(400).send({ error: 'x, y, w, h must describe a region of the page' });

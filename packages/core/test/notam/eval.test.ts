@@ -1,7 +1,7 @@
 /**
  * The eval gate. The labelled set is checked for integrity always. The
  * model is scored only when recorded responses exist for the current
- * prompt version (HOLDSHORT_LLM_FIXTURE_DIR, default
+ * prompt version (DEPBRIEF_LLM_FIXTURE_DIR, default
  * test/fixtures/llm/<model>) — without them the scoring test is skipped
  * and says so, never silently passed.
  */
@@ -68,7 +68,7 @@ async function seeded(): Promise<MemoryStore> {
 }
 
 const model = process.env['OLLAMA_MODEL'] ?? 'qwen2.5:7b';
-const fixtureDir = process.env['HOLDSHORT_LLM_FIXTURE_DIR'] ?? join(__dirname, '..', 'fixtures', 'llm', model.replace(/[^a-z0-9.-]/gi, '_'));
+const fixtureDir = process.env['DEPBRIEF_LLM_FIXTURE_DIR'] ?? join(__dirname, '..', 'fixtures', 'llm', model.replace(/[^a-z0-9.-]/gi, '_'));
 
 async function recordingsExist(): Promise<boolean> {
   if (!existsSync(fixtureDir)) return false;

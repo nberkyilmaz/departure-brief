@@ -12,7 +12,7 @@ import { parseCsv } from './csv.js';
  * `https://nfdc.faa.gov/webContent/28DaySub/extra/DD_Mon_YYYY_APT_CSV.zip`
  * (e.g. `03_Sep_2026_APT_CSV.zip`, ~8 MB). The server answers HEAD with 503;
  * GET works. Unzip into `data/raw/nasr/<YYYY-MM-DD>/` and run
- * `holdshort nasr <that directory>`.
+ * `depbrief nasr <that directory>`.
  *
  * Verified against the 2026-09-03 cycle; the fixture under
  * `test/fixtures/fetch/nasr/` is a verbatim slice of it.

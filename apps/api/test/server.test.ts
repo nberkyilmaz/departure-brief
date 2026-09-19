@@ -15,7 +15,7 @@ import {
   type HttpClient,
   type LLMProvider,
   type StoredBriefing,
-} from '@holdshort/core';
+} from '@depbrief/core';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -320,14 +320,14 @@ describe('POST /api/briefings with NOTAMs', () => {
 });
 
 describe('static web app', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'holdshort-web-'));
-  writeFileSync(join(dir, 'index.html'), '<!doctype html><title>Hold Short</title>');
+  const dir = mkdtempSync(join(tmpdir(), 'depbrief-web-'));
+  writeFileSync(join(dir, 'index.html'), '<!doctype html><title>Departure Brief</title>');
   afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
   it('serves index.html at / and for unknown non-API paths; API 404s stay JSON', async () => {
     const app = await makeApp(dir);
-    expect((await app.inject({ method: 'GET', url: '/' })).body).toContain('Hold Short');
-    expect((await app.inject({ method: 'GET', url: '/briefings/abc' })).body).toContain('Hold Short');
+    expect((await app.inject({ method: 'GET', url: '/' })).body).toContain('Departure Brief');
+    expect((await app.inject({ method: 'GET', url: '/briefings/abc' })).body).toContain('Departure Brief');
     const api = await app.inject({ method: 'GET', url: '/api/nope' });
     expect(api.statusCode).toBe(404);
     expect(api.json()).toEqual({ error: 'not found' });

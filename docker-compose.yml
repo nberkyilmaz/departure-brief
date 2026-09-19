@@ -4,15 +4,15 @@ services:
     # extension available avoids a migration later.
     image: postgis/postgis:16-3.4
     environment:
-      POSTGRES_USER: holdshort
-      POSTGRES_PASSWORD: holdshort
-      POSTGRES_DB: holdshort
+      POSTGRES_USER: depbrief
+      POSTGRES_PASSWORD: depbrief
+      POSTGRES_DB: depbrief
     ports:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U holdshort -d holdshort"]
+      test: ["CMD-SHELL", "pg_isready -U depbrief -d depbrief"]
       interval: 5s
       timeout: 5s
       retries: 10

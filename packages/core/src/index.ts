@@ -1,5 +1,5 @@
 /**
- * @holdshort/core — the deterministic pipeline. Everything the API and the
+ * @depbrief/core — the deterministic pipeline. Everything the API and the
  * web app consume comes through here.
  */
 export * from './domain/units.js';

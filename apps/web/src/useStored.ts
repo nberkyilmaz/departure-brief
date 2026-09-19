@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
  * has better things to retype. Storage is per-browser and never leaves it.
  */
 export function useStored<T>(key: string, initial: T): [T, (next: T) => void] {
-  const storageKey = `holdshort.${key}`;
+  const storageKey = `depbrief.${key}`;
   const [value, setValue] = useState<T>(() => {
     try {
       const raw = window.localStorage.getItem(storageKey);

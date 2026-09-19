@@ -1,4 +1,4 @@
-# Hold Short on Render, as a blueprint.
+# Departure Brief on Render, as a blueprint.
 #
 # Everything here is on free plans. What that buys and what it costs is
 # written down rather than discovered later:
@@ -26,7 +26,7 @@
 
 services:
   - type: web
-    name: holdshort-api
+    name: depbrief-api
     runtime: docker
     plan: free
     region: ohio # Nearest of Render's regions to southern Ontario.
@@ -41,7 +41,7 @@ services:
       # Put a real contact address in this. The AWC and NAV CANADA both ask
       # for one, and it is the difference between being rate-limited politely
       # and being blocked.
-      - key: HOLDSHORT_USER_AGENT
+      - key: DEPBRIEF_USER_AGENT
         sync: false
 
       # Render terminates TLS and proxies to this service, so the socket's
@@ -56,11 +56,11 @@ services:
       # The published page is on GitHub Pages, which is a different origin,
       # so without its name here the browser refuses every request it makes.
       # Add the custom domain alongside it once there is one.
-      - key: HOLDSHORT_ALLOWED_ORIGINS
+      - key: DEPBRIEF_ALLOWED_ORIGINS
         value: https://nberkyilmaz.github.io
 
       # No model is called in a request path, ever. Unset means NOTAMs are
       # fetched, decoded, filtered and shown, but not ranked — which is the
       # deterministic half, and the half that matters.
-      - key: HOLDSHORT_LLM
+      - key: DEPBRIEF_LLM
         value: ''

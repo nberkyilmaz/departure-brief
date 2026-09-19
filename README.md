@@ -1,6 +1,6 @@
-# Hold Short
+# Departure Brief
 
-[![CI](https://github.com/nberkyilmaz/holdshort/actions/workflows/ci.yml/badge.svg)](https://github.com/nberkyilmaz/holdshort/actions/workflows/ci.yml)
+[![CI](https://github.com/nberkyilmaz/departure-brief/actions/workflows/ci.yml/badge.svg)](https://github.com/nberkyilmaz/departure-brief/actions/workflows/ci.yml)
 
 > ## ⚠ Not for operational use
 >
@@ -9,23 +9,27 @@
 > official briefing from an approved source. Nothing here is certified,
 > authoritative, or a substitute for pilot judgment and the regulations.
 
-Stop before the line and brief before you cross it.
+The brief you would give yourself before you go.
 
-**[See a real briefing →](https://nberkyilmaz.github.io/holdshort/)** — one
-flight, judged against the weather and NOTAMs those aerodromes were actually
+**[See a real briefing →](https://nberkyilmaz.github.io/departure-brief/)** — one
+flight against the weather and NOTAMs those aerodromes were actually
 publishing on 12 September 2026. The page is static and fetches nothing.
 
-Hold Short answers one question about a planned flight: **given this route, at
-this time, in this aircraft — what would I want to know?** It decodes the raw
-products a pilot already reads, resolves them to each point along the route at
-the time you'll actually be there, and evaluates the result against your own
-personal minimums, showing the source behind every finding.
+**This does not decide whether to fly.** That is the pilot's, and it is the
+one thing a tool cannot take on. What it does is make sure nothing you needed
+was missed: **given this route, at this time, in this aircraft — what would I
+want to know?** It decodes the raw products a pilot already reads, resolves
+them to each point along the route at the time you'll actually be there,
+compares them against the limits you set for yourself, and puts what deserves
+a second look first. Every line cites the span of the report it came from.
 
 ## Why this exists
 
 Existing tools are excellent at fetching and displaying. Ask any of them
-for everything at once and they hand you raw data and wish you luck. Aggregation is
-commodity; the reasoning layer is the gap.
+for everything at once and they hand you raw data and wish you luck.
+Aggregation is commodity; the gap is the reading — turning a wall of products
+into "here is what is unusual about this flight, and here is the line of the
+report that says so".
 
 ## Status
 
@@ -84,34 +88,34 @@ Requires **Node 20+** and Docker.
 
 ```bash
 npm install
-cp .env.example .env # then put a contact address in HOLDSHORT_USER_AGENT
+cp .env.example .env # then put a contact address in DEPBRIEF_USER_AGENT
 npm run db:up        # Postgres + PostGIS on localhost:5433 (Docker Desktop must be running)
 npm test             # passes without Docker; includes the Postgres tests when it is up
 npm run typecheck
 npm run corpus:metar # what the METAR decoder does not yet understand, by frequency
 npm run corpus:taf   # same for TAF; add --us to restrict to US stations
 
-npm run holdshort -- fetch KJFK KTEB      # store + decode the current METAR/TAF
-npm run holdshort -- nasr <dir>           # load a NASR cycle's APT CSV files — US airports (see src/fetch/nasr.ts)
-npm run holdshort -- ourairports <dir> --country CA   # OurAirports snapshot — everywhere else (see src/fetch/ourairports.ts)
-npm run holdshort -- airport CYSN         # runways with true headings (and magnetic variation where the source has it)
-npm run holdshort -- resolve flights/demo-cysn-cykf.json --fetch   # conditions at each waypoint at its ETA, cited
-npm run holdshort -- brief flights/demo-cysn-cykf.json --fetch     # every point, classified and compared against profiles/default.json
-npm run holdshort -- notams flights/demo-cysn-cykf.json --fetch    # every NOTAM for the flight, classified and (with a model) ranked
-npm run holdshort -- diff flights/demo-cysn-cykf.json --fetch      # brief again and say what changed since last time
-npm run holdshort -- verify --fetch                                # did the forecasts your briefings relied on turn out to be right?
-npm run holdshort -- doc ingest C172MPOH.pdf                       # OCR a scanned POH into word boxes (cached by content hash)
-npm run holdshort -- doc find C172MPOH.pdf "demonstrated crosswind" # search the OCR text, with page numbers
-npm run holdshort -- wb confirm aircraft/c172.wb.json cgAftNormalIn=47.3   # confirm a figure the extraction could not; the handbook still has to agree
-npm run holdshort -- wb aircraft/c172.wb.json --empty 1454 --empty-moment 57.6 --front 340 --fuel 38   # a loading, every limit cited to its POH page
-npm run holdshort -- decode "METAR KJFK 071151Z 34007KT 10SM CLR 19/11 A3015"
+npm run depbrief -- fetch KJFK KTEB      # store + decode the current METAR/TAF
+npm run depbrief -- nasr <dir>           # load a NASR cycle's APT CSV files — US airports (see src/fetch/nasr.ts)
+npm run depbrief -- ourairports <dir> --country CA   # OurAirports snapshot — everywhere else (see src/fetch/ourairports.ts)
+npm run depbrief -- airport CYSN         # runways with true headings (and magnetic variation where the source has it)
+npm run depbrief -- resolve flights/demo-cysn-cykf.json --fetch   # conditions at each waypoint at its ETA, cited
+npm run depbrief -- brief flights/demo-cysn-cykf.json --fetch     # every point, classified and compared against profiles/default.json
+npm run depbrief -- notams flights/demo-cysn-cykf.json --fetch    # every NOTAM for the flight, classified and (with a model) ranked
+npm run depbrief -- diff flights/demo-cysn-cykf.json --fetch      # brief again and say what changed since last time
+npm run depbrief -- verify --fetch                                # did the forecasts your briefings relied on turn out to be right?
+npm run depbrief -- doc ingest C172MPOH.pdf                       # OCR a scanned POH into word boxes (cached by content hash)
+npm run depbrief -- doc find C172MPOH.pdf "demonstrated crosswind" # search the OCR text, with page numbers
+npm run depbrief -- wb confirm aircraft/c172.wb.json cgAftNormalIn=47.3   # confirm a figure the extraction could not; the handbook still has to agree
+npm run depbrief -- wb aircraft/c172.wb.json --empty 1454 --empty-moment 57.6 --front 340 --fuel 38   # a loading, every limit cited to its POH page
+npm run depbrief -- decode "METAR KJFK 071151Z 34007KT 10SM CLR 19/11 A3015"
 
 # Two things use a model, both optional and both local: NOTAM relevance
 # ranking, and reading figures out of a scanned POH. Install Ollama, then:
 ollama pull qwen2.5:7b                                # text: NOTAM relevance
 ollama pull qwen2.5vl:3b                              # vision: POH extraction (sees the page image)
-HOLDSHORT_LLM=ollama npm run eval:notam -- --record   # rank, record fixtures, score against the labelled set
-HOLDSHORT_LLM=ollama OLLAMA_MODEL=qwen2.5vl:3b npm run holdshort -- doc wb C172MPOH.pdf --pages 88,90 --type C172
+DEPBRIEF_LLM=ollama npm run eval:notam -- --record   # rank, record fixtures, score against the labelled set
+DEPBRIEF_LLM=ollama OLLAMA_MODEL=qwen2.5vl:3b npm run depbrief -- doc wb C172MPOH.pdf --pages 88,90 --type C172
 
 npm run build -w apps/web && npm start   # the web app and API on http://127.0.0.1:3000
 npm run dev:api & npm run dev:web        # development: Vite on :5173 proxying /api to :3000
@@ -165,7 +169,7 @@ is not. The checks caught the model quoting a line from a different page,
 and reading the utility-category weight limit as the normal-category one.
 
 What the model misses, you confirm — and the handbook still has to agree.
-`holdshort wb confirm` takes a figure you have read off the page and looks
+`depbrief wb confirm` takes a figure you have read off the page and looks
 for it in the scan, recording which of three things it could establish:
 
 | | |

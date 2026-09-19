@@ -22,7 +22,7 @@ import { PAGE_ID_STRIDE, type DocumentOcr } from '../../src/docs/types.js';
 import { transcribed } from '../helpers/wbspec.js';
 
 const ROOT = join(__dirname, '..', '..', '..', '..');
-const CACHE = process.env['HOLDSHORT_DOC_CACHE'] ?? join(ROOT, 'data', 'docs');
+const CACHE = process.env['DEPBRIEF_DOC_CACHE'] ?? join(ROOT, 'data', 'docs');
 const POH_SHA = 'a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446';
 const FIXTURES = join(__dirname, '..', 'fixtures', 'llm', 'qwen2.5vl_3b');
 

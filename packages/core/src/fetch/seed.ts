@@ -3,7 +3,7 @@
  * being at a keyboard.
  *
  * Every other way into the airports table needs a person: download two CSVs,
- * put them in a directory, run `holdshort ourairports <dir>`. That is fine
+ * put them in a directory, run `depbrief ourairports <dir>`. That is fine
  * on a laptop and impossible on a host — a deployed instance starts with an
  * empty database and no shell, and every briefing it is asked for fails to
  * resolve its first waypoint. The airports table is not a cache that fills

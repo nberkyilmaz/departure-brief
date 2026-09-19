@@ -1,5 +1,5 @@
 {
-  "name": "@holdshort/core",
+  "name": "@depbrief/core",
   "version": "0.1.0",
   "private": true,
   "description": "Decoders, store, fetch, resolution and rules \u2014 the deterministic pipeline. No runtime dependencies beyond pg.",

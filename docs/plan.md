@@ -39,7 +39,7 @@ What this means concretely:
 | Core library | TypeScript, zero runtime deps for decoders/rules. Lives in `src/` today, becomes `packages/core` at step 5. |
 | API | Fastify, schema-first. Serves the JSON briefing API **and** the built SPA as static files — one process, one port. |
 | Web | React + Vite SPA. The briefing view is the product surface. |
-| First UI | A **CLI** (`holdshort brief ...`) that prints the briefing JSON and a terminal rendering. Arrives at step 5 *before* the React view and stays forever as the smoke test and the demo for "no model involved". |
+| First UI | A **CLI** (`depbrief brief ...`) that prints the briefing JSON and a terminal rendering. Arrives at step 5 *before* the React view and stays forever as the smoke test and the demo for "no model involved". |
 | Deploy | `docker compose up` — `db` + `api`. Local-first; a VPS is optional and identical. |
 
 ### 0.2 Repository layout
@@ -165,12 +165,12 @@ corpus of ≥100 METARs and ≥40 TAFs passes.
 
 ### Step 2 — Fetch layer (M1) — **done 2026-09-07**
 
-Outcome: `holdshort fetch KJFK KTEB KHPN` against the Compose Postgres stores
+Outcome: `depbrief fetch KJFK KTEB KHPN` against the Compose Postgres stores
 raw + decoded METAR/TAF rows and logs every fetch; a second run writes no
-rows. `holdshort nasr <dir>` loads a full cycle (19,411 sites) in ~2 s and
-re-loads as a no-op; `holdshort airport KHPN` returns runways with true
+rows. `depbrief nasr <dir>` loads a full cycle (19,411 sites) in ~2 s and
+re-loads as a no-op; `depbrief airport KHPN` returns runways with true
 headings. 420 tests; the Postgres contract runs in a dedicated
-`holdshort_test` database when Docker is up and skips otherwise.
+`depbrief_test` database when Docker is up and skips otherwise.
 
 Two things deliberately left open:
 
@@ -178,7 +178,7 @@ Two things deliberately left open:
   shape, but no credentials existed, so its response handling is unverified
   and untested against real data (fixtures are never fabricated). Register,
   record one real response into `test/fixtures/fetch/notam/`, and tighten
-  the parsing. Until then `holdshort fetch` skips NOTAMs and says so.
+  the parsing. Until then `depbrief fetch` skips NOTAMs and says so.
 - **Logging** is `console` in the CLI only; pino is deferred until there is a
   server process worth structuring logs for (step 5).
 
@@ -211,12 +211,12 @@ same code path; no network in CI. A "fixture drift" test that is skipped
 without network and, when run manually, diffs live response shape against the
 recorded one.
 
-**Done when.** `holdshort fetch KXYZ` stores raw and decoded METAR/TAF/NOTAM
+**Done when.** `depbrief fetch KXYZ` stores raw and decoded METAR/TAF/NOTAM
 rows for a station and re-running is a no-op on unchanged content.
 
 ### Step 3 — Route and time resolution (M3) — **done 2026-09-07**
 
-Outcome: `holdshort resolve flights/demo-kteb-khpn.json --as-of <ISO>` prints,
+Outcome: `depbrief resolve flights/demo-kteb-khpn.json --as-of <ISO>` prints,
 per waypoint, the ETA and the governing conditions with the TAF period each
 came from quoted verbatim; a field without a TAF (N07) borrows the nearest one
 within 60 NM and is labelled as interpolated. 448 tests, including an
@@ -285,12 +285,12 @@ aircraft will be there.
 **Tests.** TAF period selection has a finite, enumerable set of cases; write
 them all. Use the seeded demo flight as the end-to-end fixture.
 
-**Done when.** `holdshort resolve <flight>` prints, per waypoint, the ETA and
+**Done when.** `depbrief resolve <flight>` prints, per waypoint, the ETA and
 the governing conditions with the TAF line each came from.
 
 ### Step 4 — Rules engine (M4) — **done 2026-09-07** (airport-only; currency and 91.169 deferred)
 
-Outcome: `holdshort brief flights/demo-cysn-cykf.json --fetch` prints a
+Outcome: `depbrief brief flights/demo-cysn-cykf.json --fetch` prints a
 go/marginal/no-go per point and overall, with every finding — passes
 included — quoting the report text it was judged on. 513 tests, including
 one per row of the CARs 602.114/602.115 and FAR 91.155 tables.
@@ -394,7 +394,7 @@ briefing history UI (the data is there; that is step 9's surface).
   editor), briefing view with per-leg verdicts, each finding expandable to the
   raw report with the cited span highlighted. Safety banner at the top,
   always. Zulu with local time shown beside it, never instead of it.
-- `src/cli` — `holdshort brief <flight.json>` prints the same briefing.
+- `src/cli` — `depbrief brief <flight.json>` prints the same briefing.
 
 **Done when.** You can enter the demo flight in the browser and get a cited
 verdict, and the same verdict from the CLI, with no LLM in the process.
@@ -455,7 +455,7 @@ and a test pins both halves.
 3060 is there; nothing listening on 11434). So the eval gate is *skipped*
 with an explicit message rather than passed, and the pipeline reports
 `not-assessed` for in-scope NOTAMs. To finish: install Ollama, `ollama pull
-qwen2.5:7b`, then `HOLDSHORT_LLM=ollama npm run eval:notam -- --record`,
+qwen2.5:7b`, then `DEPBRIEF_LLM=ollama npm run eval:notam -- --record`,
 which records fixtures and prints agreement against the labelled set. The
 test suite then replays those fixtures and the gate becomes live.
 
@@ -556,7 +556,7 @@ less" and dangerously wrong if the heavy end of the line was never read, so
 a 2,300 lb loading would be judged against the limit that applies at
 1,950 lb and a nose-heavy aeroplane would come back within limits.
 
-**Surfaces.** `holdshort doc ingest|find|page|wb`, `holdshort wb`,
+**Surfaces.** `depbrief doc ingest|find|page|wb`, `depbrief wb`,
 `GET`/`POST /api/aircraft/:type/wb`, `GET /api/documents/:sha/pages/:n/crop`
 (the cited region, boxed), and a web panel whose loading form is built from
 the stations the data actually carries.
@@ -587,7 +587,7 @@ produces a `restated` change and the diff stays quiet; 1,600 → 1,400 is
   between briefings even when nothing material does, so `Finding` gained a
   stable `basisKind` (`RULES_VERSION` → 2). The diff falls back to parsing
   `basis` for briefings written before that.
-- `src/brief/diff.ts`, `describeDiff.ts`; `holdshort diff <flight.json>`;
+- `src/brief/diff.ts`, `describeDiff.ts`; `depbrief diff <flight.json>`;
   `GET /api/briefings/:sha256/diff[?against=]`; a web panel above the
   briefing showing what moved, with crossings highlighted.
 - NOTAM changes are `new` / `gone` / `rank-changed`, each with `notable` —
@@ -616,7 +616,7 @@ store.
 
 A briefing records what each waypoint's forecast asserted for that
 waypoint's ETA — ceiling, visibility, wind, flight category, and how far
-ahead the TAF was looking. That moment later passes, `holdshort verify`
+ahead the TAF was looking. That moment later passes, `depbrief verify`
 fetches the observations around it, and each prediction is paired with the
 observation nearest its moment (within 35 minutes, or it keeps waiting).
 Both halves are written once and never rewritten, so re-running only adds.
@@ -647,7 +647,7 @@ Two pieces of aviation judgement the arithmetic would otherwise get wrong:
 Nothing is claimed from a handful of pairs: below eight the summary says
 nothing rather than something unfounded.
 
-Surfaces: `holdshort verify [--fetch] [--station X] [--since ISO] [--json]`,
+Surfaces: `depbrief verify [--fetch] [--station X] [--since ISO] [--json]`,
 and `GET /api/verification`. The API never fetches — pairing needs
 observations that may not exist yet, so it is a job, not a request.
 

@@ -37,13 +37,13 @@ jobs:
       postgres:
         image: postgis/postgis:16-3.4
         env:
-          POSTGRES_USER: holdshort
-          POSTGRES_PASSWORD: holdshort
-          POSTGRES_DB: holdshort
+          POSTGRES_USER: depbrief
+          POSTGRES_PASSWORD: depbrief
+          POSTGRES_DB: depbrief
         ports:
           - 5433:5432
         options: >-
-          --health-cmd "pg_isready -U holdshort"
+          --health-cmd "pg_isready -U depbrief"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
@@ -65,7 +65,7 @@ jobs:
         run: npm test
         env:
           # Matches docker-compose, so the same URL works here and on a laptop.
-          DATABASE_URL: postgres://holdshort:holdshort@localhost:5433/holdshort
+          DATABASE_URL: postgres://depbrief:depbrief@localhost:5433/depbrief
 
       - name: Build the web app
         run: npm run build -w apps/web
@@ -87,24 +87,24 @@ jobs:
           context: .
           push: false
           load: true
-          tags: holdshort:ci
+          tags: depbrief:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Start it against a database and check it answers
         run: |
-          docker network create holdshort-ci
-          docker run -d --name db --network holdshort-ci             -e POSTGRES_USER=holdshort -e POSTGRES_PASSWORD=holdshort -e POSTGRES_DB=holdshort             postgis/postgis:16-3.4
+          docker network create depbrief-ci
+          docker run -d --name db --network depbrief-ci             -e POSTGRES_USER=depbrief -e POSTGRES_PASSWORD=depbrief -e POSTGRES_DB=depbrief             postgis/postgis:16-3.4
           # -h 127.0.0.1 rather than the default: the postgis image restarts
           # Postgres partway through its own initialisation, and until that
           # is done pg_isready answers on the unix socket while nothing is
           # listening on TCP. Asking over TCP is asking the question the
           # other container will actually be asking.
           for i in $(seq 1 45); do
-            docker exec db pg_isready -h 127.0.0.1 -U holdshort -d holdshort && break
+            docker exec db pg_isready -h 127.0.0.1 -U depbrief -d depbrief && break
             sleep 2
           done
-          docker run -d --name api --network holdshort-ci -p 3000:3000             -e DATABASE_URL=postgres://holdshort:holdshort@db:5432/holdshort             -e HOLDSHORT_USER_AGENT='holdshort/0.1 (ci@example.com)'             holdshort:ci
+          docker run -d --name api --network depbrief-ci -p 3000:3000             -e DATABASE_URL=postgres://depbrief:depbrief@db:5432/depbrief             -e DEPBRIEF_USER_AGENT='depbrief/0.1 (ci@example.com)'             depbrief:ci
           # The port opens before the airport snapshot is loaded, so what is
           # proved here is that the process starts, migrates a real database
           # and answers — not that it has finished booting. It reports 503

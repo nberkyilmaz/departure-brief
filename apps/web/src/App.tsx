@@ -160,7 +160,7 @@ export function App() {
   return (
     <>
       <div className="banner" role="alert">
-        <strong>Not for operational use.</strong> Hold Short is a study and planning aid, not an official weather briefing or weight-and-balance computation.
+        <strong>Not for operational use.</strong> Departure Brief is a study and planning aid, not an official weather briefing or weight-and-balance computation.
         Obtain an official briefing from an approved source before any flight.
       </div>
       {/* Keyboard and screen reader users should not have to walk the form to reach the answer. */}
@@ -170,7 +170,7 @@ export function App() {
       <main>
         <header>
           <h1>
-            <a href={hrefFor({ name: 'brief' })}>Hold Short</a>
+            <a href={hrefFor({ name: 'brief' })}>Departure Brief</a>
           </h1>
           <p className="tagline">Stop before the line and brief before you cross it.</p>
           <Nav route={route} attention={attentionOf(briefing)} />
@@ -255,8 +255,8 @@ export function App() {
 
         <footer>
           <p>
-            Hold Short is a study and planning aid. Nothing here is an official weather briefing, an official weight-and-balance computation, or a substitute
-            for either. <a href="https://github.com/nberkyilmaz/holdshort">Source and work log</a>.
+            Departure Brief is a study and planning aid. Nothing here is an official weather briefing, an official weight-and-balance computation, or a substitute
+            for either. <a href="https://github.com/nberkyilmaz/departure-brief">Source and work log</a>.
           </p>
         </footer>
       </main>

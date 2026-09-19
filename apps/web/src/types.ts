@@ -1,6 +1,6 @@
 /**
  * The API's JSON shapes as the browser sees them. Mirrors
- * `@holdshort/core` (`rules/types.ts`, `brief/types.ts`, `domain/flight.ts`)
+ * `@depbrief/core` (`rules/types.ts`, `brief/types.ts`, `domain/flight.ts`)
  * — kept as a local copy so the browser bundle never pulls in the Node
  * side of the core package.
  */

@@ -38,12 +38,12 @@ function harness(script: Scripted[]) {
 describe('createHttpClient', () => {
   it('sends the User-Agent and merges headers; lower-cases response headers', async () => {
     const h = harness([]);
-    const http = createHttpClient({ userAgent: 'holdshort-test', ...h.options });
+    const http = createHttpClient({ userAgent: 'depbrief-test', ...h.options });
     const res = await http.get('https://example.test/a', { headers: { client_id: 'x' } });
     expect(res.status).toBe(200);
     expect(res.body).toBe('ok');
     expect(res.headers['x-test']).toBe('yes');
-    expect(h.calls[0]?.headers['User-Agent']).toBe('holdshort-test');
+    expect(h.calls[0]?.headers['User-Agent']).toBe('depbrief-test');
     expect(h.calls[0]?.headers['client_id']).toBe('x');
   });
 
@@ -88,7 +88,7 @@ describe('createHttpClient', () => {
   });
 
   describe('disk cache', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'holdshort-http-'));
+    const dir = mkdtempSync(join(tmpdir(), 'depbrief-http-'));
     afterEach(() => rmSync(dir, { recursive: true, force: true }));
 
     it('serves a fresh 2xx from disk and refetches after the TTL', async () => {

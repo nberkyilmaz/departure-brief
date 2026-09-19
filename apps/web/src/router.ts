@@ -37,7 +37,7 @@ export const NAV_ROUTES: readonly Route[] = [
 ];
 
 const TITLES: Readonly<Record<RouteName, string>> = {
-  home: 'Hold Short',
+  home: 'Departure Brief',
   brief: 'Brief a flight',
   aerodrome: 'Aerodrome',
   navlog: 'Nav log',
@@ -104,7 +104,7 @@ export function useRoute(): Route {
   }, []);
 
   useEffect(() => {
-    document.title = `${titleOf(route)} — Hold Short`;
+    document.title = `${titleOf(route)} — Departure Brief`;
   }, [route]);
 
   return route;

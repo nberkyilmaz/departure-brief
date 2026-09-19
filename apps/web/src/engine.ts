@@ -28,7 +28,7 @@ import {
   type DemoBundle,
   type LLMProvider,
   type WeightBalanceSpec as CoreWeightBalanceSpec,
-} from '@holdshort/core/judge';
+} from '@depbrief/core/judge';
 import type { AerodromeReport, AircraftInput, BriefingDiff, FlightPlanInput, ProfileInput, StoredBriefing, WeightBalanceSpec } from './types.js';
 
 export type { AerodromeReport };

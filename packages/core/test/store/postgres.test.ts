@@ -1,6 +1,6 @@
 /**
  * Runs the store contract against a real Postgres when one is reachable.
- * Uses a dedicated `holdshort_test` database (created on demand) so that no
+ * Uses a dedicated `depbrief_test` database (created on demand) so that no
  * test row — they contain synthetic airports — can ever land in the
  * development database. Skips when nothing answers on the Compose port, so
  * `npm test` passes without Docker; run `npm run db:up` to include it.
@@ -10,9 +10,9 @@ import { afterAll, describe, it } from 'vitest';
 import { DEFAULT_DATABASE_URL, migrate, PostgresStore } from '../../src/store/postgres.js';
 import { storeContract } from './contract.js';
 
-const TEST_DB = 'holdshort_test';
-const adminUrl = process.env.HOLDSHORT_TEST_ADMIN_URL ?? DEFAULT_DATABASE_URL;
-const testUrl = process.env.HOLDSHORT_TEST_DATABASE_URL ?? adminUrl.replace(/\/[^/?]+(\?|$)/, `/${TEST_DB}$1`);
+const TEST_DB = 'depbrief_test';
+const adminUrl = process.env.DEPBRIEF_TEST_ADMIN_URL ?? DEFAULT_DATABASE_URL;
+const testUrl = process.env.DEPBRIEF_TEST_DATABASE_URL ?? adminUrl.replace(/\/[^/?]+(\?|$)/, `/${TEST_DB}$1`);
 
 /** Create the test database if the server is up; false when it is not. */
 async function prepare(): Promise<boolean> {

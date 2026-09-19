@@ -15,7 +15,7 @@ import { parseCsv } from './csv.js';
  *   https://davidmegginson.github.io/ourairports-data/airports.csv
  *   https://davidmegginson.github.io/ourairports-data/runways.csv
  * into `data/raw/ourairports/<YYYY-MM-DD>/` and run
- * `holdshort ourairports <that directory> [--country CA]`.
+ * `depbrief ourairports <that directory> [--country CA]`.
  *
  * Verified against the 2026-09-07 snapshot; the fixture under
  * `test/fixtures/fetch/ourairports/` is a verbatim slice of it.

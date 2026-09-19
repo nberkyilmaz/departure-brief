@@ -9,7 +9,7 @@ import type { ForecastCheck, ForecastOutcome, VerificationPair } from '../verify
 import { distanceNm } from '../domain/geo.js';
 import type { DecodedRow, FetchAttempt, FetchEvent, ListRawQuery, RawReport, ReportKind, Store } from './types.js';
 
-export const DEFAULT_DATABASE_URL = 'postgres://holdshort:holdshort@localhost:5433/holdshort';
+export const DEFAULT_DATABASE_URL = 'postgres://depbrief:depbrief@localhost:5433/depbrief';
 
 /**
  * Airports per insert statement. Thirteen parameters each, so this is 6,500

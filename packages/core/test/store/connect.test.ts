@@ -15,7 +15,7 @@ import { PostgresStore } from '../../src/store/postgres.js';
  */
 
 /** An address in the range reserved for documentation; nothing listens there. */
-const NOWHERE = 'postgres://holdshort:holdshort@127.0.0.1:1/holdshort';
+const NOWHERE = 'postgres://depbrief:depbrief@127.0.0.1:1/depbrief';
 
 describe('connecting to a database that is not there', () => {
   it('waits and tries again, saying so each time', async () => {

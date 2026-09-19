@@ -1,24 +1,24 @@
 /**
- * holdshort — the terminal entry point.
+ * depbrief — the terminal entry point.
  *
- *   holdshort fetch KJFK [KTEB ...] [--memory]   fetch, store and decode METAR/TAF (and NOTAMs with credentials)
- *   holdshort nasr <dir>                          load one NASR cycle's APT CSV files into the store
- *   holdshort ourairports <dir> [--country CA]    load an OurAirports snapshot (airports.csv + runways.csv)
- *   holdshort airport KJFK                        print a stored airport with its runways
- *   holdshort resolve <flight.json> [--fetch] [--as-of <ISO>] [--json]
+ *   depbrief fetch KJFK [KTEB ...] [--memory]   fetch, store and decode METAR/TAF (and NOTAMs with credentials)
+ *   depbrief nasr <dir>                          load one NASR cycle's APT CSV files into the store
+ *   depbrief ourairports <dir> [--country CA]    load an OurAirports snapshot (airports.csv + runways.csv)
+ *   depbrief airport KJFK                        print a stored airport with its runways
+ *   depbrief resolve <flight.json> [--fetch] [--as-of <ISO>] [--json]
  *                                                 conditions at each waypoint at its ETA
- *   holdshort brief <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams]
+ *   depbrief brief <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams]
  *                                                 go / marginal / no-go per waypoint, every finding cited
- *   holdshort notams <flight.json> [--fetch] [--as-of <ISO>] [--json]
+ *   depbrief notams <flight.json> [--fetch] [--as-of <ISO>] [--json]
  *                                                 every NOTAM for the flight's fields, classified and (with a model) ranked
- *   holdshort diff <flight.json> [--fetch] [--notams] [--against <sha256>] [--json]
+ *   depbrief diff <flight.json> [--fetch] [--notams] [--against <sha256>] [--json]
  *                                                 brief now, store it, and say what changed since the last briefing
- *   holdshort verify [--fetch] [--station CYSN] [--since <ISO>] [--json]
+ *   depbrief verify [--fetch] [--station CYSN] [--since <ISO>] [--json]
  *                                                 did the forecasts your briefings relied on turn out to be right?
- *   holdshort doc ingest|find|page|wb <pdf> ...   read a scanned POH into word boxes; extract weight-and-balance data
- *   holdshort wb <spec.json> --empty <lb> --empty-moment <n> [--front lb] [--rear lb] [--bag1 lb] [--fuel gal]
+ *   depbrief doc ingest|find|page|wb <pdf> ...   read a scanned POH into word boxes; extract weight-and-balance data
+ *   depbrief wb <spec.json> --empty <lb> --empty-moment <n> [--front lb] [--rear lb] [--bag1 lb] [--fuel gal]
  *                                                 a loading against the extracted limits, every limit cited to its page
- *   holdshort decode "<METAR or TAF text>"         print the decoded JSON
+ *   depbrief decode "<METAR or TAF text>"         print the decoded JSON
  *
  * Reads `.env` if present. Uses Postgres at DATABASE_URL (default: the
  * Compose database) unless `--memory` is given.
@@ -60,11 +60,11 @@ import type { Store } from '../store/types.js';
 
 if (existsSync('.env')) process.loadEnvFile('.env');
 
-const USER_AGENT = process.env.HOLDSHORT_USER_AGENT ?? 'holdshort/0.1 (+https://github.com/holdshort)';
+const USER_AGENT = process.env.DEPBRIEF_USER_AGENT ?? 'depbrief/0.1 (+https://github.com/nberkyilmaz/departure-brief)';
 
 function usage(): never {
   console.error(
-    'usage: holdshort fetch <ICAO...> [--memory] | holdshort nasr <dir> | holdshort ourairports <dir> [--country XX] | holdshort airport <id> | holdshort verify [--fetch] [--station X] | holdshort resolve|brief|notams|diff <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams] [--against <sha256>] | holdshort doc ingest|find|page|wb <pdf> ... | holdshort wb <spec.json> ... | holdshort decode "<report>"',
+    'usage: depbrief fetch <ICAO...> [--memory] | depbrief nasr <dir> | depbrief ourairports <dir> [--country XX] | depbrief airport <id> | depbrief verify [--fetch] [--station X] | depbrief resolve|brief|notams|diff <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams] [--against <sha256>] | depbrief doc ingest|find|page|wb <pdf> ... | depbrief wb <spec.json> ... | depbrief decode "<report>"',
   );
   process.exit(2);
 }
@@ -77,7 +77,7 @@ function option(args: string[], name: string): string | undefined {
 function makeAwc() {
   const http = createHttpClient({
     userAgent: USER_AGENT,
-    cache: process.env.HOLDSHORT_HTTP_CACHE ? { dir: process.env.HOLDSHORT_HTTP_CACHE, ttlMs: 5 * 60_000 } : null,
+    cache: process.env.DEPBRIEF_HTTP_CACHE ? { dir: process.env.DEPBRIEF_HTTP_CACHE, ttlMs: 5 * 60_000 } : null,
   });
   return new AwcClient(http);
 }
@@ -151,7 +151,7 @@ async function airportCommand(args: string[]): Promise<void> {
   try {
     const airport = await store.getAirport(id);
     if (!airport) {
-      console.error(`no airport ${id.toUpperCase()} in the store (run: holdshort nasr <dir> or holdshort ourairports <dir>)`);
+      console.error(`no airport ${id.toUpperCase()} in the store (run: depbrief nasr <dir> or depbrief ourairports <dir>)`);
       process.exit(1);
     }
     console.log(JSON.stringify(airport, null, 2));
@@ -233,7 +233,7 @@ async function briefCommand(args: string[]): Promise<void> {
     const profile = parsePilotProfile(readJsonRelative(file, plan.profile, 'profiles/default.json'));
     const aircraft = aircraftOf(file, plan);
     const briefing = evaluateFlight(resolved, profile, aircraft);
-    // Record what the forecasts assert, so `holdshort verify` can check them once their moment passes.
+    // Record what the forecasts assert, so `depbrief verify` can check them once their moment passes.
     const recorded = await recordForecastChecks(store, resolved);
     if (recorded.recorded > 0) console.error(`recording ${recorded.recorded} forecast${recorded.recorded === 1 ? '' : 's'} to check later`);
     const notams = args.includes('--notams') ? await notamsFor(args, store, resolved, aircraft?.type ?? 'unknown') : null;
@@ -274,7 +274,7 @@ async function diffCommand(args: string[]): Promise<void> {
  * Pair every forecast a past briefing relied on with what actually arrived,
  * then say what that means for each station.
  *
- *   holdshort verify [--fetch] [--station CYSN] [--since 2026-01-01] [--json]
+ *   depbrief verify [--fetch] [--station CYSN] [--since 2026-01-01] [--json]
  */
 async function verifyCommand(args: string[]): Promise<void> {
   const store = await openStore(args);

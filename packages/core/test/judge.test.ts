@@ -1,5 +1,5 @@
 /**
- * The `@holdshort/core/judge` entry point has to run in a browser, because
+ * The `@depbrief/core/judge` entry point has to run in a browser, because
  * that is what lets the web app produce a briefing itself instead of
  * rendering one it has to take on trust.
  *

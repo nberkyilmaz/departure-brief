@@ -234,7 +234,7 @@ describe('assessment', () => {
 });
 
 describe('providers', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'holdshort-llm-'));
+  const dir = mkdtempSync(join(tmpdir(), 'depbrief-llm-'));
   afterAll(() => rmSync(dir, { recursive: true, force: true }));
   const req: LLMRequest = { model: 'm', system: 's', prompt: 'p', schema: { type: 'object' }, maxTokens: 10 };
 

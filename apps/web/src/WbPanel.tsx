@@ -1,4 +1,4 @@
-import { computeLoading, IncompleteSpecError, type Loading, type WeightBalanceSpec as CoreSpec } from '@holdshort/core/judge';
+import { computeLoading, IncompleteSpecError, type Loading, type WeightBalanceSpec as CoreSpec } from '@depbrief/core/judge';
 import { useEffect, useState } from 'react';
 import type { DocumentCitation, LoadingResult, WeightBalanceSpec } from './types.js';
 
@@ -136,7 +136,7 @@ export function WbPanel({
       <section className="wb">
         <h2>Weight and balance</h2>
         <p className="explain">
-          No weight-and-balance data for {aircraftType} yet. Read it out of the handbook with <code>holdshort doc wb &lt;poh.pdf&gt; --type {aircraftType}</code>.
+          No weight-and-balance data for {aircraftType} yet. Read it out of the handbook with <code>depbrief doc wb &lt;poh.pdf&gt; --type {aircraftType}</code>.
         </p>
       </section>
     );

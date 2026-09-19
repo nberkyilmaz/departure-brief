@@ -10,7 +10,7 @@ export function About({ recordedAt, aerodromes }: { recordedAt: string; aerodrom
     <section className="about" id="about">
       <h2>What this is</h2>
       <p className="lede">
-        Hold Short puts in front of a pilot everything they would look at before a flight, in one place, with the report behind every line. It decodes the raw
+        Departure Brief puts in front of a pilot everything they would look at before a flight, in one place, with the report behind every line. It decodes the raw
         products, resolves them to each point along the route at the time the aircraft will actually be there, and compares them against that pilot's own
         personal minimums. <b>It does not decide whether to fly.</b> That is the pilot's, and this exists to make sure nothing they needed was missed.
       </p>
@@ -108,7 +108,7 @@ export function About({ recordedAt, aerodromes }: { recordedAt: string; aerodrom
       </p>
 
       <p className="repo">
-        Source, and a work log of every wrong turn: <a href="https://github.com/nberkyilmaz/holdshort">github.com/nberkyilmaz/holdshort</a>
+        Source, and a work log of every wrong turn: <a href="https://github.com/nberkyilmaz/departure-brief">github.com/nberkyilmaz/departure-brief</a>
       </p>
     </section>
   );

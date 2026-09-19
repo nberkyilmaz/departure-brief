@@ -8,7 +8,7 @@
  * code for what a deployment would do to it, and each would have been a
  * live instance that looked fine and was not.
  */
-import { AwcClient, MemoryStore, readNasrDirectory, type HttpClient } from '@holdshort/core';
+import { AwcClient, MemoryStore, readNasrDirectory, type HttpClient } from '@depbrief/core';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -182,42 +182,42 @@ describe('a page on another origin', () => {
   }
 
   it('answers a named origin', async () => {
-    const server = await app(['https://holdshort.example']);
-    const res = await server.inject({ method: 'GET', url: '/api/health', headers: { origin: 'https://holdshort.example' } });
-    expect(res.headers['access-control-allow-origin']).toBe('https://holdshort.example');
+    const server = await app(['https://departurebrief.example']);
+    const res = await server.inject({ method: 'GET', url: '/api/health', headers: { origin: 'https://departurebrief.example' } });
+    expect(res.headers['access-control-allow-origin']).toBe('https://departurebrief.example');
     expect(res.headers['vary']).toContain('Origin');
   });
 
   it('does not answer one it was not given', async () => {
-    const server = await app(['https://holdshort.example']);
-    const res = await server.inject({ method: 'GET', url: '/api/health', headers: { origin: 'https://not-holdshort.example' } });
+    const server = await app(['https://departurebrief.example']);
+    const res = await server.inject({ method: 'GET', url: '/api/health', headers: { origin: 'https://not-depbrief.example' } });
     expect(res.headers['access-control-allow-origin']).toBeUndefined();
     // Still varies, so a cache cannot hand this answer to the allowed origin.
     expect(res.headers['vary']).toContain('Origin');
   });
 
   it('answers the preflight a briefing needs', async () => {
-    const server = await app(['https://holdshort.example']);
+    const server = await app(['https://departurebrief.example']);
     const res = await server.inject({
       method: 'OPTIONS',
       url: '/api/briefings',
-      headers: { origin: 'https://holdshort.example', 'access-control-request-method': 'POST', 'access-control-request-headers': 'content-type' },
+      headers: { origin: 'https://departurebrief.example', 'access-control-request-method': 'POST', 'access-control-request-headers': 'content-type' },
     });
     expect(res.statusCode).toBe(204);
-    expect(res.headers['access-control-allow-origin']).toBe('https://holdshort.example');
+    expect(res.headers['access-control-allow-origin']).toBe('https://departurebrief.example');
     expect(res.headers['access-control-allow-methods']).toContain('POST');
     expect(res.headers['access-control-allow-headers']).toContain('content-type');
   });
 
   it('allows nothing when no origin was named, which is a private instance', async () => {
     const server = await app([]);
-    const res = await server.inject({ method: 'GET', url: '/api/health', headers: { origin: 'https://holdshort.example' } });
+    const res = await server.inject({ method: 'GET', url: '/api/health', headers: { origin: 'https://departurebrief.example' } });
     expect(res.headers['access-control-allow-origin']).toBeUndefined();
   });
 
   it('never allows credentials, because there is nothing to authenticate', async () => {
-    const server = await app(['https://holdshort.example']);
-    const res = await server.inject({ method: 'GET', url: '/api/health', headers: { origin: 'https://holdshort.example' } });
+    const server = await app(['https://departurebrief.example']);
+    const res = await server.inject({ method: 'GET', url: '/api/health', headers: { origin: 'https://departurebrief.example' } });
     expect(res.headers['access-control-allow-credentials']).toBeUndefined();
   });
 });

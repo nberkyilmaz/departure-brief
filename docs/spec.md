@@ -1,4 +1,4 @@
-# Hold Short — Flight Briefing Decision Support
+# Departure Brief — Pre-flight Information
 
 A build spec. Supersedes `bellwether-spec.md` and `recoup-spec.md`.
 
@@ -29,7 +29,7 @@ ForeFlight, Garmin Pilot and 1800wxbrief are excellent at fetching and displayin
 
 The target role is a Software Engineer at an AI-infrastructure company for CPG finance. Different domain, same job. Every line of their posting has a counterpart here:
 
-| Their posting says | Hold Short |
+| Their posting says | Departure Brief |
 | --- | --- |
 | "AI-powered workflows for **document processing and data extraction**" | **H1b** — airworthiness and W&B extraction from photographed logbooks and scanned POH pages, OCR-grounded, low-confidence routed to review |
 | "Scaling systems that **ingest data from multiple sources**" | AWC, FAA NOTAM, FAA NASR, USGS, plus uploaded documents — all normalized to one canonical schema |

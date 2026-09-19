@@ -1,10 +1,10 @@
 /**
  * Score the NOTAM relevance model against the labelled set for the demo
  * flight. Runs the pipeline over the recorded NAV CANADA corpus (no
- * network) with whatever HOLDSHORT_LLM configures; `--record` wraps a
+ * network) with whatever DEPBRIEF_LLM configures; `--record` wraps a
  * live provider so the answers become fixtures the test suite can replay.
  *
- *   HOLDSHORT_LLM=ollama OLLAMA_MODEL=qwen2.5:7b npx tsx packages/core/scripts/notam-eval.ts --record
+ *   DEPBRIEF_LLM=ollama OLLAMA_MODEL=qwen2.5:7b npx tsx packages/core/scripts/notam-eval.ts --record
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -33,10 +33,10 @@ for (const env of [join(root, '.env')]) if (existsSync(env)) process.loadEnvFile
 const record = process.argv.includes('--record');
 const llm = llmFromEnv();
 if (!llm) {
-  console.error('no model configured: set HOLDSHORT_LLM=ollama (and OLLAMA_MODEL) or HOLDSHORT_LLM=fixture with HOLDSHORT_LLM_FIXTURE_DIR');
+  console.error('no model configured: set DEPBRIEF_LLM=ollama (and OLLAMA_MODEL) or DEPBRIEF_LLM=fixture with DEPBRIEF_LLM_FIXTURE_DIR');
   process.exit(2);
 }
-const fixtureDir = process.env['HOLDSHORT_LLM_FIXTURE_DIR'] ?? join(fixtures, 'llm', llm.model.replace(/[^a-z0-9.-]/gi, '_'));
+const fixtureDir = process.env['DEPBRIEF_LLM_FIXTURE_DIR'] ?? join(fixtures, 'llm', llm.model.replace(/[^a-z0-9.-]/gi, '_'));
 const provider = record ? new RecordingProvider(llm.provider, fixtureDir) : llm.provider;
 
 const replay: HttpClient = {

@@ -1,8 +1,8 @@
 {
-  "name": "holdshort",
+  "name": "depbrief",
   "version": "0.1.0",
   "private": true,
-  "description": "Flight briefing decision support. A study and planning aid — not an operational tool.",
+  "description": "Everything a pilot looks at before a flight, with the report behind every line. A study and planning aid — not an operational tool.",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -15,7 +15,7 @@
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
-    "holdshort": "tsx packages/core/src/cli/main.ts",
+    "depbrief": "tsx packages/core/src/cli/main.ts",
     "corpus:metar": "tsx packages/core/scripts/corpus-report.ts --kind metar",
     "corpus:taf": "tsx packages/core/scripts/corpus-report.ts --kind taf",
     "dev:api": "npm run dev -w apps/api",
