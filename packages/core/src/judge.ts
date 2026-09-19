@@ -27,6 +27,8 @@ export * from './rules/index.js';
 export * from './brief/index.js';
 // The wind triangle, leg by leg: arithmetic over what is already resolved.
 export * from './navlog/index.js';
+// Everything about one field, arranged around the place rather than a route.
+export * from './aerodrome/index.js';
 export * from './hash/sha256.js';
 // Weight and balance: the computation and the handbook limits it fills in.
 export * from './wb/compute.js';

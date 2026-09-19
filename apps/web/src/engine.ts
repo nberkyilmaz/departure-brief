@@ -13,6 +13,7 @@
  * result decided somewhere else.
  */
 import {
+  aerodromeReport,
   assembleBriefing,
   diffBriefings,
   loadBundle,
@@ -28,7 +29,9 @@ import {
   type LLMProvider,
   type WeightBalanceSpec as CoreWeightBalanceSpec,
 } from '@holdshort/core/judge';
-import type { AircraftInput, BriefingDiff, FlightPlanInput, ProfileInput, StoredBriefing, WeightBalanceSpec } from './types.js';
+import type { AerodromeReport, AircraftInput, BriefingDiff, FlightPlanInput, ProfileInput, StoredBriefing, WeightBalanceSpec } from './types.js';
+
+export type { AerodromeReport };
 
 /**
  * A model cannot run here. Answers recorded when the demo was built are
@@ -96,6 +99,11 @@ export interface LocalEngine {
   /** Every report it holds, verbatim — the whole of what a briefing here can see. */
   readonly reports: readonly HeldReport[];
   brief(plan: FlightPlanInput, profile: ProfileInput, aircraft: AircraftInput): Promise<LocalBriefing>;
+  /**
+   * Everything about one field at the recorded instant, needing no flight
+   * plan: a pilot looking a place up has usually not planned one yet.
+   */
+  aerodrome(id: string): Promise<AerodromeReport | null>;
   /** What the store knows about an identifier, for the form to answer as it is typed. */
   airport(id: string): Promise<{ icaoId: string | null; faaId: string | null; name: string; city: string | null; country: string | null; runways: { id: string }[] } | null>;
 }
@@ -166,6 +174,10 @@ export async function loadEngine(base: string): Promise<LocalEngine> {
       await store.putBriefing(briefing);
       const diff = before ? diffBriefings(before, briefing) : null;
       return { briefing: asJson<StoredBriefing>(briefing), diff: diff && !diff.quiet ? asJson<BriefingDiff>(diff) : null };
+    },
+    async aerodrome(id) {
+      const report = await aerodromeReport(store, id, asOf, parsePilotProfile(bundle.profile), withHandbookLimits(parseAircraftLimits(bundle.aircraft), wb as CoreWeightBalanceSpec | null));
+      return report ? asJson<AerodromeReport>(report) : null;
     },
     async airport(id) {
       const a = await store.getAirport(id);

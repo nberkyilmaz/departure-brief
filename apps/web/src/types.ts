@@ -199,6 +199,49 @@ export interface NavLog {
   alternate: NavLogLeg | null;
 }
 
+/** A runway as the airport data carries it. */
+export interface Runway {
+  id: string;
+  length: number | null;
+  width: number | null;
+  surface: string | null;
+  ends: { id: string; trueHeading: number | null }[];
+}
+
+export interface Airport {
+  icaoId: string | null;
+  faaId: string;
+  name: string;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  lat: number;
+  lon: number;
+  elevation: number | null;
+  runways: Runway[];
+}
+
+/** Everything the pipeline knows about one field at one instant. */
+export interface AerodromeReport {
+  airport: Airport;
+  at: string;
+  observation: {
+    station: string;
+    source: 'own' | 'nearby';
+    distance: number;
+    ageMinutes: number;
+    ownAsleep: boolean;
+    report: { body: string; sha256: string; issuedAt: string | null };
+  } | null;
+  forecast: { station: string; source: 'own' | 'nearby'; distance: number; resolved: { raw: string } } | null;
+  category: FlightCategory | null;
+  forecastCategory: FlightCategory | null;
+  night: boolean;
+  daylight: { sunrise: string | null; sunset: string | null; civilDawn: string | null; civilDusk: string | null; allDay: boolean; allNight: boolean };
+  findings: Finding[];
+  nearby: { id: string; name: string; distanceNm: number; bearingTrue: number; ageMinutes: number | null }[];
+}
+
 export interface StoredBriefing {
   sha256: string;
   flightKey: string;

@@ -148,6 +148,24 @@ function Gaps({ stored }: { stored: StoredBriefing }) {
   );
 }
 
+/**
+ * A list of findings, most wanting of attention first, each opening to the
+ * report it was read from. Shared with the aerodrome page so a field looked
+ * up on its own reads exactly as it does inside a briefing.
+ */
+export function FindingList({ findings }: { findings: readonly Finding[] }) {
+  const order: Record<string, number> = { alert: 0, caution: 1, note: 2, routine: 3 };
+  const sorted = [...findings].sort((a, b) => (order[a.attention] ?? 9) - (order[b.attention] ?? 9));
+  if (sorted.length === 0) return <p className="field-note">Nothing to report.</p>;
+  return (
+    <ul className="findings">
+      {sorted.map((f, i) => (
+        <FindingRow key={`${f.rule}-${i}`} f={f} />
+      ))}
+    </ul>
+  );
+}
+
 function Point({ p, label }: { p: PointReview; label: string | null }) {
   const driving = p.findings.filter((f) => f.attention === 'alert' || f.attention === 'caution');
   const rest = p.findings.filter((f) => f.attention !== 'alert' && f.attention !== 'caution');

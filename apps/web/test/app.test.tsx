@@ -35,7 +35,7 @@ beforeAll(() => {
 
 // Each test arrives at the application fresh, as a visitor would.
 beforeEach(() => {
-  window.location.hash = '';
+  window.location.hash = '#/brief';
 });
 
 afterEach(cleanup);
@@ -142,7 +142,7 @@ describe('moving around it', () => {
     render(<App />);
     await briefed();
 
-    go(/The reports/i);
+    go(/^The reports$/i);
 
     expect(await screen.findByRole('heading', { level: 2, name: /The reports/i })).toBeTruthy();
     // Every report the page holds, not only the ones the briefing cited.
@@ -157,7 +157,7 @@ describe('moving around it', () => {
     render(<App />);
     await briefed();
 
-    go(/Nav log/i);
+    go(/^Nav log$/i);
     expect(await screen.findByRole('heading', { level: 2, name: /Nav log/i })).toBeTruthy();
 
     const rows = [...document.querySelectorAll('.navlog-table .leg-name')].map((c) => c.textContent);
@@ -181,7 +181,7 @@ describe('moving around it', () => {
     await briefed();
     const waiting = attentionCounts().alert + attentionCounts().caution;
 
-    go(/Weight and balance/i);
+    go(/^Aircraft$/i);
     await waitFor(() => expect(document.querySelector('.wb')).not.toBeNull());
 
     const chip = document.querySelector('.nav-attention');
@@ -207,8 +207,44 @@ describe('moving around it', () => {
     const current = [...document.querySelectorAll('.nav a[aria-current="page"]')].map((a) => a.textContent);
     expect(current).toEqual(['How this works']);
 
-    // An address that names nothing lands on the briefing rather than nowhere.
+    // An address that names nothing lands on the way in, not on a blank.
     window.location.hash = '#/nonsense';
-    await waitFor(() => expect(document.querySelector('.inputs')).not.toBeNull());
+    await waitFor(() => expect(document.querySelector('.start')).not.toBeNull());
+  });
+});
+
+describe('a field of its own', () => {
+  it('reports on an aerodrome with no flight plan in existence', async () => {
+    window.location.hash = '#/aerodrome/CYSN';
+    render(<App />);
+
+    expect(await screen.findByRole('heading', { level: 2, name: /CYSN/ }, { timeout: 10_000 })).toBeTruthy();
+    // The classification, the raw report, and the runways — about the place.
+    await waitFor(() => expect(document.querySelector('.aerodrome-page .raw')).not.toBeNull(), { timeout: 10_000 });
+    expect(document.querySelector('.aerodrome-page .raw')!.textContent).toContain('METAR');
+    expect(screen.getByText(/Runways/i)).toBeTruthy();
+    // Never a form: looking a field up does not require planning a flight.
+    expect(document.querySelector('.inputs')).toBeNull();
+  });
+
+  it('offers the neighbours, with the age of each reading', async () => {
+    window.location.hash = '#/aerodrome/CYSN';
+    render(<App />);
+    await waitFor(() => expect(document.querySelector('.nearby li')).not.toBeNull(), { timeout: 10_000 });
+    const first = document.querySelector('.nearby li')!;
+    expect(first.querySelector('a')!.getAttribute('href')).toMatch(/^#\/aerodrome\/[A-Z0-9]{3,4}$/);
+    expect(first.textContent).toMatch(/nm/);
+  });
+
+  it('tells a malformed identifier apart from one it does not carry', async () => {
+    window.location.hash = '#/aerodrome/ZZZZZZ';
+    render(<App />);
+    expect((await screen.findByText(/is not an aerodrome identifier/i, {}, { timeout: 10_000 })).textContent).toBeTruthy();
+    cleanup();
+
+    // Well formed, and genuinely not in a bundle that carries Canada.
+    window.location.hash = '#/aerodrome/EGLL';
+    render(<App />);
+    expect(await screen.findByText(/is not among the/i, {}, { timeout: 10_000 })).toBeTruthy();
   });
 });

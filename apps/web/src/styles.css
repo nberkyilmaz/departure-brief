@@ -585,3 +585,27 @@ summary:focus-visible,
 @media (prefers-color-scheme: dark) {
   .age { color: #15151a; }
 }
+
+/* One field, and everything about it. */
+.aerodrome-page h2 { font-size: 1.35rem; margin: 0 0 var(--s2); display: flex; align-items: baseline; gap: var(--s2); flex-wrap: wrap; }
+.aerodrome-page h3 { font-size: 0.95rem; margin: var(--s5) 0 var(--s2); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.aerodrome-page .meta { font-weight: normal; font-size: 1rem; color: var(--muted); }
+.nearby { list-style: none; margin: 0; padding: 0; }
+.nearby li { padding: var(--s1) 0; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: var(--s2); align-items: baseline; }
+.nearby a { font-weight: 600; font-family: var(--mono); }
+
+/* The way in. */
+.start .lede { font-size: 1.1rem; max-width: 44rem; }
+.start-search { display: flex; align-items: flex-end; gap: var(--s3); margin: var(--s5) 0 var(--s2); flex-wrap: wrap; }
+.start-search label { flex: 1 1 18rem; }
+.start-matches { list-style: none; margin: 0 0 var(--s4); padding: 0; }
+.start-matches li { padding: var(--s1) 0; }
+.start-matches a { font-family: var(--mono); font-weight: 600; }
+.start-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: var(--s3); margin: var(--s5) 0; }
+.start-card {
+  display: grid; gap: var(--s1); padding: var(--s4);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); box-shadow: var(--shadow); text-decoration: none; color: inherit;
+}
+.start-card:hover { border-color: var(--muted); }
+.start-card b { font-size: 1.05rem; }

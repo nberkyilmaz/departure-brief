@@ -9,6 +9,8 @@ import { Nav } from './Nav.js';
 import { NavLogPage } from './NavLogPage.js';
 import { ProfileForm, defaultAircraft, defaultProfile } from './ProfileForm.js';
 import { ReportsPage } from './ReportsPage.js';
+import { StartPage } from './StartPage.js';
+import { AerodromePage } from './AerodromePage.js';
 import { hrefFor, useRoute } from './router.js';
 import { useStored } from './useStored.js';
 import { WbPanel } from './WbPanel.js';
@@ -168,13 +170,13 @@ export function App() {
       <main>
         <header>
           <h1>
-            <a href={hrefFor('brief')}>Hold Short</a>
+            <a href={hrefFor({ name: 'brief' })}>Hold Short</a>
           </h1>
           <p className="tagline">Stop before the line and brief before you cross it.</p>
           <Nav route={route} attention={attentionOf(briefing)} />
         </header>
 
-        {route === 'brief' && (
+        {route.name === 'brief' && (
           <>
             {DEMO && (
               <div className="frozen" role="note">
@@ -239,13 +241,17 @@ export function App() {
           </>
         )}
 
-        {route === 'navlog' && <NavLogPage briefing={briefing} />}
+        {route.name === 'home' && <StartPage engine={engine} recordedAt={recordedText} home={plan.departure || 'CYSN'} />}
 
-        {route === 'reports' && <ReportsPage held={engine?.reports ?? []} briefing={briefing} recordedAt={DEMO ? recordedText : null} />}
+        {route.name === 'aerodrome' && <AerodromePage id={route.id} engine={engine} />}
 
-        {route === 'weight' && <WbPanel aircraftType={aircraft.type} spec={engine?.wb ?? null} crops={!DEMO} />}
+        {route.name === 'navlog' && <NavLogPage briefing={briefing} />}
 
-        {route === 'about' && <About recordedAt={recordedText} aerodromes={engine?.aerodromes ?? []} />}
+        {route.name === 'reports' && <ReportsPage held={engine?.reports ?? []} briefing={briefing} recordedAt={DEMO ? recordedText : null} />}
+
+        {route.name === 'aircraft' && <WbPanel aircraftType={aircraft.type} spec={engine?.wb ?? null} crops={!DEMO} />}
+
+        {route.name === 'about' && <About recordedAt={recordedText} aerodromes={engine?.aerodromes ?? []} />}
 
         <footer>
           <p>

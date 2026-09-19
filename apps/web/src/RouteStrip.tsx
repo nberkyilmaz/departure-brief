@@ -1,3 +1,4 @@
+import { aerodromeHref } from './router.js';
 import { hhmmZ } from './time.js';
 import type { StoredBriefing } from './types.js';
 
@@ -44,7 +45,7 @@ export function RouteStrip({ stored }: { stored: StoredBriefing }) {
       {legs.map(({ point, fromPrevious, label }) => (
         <li key={point.waypoint + point.at} className={`strip-point ${(point.category ?? point.forecastCategory ?? "unknown").toLowerCase()}`}>
           {fromPrevious !== null && <span className="strip-leg">{fromPrevious} nm</span>}
-          <a href={`#verdict`} className="strip-body">
+          <a href={aerodromeHref(point.waypoint)} className="strip-body" title={`Everything about ${point.waypoint}`}>
             <span className="strip-id">
               {label && <span className="strip-label">{label} </span>}
               {point.waypoint}
