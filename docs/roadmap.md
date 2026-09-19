@@ -122,8 +122,16 @@ midnight Zulu for half the year.
 The document pipeline is built and proven on weight and balance. The same
 machinery reads:
 
-- **Takeoff and landing distance**, against the actual runway, altitude and
-  temperature — which is where a short strip on a hot day stops being fine.
+- **Takeoff and landing distance** — but not as first imagined. An audit of
+  the handbook's own OCR found that the extraction pipeline cannot verify a
+  positional table cell, that the charts have cells Cessna deliberately left
+  blank which interpolation would silently fill, and that the two pages
+  disagree about the headwind correction (2 knots on one, 8 on the other),
+  so at least one is a misread. The honest feature is: show the chart row as
+  printed, cited to a crop; use the density altitude the field itself
+  measured or none at all; print the notes verbatim and apply nothing; put
+  the runway length beside it and draw no conclusion. See docs/worklog.md,
+  session 20.
 - **Airworthiness dates**: annual, transponder, ELT, pitot-static. A flight
   can be legal on weather and illegal on paperwork.
 

@@ -11,32 +11,27 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
 
 ---
 
-## Where we are (updated 2026-09-15)
+## Where we are (updated 2026-09-19)
 
 **This tool does not decide whether to fly.** It reports what the products
 say, compares them against the limits the pilot set, and puts what deserves
-a second look first. Where a summary is needed it is the flight category —
-VFR, MVFR, IFR, LIFR — which classifies ceiling and visibility the way every
-weather service does: a fact about the sky, not an opinion about the flight.
+a second look first. Where a summary is needed it is the flight category.
 
-**The site** at <https://nberkyilmaz.github.io/holdshort/> carries the whole
-of Canada: 1,504 aerodromes, every station that was reporting at 21:37Z on
-15 September, upper winds for the seventeen sites that publish them, and
-NOTAMs for six fields. 222 KB gzipped. It runs the pipeline in the browser,
-so changing a personal minimum rebuilds the briefing in front of you. What
-it cannot do is fetch — neither weather service allows a page to call it
-directly — so the reports are frozen at that instant and the page says so.
+**The site** carries both sides of the border: 1,667 aerodromes, every
+station reporting at 00:52Z on 19 September, upper winds for seventeen
+sites, NOTAMs for six fields. Eight routes, a page per aerodrome, the whole
+pipeline running in the browser.
 
-**Next, in the owner's order:** the nearest reporting station when a field's
-own is asleep (CYSN → KIAG); report age shown in colour; takeoff and landing
-distance from the POH; a page per aerodrome; the API live on a host; a
-domain.
+**Done of the owner's list:** the nearest reporting station when a field
+sleeps; report age in colour; a page per aerodrome.
 
-**Still open from the audit** (`docs/worklog.md`, session 18 and the audit
-notes): nothing loads the airports table on a deployed instance, `pg.Pool`
-has no error listener, the rate limiter keys on a proxy IP, the NOTAM eval
-gate cannot fail on model quality, CFPS NOTAMs ignore the freshness window,
-and there is no fuel planning.
+**Left:** POH takeoff and landing distances — see session 20, which changed
+what that feature can honestly be; the API live on a host; a domain.
+
+**Still open from the audit:** nothing loads the airports table on a
+deployed instance, `pg.Pool` has no error listener, the rate limiter keys on
+a proxy IP, the NOTAM eval gate cannot fail on model quality, CFPS NOTAMs
+ignore the freshness window, and there is no fuel planning.
 
 ---
 
@@ -1499,3 +1494,96 @@ had just dropped into the repo root.
 
 - 750 tests across three workspaces, typecheck clean.
 - Nothing anywhere tells a pilot whether to fly.
+
+---
+
+## Session 20 — 2026-09-18/19 — The field's page, and what the handbook will not let us compute
+
+224. **The nearest reporting station**, which the owner asked for by name.
+     CYSN stops overnight; KIAG reports every hour, eleven miles across the
+     river. The field's own observation is used while it is current, and
+     otherwise the nearest one that is — labelled with whose it is, how far
+     away, and how old. Every line derived from a borrowed reading carries
+     that in its own basis so it cannot read as the field's own. When
+     nothing current is in reach the stale local reading stands, because
+     "this is what it said four hours ago" is information and a blank is not.
+225. The snapshot had to grow to make that true: it was Canada-only, so
+     CYSN would have borrowed CYTZ at 28 nm rather than KIAG at 11. It now
+     carries both sides of the border — 171 American reporting stations,
+     1,667 aerodromes — because you can only borrow from a field that
+     reports and a border is not a weather boundary.
+226. **Report age in colour.** Two things a report cannot tell you about
+     itself are now said every time: how old it is and whose it is. The
+     bands come from how a METAR is issued — within the hour it is the
+     current one, within two recent, past six barely about today.
+227. **A page for every field**, at `#/aerodrome/CYSN`, needing no flight
+     plan: a pilot looking a place up has usually not planned one yet. It is
+     assembled by `aerodromeReport` from exactly the functions the flight
+     path uses, so a field's page and a briefing of that field cannot
+     disagree.
+228. Routing became a value rather than a string. The old parser took the
+     first segment and fell back to the briefing, so `#/aerodrome/CYSN`
+     silently resolved to the brief — a bad deep link that looks like it
+     worked is the one routing behaviour that actively misleads. Three
+     failures are told apart now and none of them redirects.
+229. A start page, because the root was a form. Most arrivals want to look
+     up a field or find out what this is.
+
+### What an audit of the handbook found, and why performance is not built yet
+
+A pair of agents specified the takeoff and landing feature and then read the
+actual OCR of the owner's POH to check it. Three findings, all specific, all
+fatal to the obvious design:
+
+230. **The extraction pipeline cannot verify a performance cell.** It was
+     built for labelled scalars: `checkLabel` confirms the quoted line
+     contains a keyword from each group, and `alignNumbers` only checks the
+     cited text *contains* the number. A performance row is positional. The
+     real OCR of the 2300 lb sea-level row reads
+     `2300 52 | 59 { suf 778 1380 835 1475 895 { 1575 o60 | 1885 1030] 1798`
+     — ten numbers on one line, and any proposed value among them verifies
+     whichever column it actually belongs to. Worse, the OCR normaliser maps
+     `o`→0 and `B`→8 beside digits, so `o60` verifies as 60 and `B70` as 870:
+     verification proves a number is on the page *as Tesseract read it*, not
+     as Cessna printed it. This needs positional verification — the cell's
+     own word box, checked against its row and column headers — which does
+     not exist yet.
+231. **Interpolation must not happen at all.** Figure 5-4 is printed in
+     1,000 ft rows and 10 °C columns, and the top-right cells are *deleted
+     in the handbook itself*: the 7,000 and 8,000 ft rows OCR to noise
+     because there is nothing printed there. Note 4 says why — where a value
+     is deleted, climb performance after lift-off is below the stated rate.
+     Interpolating across those blanks would manufacture a takeoff distance
+     for a condition in which Cessna declined to publish one, which is the
+     single worst thing this feature could do.
+232. **The correction factors cannot be read from the page.** Page 72's note
+     says "decrease distances 10% for each 2 knots headwind"; page 81's says
+     "for each 8 knots". At least one is a misread, and applying the first
+     to an 18 kt headwind computes minus ninety per cent of the takeoff roll.
+     Until an owner confirms each note against a rendered crop, the note is
+     printed verbatim beside the figure and nothing is applied.
+233. And one that changes the shape of the answer: **no "fits" badge**.
+     Runway adequacy depends on technique, surface condition, obstacles and
+     the pilot's own currency, none of which this tool holds. Weight and
+     balance may say WITHIN LIMITS because a CG inside an envelope is pure
+     geometry; a runway badge would be the go/no-go verdict returning
+     through a side door, in the exact place it was removed from. Print the
+     POH figure and the runway length side by side and stop.
+234. A fourth, which is a better design than the one proposed: the decoder
+     already reads the Canadian `DENSITY ALT nnnnFT` remark, and CYSN prints
+     it in its own observations. When a field's own METAR is current, take
+     the density altitude the field itself measured and compute nothing.
+     When the observation is borrowed, omit the figure with the reason
+     stated — a distance computed from KIAG's temperature is a number about
+     KIAG printed under CYSN's runway.
+
+**So the performance feature, when it is built, is: show the chart row as
+printed, cited to a crop of the page; use the field's own measured density
+altitude or none; print the notes verbatim and apply nothing; put the runway
+length beside it and draw no conclusion.** Smaller than intended, and the
+only version that is honest.
+
+### State at end of session 20
+
+- 760 tests across three workspaces, typecheck clean.
+- Eight routes; a field is a page; the root is a way in rather than a form.
