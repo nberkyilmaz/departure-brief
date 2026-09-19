@@ -11,6 +11,9 @@
  */
 export type Attention = 'routine' | 'note' | 'caution' | 'alert';
 
+/** How old an observation is, in bands. Old data is not wrong; it is old. */
+export type ObservationAge = 'current' | 'recent' | 'stale' | 'old';
+
 /** The standard classification of ceiling and visibility. A fact, not an opinion. */
 export type FlightCategory = 'VFR' | 'MVFR' | 'IFR' | 'LIFR';
 export type AirspaceClass = 'control-zone' | 'controlled' | 'uncontrolled' | 'B' | 'C' | 'D' | 'E' | 'G';

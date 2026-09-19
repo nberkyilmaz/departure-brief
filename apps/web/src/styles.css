@@ -560,3 +560,28 @@ summary:focus-visible,
   .category, .nav-attention { color: #15151a; }
   .category.forecast { color: var(--fg); }
 }
+
+/*
+ * How old a reading is. The bands are the ones a METAR's issue cycle
+ * implies: within the hour it is the current one, within two it is recent,
+ * past six it is barely about today. Colour says it at a glance; the line
+ * beside it says the minutes.
+ */
+.age {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  text-align: center;
+  color: #fff;
+  background: var(--muted);
+}
+.age.current { background: var(--ok); }
+.age.recent { background: var(--advisory); }
+.age.stale { background: var(--marginal); }
+.age.old { background: var(--nogo); }
+
+@media (prefers-color-scheme: dark) {
+  .age { color: #15151a; }
+}

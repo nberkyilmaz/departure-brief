@@ -87,7 +87,9 @@ describe('POST /api/briefings', () => {
     expect(res.statusCode).toBe(201);
     const b = res.json() as StoredBriefing;
     expect(b.sha256).toMatch(/^[0-9a-f]{64}$/);
-    expect(b.document.briefing.points.map((p) => p.category)).toEqual(['VFR', null, 'VFR']);
+    // N07 reports nothing itself, so the nearest current observation stands in.
+    expect(b.document.briefing.points.map((p) => p.category)).toEqual(['VFR', 'VFR', 'VFR']);
+    expect(b.document.briefing.points[1]!.findings.some((f) => f.rule === 'observation.borrowed')).toBe(true);
     expect(b.document.briefing.points.map((p) => p.waypoint)).toEqual(['KTEB', 'N07', 'KHPN']);
     expect(b.document.inputs.reports.length).toBe(6);
 

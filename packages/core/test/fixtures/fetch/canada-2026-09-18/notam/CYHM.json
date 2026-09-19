@@ -1,19 +1,19 @@
 {
  "meta": {
-  "now": "2026-09-15T21:37:48.717",
+  "now": "2026-09-19T00:53:06.875",
   "count": {
-   "notam": 15
+   "notam": 13
   },
   "messages": []
  },
  "data": [
   {
    "type": "notam",
-   "pk": "1773857",
+   "pk": "1775780",
    "location": "CYHM",
-   "startValidity": "2026-09-15T21:01:00",
-   "endValidity": "2026-09-16T05:01:00",
-   "text": "{\"raw\" : \"(S3124/26 NOTAMR S3099/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4310N07956W005\\nA) CYHM B) 2609152101 C) 2609160501\\nE) RSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 15 2058 - SEP 16 0458.\\n\\nRSC 30 6/6/6 DRY, DRY, DRY. VALID SEP 15 2058 - SEP 16 0458.\\n\\nADDN NON-GRF/TALPA INFO:\\nCRFI 12 NR/NR/NR.\\nCRFI 30 NR/NR/NR.)\", \"english\" : null, \"french\" : null}",
+   "startValidity": "2026-09-18T20:33:00",
+   "endValidity": "2026-09-19T04:33:00",
+   "text": "{\"raw\" : \"(S3336/26 NOTAMR S3315/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4310N07956W005\\nA) CYHM B) 2609182033 C) 2609190433\\nE) RSC 06 6/6/6 DRY, DRY, DRY. VALID SEP 18 2030 - SEP 19 0430.\\n\\nRSC 24 6/6/6 DRY, DRY, DRY. VALID SEP 18 2030 - SEP 19 0430.\\n\\nRSC 12 6/6/6 DRY, DRY, DRY. VALID SEP 18 2030 - SEP 19 0430.\\n\\nRSC 30 6/6/6 DRY, DRY, DRY. VALID SEP 18 2030 - SEP 19 0430.\\n\\nADDN NON-GRF/TALPA INFO:\\nCRFI 06 NR/NR/NR.\\nCRFI 24 NR/NR/NR.\\nCRFI 12 NR/NR/NR.\\nCRFI 30 NR/NR/NR.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYHM",
@@ -22,11 +22,11 @@
   },
   {
    "type": "notam",
-   "pk": "1772813",
+   "pk": "1775724",
    "location": "CYHM",
-   "startValidity": "2026-09-14T11:35:53.512",
+   "startValidity": "2026-09-18T19:14:00",
    "endValidity": "2026-09-30T17:00:00",
-   "text": "{\"raw\" : \"(D3896/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4310N07956W005\\nA) CYHM B) 2609142100 C) 2609301700\\nD) SEP 14 2100-1100, SEP 15 2100-30 1700\\nE) RWY 06/24 CLSD AVBL AS TWY BTN TWY C AND TWY F. \\nACFT LIMITED TO AGN II AUTH NORTH OF RWY 12/30.)\", \"english\" : null, \"french\" : null}",
+   "text": "{\"raw\" : \"(D4004/26 NOTAMR D3896/26\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4310N07956W005\\nA) CYHM B) 2609181914 C) 2609301700\\nE) RWY 06/24 CLSD AVBL AS TWY BTN TWY C AND TWY F.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYHM",
@@ -35,11 +35,11 @@
   },
   {
    "type": "notam",
-   "pk": "1771368",
-   "location": null,
-   "startValidity": "2026-09-11T12:19:36.891",
-   "endValidity": "2026-09-18T10:59:00",
-   "text": "{\"raw\" : \"(G3263/26 NOTAMN\\nQ) CZXX/QGWAU/IV/NBO/E/000/999/4442N08439W294\\nA) CZWG CZYZ B) 2609140400 C) 2609181059\\nD) DAILY 0400-1059\\nE) GPS INTERFERENCE EXER\\nRADIUS 294NM CENTRE 444202N 0843838W FL400-UNL, \\n242NM RADIUS AT FL250,\\n177NM RADIUS AT 10000FT AMSL,\\n137NM RADIUS AT 4000FT AGL,\\n80NM RADIUS AT 50FT AGL. \\nGNSS SIGNAL MAY BE PERIODICALLY INTERRUPTED. INFORM ATC OF ANY\\nADVERSE IMPACT.)\", \"english\" : null, \"french\" : null}",
+   "pk": "1775657",
+   "location": "CPJ3",
+   "startValidity": "2026-09-18T17:15:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J6435/26 NOTAMR J4064/26\\nQ) CZYZ/QOBCE/IV/M/AE/000/006/4315N07955W005\\nA) CXXX B) 2609181715 C) 2612171800EST\\nE) CPJ3 HAMILTON (MCMASTER UNIVERSITY MEDICAL CENTRE) (HELI)\\nCRANE 431528N 0795435W (APRX 5920FT SE AD (CPJ3)). 256FT AGL \\n580FT AMSL. NOT LGTD, PAINTED.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYHM",
@@ -53,19 +53,6 @@
    "startValidity": "2026-09-04T13:20:00",
    "endValidity": "2026-09-25T03:30:00",
    "text": "{\"raw\" : \"(D3729/26 NOTAMR D3511/26\\nQ) CZYZ/QFFAH/IV/BO/A/000/999/4310N07956W005\\nA) CYHM B) 2609041320 C) 2609250330\\nE) ACFT RESCUE AND FIRE FIGHTING (ARFF) TO READ: \\nDESIGNATED CAT 7 AVBL FOR SKED PAX FLT:  \\n.\\nSEP 04 1320-1440 1640-2359\\nSEP 05 0000-0330 0950-2359\\nSEP 06 0000-0110 0215-0330 0950-1445 1640-2359\\nSEP 07 0000-0050 0150-0330 0950-1140 1200-1440 1600-2359\\nSEP 08 0000-0050 0150-0330 0950-1140 1230-1440 1640-2359\\nSEP 09 0150-0330 0950-1140 1230-1400 1530-2359\\nSEP 10 0150-0330 0950-1140 1230-1330 1530-2359\\nSEP 11 0200-0330, 0950-1325, 1530-2359\\nSEP 12 0150-0330, 0950-1250, 1530-2010, 2130-2359\\nSEP 13 0150-0330, 0950-1330, 1530-2359\\nSEP 14 0150-0330, 0950-1250, 1530-2000, 2100-2359\\nSEP 15 0150-0330, 0950-1250, 1530-1920, 2100-2359\\nSEP 16 0200-0330, 0950-1325, 1530-1920-2035-2359\\nSEP 17-18 0200-0330, 0950-1325, 1530-2359\\nSEP 19 0150-0330, 0950-1250, 1530-2010, 2130-2359\\nSEP 20 0150-0330, 0950-1330, 1530-2359\\nSEP 21 0150-0330, 0950-1250, 1530-2000, 2100-2359\\nSEP 22 0150-0330, 0950-1250, 1530-1920, 2100-2359\\nSEP 23 0200-0330, 0950-1325, 1530-1920, 2035-2359\\nSEP 24 0200-0330, 0950-1325, 1530-2359\\nSEP 25 0200-0330)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYHM",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1762181",
-   "location": null,
-   "startValidity": "2026-08-26T18:06:45.686",
-   "endValidity": "2026-09-16T23:59:00",
-   "text": "{\"raw\" : \"(G3032/26 NOTAMN\\nQ) CZXX/QOATT/IV/BO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2609030901 C) 2609162359\\nE) TRIGGER NOTAM - PERM AIRAC AIP AMDT (AIRAC CANADA) ISSUES 25/2026 \\nTO 32/2026 WEF 03 SEP 2026. AIP CANADA, CANADA FLT SUPPLEMENT \\n(CFS), CANADA AIR PILOT (CAP), RESTRICTED CANADA AIR PILOT \\n(RCAP), DESIGNATED AIRSPACE HANDBOOK (DAH), TERMINAL, LOW AND \\nHIGH ENR CHARTS AMENDED.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYHM",
@@ -183,19 +170,6 @@
    "startValidity": "2026-07-03T16:22:00",
    "endValidity": null,
    "text": "{\"raw\" : \"(D2402/26 NOTAMR D2054/26\\nQ) CZYZ/QLPAS/IV/BO/A/000/999/4310N07956W005\\nA) CYHM B) 2607031622 C) 2609301600EST\\nE) PAPI 06 AND 24 U/S)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYHM",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1723229",
-   "location": "CPJ3",
-   "startValidity": "2026-06-19T17:21:00",
-   "endValidity": null,
-   "text": "{\"raw\" : \"(J4064/26 NOTAMR J1996/26\\nQ) CZYZ/QOBCE/IV/M/AE/000/006/4315N07955W005\\nA) CXXX B) 2606191721 C) 2609181800EST\\nE) CPJ3 HAMILTON (MCMASTER UNIVERSITY MEDICAL CENTRE) (HELI)\\nCRANE 431528N 0795435W (APRX 5920FT SE AD (CPJ3)). 256FT AGL \\n580FT AMSL. NOT LGTD, PAINTED.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYHM",

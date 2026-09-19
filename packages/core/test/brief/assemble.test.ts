@@ -74,9 +74,10 @@ describe('assembleBriefing', () => {
     expect(d.inputs.reports.map((r) => r.kind).sort()).toEqual(['metar', 'metar', 'metar', 'taf', 'taf', 'taf']);
     for (const r of d.inputs.reports) expect(await store.getRaw(r.sha256)).not.toBeNull();
     // No verdict: the classification of what was reported, and nothing rolled up.
-    // N07 has no observation of its own, so it has no observed category — a
-    // blank, not a guess.
-    expect(d.briefing.points.map((p) => p.category)).toEqual(['VFR', null, 'VFR']);
+    // N07 reports nothing itself, so the nearest current observation stands
+    // in for it — named and measured in the findings, not passed off as its own.
+    expect(d.briefing.points.map((p) => p.category)).toEqual(['VFR', 'VFR', 'VFR']);
+    expect(d.briefing.points[1]!.findings.some((f) => f.rule === 'observation.borrowed')).toBe(true);
     expect('verdict' in d.briefing).toBe(false);
   });
 

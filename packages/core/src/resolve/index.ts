@@ -3,6 +3,8 @@ export type { Overlay, PeriodWindow, ResolvedForecast } from './taf.js';
 export { resolveRoute, UnknownWaypointError } from './route.js';
 export type { Leg, Route, RoutePoint, Waypoint } from './route.js';
 export { forecastAt, latestTaf, NEARBY_RADIUS_NM } from './forecast.js';
+export { observationAt, CURRENT_WITHIN_MS, OBSERVATION_RADIUS_NM } from './observation.js';
+export type { WaypointObservation } from './observation.js';
 export { upperWindFor, windAt, UPPERWIND_RADIUS_NM } from './wind.js';
 export type { WaypointWind } from './wind.js';
 export type { WaypointForecast } from './forecast.js';

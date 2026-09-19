@@ -38,7 +38,7 @@ const fixtures = join(core, 'test', 'fixtures');
 const out = join(root, 'apps', 'web', 'public', 'demo');
 
 /** The moment the demo is frozen at: when these reports were recorded. */
-const AS_OF = new Date('2026-09-15T21:37:00Z');
+const AS_OF = new Date('2026-09-19T00:52:00Z');
 /**
  * The aerodromes NOTAMs were recorded for. Not every field in Canada: that
  * would be fifteen hundred requests to an unofficial service, which is not
@@ -48,7 +48,7 @@ const AS_OF = new Date('2026-09-15T21:37:00Z');
  */
 const NOTAM_SITES = ['CYSN', 'CYKF', 'CYHM', 'CYYZ', 'CYTZ', 'CYOW'] as const;
 /** Where the recorded snapshot lives. */
-const SNAPSHOT = 'canada-2026-09-15';
+const SNAPSHOT = 'canada-2026-09-18';
 const MODEL = 'qwen2.5:7b';
 
 /** Serves only what was recorded; anything else is a 204, as a quiet upstream would be. */
@@ -77,10 +77,11 @@ const replay: HttpClient = {
 };
 
 /*
- * Every aerodrome in Canada, so a visitor can type any identifier and be
- * told what the tool knows about it. Heliports and seaplane bases are left
- * out: this is a tool for an aeroplane on wheels, and they would be three
- * hundred kilobytes of places it cannot take you.
+ * Every aerodrome in Canada, plus every station that reported — including
+ * the American ones just across the border, because a field with no
+ * observation of its own borrows from the nearest that has one and a border
+ * is not a weather boundary. Heliports and seaplane bases are left out:
+ * this is a tool for an aeroplane on wheels.
  */
 const store = new MemoryStore();
 const airports = readOurAirportsDirectory(join(snapshot, 'ourairports'), { snapshot: '2026-09-14' }).filter((a) => a.siteType === 'A');
@@ -148,7 +149,7 @@ if (existsSync(liveWeather)) {
  * stations — so the briefing borrows Toronto's at both ends and says so,
  * which is the right answer and worth a visitor seeing.
  */
-const planJson = { ...JSON.parse(readFileSync(join(root, 'flights', 'demo-cysn-cykf.json'), 'utf8')), departureTime: '2026-09-16T00:00:00Z' };
+const planJson = { ...JSON.parse(readFileSync(join(root, 'flights', 'demo-cysn-cykf.json'), 'utf8')), departureTime: '2026-09-19T04:00:00Z' };
 const profileJson = JSON.parse(readFileSync(join(root, 'profiles', 'default.json'), 'utf8'));
 const aircraftJson = JSON.parse(readFileSync(join(root, 'aircraft', 'c172.json'), 'utf8'));
 const plan = parseFlightPlan(planJson);

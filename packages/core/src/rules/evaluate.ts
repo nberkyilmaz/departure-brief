@@ -7,6 +7,7 @@ import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
 import { checkConditions, checkNight, type CheckContext } from './checks.js';
 import { checkDaylight } from './daylight.js';
 import { checkHazards } from './hazards.js';
+import { ageText, checkObservation } from './observation.js';
 import { checkWindAloft } from './windAloft.js';
 import { RULES_VERSION, type Briefing, type Finding, type PointReview } from './types.js';
 
@@ -109,11 +110,20 @@ function evaluatePoint(
     });
   }
 
+  findings.push(...checkObservation({ waypoint: w.id, at }, p.metar));
+
   if (p.metar && p.metar.report.issuedAt) {
     const age = at.getTime() - p.metar.report.issuedAt.getTime();
+    /*
+     * The basis says whose observation it is and how old, so every line
+     * derived from it carries that with it — a reading borrowed from
+     * twelve miles away should not look like the field's own halfway down
+     * a list of findings.
+     */
+    const borrowed = p.metar.source === 'nearby' ? ` at ${p.metar.station}, ${Math.round(p.metar.distance)} nm` : '';
     const ctx: CheckContext = {
       ...base,
-      basis: `observed ${hhmm(p.metar.report.issuedAt)}`,
+      basis: `observed ${hhmm(p.metar.report.issuedAt)}${borrowed}${p.metar.ageMinutes > 60 ? `, ${ageText(p.metar.ageMinutes)}` : ''}`,
       basisKind: 'observed',
       // A current observation is hard evidence at departure; hours before an ETA it is context.
       violation: Math.abs(age) <= OBSERVATION_WINDOW_MS ? 'alert' : 'caution',

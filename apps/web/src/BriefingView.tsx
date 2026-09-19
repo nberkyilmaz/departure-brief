@@ -32,6 +32,20 @@ function Source({ c }: { c: Citation }) {
   );
 }
 
+/**
+ * How old the reading is, in colour.
+ *
+ * A METAR carries its own time and nothing else: a pilot reading
+ * `CYSN 122100Z` at four in the morning has no way to see from the text
+ * that it is seven hours stale. The band says it at a glance, and the
+ * minutes say it exactly.
+ */
+function AgeBadge({ f }: { f: Finding }) {
+  const band = f.values['band'];
+  if (typeof band !== 'string') return null;
+  return <span className={`age ${band}`}>{band}</span>;
+}
+
 function FindingRow({ f, waypoint = null }: { f: Finding; waypoint?: string | null }) {
   const [open, setOpen] = useState(false);
   const sources = f.citations.filter((c) => c.raw);
@@ -39,7 +53,7 @@ function FindingRow({ f, waypoint = null }: { f: Finding; waypoint?: string | nu
   return (
     <li className={`finding ${f.attention}`}>
       <button className="row" onClick={() => setOpen(!open)} aria-expanded={open}>
-        <span className={`badge ${f.attention}`}>{f.attention}</span>
+        {f.rule === 'observation.age' ? <AgeBadge f={f} /> : <span className={`badge ${f.attention}`}>{f.attention}</span>}
         <span className="basis">
           {waypoint ? <b>{waypoint}</b> : null} {f.basis}
         </span>

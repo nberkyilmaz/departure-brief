@@ -1,19 +1,19 @@
 {
  "meta": {
-  "now": "2026-09-15T21:37:52.946",
+  "now": "2026-09-19T00:53:11.194",
   "count": {
-   "notam": 26
+   "notam": 24
   },
   "messages": []
  },
  "data": [
   {
    "type": "notam",
-   "pk": "1773733",
+   "pk": "1775889",
    "location": "CYTZ",
-   "startValidity": "2026-09-15T18:01:00",
-   "endValidity": "2026-09-16T02:01:00",
-   "text": "{\"raw\" : \"(A9490/26 NOTAMR A9414/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609151801 C) 2609160201\\nE) RSC 06/24 DRY. VALID SEP 15 1751 - SEP 16 0151.\\n\\nRSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 15 1751 - SEP 16 0151.\\n\\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 15 1751 - SEP 16 0151.\\n\\nADDN NON-GRF/TALPA INFO:)\", \"english\" : null, \"french\" : null}",
+   "startValidity": "2026-09-19T00:42:00",
+   "endValidity": "2026-09-19T03:00:00",
+   "text": "{\"raw\" : \"(A9987/26 NOTAMR A9935/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609190042 C) 2609190300\\nE) RSC 06/24 DRY. VALID SEP 19 0039 - SEP 19 0839.\\n\\nRSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 19 0038 - SEP 19 0838.\\n\\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 19 0038 - SEP 19 0838.\\n\\nADDN NON-GRF/TALPA INFO:\\n\\nRMK: NEXT OBS AT SEP 19 1030.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYTZ",
@@ -22,11 +22,37 @@
   },
   {
    "type": "notam",
-   "pk": "1773152",
+   "pk": "1775720",
+   "location": "CPP4",
+   "startValidity": "2026-09-18T18:48:17.115",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J6441/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/008/4340N07921W005\\nA) CXXX B) 2609211100 C) PERM\\nE) CPP4 TORONTO/CHARTRIGHT POLSON PIER (HELI)\\nAMEND PUBLICATIONS: TOWER CRANE WITHIN 98FT RADIUS CENTRED ON \\n433936N 0792126W (APRX 1.1NM N AD (CPP4)). 468FT AGL 744FT AMSL. \\nLGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1775717",
+   "location": "CPP4",
+   "startValidity": "2026-09-18T18:45:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J6440/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/007/4340N07921W005\\nA) CXXX B) 2609181845 C) PERM\\nE) CPP4 TORONTO/CHARTRIGHT POLSON PIER (HELI)\\nAMEND PUBLICATIONS: NEW BUILDING 433936N 0792126W (APRX 1.1NM N \\nAD (CPP4)). 420FT AGL 696FT AMSL. LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYTZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1775493",
    "location": "CYTZ",
-   "startValidity": "2026-09-14T18:17:11.286",
-   "endValidity": "2026-09-20T11:00:00",
-   "text": "{\"raw\" : \"(J6311/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609150300 C) 2609201100\\nD) SEP 15 0300-1015, SEP 16-19 0300-1000, SEP 20 0200-1100\\nE) RWY 06/24 AND RWY 08/26 CLSD DUE CONST)\", \"english\" : null, \"french\" : null}",
+   "startValidity": "2026-09-18T14:11:52.098",
+   "endValidity": "2026-09-27T11:00:00",
+   "text": "{\"raw\" : \"(J6424/26 NOTAMN\\nQ) CZYZ/QFPXX/IV/BO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609190300 C) 2609271100\\nD) SEP 19 0300-1000, SEP 20 0200-1100, SEP 22-26 0300-1000,       \\nSEP 27 0200-1100\\nE) MEDEVAC HEL TO OPR FM TEMPO NON-INSTR FATO 433748N 0792348W\\n(APRX 2001FT BEYOND THR 08 N SIDE TWY F, DIAMETER 82FT,\\nASPH, LGTD). ARR/DEP 107DEG TO 231DEG CLOCKWISE FR FATO.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYTZ",
@@ -35,11 +61,11 @@
   },
   {
    "type": "notam",
-   "pk": "1771824",
+   "pk": "1775485",
    "location": "CYTZ",
-   "startValidity": "2026-09-11T22:37:08.689",
-   "endValidity": "2026-09-20T11:00:00",
-   "text": "{\"raw\" : \"(J6256/26 NOTAMN\\nQ) CZYZ/QFPXX/IV/BO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609120300 C) 2609201100\\nD) SEP 12 0300-1015, SEP 13 0200-1100, SEP 15-19 0300-1000,       \\nSEP 20 0200-1100\\nE) MEDEVAC HEL TO OPR FM TEMPO NON-INSTR FATO 433748N 0792348W\\n(APRX 2001FT BEYOND THR 08 N SIDE TWY F, DIAMETER 82FT,\\nASPH, LGTD). ARR/DEP 107DEG TO 231DEG CLOCKWISE FR FATO.)\", \"english\" : null, \"french\" : null}",
+   "startValidity": "2026-09-18T14:07:58.349",
+   "endValidity": "2026-09-27T11:00:00",
+   "text": "{\"raw\" : \"(J6421/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609190300 C) 2609271100\\nD) SEP 19 0300-1000, SEP 20 0200-1100, SEP 22-26 0300-1000, SEP 27 \\n0200-1100\\nE) RWY 06/24 AND RWY 08/26 CLSD DUE CONST)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYTZ",
@@ -48,24 +74,11 @@
   },
   {
    "type": "notam",
-   "pk": "1771722",
-   "location": null,
-   "startValidity": "2026-09-11T19:42:36.156",
-   "endValidity": "2026-09-16T04:00:00",
-   "text": "{\"raw\" : \"(G3282/26 NOTAMN\\nQ) CZYZ/QRTCA/IV/BO/W/000/025/4340N07923W003\\nA) CZYZ B) 2609131400 C) 2609160400\\nE) PURSUANT TO SECTION 5.1 OF THE AERONAUTICS ACT, THE AIRSPACE\\nWITHIN RADIUS 2NM CENTRE 434015N 0792324W (CENTRE APRX 5142FT N\\nTORONTO (HOSPITAL FOR SICK CHILDREN) (HELI) AD (CNW8), 2.6 NM\\nNNE TORONTO / BILLY BISHOP TORONTO CITY AIRPORT (CYTZ)) IS\\nRESTRICTED DURING POLICE OPS. NO PERSON SHALL OPR A REMOTELY\\nPILOTED ACFT (RPA) WITHIN THE AREA DESCRIBED EXC FOR POLICE OPS\\nUNLESS PRIOR AUTH HAS BEEN RECEIVED BY AIR SUPPORT UNIT TORONTO\\nPOLICE SVC 416-671-2159 OR AIRSUPPORT(A)TPS.CA\\nF) SFC G) 2500FT AMSL)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYTZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1771368",
-   "location": null,
-   "startValidity": "2026-09-11T12:19:36.891",
-   "endValidity": "2026-09-18T10:59:00",
-   "text": "{\"raw\" : \"(G3263/26 NOTAMN\\nQ) CZXX/QGWAU/IV/NBO/E/000/999/4442N08439W294\\nA) CZWG CZYZ B) 2609140400 C) 2609181059\\nD) DAILY 0400-1059\\nE) GPS INTERFERENCE EXER\\nRADIUS 294NM CENTRE 444202N 0843838W FL400-UNL, \\n242NM RADIUS AT FL250,\\n177NM RADIUS AT 10000FT AMSL,\\n137NM RADIUS AT 4000FT AGL,\\n80NM RADIUS AT 50FT AGL. \\nGNSS SIGNAL MAY BE PERIODICALLY INTERRUPTED. INFORM ATC OF ANY\\nADVERSE IMPACT.)\", \"english\" : null, \"french\" : null}",
+   "pk": "1774845",
+   "location": "CPP4",
+   "startValidity": "2026-09-17T14:06:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(U1604/26 NOTAMN\\nQ) CZYZ/QOLAS/IV/M/AE/000/010/4339N07920W005\\nA) CXXX B) 2609171406 C) 2610171300EST\\nE) CPP4 TORONTO/CHARTRIGHT POLSON PIER (HELI)\\nOBST LGT U/S SMOKE STACK 433846N 0791958W (APRX 1.05NM E AD) \\n699FT AGL, 952FT AMSL.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYTZ",
@@ -79,45 +92,6 @@
    "startValidity": "2026-09-07T17:40:00",
    "endValidity": null,
    "text": "{\"raw\" : \"(J6141/26 NOTAMN\\nQ) CZYZ/QFALT/IV/NBO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609071740 C) 2612071700EST\\nE) FLOATPLANE RAMP NOT AVBL)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYTZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1766862",
-   "location": "CYYZ",
-   "startValidity": "2026-09-03T13:02:00",
-   "endValidity": "2026-09-16T23:59:00",
-   "text": "{\"raw\" : \"(D3712/26 NOTAMN\\nQ) CZYZ/QOBTT/IV/BO/AE/000/016/4341N07938W030\\nA) CYYZ B) 2609031302 C) 2609162359\\nE) TRIGGER NOTAM - AIP SUP 083/2026 WEF 03 SEP 2026. CRANES-WITHIN \\n30 NAUTICAL MILES OF TORONTO / LESTER B. PEARSON INTL AIRPORT \\n(CYYZ)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYTZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1766857",
-   "location": "CYTZ",
-   "startValidity": "2026-09-03T13:00:00",
-   "endValidity": "2026-09-16T23:59:00",
-   "text": "{\"raw\" : \"(J6046/26 NOTAMN\\nQ) CZYZ/QFATT/IV/BO/A/000/999/4338N07924W005\\nA) CYTZ B) 2609031300 C) 2609162359\\nE) TRIGGER NOTAM - AIP SUP 081/2026 WEF 03 SEP 2026. AERODROME \\nCONSTRUCTION - BILLY BISHOP TORONTO CITY AIRPORT, ON (CYTZ)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYTZ",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1762181",
-   "location": null,
-   "startValidity": "2026-08-26T18:06:45.686",
-   "endValidity": "2026-09-16T23:59:00",
-   "text": "{\"raw\" : \"(G3032/26 NOTAMN\\nQ) CZXX/QOATT/IV/BO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2609030901 C) 2609162359\\nE) TRIGGER NOTAM - PERM AIRAC AIP AMDT (AIRAC CANADA) ISSUES 25/2026 \\nTO 32/2026 WEF 03 SEP 2026. AIP CANADA, CANADA FLT SUPPLEMENT \\n(CFS), CANADA AIR PILOT (CAP), RESTRICTED CANADA AIR PILOT \\n(RCAP), DESIGNATED AIRSPACE HANDBOOK (DAH), TERMINAL, LOW AND \\nHIGH ENR CHARTS AMENDED.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYTZ",

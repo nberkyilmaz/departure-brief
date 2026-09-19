@@ -85,12 +85,19 @@ describe('evaluateFlight', () => {
     }
     // Recorded conditions were VFR everywhere: 35004KT P6SM SKC and the like.
     // The category says what the sky was; nothing says what to do about it.
-    expect(b.points.map((p) => p.category)).toEqual(['VFR', null, 'VFR']);
+    // N07 reports nothing itself; the category is from the observation that
+    // stands in for it, which the findings name and measure the distance of.
+    expect(b.points.map((p) => p.category)).toEqual(['VFR', 'VFR', 'VFR']);
+    expect(b.points[1]!.findings.some((f) => f.rule === 'observation.borrowed')).toBe(true);
     expect(b.points.every((p) => p.findings.every((f) => f.attention !== 'alert'))).toBe(true);
     // N07 borrowed KTEB's TAF and says so; it has no runways in the crosswind check? It does (NASR) — and no METAR.
     const n07 = b.points[1]!;
     expect(n07.findings.some((f) => f.rule === 'forecast.borrowed')).toBe(true);
-    expect(n07.findings.some((f) => f.basis.startsWith('observed'))).toBe(false);
+    // Its conditions now come from a neighbour, and every line derived from
+    // them says so in its own basis rather than reading as N07's.
+    const fromObservation = n07.findings.filter((f) => f.basis.startsWith('observed'));
+    expect(fromObservation.length).toBeGreaterThan(0);
+    expect(fromObservation.every((f) => /\d+ nm/.test(f.basis))).toBe(true);
     // KTEB at departure: prevailing checks, regulatory Class D, and the 1151Z observation as hard evidence for a 1300Z departure.
     const kteb = b.points[0]!;
     // KTEB's TAF was `35004KT P6SM SKC`: nothing to clear, so no cloud-clearance finding — and none faked.

@@ -118,7 +118,11 @@ describe('resolveFlight', () => {
     expect(n07!.forecast?.station).toBe('KTEB');
     expect(n07!.forecast?.distance).toBeGreaterThan(5);
     expect(n07!.forecast?.distance).toBeLessThan(20);
-    expect(n07!.metar).toBeNull();
+    // N07 has no observation of its own, so the nearest current one stands
+    // in — labelled, with the distance, which is what a pilot would do.
+    expect(n07!.metar!.source).toBe('nearby');
+    expect(n07!.metar!.station).not.toBe('N07');
+    expect(n07!.metar!.distance).toBeGreaterThan(0);
 
     expect(hpn!.forecast?.source).toBe('own');
     expect(hpn!.forecast?.resolved.at).toEqual(hpn!.point.eta);

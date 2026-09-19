@@ -10,3 +10,5 @@ export { briefingText } from './describe.js';
 export { checkDaylight, THIN_MARGIN_MINUTES } from './daylight.js';
 export { checkWindAloft, windText, FREEZING_C } from './windAloft.js';
 export { checkHazards, HAZARD_TEXT, NEAR_HAZARD_NM } from './hazards.js';
+export { ageBand, ageText, checkObservation, OBSERVATION_AGE_MINUTES } from './observation.js';
+export type { ObservationAge } from './observation.js';

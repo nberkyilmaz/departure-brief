@@ -1,12 +1,25 @@
 {
  "meta": {
-  "now": "2026-09-15T21:37:44.499",
+  "now": "2026-09-19T00:53:02.452",
   "count": {
-   "notam": 11
+   "notam": 10
   },
   "messages": []
  },
  "data": [
+  {
+   "type": "notam",
+   "pk": "1774854",
+   "location": "CYSN",
+   "startValidity": "2026-09-17T14:14:31.034",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J6393/26 NOTAMN\\nQ) CZYZ/QFALC/IV/NBO/A/000/999/4312N07910W005\\nA) CYSN B) 2609191400 C) 2609192200EST\\nE) AD CLSD DUE EVENT. AVBL FOR EVENT ACFT AND MEDEVAC ONLY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYSN",
+    "radialDistance": 0
+   }
+  },
   {
    "type": "notam",
    "pk": "1773714",
@@ -22,37 +35,11 @@
   },
   {
    "type": "notam",
-   "pk": "1771368",
-   "location": null,
-   "startValidity": "2026-09-11T12:19:36.891",
-   "endValidity": "2026-09-18T10:59:00",
-   "text": "{\"raw\" : \"(G3263/26 NOTAMN\\nQ) CZXX/QGWAU/IV/NBO/E/000/999/4442N08439W294\\nA) CZWG CZYZ B) 2609140400 C) 2609181059\\nD) DAILY 0400-1059\\nE) GPS INTERFERENCE EXER\\nRADIUS 294NM CENTRE 444202N 0843838W FL400-UNL, \\n242NM RADIUS AT FL250,\\n177NM RADIUS AT 10000FT AMSL,\\n137NM RADIUS AT 4000FT AGL,\\n80NM RADIUS AT 50FT AGL. \\nGNSS SIGNAL MAY BE PERIODICALLY INTERRUPTED. INFORM ATC OF ANY\\nADVERSE IMPACT.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYSN",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
    "pk": "1766504",
    "location": "CYSN",
    "startValidity": "2026-09-02T22:54:00",
    "endValidity": "2026-10-17T22:30:00",
    "text": "{\"raw\" : \"(U1517/26 NOTAMR U1312/26\\nQ) CZYZ/QOLAS/IV/M/AE/000/005/4311N07913W005\\nA) CYSN B) 2609022254 C) 2610172230\\nE) OBST LGT U/S ANTENNA 431042N 0791257W (APRX 2.1NM WSW AD) 167FT \\nAGL, 495FT AMSL.)\", \"english\" : null, \"french\" : null}",
-   "hasError": false,
-   "position": {
-    "pointReference": "CYSN",
-    "radialDistance": 0
-   }
-  },
-  {
-   "type": "notam",
-   "pk": "1762181",
-   "location": null,
-   "startValidity": "2026-08-26T18:06:45.686",
-   "endValidity": "2026-09-16T23:59:00",
-   "text": "{\"raw\" : \"(G3032/26 NOTAMN\\nQ) CZXX/QOATT/IV/BO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2609030901 C) 2609162359\\nE) TRIGGER NOTAM - PERM AIRAC AIP AMDT (AIRAC CANADA) ISSUES 25/2026 \\nTO 32/2026 WEF 03 SEP 2026. AIP CANADA, CANADA FLT SUPPLEMENT \\n(CFS), CANADA AIR PILOT (CAP), RESTRICTED CANADA AIR PILOT \\n(RCAP), DESIGNATED AIRSPACE HANDBOOK (DAH), TERMINAL, LOW AND \\nHIGH ENR CHARTS AMENDED.)\", \"english\" : null, \"french\" : null}",
    "hasError": false,
    "position": {
     "pointReference": "CYSN",

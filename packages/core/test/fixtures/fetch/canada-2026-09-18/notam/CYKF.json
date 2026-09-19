@@ -1,0 +1,89 @@
+{
+ "meta": {
+  "now": "2026-09-19T00:53:04.562",
+  "count": {
+   "notam": 6
+  },
+  "messages": []
+ },
+ "data": [
+  {
+   "type": "notam",
+   "pk": "1775885",
+   "location": "CYKF",
+   "startValidity": "2026-09-19T00:18:00",
+   "endValidity": "2026-09-19T08:18:00",
+   "text": "{\"raw\" : \"(A9986/26 NOTAMR A9931/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4328N08023W005\\nA) CYKF B) 2609190018 C) 2609190818\\nE) RSC 08 6/6/6 DRY, DRY, DRY. VALID SEP 18 2337 - SEP 19 0737.\\n\\nRSC 26 6/6/6 DRY, DRY, DRY. VALID SEP 18 2337 - SEP 19 0737.\\n\\nRSC 14/32 DRY. VALID SEP 18 2348 - SEP 19 0748.\\n\\nADDN NON-GRF/TALPA INFO:\\nCRFI 08 NR/NR/NR.\\nCRFI 26 NR/NR/NR.\\nCRFI 14/32 NR.\\n\\nRMK: TWY ALL DRY.\\nRMK: APN ALL DRY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYKF",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1766445",
+   "location": "CYKF",
+   "startValidity": "2026-09-02T21:05:00",
+   "endValidity": "2026-09-21T20:00:00",
+   "text": "{\"raw\" : \"(J6015/26 NOTAMN\\nQ) CZYZ/QICAS/I/NBO/A/000/999/4328N08023W005\\nA) CYKF B) 2609022105 C) 2609212000\\nE) ILS RWY 26 U/S)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYKF",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1750858",
+   "location": null,
+   "startValidity": "2026-08-07T12:18:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2675/26 NOTAMR G1363/26\\nQ) CZXX/QOEXX/IV/NBO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2608071218 C) 2611061800EST\\nE) AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\\nIN RESPONSE TO THE SECURITY SITUATION IN MALI. CANADIAN AIR\\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL EQUAL TO OR ABOVE FL320 IN\\nTHE PORTIONS OF FIR DAKAR (GOOO) AND FIR NIAMEY (DRRR) LOCATED IN\\nTHE TERRITORY OF MALI DUE TO THE POTENTIAL RISK FROM MILITANT\\nACTIVITY AND ANTI-AIRCRAFT WEAPONRY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYKF",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1750853",
+   "location": null,
+   "startValidity": "2026-08-07T12:16:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2674/26 NOTAMR G1362/26\\nQ) CZXX/QOEXX/IV/NBO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2608071216 C) 2611061800EST\\nE) AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\\nIN RESPONSE TO THE SECURITY SITUATION IN MYANMAR. CANADIAN AIR\\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL AT OR ABOVE FL260 IN FIR\\nYANGON (VYYF) DUE TO THE RISK FROM ANTI-AIRCRAFT WEAPONRY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYKF",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1741094",
+   "location": null,
+   "startValidity": "2026-07-21T13:24:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2420/26 NOTAMR G1192/26\\nQ) CZXX/QOECH/IV/NBO/E/000/999/5518N09358W999\\nA) CZWG CZYZ B) 2607211324 C) 2610191800EST\\nE) ALL ACFT, REGARDLESS OF THE STATE OF REGISTRY, DIRECTLY OR \\nINDIRECTLY OWNED, CHARTERED, LEASED, OPERATED OR OTHERWISE \\nCONTROLLED BY A PERSON CONNECTED WITH EITHER THE RUSSIAN \\nFEDERATION OR OF BELARUS OR BY A CORPORATION OR ENTITY THAT IS \\nINCORPORATED OR FORMED UNDER THE LAWS OF THE RUSSIAN FEDERATION \\nOR BELARUS, AND ALL OPERATORS HOLDING AN AIR OPERATOR CERTIFICATE \\n(AOC) ISSUED BY RUSSIAN FEDERATION AND/OR BELARUSIAN AUTHORITIES \\nARE PROHIBITED TO ENTER, EXIT OR OVERFLY CANADA'S TERRITORIAL \\nAIRSPACE (INCLUDING FLT WITHIN 12NM OF CANADA'S COASTS). \\nEXCEPTIONS PERMITTED FOR ACFT EXPERIENCING INFLIGHT EMERG. \\n\\nALL AUTH OBTAINED PRIOR TO 27 FEB 2022 FOR ACFT AND OPS SUBJECT \\nTO THIS NOTAM ARE REVOKED.\\n\\nHUMANITARIAN, SAR, MEDEVAC AND ANY OTHER FLT SEEKING AN EXCEPTION \\nTO THIS RESTRICTION MUST RECEIVE AUTH GRANTED AFTER 27 FEB 2022 \\nFM THE MINISTER OF TRANSPORT TO OPERATE IN CANADA'S TERRITORIAL \\nAIRSPACE.  AFFECTED ACFT WISHING TO OBTAIN SUCH AN AUTH OR CLR \\nINTO CANADA'S TERRITORIAL AIRSPACE MAY APPLY TO THE MINISTER OF \\nTRANSPORT AT 1-877-992-6853 OR 1-613-992-6853 OR BY EMAIL AT \\nOPERATIONS.AVIATION(AT)TC.GC.CA.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYKF",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1726003",
+   "location": "CYKF",
+   "startValidity": "2026-06-24T22:09:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(J4168/26 NOTAMR J2145/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4328N08023W005\\nA) CYKF B) 2606242209 C) 2609241700EST\\nE) RWY 08/26 NON STANDARD MARKINGS)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYKF",
+    "radialDistance": 0
+   }
+  }
+ ]
+}
