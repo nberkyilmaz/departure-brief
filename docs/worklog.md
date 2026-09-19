@@ -1719,9 +1719,21 @@ actually was: every place the code assumed it was running on a laptop.
      `pages.yml`'s `VITE_BASE`, which is `/holdshort/` for a project site
      and would 404 every asset on a custom domain.
 
+246. And one the CI gate caught on its first run, which is what it is for:
+     the container started before its database was listening. `pg_isready`
+     inside the postgis image answers on the unix socket while Postgres is
+     still restarting partway through its own initialisation, so "ready" was
+     true and connecting still failed. CI asks over TCP now — the question
+     the other container is actually asking. The deeper fix is in the store:
+     a connection refused at boot is waited on rather than died of, ten
+     tries two seconds apart, because on a host dying of it is a crash loop
+     in which every attempt pays the cold start again. Only connection
+     failures are retried; a migration that fails because the SQL is wrong
+     fails at once, since waiting will not fix it.
+
 ### State at end of session 21
 
-- 808 tests across three workspaces, all passing against real Postgres.
+- 812 tests across three workspaces, all passing against real Postgres.
 - A container that boots from nothing into a working instance.
 - Everything remaining on the API is an account only the owner can open.
 

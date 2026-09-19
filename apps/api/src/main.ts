@@ -32,6 +32,10 @@ const store = await PostgresStore.connect(undefined, {
   // `app` is built below; a pool error during migration would arrive before
   // there is a logger, so this asks whether there is one rather than assuming.
   onPoolError: (err) => (typeof app === 'undefined' ? console.warn(err.message) : app.log.warn({ err }, 'idle database connection dropped')),
+  // A database that is not answering yet is waited for rather than died of:
+  // on a host, dying of it is a crash loop that pays the cold start every
+  // time round. This runs before the logger exists, so it writes directly.
+  onWaiting: (message) => console.warn(message),
 });
 const http = createHttpClient({
   userAgent,

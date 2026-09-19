@@ -95,8 +95,13 @@ jobs:
         run: |
           docker network create holdshort-ci
           docker run -d --name db --network holdshort-ci             -e POSTGRES_USER=holdshort -e POSTGRES_PASSWORD=holdshort -e POSTGRES_DB=holdshort             postgis/postgis:16-3.4
-          for i in $(seq 1 30); do
-            docker exec db pg_isready -U holdshort -d holdshort && break
+          # -h 127.0.0.1 rather than the default: the postgis image restarts
+          # Postgres partway through its own initialisation, and until that
+          # is done pg_isready answers on the unix socket while nothing is
+          # listening on TCP. Asking over TCP is asking the question the
+          # other container will actually be asking.
+          for i in $(seq 1 45); do
+            docker exec db pg_isready -h 127.0.0.1 -U holdshort -d holdshort && break
             sleep 2
           done
           docker run -d --name api --network holdshort-ci -p 3000:3000             -e DATABASE_URL=postgres://holdshort:holdshort@db:5432/holdshort             -e HOLDSHORT_USER_AGENT='holdshort/0.1 (ci@example.com)'             holdshort:ci

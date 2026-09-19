@@ -65,8 +65,44 @@ interface RawRow {
   upstream: unknown;
 }
 
+/**
+ * Migrate, waiting for a database that is not answering yet.
+ *
+ * Boot order is not something a process controls. A container starts beside
+ * its database and wins the race; a hosted database is briefly unreachable
+ * while it wakes. Neither is an error worth dying of — and dying of it on a
+ * host means a crash loop, where every attempt pays the cold start again.
+ *
+ * Only connection failures are retried. A migration that fails because the
+ * SQL is wrong fails immediately, because waiting will not fix it and a
+ * server that eventually starts against a half-migrated schema is worse
+ * than one that refuses to.
+ */
+async function migrateWhenReachable(pool: pg.Pool, options: PostgresOptions): Promise<void> {
+  const attempts = Math.max(1, options.connectAttempts ?? 10);
+  const delay = options.connectRetryMs ?? 2_000;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await migrate(pool);
+      return;
+    } catch (e) {
+      const code = (e as { code?: string }).code;
+      const unreachable = code === 'ECONNREFUSED' || code === 'ENOTFOUND' || code === 'EAI_AGAIN' || code === 'ETIMEDOUT' || code === 'ECONNRESET';
+      if (!unreachable || attempt >= attempts) throw e;
+      options.onWaiting?.(`database not reachable yet (${code}); attempt ${attempt} of ${attempts}`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
 export interface PostgresOptions {
   readonly max?: number;
+  /** Tries before giving up on a database that is not answering. Default 10. */
+  readonly connectAttempts?: number;
+  /** Between those tries. Default two seconds, so the default wait is twenty. */
+  readonly connectRetryMs?: number;
+  /** Called before each wait, so a boot log says what is happening rather than nothing. */
+  readonly onWaiting?: (message: string) => void;
   readonly connectionTimeoutMillis?: number;
   readonly idleTimeoutMillis?: number;
   /**
@@ -113,7 +149,7 @@ export class PostgresStore implements Store {
       idleTimeoutMillis: options.idleTimeoutMillis ?? 30_000,
     });
     pool.on('error', (err) => options.onPoolError?.(err));
-    await migrate(pool);
+    await migrateWhenReachable(pool, options);
     return new PostgresStore(pool);
   }
 
