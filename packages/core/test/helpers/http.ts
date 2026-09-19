@@ -9,6 +9,8 @@ export interface ReplayRoute {
   /** Path under test/fixtures/fetch, or an inline body. */
   readonly file?: string;
   readonly body?: string;
+  /** Response headers, lower-cased as `fetch` gives them. */
+  readonly headers?: Readonly<Record<string, string>>;
 }
 
 export interface ReplayCall {
@@ -30,7 +32,7 @@ export function replayHttp(routes: Readonly<Record<string, ReplayRoute>>): HttpC
       const route = routes[url];
       if (!route) throw new Error(`replayHttp: no recorded response for ${url}`);
       const body = route.file !== undefined ? readFileSync(join(FIXTURES, route.file), 'utf8') : (route.body ?? '');
-      const res: HttpResponse = { status: route.status, body, headers: {} };
+      const res: HttpResponse = { status: route.status, body, headers: route.headers ?? {} };
       return res;
     },
   };

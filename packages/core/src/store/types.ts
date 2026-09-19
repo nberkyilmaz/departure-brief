@@ -109,6 +109,14 @@ export interface ReportStore {
  */
 export interface AirportStore {
   putAirports(airports: readonly Airport[], loadedAt: Date): Promise<{ inserted: number }>;
+  /**
+   * How many airports are loaded, across every cycle.
+   *
+   * Asked at boot, because an instance with an empty airports table cannot
+   * resolve the first waypoint of any flight plan and should load one rather
+   * than answer every request with a failure.
+   */
+  countAirports(): Promise<number>;
   /** By ICAO id (`KJFK`) or FAA id (`JFK`, `N07`), case-insensitive. */
   getAirport(id: string): Promise<Airport | null>;
   /** Airports (newest cycle each) within a great-circle radius, nearest first. */

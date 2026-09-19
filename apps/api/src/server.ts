@@ -5,6 +5,7 @@ import {
   cropPageImage,
   diffBriefings,
   IncompleteSpecError,
+  ingestNeighbourhood,
   ingestStation,
   ingestUpperWinds,
   recordFetchAttempt,
@@ -43,6 +44,9 @@ import { fixedWindow, type RateLimit } from './ratelimit.js';
  */
 const HAZARD_STATION = 'WORLD';
 
+/** The key the instance-wide limit counts under. One bucket, so its name does not matter — only that nothing can change it. */
+const INSTANCE_KEY = 'instance';
+
 export interface ServerDeps {
   readonly store: Store;
   readonly awc: AwcClient;
@@ -55,13 +59,75 @@ export interface ServerDeps {
   /**
    * How often one caller may ask for a briefing. Defaults to 20 a minute;
    * `null` turns it off, for a private instance or a test.
+   *
+   * Keyed on the caller's address, which behind a proxy is only as
+   * trustworthy as {@link ServerDeps.trustProxy} makes it. Courtesy between
+   * visitors, not a defence.
    */
   readonly rateLimit?: RateLimit | null;
+  /**
+   * How often *this instance* will assemble a briefing, for anybody.
+   *
+   * The per-caller limit cannot be the whole answer: behind a proxy its key
+   * is either the proxy, in which case one visitor exhausts everyone's
+   * share, or a header the caller wrote, in which case anybody wanting more
+   * turns can simply claim to be somebody else. This one is keyed on
+   * nothing, so neither is possible. It is the promise the server can
+   * actually keep to the weather services — no more than this many rounds of
+   * requests a minute, whoever is asking. Defaults to 120 a minute; `null`
+   * turns it off.
+   */
+  readonly instanceLimit?: RateLimit | null;
+  /**
+   * Whether `X-Forwarded-For` may be believed, and from whom.
+   *
+   * Behind a managed host the socket's remote address is the proxy, so
+   * without this every visitor on earth shares one rate-limit bucket and
+   * the twenty-first briefing of the minute is refused to whoever asks for
+   * it. The client address is in `X-Forwarded-For` instead — but that
+   * header is written by whoever is calling, so believing it means
+   * believing a stranger about who they are.
+   *
+   * Passed straight to Fastify: `true` to believe the header, or the
+   * proxy's address or CIDR to believe it only from there. A hop count is
+   * deliberately not offered, because Fastify treats one as "trust
+   * nothing" — it cannot check who the immediate peer is, so it fails
+   * closed, and an instance configured that way would look configured and
+   * behave as though it were not.
+   *
+   * {@link ServerDeps.instanceLimit} is what actually protects the upstream
+   * services, precisely because it depends on no header at all.
+   */
+  readonly trustProxy?: boolean | string | string[];
+  /**
+   * Origins allowed to call this API from a browser, matched exactly.
+   *
+   * The published page and the API are on different hosts, so without this
+   * the browser refuses every request the page makes. A list, never `*`:
+   * the point is that a named page may call this, not that anything may.
+   */
+  readonly allowedOrigins?: readonly string[];
+  /**
+   * What the instance holds, for `/api/health` to report. A deployed
+   * instance with no airport data cannot resolve a waypoint, and a health
+   * check that says `ok` while every briefing fails is worse than none.
+   */
+  readonly status?: () => Promise<InstanceStatus> | InstanceStatus;
   /** Where `<type>.wb.json` weight-and-balance specs live (default `aircraft`). */
   readonly aircraftDir?: string;
   /** The document cache written by `holdshort doc ingest` (default `data/docs`); page crops are served from it. */
   readonly docCacheDir?: string;
   readonly logger?: boolean;
+}
+
+/** What an instance can say about its own readiness. */
+export interface InstanceStatus {
+  /** Aerodromes loaded. Zero means no briefing can resolve its first waypoint. */
+  readonly airports: number;
+  /** `loading` while the boot-time snapshot load is still running. */
+  readonly airportData: 'ready' | 'loading' | 'missing';
+  /** Why airport data is missing, when it is. */
+  readonly reason: string | null;
 }
 
 interface BriefRequestBody {
@@ -84,6 +150,10 @@ interface BriefRequestBody {
 export function buildServer(deps: ServerDeps): FastifyInstance {
   const app = Fastify({
     logger: deps.logger ?? false,
+    // See ServerDeps.trustProxy: a hop count, not a blanket "believe the
+    // header", because the left of X-Forwarded-For is whatever the caller
+    // wrote there.
+    trustProxy: deps.trustProxy ?? false,
     // A briefing request is a few hundred bytes; nothing here needs more.
     bodyLimit: 64 * 1024,
     // A request that has not arrived in half a minute is not going to.
@@ -91,13 +161,60 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
   });
   const { store, awc } = deps;
   const briefingLimit = deps.rateLimit === undefined ? fixedWindow({ limit: 20, windowMs: 60_000 }) : deps.rateLimit;
+  const instanceLimit = deps.instanceLimit === undefined ? fixedWindow({ limit: 120, windowMs: 60_000, maxKeys: 1 }) : deps.instanceLimit;
 
-  app.get('/api/health', async () => ({
-    ok: true,
-    notOperational: 'study and planning aid only — not an official briefing',
-    notams: deps.navcanada ? 'navcanada-cfps' : null,
-    model: deps.llm?.description ?? null,
-  }));
+  /**
+   * Whether this instance can do its job, not whether the process is alive.
+   *
+   * `ok` is false while there is no airport data, because in that state
+   * every briefing fails to resolve its first waypoint. A host that restarts
+   * on a failing health check will restart this one, which is right: the
+   * snapshot load is retried on boot.
+   */
+  /*
+   * Cross-origin access, by hand and on purpose.
+   *
+   * What is needed here is small and worth being able to read: an exact
+   * allowlist, no credentials, and the `Vary` that stops a shared cache
+   * handing one origin's response to another. Nothing is allowed by
+   * default, so a private instance behaves as though this were not here.
+   */
+  const allowedOrigins = new Set(deps.allowedOrigins ?? []);
+  if (allowedOrigins.size > 0) {
+    app.addHook('onRequest', async (req, reply) => {
+      const origin = req.headers.origin;
+      if (origin === undefined) return;
+      reply.header('Vary', 'Origin');
+      if (!allowedOrigins.has(origin)) return;
+      reply.header('Access-Control-Allow-Origin', origin);
+      if (req.method === 'OPTIONS') {
+        reply
+          .header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+          .header('Access-Control-Allow-Headers', 'content-type')
+          .header('Access-Control-Max-Age', '86400');
+        return reply.code(204).send();
+      }
+      return;
+    });
+    // Fastify answers an unrouted OPTIONS with 404 before the hook can
+    // reply, so preflight needs somewhere to land.
+    app.options('/api/*', async (_req, reply) => reply.code(204).send());
+  }
+
+  app.get('/api/health', async (_req, reply) => {
+    const status = (await deps.status?.()) ?? null;
+    const ok = status === null || status.airportData === 'ready';
+    if (!ok) reply.code(503);
+    return {
+      ok,
+      notOperational: 'study and planning aid only — not an official briefing',
+      notams: deps.navcanada ? 'navcanada-cfps' : null,
+      model: deps.llm?.description ?? null,
+      airports: status?.airports ?? null,
+      airportData: status?.airportData ?? null,
+      reason: status?.reason ?? null,
+    };
+  });
 
   /**
    * How the forecasts this store has seen turned out, per station. Reading
@@ -135,12 +252,27 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
   });
 
   app.post<{ Body: BriefRequestBody }>('/api/briefings', async (req, reply) => {
-    const retryAfter = briefingLimit?.check(req.ip, Date.now()) ?? null;
-    if (retryAfter !== null) {
+    /*
+     * Two caps, because they answer to different people. The per-caller one
+     * is owed to other visitors and can be evaded by anybody who wants to;
+     * the instance one is owed to the weather services and cannot, because
+     * its key is a constant rather than anything the request said about
+     * itself.
+     */
+    const now = Date.now();
+    const perCaller = briefingLimit?.check(req.ip, now) ?? null;
+    if (perCaller !== null) {
       return reply
         .code(429)
-        .header('Retry-After', String(retryAfter))
-        .send({ error: `too many briefings from this address; try again in ${retryAfter}s` });
+        .header('Retry-After', String(perCaller))
+        .send({ error: `too many briefings from this address; try again in ${perCaller}s` });
+    }
+    const perInstance = instanceLimit?.check(INSTANCE_KEY, now) ?? null;
+    if (perInstance !== null) {
+      return reply
+        .code(429)
+        .header('Retry-After', String(perInstance))
+        .send({ error: `this instance is assembling as many briefings as it will ask the weather services for; try again in ${perInstance}s` });
     }
     const body = req.body ?? ({} as BriefRequestBody);
     let plan, profile, aircraft, asOf: Date;
@@ -168,7 +300,24 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
     try {
       route = await resolveRoute(store, plan);
     } catch (e) {
-      if (e instanceof UnknownWaypointError) return reply.code(422).send({ error: e.message });
+      if (e instanceof UnknownWaypointError) {
+        /*
+         * "No such aerodrome" and "this instance has no aerodromes" are the
+         * same exception and completely different problems. Told the first
+         * when the second is true, a caller checks their spelling of a field
+         * that is spelled correctly.
+         */
+        const status = (await deps.status?.()) ?? null;
+        if (status && status.airportData !== 'ready') {
+          return reply.code(503).send({
+            error:
+              status.airportData === 'loading'
+                ? 'this instance is still loading its airport data; no waypoint can be resolved until it is'
+                : `this instance has no airport data loaded, so no waypoint can be resolved: ${status.reason ?? 'unknown reason'}`,
+          });
+        }
+        return reply.code(422).send({ error: e.message });
+      }
       throw e;
     }
     if (body.fetch !== false) {
@@ -178,6 +327,28 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
       const points = [...route.points, ...(route.alternate ? [route.alternate.point] : [])];
       const stations = [...new Set(points.map((p) => p.waypoint.airport?.icaoId ?? null).filter((s): s is string => s !== null))];
       for (const id of stations) await ingestStation({ store, awc }, id);
+      /*
+       * Then the neighbourhood of any field that came back with nothing
+       * current — because a field that is not reporting borrows from the
+       * nearest one that is, and a store holding only the fields named in
+       * the plan has nothing to borrow. Asking is what makes the borrowing
+       * work on a live instance at all; it is skipped for every field that
+       * is reporting normally, which is most of them most of the time.
+       */
+      for (const point of points) {
+        try {
+          // Asked per waypoint rather than per area: two waypoints in one
+          // area is the second one finding the first one's answer already
+          // in the store, which is the freshness window doing its job and
+          // does not need a second list of what has been asked.
+          const result = await ingestNeighbourhood({ store, awc }, point.waypoint.position, point.waypoint.airport?.icaoId ?? null, asOf);
+          if (result.asked) req.log.info(`${result.reports} reporting stations around ${point.waypoint.id}`);
+        } catch (e) {
+          // The field's own reading, however old, is still there to fall
+          // back on, and it says how old it is.
+          req.log.warn({ err: e }, `could not fetch the reporting stations around ${point.waypoint.id}`);
+        }
+      }
       /*
        * Upper winds are published for a few dozen places, almost never the
        * aerodromes on a light aircraft's route, so they are fetched for the

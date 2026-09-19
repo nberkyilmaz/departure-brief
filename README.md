@@ -60,6 +60,9 @@ above works end to end.
   what each step builds, and what "done" means for it.
 - **[`docs/worklog.md`](docs/worklog.md)** — chronological log of everything
   done so far, wrong turns included. Append an entry every session.
+- **[`docs/deploy.md`](docs/deploy.md)** — putting it on a host: the two free
+  accounts needed, what each free tier actually costs, what behaves
+  differently on a host than on a laptop, and the DNS for a domain.
 
 ## Design rules
 

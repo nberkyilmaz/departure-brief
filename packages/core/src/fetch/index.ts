@@ -1,7 +1,7 @@
 export { createHttpClient, expectOk, HttpError } from './http.js';
 export type { HttpClient, HttpClientOptions, HttpRequestInit, HttpResponse } from './http.js';
 export { AWC_BASE_URL, AwcClient, AwcError } from './awc.js';
-export type { AwcFetch, AwcMetarRecord, AwcTafRecord } from './awc.js';
+export type { AwcFetch, AwcMetarRecord, AwcTafRecord, LatLonBox } from './awc.js';
 export { FAA_NOTAM_BASE_URL, FaaNotamClient, NotamError } from './notam.js';
 export type { NotamCredentials, NotamFetch } from './notam.js';
 export { ingestStation } from './ingest.js';
@@ -16,3 +16,7 @@ export { ingestUpperWinds, upperWindCandidates, MAX_UPPERWIND_SITES } from './wi
 export type { UpperWindIngest } from './winds.js';
 export { decideFetch, recordFetchAttempt, shouldFetch, DEFAULT_FRESHNESS_MS } from './freshness.js';
 export type { FreshnessDecision, FreshnessStore } from './freshness.js';
+export { downloadOurAirports, ensureAirportData, OURAIRPORTS_BASE, SEED_COUNTRIES } from './seed.js';
+export type { SeedOptions, SeedResult, SeedState, SeedStore } from './seed.js';
+export { ingestNeighbourhood, neighbourhoodCell, NEIGHBOURHOOD_FRESHNESS_MS } from './neighbourhood.js';
+export type { NeighbourhoodResult } from './neighbourhood.js';

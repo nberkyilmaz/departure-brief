@@ -36,7 +36,12 @@ if (available) {
     const pool = new pg.Pool({ connectionString: testUrl });
     pools.push(pool);
     await migrate(pool);
-    await pool.query('truncate forecast_outcomes, forecast_checks, notam_assessments, report_fetches, decoded_reports, raw_reports, airports, briefings');
+    // Every table, including fetch_attempts — it was added after this list
+    // and left out of it, which passes on a fresh database and fails the
+    // second time the suite is run against the same one.
+    await pool.query(
+      'truncate forecast_outcomes, forecast_checks, notam_assessments, report_fetches, fetch_attempts, decoded_reports, raw_reports, airports, briefings',
+    );
     // Sanity check on the JSON backfill migration: a row inserted with no
     // `source` in its document must come back with one.
     await pool.query(

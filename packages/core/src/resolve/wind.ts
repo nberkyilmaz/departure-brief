@@ -12,6 +12,7 @@ import type { DecodedUpperWind } from '../decode/upperwind/types.js';
 import { windAtAltitude, type WindAloft } from '../decode/upperwind/interpolate.js';
 import { distanceNm, type LatLon } from '../domain/geo.js';
 import { nm, type NauticalMiles } from '../domain/units.js';
+import { reviveUpperWind } from '../store/revive.js';
 import type { RawReport, Store } from '../store/types.js';
 
 /**
@@ -33,7 +34,10 @@ export interface WaypointWind {
 }
 
 function decodedOf(report: RawReport, stored: unknown): DecodedUpperWind {
-  return stored ? (stored as DecodedUpperWind) : decodeUpperWind(report.body);
+  // Revived, not cast: a stored record's dates crossed JSON on the way in
+  // and come back as strings, and the use-window comparison below calls
+  // getTime on them.
+  return stored ? reviveUpperWind(stored) : decodeUpperWind(report.body);
 }
 
 /**

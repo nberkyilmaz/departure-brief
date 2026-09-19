@@ -1,0 +1,66 @@
+# Hold Short on Render, as a blueprint.
+#
+# Everything here is on free plans. What that buys and what it costs is
+# written down rather than discovered later:
+#
+#   - The web service sleeps after fifteen minutes with no requests, and the
+#     first request after that waits about fifty seconds for it to wake. A
+#     briefing is not something anybody asks for once a minute, so most
+#     visits will pay that.
+#   - Free Postgres on Render expires after thirty days. That is why this
+#     blueprint does NOT create a database: use Neon's free tier instead,
+#     which does not expire, and paste its connection string into
+#     DATABASE_URL. Losing the database means losing every stored briefing —
+#     they are content-addressed and immutable, and the whole point of them
+#     is that the one you flew with is still there afterwards.
+#   - The instance holds 512 MB. The airport snapshot is loaded in one pass
+#     on first boot and the process settles well under that, but this is
+#     where to look first if it restarts on its own.
+#
+# On first boot against an empty database the service downloads the
+# OurAirports snapshot (about 17 MB, some 27,000 aerodromes across Canada
+# and the United States) and loads it. Until that finishes /api/health
+# answers 503 with airportData: loading, and a briefing asked for in the
+# meantime is told so rather than being told its aerodrome does not exist.
+# It happens once per database, not once per deploy.
+
+services:
+  - type: web
+    name: holdshort-api
+    runtime: docker
+    plan: free
+    region: ohio # Nearest of Render's regions to southern Ontario.
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      # Paste the Neon connection string here in the dashboard. Marked sync:
+      # false so it is never written into this file.
+      - key: DATABASE_URL
+        sync: false
+
+      # Put a real contact address in this. The AWC and NAV CANADA both ask
+      # for one, and it is the difference between being rate-limited politely
+      # and being blocked.
+      - key: HOLDSHORT_USER_AGENT
+        sync: false
+
+      # Render terminates TLS and proxies to this service, so the socket's
+      # remote address is Render's, not the visitor's. Without this every
+      # visitor shares one rate-limit bucket. With it the server believes
+      # X-Forwarded-For — which a caller can write whatever they like into,
+      # and is why there is a second cap keyed on nothing at all.
+      - key: TRUST_PROXY
+        value: 'true'
+
+      # Origins allowed to call this API from a browser, comma separated.
+      # The published page is on GitHub Pages, which is a different origin,
+      # so without its name here the browser refuses every request it makes.
+      # Add the custom domain alongside it once there is one.
+      - key: HOLDSHORT_ALLOWED_ORIGINS
+        value: https://nberkyilmaz.github.io
+
+      # No model is called in a request path, ever. Unset means NOTAMs are
+      # fetched, decoded, filtered and shown, but not ranked — which is the
+      # deterministic half, and the half that matters.
+      - key: HOLDSHORT_LLM
+        value: ''

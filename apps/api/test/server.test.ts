@@ -46,6 +46,12 @@ for (const id of ['KTEB', 'N07', 'KHPN', 'KJFK']) {
 // Hazard advisories: nothing in force, which is what the service says most days.
 routes[`${AWC_BASE_URL}/isigmet?format=json`] = { status: 204 };
 routes[`${AWC_BASE_URL}/airsigmet?format=json`] = { status: 204 };
+/*
+ * The area around N07, which has no identifier of its own and so no reports
+ * to ask for — the one field in this plan that has to borrow. Recorded from
+ * the AWC, 52 reporting stations.
+ */
+routes[`${AWC_BASE_URL}/metar?bbox=39,-76.35,42,-72.65&format=json`] = { status: 200, file: 'awc/metar-bbox-N07.json' };
 
 async function makeApp(staticDir: string | null = null) {
   const store = new MemoryStore();
@@ -138,18 +144,27 @@ describe('POST /api/briefings', () => {
      * One METAR and one TAF request in total, for a plan naming five points.
      * A repeated waypoint was never a second request; the first response
      * carried KHPN and KJFK as well as KTEB, so by the time those came round
-     * the freshness window already had them. Then the two hazard feeds,
-     * which are not per station: they are the whole world, once, however
-     * many aerodromes the plan names.
+     * the freshness window already had them.
+     *
+     * Then one box. N07 has no ICAO identifier, so nothing is filed under it
+     * and no amount of asking for "N07" would produce a report — it is the
+     * one point here that has to borrow, and the box is how the store learns
+     * who is reporting near it. The three fields that report for themselves
+     * cost nothing extra: their own observations are current, so nothing has
+     * to stand in for them.
+     *
+     * Then the two hazard feeds, which are not per station: they are the
+     * whole world, once, however many aerodromes the plan names.
      */
     expect(calls).toEqual([
       `${AWC_BASE_URL}/metar?ids=KTEB&format=json`,
       `${AWC_BASE_URL}/taf?ids=KTEB&format=json`,
+      `${AWC_BASE_URL}/metar?bbox=39,-76.35,42,-72.65&format=json`,
       `${AWC_BASE_URL}/isigmet?format=json`,
       `${AWC_BASE_URL}/airsigmet?format=json`,
     ]);
-    // N07 has no ICAO identifier, so there are no reports filed under it to ask for.
-    expect(calls.some((u) => u.includes('N07'))).toBe(false);
+    // Never by name: there are no reports filed under N07 to ask for.
+    expect(calls.some((u) => u.includes('ids=N07'))).toBe(false);
   });
 
   it('asks for the hazard feeds once, not once per briefing', async () => {

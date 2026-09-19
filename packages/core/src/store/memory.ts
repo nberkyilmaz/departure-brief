@@ -79,6 +79,10 @@ export class MemoryStore implements Store {
     return { inserted };
   }
 
+  async countAirports(): Promise<number> {
+    return this.airports.size;
+  }
+
   async getAirport(id: string): Promise<Airport | null> {
     const wanted = id.trim().toUpperCase();
     let best: Airport | null = null;

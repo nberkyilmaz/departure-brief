@@ -98,8 +98,14 @@ export function storeContract(name: string, make: () => Promise<Store>): void {
       const store = await make();
       try {
         const airports = readNasrDirectory(join(FIXTURES, 'nasr', '2026-09-03'));
+        // An instance asks this at boot to decide whether to load a snapshot;
+        // getting it wrong either leaves it unable to resolve any waypoint or
+        // has it download 17 MB on every restart.
+        expect(await store.countAirports()).toBe(0);
         expect(await store.putAirports(airports, t0)).toEqual({ inserted: airports.length });
+        expect(await store.countAirports()).toBe(airports.length);
         expect(await store.putAirports(airports, t1)).toEqual({ inserted: 0 });
+        expect(await store.countAirports()).toBe(airports.length);
         const jfk = await store.getAirport('kjfk');
         expect(jfk).toEqual(airports.find((a) => a.faaId === 'JFK'));
         expect((await store.getAirport('JFK'))?.icaoId).toBe('KJFK');
@@ -125,6 +131,15 @@ export function storeContract(name: string, make: () => Promise<Store>): void {
         expect((await store.getAirport('CYSN'))?.source).toBe('ourairports');
         expect((await store.getAirport('CYSN'))?.runways[1]?.ends[0]?.trueHeading).toBe(52.7);
         expect((await store.getAirport('CYKF'))?.runways.map((r) => r.id).sort()).toEqual(['08/26', '14/32']);
+        // Counted across every cycle, not per lookup: the question is whether
+        // anything is loaded at all.
+        expect(await store.countAirports()).toBeGreaterThan(airports.length);
+        // A batched load writes the same rows as one at a time, including the
+        // ones a second load has to skip.
+        const batch = Array.from({ length: 1200 }, (_, i) => ({ ...airports[0]!, siteNo: `batch-${i}`, cycle: '2099-01-01' }));
+        expect(await store.putAirports(batch, t1)).toEqual({ inserted: batch.length });
+        expect(await store.putAirports(batch, t1)).toEqual({ inserted: 0 });
+
         const near = await store.listAirportsNear(43.19, -79.17, 40);
         expect(near[0]?.icaoId).toBe('CYSN');
         expect(near.map((a) => a.icaoId)).toContain('CYHM');

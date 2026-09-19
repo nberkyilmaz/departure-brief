@@ -9,6 +9,7 @@
 import { decodeSigmet, SIGMET_DECODER_VERSION } from '../decode/sigmet/decode.js';
 import type { DecodedSigmet } from '../decode/sigmet/types.js';
 import type { RawReport, Store } from '../store/types.js';
+import { reviveSigmet } from '../store/revive.js';
 
 /** How many to consider. The world carries a few hundred at once. */
 export const MAX_ADVISORIES = 500;
@@ -29,7 +30,9 @@ export async function hazardsKnownBy(store: Store, asOf: Date, until: Date): Pro
   const out: HazardAdvisory[] = [];
   for (const report of reports) {
     const stored = await store.getDecoded(report.sha256, SIGMET_DECODER_VERSION);
-    const decoded = stored ? (stored.decoded as DecodedSigmet) : decodeSigmet(report.body);
+    // Revived rather than cast: the validity window is two stored Dates,
+    // which JSON turned into strings on the way into the store.
+    const decoded = stored ? reviveSigmet(stored.decoded) : decodeSigmet(report.body);
     if (decoded.validTo && decoded.validTo.getTime() < asOf.getTime() && decoded.validTo.getTime() < until.getTime()) continue;
     out.push({ report, decoded });
   }

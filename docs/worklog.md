@@ -17,21 +17,28 @@ Related: `docs/plan.md` is the sequence *ahead*; this file is the sequence
 say, compares them against the limits the pilot set, and puts what deserves
 a second look first. Where a summary is needed it is the flight category.
 
-**The site** carries both sides of the border: 1,667 aerodromes, every
+**The page** carries both sides of the border: 1,667 aerodromes, every
 station reporting at 00:52Z on 19 September, upper winds for seventeen
 sites, NOTAMs for six fields. Eight routes, a page per aerodrome, the whole
 pipeline running in the browser.
 
-**Done of the owner's list:** the nearest reporting station when a field
-sleeps; report age in colour; a page per aerodrome.
+**The API is ready to go live.** It was not before — four things behaved
+differently on a host than on a laptop and each was a live instance that
+would have looked fine and not been. A container built from this repository,
+pointed at an empty database, now loads 27,560 aerodromes by itself and
+serves a briefing of CYSN that reads KIAG at eleven miles. Proved, not
+assumed: session 21.
 
-**Left:** POH takeoff and landing distances — see session 20, which changed
-what that feature can honestly be; the API live on a host; a domain.
+**Waiting on the owner:** a Neon account, a Render account, and a domain —
+none of which anybody else can create. `docs/deploy.md` has the steps and
+what each free tier actually costs.
 
-**Still open from the audit:** nothing loads the airports table on a
-deployed instance, `pg.Pool` has no error listener, the rate limiter keys on
-a proxy IP, the NOTAM eval gate cannot fail on model quality, CFPS NOTAMs
-ignore the freshness window, and there is no fuel planning.
+**Left to build:** POH takeoff and landing distances, in the constrained
+form session 20 established.
+
+**Still open from the audit:** the NOTAM eval gate cannot fail on model
+quality, CFPS NOTAMs ignore the freshness window, and there is no fuel
+planning (CARs 602.88).
 
 ---
 
@@ -1587,3 +1594,134 @@ only version that is honest.
 
 - 760 tests across three workspaces, typecheck clean.
 - Eight routes; a field is a page; the root is a way in rather than a form.
+
+---
+
+## Session 21 — 2026-09-19 — Making it survive a host
+
+The owner asked for the API live and a domain. Most of this session is the
+first, because the second needs an account only he can open. What the work
+actually was: every place the code assumed it was running on a laptop.
+
+### The four that would have shipped broken
+
+235. **Nothing loaded the airports table.** The only way in was to download
+     two CSVs by hand and run `holdshort ourairports <dir>`, which is fine
+     at a keyboard and impossible on a host — a deployed instance starts
+     with an empty database and no shell, and an empty airports table is not
+     slow, it is broken: a briefing needs a field's position before it can
+     ask anything about it, so every request would have failed at its first
+     waypoint. `ensureAirportData` now fetches the OurAirports snapshot on
+     first boot, 27,560 aerodromes across Canada and the United States,
+     once per database. It runs *after* the port opens: done before, a
+     first boot is a minute in which the host sees no port and concludes the
+     deploy failed. `/api/health` answers 503 with `airportData: loading`
+     until it finishes, and a briefing asked for meanwhile is told that
+     rather than told its aerodrome does not exist — the same exception,
+     completely different problems, and told the first a pilot checks their
+     spelling of a field that is spelled correctly.
+236. **The pool had no `error` listener.** Any hosted database drops a
+     connection that has been idle, `pg` reports it on the pool with nothing
+     awaiting it, and an unhandled `error` event is a process-level throw.
+     The first idle drop would have taken the server down.
+237. **Loading airports was one round trip per row.** 27,000 of them: a few
+     seconds over a local socket, several minutes against a database in
+     another region. Batched 500 to a statement, still one transaction.
+238. **Behind a proxy every visitor is the proxy.** So one visitor exhausts
+     everyone's share. The obvious fix — believe `X-Forwarded-For` — means
+     believing a header the caller wrote, so anybody wanting more turns just
+     claims to be somebody else. Fastify's numeric hop count is not an
+     answer either: in this version it fails closed and trusts nothing, so
+     an instance configured that way looks configured and behaves as though
+     it were not. What is there instead is two caps. Per caller, 20 a
+     minute, a courtesy between visitors, evadable. Per instance, 120 a
+     minute, keyed on a constant so nothing in the request can change it —
+     the promise the server can actually keep to the weather services.
+
+### The one the snapshot was hiding
+
+239. **A sleeping field had nothing to borrow.** `observationAt` stands the
+     nearest current observation in for a field that is not reporting, which
+     works on the page because the recorded snapshot holds every station. A
+     live instance fetches only the stations the flight plan names — so
+     asked about CYSN at night it fetched CYSN, found nothing current,
+     looked for a neighbour and found nothing at all. The feature the owner
+     asked for by name, silently absent on exactly the deployment it was
+     written for. Found by running it: the first live briefing borrowed CYKF
+     at 55 nm, because CYKF was the destination and therefore the only other
+     station in the store.
+
+     The fix had to answer "which fields near here report?", and nothing in
+     the airport data answers it. Within 60 nm of CYSN the nine nearest
+     fields with an ICAO identifier are hospital helipads and private
+     strips; KIAG is tenth. Runway length is no better — CYSN has 5,000 ft of
+     asphalt and closes at dusk, and a marine station on a pier with no
+     runway at all reports every hour. So it is not guessed: the AWC's METAR
+     endpoint takes a bounding box, and one request returns whichever
+     stations near there are reporting, which is the service answering the
+     question rather than this code inferring it. Asked only when a field
+     has nothing current of its own, once an hour per one-degree cell,
+     however many briefings pass through it.
+
+### The one only a real database shows
+
+240. **JSON has no date.** Decoded records are stored as JSON, so a `Date`
+     goes in and an ISO string comes back — and every type still calls it a
+     `Date`, because the read site casts. In memory the cast is harmless,
+     the object never left the process, and all 760 tests passed. Against
+     Postgres the *second* briefing died: the first decoded its upper winds
+     in process and worked, the second read them back and threw
+     `useFrom?.value.getTime is not a function`, a 500 for the whole
+     request. Upper winds and hazard advisories are the only two decoders
+     that put a `Date` inside their output — METAR and TAF store the
+     day-and-hour groups as written and resolve them against a reference —
+     and both are revived at the read site now. The regression test round
+     trips through `JSON.parse(JSON.stringify(...))`, which is exactly what
+     a JSONB column does, and it fails without the fix.
+241. And a smaller one of the same family: the Postgres contract test's
+     `truncate` list predates migration 0009 and omitted `fetch_attempts`,
+     so the suite passed on a fresh database and failed the second time it
+     was run against the same one. CI gets a clean container every time,
+     which is why nobody noticed.
+
+### Proved rather than asserted
+
+242. A container built from this repository, pointed at an empty Postgres:
+     migrates, downloads the snapshot, loads 27,560 aerodromes, serves the
+     web app, health goes green, and a briefing of CYSN → CYKF comes back
+     saying **"CYSN is not reporting at this hour; the conditions above are
+     KIAG's, 11 nm away."** That is the owner's own example, live, from real
+     data, through the image the host will run.
+243. CI builds that image on every push and starts it against a real
+     database, so a Dockerfile that would fail on deploy fails on push.
+
+### The domain
+
+244. Checked against the registries rather than a search box. `holdshort.com`,
+     `.org`, `.net`, `.dev` and `.app` are all taken. Two things worth acting
+     on, both verified directly at RDAP on 19 September:
+     - **`holdshort.ca` is in `pending delete`** — expired 2026-08-04, out of
+       redemption 2026-09-15, now on CIRA's To Be Released list. CIRA
+       releases those Wednesdays at 19:00 UTC; the expected session is
+       **Wednesday 23 September**. Webnames.ca takes TBR backorders free and
+       charges only if the catch succeeds. A free lottery ticket, not a plan
+       — CIRA picks at random between registrars requesting the same name.
+     - **`holdshort.page` is available**, $10.20 a year at Cloudflare
+       Registrar, first year and every year. Cloudflare sells at wholesale
+       with no promotional first year, which matters: `holdshort.xyz` is
+       $1.00 to register at Namecheap and $19.48 to renew.
+245. `docs/deploy.md` carries the whole thing: the two accounts to create,
+     what each free tier actually costs (Render sleeps after fifteen minutes
+     and takes fifty seconds to wake; Render's free Postgres is *deleted*
+     after thirty days, which is why the blueprint does not create one), the
+     exact DNS records, and the three things in this repository that must
+     change when a domain is attached — the most important being
+     `pages.yml`'s `VITE_BASE`, which is `/holdshort/` for a project site
+     and would 404 every asset on a custom domain.
+
+### State at end of session 21
+
+- 808 tests across three workspaces, all passing against real Postgres.
+- A container that boots from nothing into a working instance.
+- Everything remaining on the API is an account only the owner can open.
+

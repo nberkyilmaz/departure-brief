@@ -11,6 +11,14 @@ import { expectOk, type HttpClient } from './http.js';
  */
 export const AWC_BASE_URL = 'https://aviationweather.gov/api/data';
 
+/** A latitude/longitude rectangle, as the AWC's `bbox` parameter wants it. */
+export interface LatLonBox {
+  readonly minLat: number;
+  readonly minLon: number;
+  readonly maxLat: number;
+  readonly maxLon: number;
+}
+
 export interface AwcMetarRecord {
   readonly icaoId: string;
   readonly rawOb: string;
@@ -96,6 +104,32 @@ export class AwcClient {
         issuedAt: new Date(r.obsTime * 1000),
         upstream: r,
       });
+    });
+    return { request: url, reports };
+  }
+
+  /**
+   * Every station reporting inside a box, rather than the ones asked for.
+   *
+   * There is no list anywhere of which aerodromes report and which do not.
+   * A field's identifier, its runways and its size all suggest an answer
+   * and none of them give one — CYSN has a 5,000 ft paved runway and stops
+   * at dusk, and a marine station on a pier with no runway at all reports
+   * every hour. The only reliable way to find out who is reporting near a
+   * place is to ask the service which stations near that place reported,
+   * which is what this does: one request, and the answer is data rather
+   * than a guess about equipment.
+   *
+   * Used when a field's own observation is missing or stale and something
+   * nearby has to stand in for it.
+   */
+  async metarsInBox(box: LatLonBox): Promise<AwcFetch> {
+    const round = (n: number) => Number(n.toFixed(2));
+    const url = `${this.baseUrl}/metar?bbox=${round(box.minLat)},${round(box.minLon)},${round(box.maxLat)},${round(box.maxLon)}&format=json`;
+    const records = await getJsonArray(this.http, url);
+    const reports = records.map((r) => {
+      if (!isMetar(r)) throw new AwcError('METAR record missing icaoId/rawOb/obsTime', url);
+      return rawReport({ kind: 'metar', source: 'awc', station: r.icaoId, body: r.rawOb, issuedAt: new Date(r.obsTime * 1000), upstream: r });
     });
     return { request: url, reports };
   }

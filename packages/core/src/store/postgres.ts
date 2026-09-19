@@ -11,6 +11,13 @@ import type { DecodedRow, FetchAttempt, FetchEvent, ListRawQuery, RawReport, Rep
 
 export const DEFAULT_DATABASE_URL = 'postgres://holdshort:holdshort@localhost:5433/holdshort';
 
+/**
+ * Airports per insert statement. Thirteen parameters each, so this is 6,500
+ * of the 65,535 a Postgres statement allows — far enough under that a wider
+ * airports table later does not quietly break the load.
+ */
+const AIRPORT_BATCH = 500;
+
 const MIGRATIONS_DIR = join(dirname(fileURLToPath(import.meta.url)), 'migrations');
 
 /**
@@ -58,6 +65,18 @@ interface RawRow {
   upstream: unknown;
 }
 
+export interface PostgresOptions {
+  readonly max?: number;
+  readonly connectionTimeoutMillis?: number;
+  readonly idleTimeoutMillis?: number;
+  /**
+   * Called when the pool reports an error on an idle connection. Default is
+   * silence: the error is already handled by ignoring it, and a store that
+   * wrote to the console would be doing the caller's logging for it.
+   */
+  readonly onPoolError?: (err: Error) => void;
+}
+
 interface DecodedDbRow {
   sha256: string;
   kind: ReportKind;
@@ -69,9 +88,31 @@ interface DecodedDbRow {
 export class PostgresStore implements Store {
   constructor(private readonly pool: pg.Pool) {}
 
-  /** Connect and bring the schema up to date. */
-  static async connect(databaseUrl = process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL): Promise<PostgresStore> {
-    const pool = new pg.Pool({ connectionString: databaseUrl });
+  /**
+   * Connect and bring the schema up to date.
+   *
+   * The `error` listener is not optional. A pooled connection sitting idle
+   * is dropped eventually by anything between here and the database — a
+   * hosted Postgres closing it after a few minutes, a load balancer, a
+   * laptop's network changing — and `pg` reports that on the pool itself,
+   * asynchronously, with nothing awaiting it. An unhandled `error` event on
+   * an EventEmitter is a process-level throw, so without this the first
+   * dropped idle connection takes the whole server down. The connection is
+   * already gone; the pool will open another when one is next asked for.
+   * There is nothing to do but say so.
+   */
+  static async connect(databaseUrl = process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL, options: PostgresOptions = {}): Promise<PostgresStore> {
+    const pool = new pg.Pool({
+      connectionString: databaseUrl,
+      // A free hosted Postgres allows few connections, and this process is
+      // one of several sharing them.
+      max: options.max ?? Number(process.env.PGPOOLSIZE ?? 8),
+      // Do not wait forever on a database that is not answering; a request
+      // that fails at once can say so.
+      connectionTimeoutMillis: options.connectionTimeoutMillis ?? 10_000,
+      idleTimeoutMillis: options.idleTimeoutMillis ?? 30_000,
+    });
+    pool.on('error', (err) => options.onPoolError?.(err));
     await migrate(pool);
     return new PostgresStore(pool);
   }
@@ -167,17 +208,34 @@ export class PostgresStore implements Store {
     };
   }
 
+  /**
+   * Load a snapshot, in batches of {@link AIRPORT_BATCH} rows per statement.
+   *
+   * A full OurAirports snapshot of Canada and the United States is about
+   * 26,000 airports. One statement each is 26,000 round trips, which over a
+   * local socket is a few seconds and against a hosted database on another
+   * continent is several minutes — long enough that a first boot looks hung.
+   * The whole load is still one transaction: a snapshot is present or it is
+   * not, never half.
+   */
   async putAirports(airports: readonly Airport[], loadedAt: Date): Promise<{ inserted: number }> {
     const client = await this.pool.connect();
     let inserted = 0;
     try {
       await client.query('begin');
-      for (const a of airports) {
+      for (let i = 0; i < airports.length; i += AIRPORT_BATCH) {
+        const batch = airports.slice(i, i + AIRPORT_BATCH);
+        const values: unknown[] = [];
+        const rows = batch.map((a, n) => {
+          values.push(a.source, a.cycle, a.siteNo, a.siteType, a.faaId, a.icaoId, a.name, a.lat, a.lon, a.elevation, a.magneticVariation, JSON.stringify(a), loadedAt);
+          const base = n * 13;
+          return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10}, $${base + 11}, $${base + 12}, $${base + 13})`;
+        });
         const res = await client.query(
           `insert into airports (source, cycle, site_no, site_type, faa_id, icao_id, name, lat, lon, elevation_ft, mag_var_deg, airport, loaded_at)
-           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+           values ${rows.join(', ')}
            on conflict (source, cycle, site_no, site_type) do nothing`,
-          [a.source, a.cycle, a.siteNo, a.siteType, a.faaId, a.icaoId, a.name, a.lat, a.lon, a.elevation, a.magneticVariation, JSON.stringify(a), loadedAt],
+          values,
         );
         inserted += res.rowCount ?? 0;
       }
@@ -189,6 +247,11 @@ export class PostgresStore implements Store {
       client.release();
     }
     return { inserted };
+  }
+
+  async countAirports(): Promise<number> {
+    const res = await this.pool.query<{ n: string }>('select count(*)::text as n from airports');
+    return Number(res.rows[0]?.n ?? 0);
   }
 
   async getAirport(id: string): Promise<Airport | null> {

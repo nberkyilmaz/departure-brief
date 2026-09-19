@@ -69,3 +69,51 @@ jobs:
 
       - name: Build the web app
         run: npm run build -w apps/web
+
+  # The image the host runs, built here so a Dockerfile that would fail on
+  # deploy fails on push instead. Not pushed anywhere: Render builds its own
+  # from this same file, and what is being proved is that it can.
+  image:
+    name: Container image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: holdshort:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start it against a database and check it answers
+        run: |
+          docker network create holdshort-ci
+          docker run -d --name db --network holdshort-ci             -e POSTGRES_USER=holdshort -e POSTGRES_PASSWORD=holdshort -e POSTGRES_DB=holdshort             postgis/postgis:16-3.4
+          for i in $(seq 1 30); do
+            docker exec db pg_isready -U holdshort -d holdshort && break
+            sleep 2
+          done
+          docker run -d --name api --network holdshort-ci -p 3000:3000             -e DATABASE_URL=postgres://holdshort:holdshort@db:5432/holdshort             -e HOLDSHORT_USER_AGENT='holdshort/0.1 (ci@example.com)'             holdshort:ci
+          # The port opens before the airport snapshot is loaded, so what is
+          # proved here is that the process starts, migrates a real database
+          # and answers — not that it has finished booting. It reports 503
+          # with airportData: loading until the snapshot is in, which on a
+          # fresh database is the correct answer and the one being checked.
+          for i in $(seq 1 30); do
+            body=$(curl -s http://127.0.0.1:3000/api/health || true)
+            case "$body" in *'"airportData"'*) echo "$body"; exit 0;; esac
+            sleep 2
+          done
+          echo "the container never answered /api/health"
+          docker logs api
+          exit 1
+
+      - name: Logs, when it did not
+        if: failure()
+        run: docker logs api || true
