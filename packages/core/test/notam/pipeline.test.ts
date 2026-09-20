@@ -455,4 +455,35 @@ describe('scoreAssessments', () => {
     expect(s2.agreement).toBe(0.5);
     expect(s2.disagreements).toEqual([{ notamId: 'J5066/26', expected: 'advisory', actual: 'irrelevant' }]);
   });
+
+  it('a model that declines to answer does not keep its agreement', async () => {
+    /*
+     * The hole this closes: agreement is computed over the NOTAMs the
+     * model answered usably, so a model whose citations never verify
+     * answers nothing, disagrees with nothing, and scored 100%. The one
+     * NOTAM here that still scores is settled by a deterministic rule —
+     * the runway closure — which is exactly the kind of "answer" a bad
+     * model would be carried by.
+     */
+    const store = await seededStore();
+    const resolved = await resolveFlight(store, { ...plan, departureTime: '2026-09-14T15:00:00.000Z' }, new Date('2026-09-12T20:00Z'));
+    const evasive = stub({ ...goodAnswer, relevance: 'advisory', cited_span: 'THIS TEXT IS IN NO NOTAM' });
+    const nb = await notamsForFlight({ store, navcanada: new NavCanadaClient(replayHttp(cfpsRoutes)), provider: evasive, model: 'm', now: () => new Date('2026-09-12T20:00Z') }, resolved, 'C172');
+    const score = scoreAssessments(
+      {
+        flight: 'demo-cysn-cykf',
+        description: 'test',
+        labels: [
+          { notamId: 'J5067/26', relevance: 'critical', category: 'runway', labelledBy: 'test', note: 'settled by rule, never asked' },
+          { notamId: 'J5066/26', relevance: 'advisory', category: 'taxiway', labelledBy: 'test', note: null },
+        ],
+      },
+      nb.items,
+    );
+    // Agreement alone says this model is perfect.
+    expect(score.missing).toBe(1);
+    expect(score.agreement).toBe(1);
+    // Coverage says it answered half of what it was asked. The gate reads both.
+    expect(score.coverage).toBe(0.5);
+  });
 });

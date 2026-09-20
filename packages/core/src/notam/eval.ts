@@ -31,7 +31,19 @@ export interface EvalScore {
   readonly missing: number;
   /** Labelled NOTAMs the deterministic filter put out of scope, so the model was never asked; not a model error either way. */
   readonly filtered: number;
+  /** Of the NOTAMs the model answered usably, the fraction it answered as the labels say. */
   readonly agreement: number;
+  /**
+   * Of the NOTAMs the model was asked about, the fraction it answered
+   * usably at all.
+   *
+   * Without this the gate has a hole: `agreement` is computed over
+   * answered items only, so a model that answers the five easy NOTAMs
+   * correctly and returns an unverifiable citation for the other
+   * twenty-six scores 100%. Declining to answer is not agreeing, and a
+   * model that gets worse by answering less must be seen to get worse.
+   */
+  readonly coverage: number;
   readonly perClass: Readonly<Record<Relevance, { precision: number; recall: number; support: number }>>;
   readonly confusion: Readonly<Record<Relevance, Readonly<Record<Relevance, number>>>>;
   readonly categoryAgreement: number | null;
@@ -83,6 +95,7 @@ export function scoreAssessments(set: LabelledSet, items: readonly RankedNotam[]
     missing,
     filtered,
     agreement: total - missing - filtered > 0 ? agree / (total - missing - filtered) : 0,
+    coverage: total - filtered > 0 ? (total - filtered - missing) / (total - filtered) : 0,
     perClass,
     confusion,
     categoryAgreement: catTotal > 0 ? catAgree / catTotal : null,

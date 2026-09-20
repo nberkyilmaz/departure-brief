@@ -92,13 +92,17 @@ async function recordingsExist(): Promise<boolean> {
 const haveRecordings = await recordingsExist();
 
 describe.skipIf(!haveRecordings)(`NOTAM relevance eval — ${model}, prompt v${PROMPT_VERSION}`, () => {
-  it('agrees with the labelled set on at least 75% of assessed NOTAMs and never calls a runway closure irrelevant', async () => {
+  it('answers at least 90% of what it is asked, agrees with the labels on at least 75% of those, and never calls a runway closure irrelevant', async () => {
     const store = await seeded();
     const resolved = await resolveFlight(store, plan, new Date('2026-09-12T20:00:00Z'));
     const cfps = new NavCanadaClient(replayHttp(Object.fromEntries(['CYSN', 'CYKF', 'CYHM'].map((s) => [`${NAVCANADA_CFPS_BASE_URL}?site=${s}&alpha=notam`, { status: 200, file: `../notam/navcanada/2026-09-12/${s}.json` }]))));
     const nb = await notamsForFlight({ store, navcanada: cfps, provider: new FixtureProvider(fixtureDir), model, now: () => new Date('2026-09-12T20:00:00Z') }, resolved, 'C172');
     const score = scoreAssessments(set, nb.items);
-    console.log(`eval ${model}: agreement ${(score.agreement * 100).toFixed(0)}% over ${score.total - score.missing - score.filtered} (filtered ${score.filtered}, missing ${score.missing})`, score.perClass, score.disagreements);
+    console.log(`eval ${model}: coverage ${(score.coverage * 100).toFixed(0)}%, agreement ${(score.agreement * 100).toFixed(0)}% over ${score.total - score.missing - score.filtered} (filtered ${score.filtered}, missing ${score.missing})`, score.perClass, score.disagreements);
+    // Both, because either alone can be gamed: a model that declines to
+    // answer keeps its agreement, and a model that answers everything
+    // keeps its coverage. Recorded today: coverage 100%, agreement 86%.
+    expect(score.coverage).toBeGreaterThanOrEqual(0.9);
     expect(score.agreement).toBeGreaterThanOrEqual(0.75);
     const closure = nb.items.find((i) => i.decoded.id?.value.text === 'J5067/26')!;
     expect(closure.rank).not.toBe('irrelevant');
