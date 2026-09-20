@@ -384,6 +384,30 @@ describe('notamsForFlight', () => {
     expect((await notamsForFlight({ store }, before, 'C172')).items).toEqual([]);
   });
 
+  it('asks CFPS once per site per half hour, however many briefings pass through', async () => {
+    const store = await seededStore();
+    const http = replayHttp(cfpsRoutes);
+    const navcanada = new NavCanadaClient(http);
+
+    const first = await notamsForFlight({ store, navcanada, now: () => asOf }, await resolveFlight(store, flightPlan, asOf), 'C172');
+    const asked = http.calls.length;
+    expect(asked).toBe(3);
+    expect(first.items.length).toBeGreaterThan(25);
+
+    // Ten minutes later, the same route: every site was asked about within
+    // the window, so nothing goes upstream and the same NOTAMs come back.
+    const tenMinutes = new Date(asOf.getTime() + 10 * 60_000);
+    const again = await notamsForFlight({ store, navcanada, now: () => tenMinutes }, await resolveFlight(store, flightPlan, tenMinutes), 'C172');
+    expect(http.calls.length).toBe(asked);
+    expect(again.items.length).toBe(first.items.length);
+    expect(again.fetchErrors).toEqual([]);
+
+    // Past the window it asks again.
+    const later = new Date(asOf.getTime() + 31 * 60_000);
+    await notamsForFlight({ store, navcanada, now: () => later }, await resolveFlight(store, flightPlan, later), 'C172');
+    expect(http.calls.length).toBe(asked * 2);
+  });
+
   it('a fetch failure for one site is reported and the rest still works', async () => {
     const store = await seededStore();
     const resolved = await resolveFlight(store, flightPlan, asOf);

@@ -7,6 +7,7 @@
  */
 
 import { storeAndDecode } from '../store/decode.js';
+import { shouldFetch } from '../fetch/freshness.js';
 import type { LLMProvider } from '../llm/provider.js';
 import { isNight } from '../domain/sun.js';
 import type { ResolvedFlight } from '../resolve/flight.js';
@@ -126,6 +127,14 @@ export async function notamsForFlight(deps: NotamDeps, flight: ResolvedFlight, a
   let fetchedAt: Date | null = null;
   if (deps.navcanada) {
     for (const site of sites) {
+      /*
+       * The same window every other product respects. Without this every
+       * briefing asked CFPS for every site, and the attempt recorded below
+       * was written on each one and read on none — a freshness record kept
+       * for the sake of it. Two briefings of the same route ten minutes
+       * apart are one request now, not two, and a page refresh is none.
+       */
+      if (!(await shouldFetch(deps.store, site, 'notam', now()))) continue;
       try {
         const fetched = await deps.navcanada.notams(site);
         fetchedAt = now();
