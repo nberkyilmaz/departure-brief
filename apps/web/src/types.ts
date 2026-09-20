@@ -65,7 +65,22 @@ export interface FlightPlanInput {
   route: string[];
   departureTime: string;
   cruise: { tas: number; altitude: number };
+  /** US gallons in the tanks at departure, as the pilot states it; null when not given. */
+  fuelAboardGal?: number | null;
   airspace: Record<string, AirspaceClass> | null;
+}
+
+/** Trip, reserve and what is aboard, against CARs 602.88. Every null has a reason in `gaps`. */
+export interface FuelPlan {
+  tripGal: number | null;
+  alternateGal: number | null;
+  reserve: { minutes: 30 | 45; basis: 'day' | 'night'; rule: string; gal: number | null };
+  requiredGal: number | null;
+  withAlternateGal: number | null;
+  aboardGal: number | null;
+  marginGal: number | null;
+  marginMinutes: number | null;
+  gaps: string[];
 }
 
 export interface ProfileInput {
@@ -260,7 +275,7 @@ export interface StoredBriefing {
   asOf: string;
   createdAt: string;
   document: {
-    format: 2;
+    format: 3;
     plan: FlightPlanInput;
     asOf: string;
     notams: NotamDocument | null;
@@ -272,6 +287,7 @@ export interface StoredBriefing {
     };
     briefing: Briefing;
     navlog: NavLog;
+    fuel: FuelPlan;
   };
 }
 

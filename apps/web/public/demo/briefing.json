@@ -1,10 +1,10 @@
 {
-  "sha256": "5217c5b4213ce20a83d82ed396b32e141031d1d2b2856f07e03ea59d2d304aee",
+  "sha256": "6d00459f2f2b466a2dbcc1eefac6bd319e5d90fb932523309e67dfc5d1bc2da9",
   "flightKey": "2c8115094cbf5965b4acc3bb0482ba82f940c10935f36d80648410ed0541d0a8",
   "asOf": "2026-09-19T00:52:00.000Z",
   "createdAt": "2026-09-19T00:52:00.000Z",
   "document": {
-    "format": 2,
+    "format": 3,
     "plan": {
       "departure": "CYSN",
       "destination": "CYKF",
@@ -15,6 +15,7 @@
         "tas": 105,
         "altitude": 3500
       },
+      "fuelAboardGal": null,
       "airspace": {
         "CYSN": "control-zone",
         "CYKF": "control-zone",
@@ -47,7 +48,7 @@
     },
     "asOf": "2026-09-19T00:52:00.000Z",
     "versions": {
-      "rules": 5,
+      "rules": 6,
       "metarDecoder": 2,
       "tafDecoder": 1,
       "notamDecoder": 1,
@@ -1421,7 +1422,7 @@
       ]
     },
     "briefing": {
-      "rulesVersion": 5,
+      "rulesVersion": 6,
       "profile": {
         "name": "default",
         "version": 1
@@ -3052,6 +3053,34 @@
                   "sha256": null
                 }
               ]
+            },
+            {
+              "waypoint": "CYKF",
+              "basis": "fuel",
+              "basisKind": "plan",
+              "at": "2026-09-19T04:31:30.378Z",
+              "citations": [
+                {
+                  "kind": "plan",
+                  "station": "CYKF",
+                  "raw": null,
+                  "span": null,
+                  "text": "CARs 602.88(4): 45 min at cruise after the destination (night at CYSN)",
+                  "sha256": null
+                }
+              ],
+              "rule": "fuel.inputs",
+              "attention": "note",
+              "summary": "no fuel plan: no cruise burn rate in the aircraft file, so neither the trip fuel nor the reserve can be worked out; no fuel aboard given in the flight plan",
+              "values": {
+                "gaps": [
+                  "no cruise burn rate in the aircraft file, so neither the trip fuel nor the reserve can be worked out",
+                  "no fuel aboard given in the flight plan"
+                ],
+                "tripGal": null,
+                "reserveGal": null,
+                "aboardGal": null
+              }
             }
           ]
         }
@@ -3943,6 +3972,25 @@
         "cumulativeMinutes": null,
         "cumulativeFuelGal": null
       }
+    },
+    "fuel": {
+      "tripGal": null,
+      "alternateGal": null,
+      "reserve": {
+        "minutes": 45,
+        "basis": "night",
+        "rule": "CARs 602.88(4)",
+        "gal": null
+      },
+      "requiredGal": null,
+      "withAlternateGal": null,
+      "aboardGal": null,
+      "marginGal": null,
+      "marginMinutes": null,
+      "gaps": [
+        "no cruise burn rate in the aircraft file, so neither the trip fuel nor the reserve can be worked out",
+        "no fuel aboard given in the flight plan"
+      ]
     }
   }
 }

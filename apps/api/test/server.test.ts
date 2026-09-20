@@ -290,7 +290,7 @@ describe('POST /api/briefings with NOTAMs', () => {
     const res = await app.inject({ method: 'POST', url: '/api/briefings', payload: { plan: caPlan, profile, asOf: '2026-09-12T20:00:00Z' } });
     expect(res.statusCode).toBe(201);
     const b = res.json() as StoredBriefing;
-    expect(b.document.format).toBe(2);
+    expect(b.document.format).toBe(3);
     expect(b.document.notams?.sites).toEqual(['CYSN', 'CYKF', 'CYHM']);
     expect(b.document.notams?.items.length).toBeGreaterThan(25);
     expect(b.document.notams?.model).toBeNull();

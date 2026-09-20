@@ -1,6 +1,7 @@
 import type { FlightPlan } from '../domain/flight.js';
 import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
 import type { NotamDocument } from '../notam/describe.js';
+import type { FuelPlan } from '../navlog/fuel.js';
 import type { NavLog } from '../navlog/compute.js';
 import type { Briefing } from '../rules/types.js';
 import type { ReportKind } from '../store/types.js';
@@ -36,8 +37,8 @@ export interface BriefingPointInputs {
  * that each know their sources.
  */
 export interface BriefingDocument {
-  /** 2: adds `notams` and the NOTAM decoder / prompt versions. */
-  readonly format: 2;
+  /** 2: adds `notams` and the NOTAM decoder / prompt versions. 3: adds `fuel`. */
+  readonly format: 3;
   readonly plan: FlightPlan;
   readonly profile: PilotProfile;
   readonly aircraft: AircraftLimits | null;
@@ -60,6 +61,8 @@ export interface BriefingDocument {
   readonly briefing: Briefing;
   /** The wind triangle, leg by leg, from the same resolved flight. */
   readonly navlog: NavLog;
+  /** Trip, reserve and what is aboard, against CARs 602.88. */
+  readonly fuel: FuelPlan;
 }
 
 export interface StoredBriefing {

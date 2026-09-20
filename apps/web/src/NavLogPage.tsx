@@ -1,4 +1,4 @@
-import type { NavLog, NavLogLeg, StoredBriefing } from './types.js';
+import type { FuelPlan, NavLog, NavLogLeg, StoredBriefing } from './types.js';
 
 /**
  * The nav log: the arithmetic a pilot does on the kitchen table, laid out
@@ -18,6 +18,68 @@ const minutes = (m: number | null): string => {
 };
 
 const deg = (d: number | null): string => (d === null ? '—' : `${String(d).padStart(3, '0')}°`);
+
+const gal = (g: number | null): string => (g === null ? '—' : `${g} gal`);
+
+/**
+ * CARs 602.88 as a short table: the trip, the reserve the regulation adds,
+ * the sum, and what the pilot said is aboard. A row that cannot be filled
+ * says why underneath rather than leaving a dash for the reader to guess
+ * at. The regulation is a floor, and the table says nothing about whether
+ * to go: that is what the margin row is for the pilot to read.
+ */
+function Fuel({ plan }: { plan: FuelPlan | undefined }) {
+  if (!plan) return null;
+  const short = plan.marginGal !== null && plan.marginGal < 0;
+  return (
+    <>
+      <div className="table-scroll">
+        <table className="wb-table fuel">
+          <tbody>
+            <tr>
+              <td>Trip, departure to destination</td>
+              <td>{gal(plan.tripGal)}</td>
+            </tr>
+            <tr>
+              <td>
+                Reserve, {plan.reserve.minutes} min at cruise <span className="muted">({plan.reserve.rule}, {plan.reserve.basis})</span>
+              </td>
+              <td>{gal(plan.reserve.gal)}</td>
+            </tr>
+            <tr className="total">
+              <td>Required at departure</td>
+              <td>{gal(plan.requiredGal)}</td>
+            </tr>
+            {plan.withAlternateGal !== null && (
+              <tr>
+                <td>
+                  With the alternate as well <span className="muted">(not required by 602.88 for VFR; what a diversion would take)</span>
+                </td>
+                <td>{gal(plan.withAlternateGal)}</td>
+              </tr>
+            )}
+            <tr>
+              <td>Aboard, as you entered it</td>
+              <td>{gal(plan.aboardGal)}</td>
+            </tr>
+            <tr className={`total${short ? ' over' : ''}`}>
+              <td>{short ? 'Short by' : 'To spare'}</td>
+              <td>
+                {plan.marginGal === null ? '—' : `${Math.abs(plan.marginGal)} gal`}
+                {plan.marginMinutes !== null && <span className="muted"> · {Math.abs(plan.marginMinutes)} min at cruise</span>}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {plan.gaps.length > 0 && (
+        <p className="field-note">
+          {plan.gaps.map((g) => g.charAt(0).toUpperCase() + g.slice(1)).join('. ')}.
+        </p>
+      )}
+    </>
+  );
+}
 
 function Leg({ leg, label }: { leg: NavLogLeg; label?: string }) {
   return (
@@ -56,8 +118,10 @@ function Leg({ leg, label }: { leg: NavLogLeg; label?: string }) {
 }
 
 export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
+  // Narrowed on the briefing rather than on the log, so everything else
+  // read out of the document below is known to be there too.
   const log: NavLog | null = briefing?.document.navlog ?? null;
-  if (!log) {
+  if (!briefing || !log) {
     return (
       <section className="navlog-page">
         <h2>Nav log</h2>
@@ -116,6 +180,9 @@ export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
           the aircraft box on the briefing page and it will be filled in.
         </p>
       )}
+
+      <h3>Fuel</h3>
+      <Fuel plan={briefing.document.fuel} />
     </section>
   );
 }

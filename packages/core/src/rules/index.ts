@@ -12,3 +12,5 @@ export { checkWindAloft, windText, FREEZING_C } from './windAloft.js';
 export { checkHazards, HAZARD_TEXT, NEAR_HAZARD_NM } from './hazards.js';
 export { ageBand, ageText, checkObservation, OBSERVATION_AGE_MINUTES } from './observation.js';
 export type { ObservationAge } from './observation.js';
+export { checkFuel } from './fuel.js';
+export type { FuelContext } from './fuel.js';

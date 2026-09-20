@@ -107801,7 +107801,7 @@
         "rationale": "The PAPI is needed for the arrival at CYHM, and its unserviceability affects the flight's ability to land safely."
       },
       "citation": "exact",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 926,
         "output": 102
@@ -107824,7 +107824,7 @@
         "rationale": "The runway ID lights are critical for identifying the runway during arrival, especially in low visibility conditions, and the NOTAM indicates they are out of service during the flight's arrival time at CYHM."
       },
       "citation": "exact",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 923,
         "output": 112
@@ -107848,7 +107848,7 @@
         "rationale": "The closure of taxiway B affects both departure and arrival at CYHM, the alternate aerodrome, and there are no other routes available."
       },
       "citation": "exact",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 919,
         "output": 93
@@ -107872,7 +107872,7 @@
         "rationale": "The closure of taxiways B and C blocks the only route to and from runway 06/24, affecting both departure and arrival at CYHM."
       },
       "citation": "exact",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 931,
         "output": 118
@@ -107896,7 +107896,7 @@
         "rationale": "The non-standard markings on the runway could affect visual recognition during arrival and departure, impacting the pilot's ability to correctly identify the runway."
       },
       "citation": "exact",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 928,
         "output": 109
@@ -107919,7 +107919,7 @@
         "rationale": "The cranes are within 1.4NM before threshold 11, which is close to the departure path and not lit or marked, making the flight critical."
       },
       "citation": "whitespace",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 999,
         "output": 209
@@ -107942,7 +107942,7 @@
         "rationale": "The crane is within about 3 nm of the departure aerodrome CYSN and is unlit and unpainted, posing a critical obstacle during departure."
       },
       "citation": "exact",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 990,
         "output": 123
@@ -107965,7 +107965,7 @@
         "rationale": "The obstacle is within 3 nm of the departure aerodrome and is unlit, which could be hazardous during the climb-out. This is critical for the C172's VFR flight."
       },
       "citation": "whitespace",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 967,
         "output": 196
@@ -107989,7 +107989,7 @@
         "rationale": "The runway surface conditions are dry during the flight times, which does not affect the flight as the aircraft is VFR and the runway conditions are not critical for the C172."
       },
       "citation": "exact",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 1089,
         "output": 204
@@ -108013,7 +108013,7 @@
         "rationale": "The edge lights on taxiway B are not working, which could affect ground operations at the aerodromes the flight uses, but there are other taxiways available."
       },
       "citation": "exact",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 921,
         "output": 106
@@ -108036,7 +108036,7 @@
         "rationale": "The closure of taxiway D affects the departure from CYSN, as it blocks a route the flight might use."
       },
       "citation": "exact",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 922,
         "output": 87
@@ -108060,7 +108060,7 @@
         "rationale": "The runway surface report is valid during the flight's times and affects the runway conditions at the departure and arrival aerodromes."
       },
       "citation": "exact",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 1133,
         "output": 178
@@ -108081,7 +108081,7 @@
         "rationale": "This NOTAM is about airport parking services, which the flight does not require or use. Therefore, it is irrelevant."
       },
       "citation": "exact",
-      "provider": "ollama",
+      "provider": "fixture:ollama",
       "usage": {
         "input": 944,
         "output": 129

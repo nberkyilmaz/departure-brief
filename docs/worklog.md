@@ -39,9 +39,8 @@ session 21.
 **Left to build:** POH takeoff and landing distances, in the constrained
 form session 20 established.
 
-**Still open from the audit:** the NOTAM eval gate cannot fail on model
-quality, CFPS NOTAMs ignore the freshness window, and there is no fuel
-planning (CARs 602.88).
+**Still open from the audit:** nothing. The three items — the NOTAM eval
+gate, the CFPS freshness window and fuel planning — are closed.
 
 ---
 
@@ -1895,3 +1894,77 @@ actually was: every place the code assumed it was running on a laptop.
 
 - 843 tests, typecheck clean, the whole suite green against real Postgres.
 - Both features cost about a kilobyte gzipped between them.
+
+---
+
+## Session 24 — 2026-09-20 — The last three open items, and a failure that was the harness
+
+261. **Fuel, under CARs 602.88.** The regulation is short: enough to reach
+     the destination and then fly thirty minutes at normal cruising speed
+     by day, forty-five by night. So is the arithmetic — trip fuel out of
+     the nav log, the reserve out of the burn rate, the sum against what is
+     aboard — and the whole of the work was deciding what to do when a
+     number is missing.
+
+     Two of the three inputs are the pilot's and neither is invented here.
+     The burn rate is in the aircraft file because the handbook prints it
+     against power setting and altitude and only the pilot knows which row
+     they fly; the fuel aboard is in the flight plan because only the
+     person who dipped the tanks knows it. With either missing the line
+     reads `no fuel plan:` and then says which, in words. The demo says
+     exactly that today, because neither figure is in this repository.
+262. An alternate is shown beside the requirement rather than folded into
+     it. 602.88(3) and (4) name the destination only — a diversion is a
+     different flight — but a pilot who planned an alternate wants to know
+     what reaching it would take, so both numbers appear and only one is
+     called required.
+263. The finding goes on the destination, because that is where the reserve
+     has to still be in the tanks, and it cites the subsection and the
+     point that made the flight a night one. A test asserts the summary
+     never contains *go*, *safe*, *fits*, *legal* or *sufficient*: the
+     regulation is a floor, and a pilot holding exactly the legal minimum
+     against an unforecast headwind is the person that line is written for.
+264. **The NOTAM eval gate could not fail on model quality.** Agreement was
+     computed over the NOTAMs the model answered usably, so a model whose
+     citations never verified answered nothing, disagreed with nothing, and
+     scored 100% — carried by the single NOTAM a deterministic rule settles
+     without asking. Coverage is the second number now, and the gate reads
+     both, because either alone can be gamed. Recorded today: coverage
+     100%, agreement 86%.
+265. **CFPS was asked for every site on every briefing.** It recorded the
+     attempt each time and read the record on none of them, while METAR,
+     TAF, upper winds and hazard advisories all respected their windows.
+     Two briefings of one route ten minutes apart were six requests. Now
+     once per site per half hour, the same way as everything else.
+
+### A failure that was the harness, not the code
+
+266. Four Postgres contract tests failed with results that could not
+     happen: a decoding written a line earlier coming back `undefined`, an
+     airport load reporting rows it had not inserted, a forecast outcome
+     violating the foreign key to a check that existed a moment before.
+     They passed in isolation and passed on a re-run, which is the shape of
+     a problem worth chasing rather than shrugging at.
+
+     The contract truncates every table on each `make()`, and every run
+     shared one `depbrief_test` database. Two suites at once — a watch
+     process and a one-off, or the same command twice, which is what
+     happened — wiped each other's rows mid-test. Each run gets its own
+     database named after the process now, dropped at the end, and two
+     suites started deliberately at the same moment both pass. The tests
+     were right; the harness was lying to them.
+267. And a leak of mine from session 21: when `PostgresStore.connect` could
+     not reach the database it threw without ending the pool, so the caller
+     — which never receives a store — could not close it either. The retry
+     added in the same session meant a database down for a while produced
+     several. Ended on the failure path now.
+268. The rename recipe in `docs/deploy.md` was wrong twice over: Markdown
+     had eaten the line continuations, turning them into shell redirections
+     into a file named `-c`, and even repaired it could not work, because
+     `ALTER ROLE` refuses to rename the session user. Replaced with the
+     thing session 23 actually did.
+
+### State at end of session 24
+
+- 868 tests, typecheck clean, the whole suite green against real Postgres.
+- Rules version 6, briefing document format 3.

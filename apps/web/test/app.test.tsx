@@ -213,6 +213,29 @@ describe('moving around it', () => {
   });
 });
 
+describe('fuel', () => {
+  it('shows the CARs 602.88 sum, and says what it is missing rather than inventing it', async () => {
+    window.location.hash = '#/navlog';
+    render(<App />);
+
+    await waitFor(() => expect(document.querySelector('.fuel')).not.toBeNull(), { timeout: 10_000 });
+    const table = document.querySelector('.fuel')!.textContent ?? '';
+    // The regulation, named, with which subsection and why.
+    expect(table).toMatch(/CARs 602\.88\(\d\)/);
+    expect(table).toMatch(/Reserve, (30|45) min at cruise/);
+    expect(table).toMatch(/Required at departure/);
+
+    /*
+     * Neither the burn rate nor the fuel aboard is in the repository, so
+     * every figure is a dash and the reason is printed underneath. A
+     * plausible number here would be the one thing this must never do.
+     */
+    const section = document.querySelector('.navlog-page')!.textContent ?? '';
+    expect(section).toMatch(/no cruise burn rate in the aircraft file/i);
+    expect(section).toMatch(/no fuel aboard given in the flight plan/i);
+  });
+});
+
 describe('a field of its own', () => {
   it('reports on an aerodrome with no flight plan in existence', async () => {
     window.location.hash = '#/aerodrome/CYSN';

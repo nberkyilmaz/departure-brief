@@ -10,7 +10,19 @@ import { afterAll, describe, it } from 'vitest';
 import { DEFAULT_DATABASE_URL, migrate, PostgresStore } from '../../src/store/postgres.js';
 import { storeContract } from './contract.js';
 
-const TEST_DB = 'depbrief_test';
+/*
+ * One database per process, not one shared by every run.
+ *
+ * The contract truncates on every `make()`, so two suites running at once
+ * — a watch process and a one-off, or simply the same command twice —
+ * wiped each other's rows mid-test. That surfaced as a scatter of
+ * impossible failures: a decoding that had just been written coming back
+ * undefined, an airport load reporting rows it had not inserted, a
+ * forecast outcome violating the foreign key to a check that existed a
+ * moment earlier. Naming the database after the process removes the whole
+ * class of it, and the drop at the end leaves nothing behind.
+ */
+const TEST_DB = `depbrief_test_${process.pid}`;
 const adminUrl = process.env.DEPBRIEF_TEST_ADMIN_URL ?? DEFAULT_DATABASE_URL;
 const testUrl = process.env.DEPBRIEF_TEST_DATABASE_URL ?? adminUrl.replace(/\/[^/?]+(\?|$)/, `/${TEST_DB}$1`);
 
@@ -55,9 +67,12 @@ if (available) {
     return new PostgresStore(pool);
   });
   afterAll(async () => {
-    const pool = new pg.Pool({ connectionString: testUrl });
-    await pool.query('truncate forecast_outcomes, forecast_checks, notam_assessments, report_fetches, decoded_reports, raw_reports, airports, briefings');
-    await pool.end();
+    // Every pool the contract opened, closed, before the database it is
+    // connected to can be dropped.
+    await Promise.all(pools.map((p) => p.end().catch(() => {})));
+    const admin = new pg.Pool({ connectionString: adminUrl });
+    await admin.query(`drop database if exists ${TEST_DB}`).catch(() => {});
+    await admin.end();
   });
 } else {
   describe('ReportStore contract: PostgresStore', () => {

@@ -29,6 +29,12 @@ export interface FlightPlan {
   readonly route: readonly string[];
   /** ISO 8601 with `Z`. */
   readonly departureTime: string;
+  /**
+   * US gallons in the tanks at departure, as the pilot states it. `null`
+   * when not given: only the person who dipped the tanks knows, and a
+   * figure invented here would come back as a fuel plan.
+   */
+  readonly fuelAboardGal: number | null;
   readonly cruise: {
     readonly tas: Knots;
     readonly altitude: FeetMsl;
@@ -72,6 +78,10 @@ export function parseFlightPlan(input: unknown): FlightPlan {
   const c = cruise as Record<string, unknown>;
   if (typeof c['tas'] !== 'number' || !(c['tas'] > 0)) throw new Error('flight plan: "cruise.tas" must be a positive number of knots');
   if (typeof c['altitude'] !== 'number') throw new Error('flight plan: "cruise.altitude" must be a number of feet MSL');
+  const fuel = o['fuelAboardGal'];
+  if (fuel !== undefined && fuel !== null && !(typeof fuel === 'number' && Number.isFinite(fuel) && fuel >= 0)) {
+    throw new Error('flight plan: "fuelAboardGal" must be a number of US gallons, or omitted');
+  }
   let airspace: Record<string, AirspaceClass> | null = null;
   if (o['airspace'] !== undefined && o['airspace'] !== null) {
     if (typeof o['airspace'] !== 'object') throw new Error('flight plan: "airspace" must be an object of waypoint id → class');
@@ -92,6 +102,7 @@ export function parseFlightPlan(input: unknown): FlightPlan {
     route: route.map((r) => (r as string).trim().toUpperCase()),
     departureTime: new Date(departureTime).toISOString(),
     cruise: { tas: c['tas'] as Knots, altitude: c['altitude'] as FeetMsl },
+    fuelAboardGal: typeof fuel === 'number' ? fuel : null,
     airspace,
     profile: path('profile'),
     aircraft: path('aircraft'),

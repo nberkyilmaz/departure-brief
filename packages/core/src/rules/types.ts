@@ -2,7 +2,7 @@ import type { FlightCategory } from '../decode/metar/derive.js';
 import type { Span } from '../decode/span.js';
 
 /** Bump when a rule's meaning or a finding's shape changes. */
-export const RULES_VERSION = 5;
+export const RULES_VERSION = 6;
 
 /**
  * How much attention a line deserves — an ordering, not a decision.
@@ -43,7 +43,7 @@ export interface Citation {
  * briefings even when nothing material does; `basisKind` is the stable part,
  * so the diff can tell "the same check on the same evidence" from a new one.
  */
-export type BasisKind = 'prevailing' | 'overlay' | 'observed' | 'forecast' | 'time';
+export type BasisKind = 'prevailing' | 'overlay' | 'observed' | 'forecast' | 'time' | 'plan';
 
 export interface Finding {
   /** Stable rule identifier, e.g. `personal.ceiling`, `crosswind.personal`, `vfr.visibility`. */

@@ -258,14 +258,18 @@ site is unreachable rather than merely insecure. Wait; do not change DNS.
 
 > **If you had the database before the rename**, its role and database are
 > still called `holdshort` and the new default connection string looks for
-> `depbrief`. One command each, once:
+> `depbrief`. Recreate the volume — it holds nothing but fetched weather
+> and a few test rows, and the instance reloads the airport snapshot by
+> itself on the next boot:
 >
 > ```sh
-> docker exec holdshort-db-1 psql -U holdshort -d postgres >   -c "ALTER DATABASE holdshort RENAME TO depbrief;" >   -c "ALTER ROLE holdshort RENAME TO depbrief;"
+> docker compose down -v && npm run db:up
 > ```
 >
-> Or throw it away and start clean — it holds nothing but fetched weather and
-> a few test rows: `docker compose down -v && npm run db:up`.
+> Renaming in place is not worth documenting: `ALTER ROLE` refuses to
+> rename the session user, and the cluster's bootstrap superuser cannot be
+> dropped, so it takes a temporary third superuser to do at all. That is
+> what session 23 found the hard way.
 
 ```sh
 npm ci

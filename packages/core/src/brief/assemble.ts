@@ -7,9 +7,11 @@ import { NOTAM_DECODER_VERSION } from '../notam/decode.js';
 import { notamDocument } from '../notam/describe.js';
 import type { NotamBriefing } from '../notam/flight.js';
 import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
+import { fuelPlan } from '../navlog/fuel.js';
+import { checkFuel } from '../rules/fuel.js';
 import { navLog } from '../navlog/compute.js';
 import { evaluateFlight } from '../rules/evaluate.js';
-import { RULES_VERSION } from '../rules/types.js';
+import { RULES_VERSION, type Briefing } from '../rules/types.js';
 import { contentHash } from './canonical.js';
 import type { BriefingDocument, BriefingPointInputs, BriefingReportRef, StoredBriefing } from './types.js';
 
@@ -63,10 +65,30 @@ export function assembleBriefing(
   createdAt: Date = new Date(),
   notams: NotamBriefing | null = null,
 ): StoredBriefing {
-  const briefing = evaluateFlight(resolved, profile, aircraft);
+  const evaluated = evaluateFlight(resolved, profile, aircraft);
+  const navlog = navLog(resolved, aircraft?.cruiseFuelGph ?? null);
+  /*
+   * Fuel is about the flight, not a point, but the reserve has to still be
+   * in the tanks at the destination, so that is where the line goes. Night
+   * for 602.88(4) is any point of the flight at night — a diversion to the
+   * alternate is a different flight and does not count.
+   */
+  const nightPoint = evaluated.points.find((p) => p.night) ?? null;
+  const fuel = fuelPlan(navlog, resolved.plan.fuelAboardGal, nightPoint !== null);
+  const destination = evaluated.points[evaluated.points.length - 1];
+  const briefing: Briefing = destination
+    ? {
+        ...evaluated,
+        points: evaluated.points.map((p, i) =>
+          i === evaluated.points.length - 1
+            ? { ...p, findings: [...p.findings, ...checkFuel({ waypoint: p.waypoint, at: new Date(p.at), nightAt: nightPoint?.waypoint ?? null }, fuel)] }
+            : p,
+        ),
+      }
+    : evaluated;
   const allPoints = [...resolved.points, ...(resolved.alternate ? [resolved.alternate] : [])];
   const document: BriefingDocument = {
-    format: 2,
+    format: 3,
     plan: resolved.plan,
     profile,
     aircraft,
@@ -85,7 +107,8 @@ export function assembleBriefing(
       reports: reportRefs(allPoints, notams),
     },
     briefing,
-    navlog: navLog(resolved, aircraft?.cruiseFuelGph ?? null),
+    navlog,
+    fuel,
   };
   return { sha256: contentHash(document), flightKey: flightKey(resolved.plan), asOf: resolved.asOf, createdAt, document };
 }

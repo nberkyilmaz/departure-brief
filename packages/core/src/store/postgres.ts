@@ -149,7 +149,16 @@ export class PostgresStore implements Store {
       idleTimeoutMillis: options.idleTimeoutMillis ?? 30_000,
     });
     pool.on('error', (err) => options.onPoolError?.(err));
-    await migrateWhenReachable(pool, options);
+    try {
+      await migrateWhenReachable(pool, options);
+    } catch (e) {
+      // The caller never gets a store, so it can never close this pool.
+      // Without this every failed boot leaves one behind holding its
+      // connection attempts and its idle timers — and the retry above
+      // means a database that is down for a while produces several.
+      await pool.end().catch(() => {});
+      throw e;
+    }
     return new PostgresStore(pool);
   }
 

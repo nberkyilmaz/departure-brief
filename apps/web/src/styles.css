@@ -664,3 +664,11 @@ summary:focus-visible,
   .decoded-row { grid-template-columns: 1fr; gap: 0; }
   .decoded-row dt { font-size: 0.78rem; }
 }
+
+/* --- Fuel ----------------------------------------------------------------
+   Two columns, label and figure; the shortfall row is the one place a
+   colour is used, and it is the same colour a crosswind over the limit
+   gets, because it means the same thing: a number the pilot set has been
+   crossed. */
+.fuel td:last-child { white-space: nowrap; }
+.fuel .over td { color: var(--nogo); font-weight: 600; }

@@ -19,6 +19,7 @@ export const defaultPlan: FlightPlanInput = {
   route: [],
   departureTime: defaultDeparture(),
   cruise: { tas: 105, altitude: 3500 },
+  fuelAboardGal: null,
   airspace: { CYSN: 'control-zone', CYKF: 'control-zone', CYHM: 'control-zone' },
 };
 
@@ -121,6 +122,21 @@ export function FlightForm({
           />
           <span className="field-note-line">
             <span className="field-note">feet above sea level</span>
+          </span>
+        </label>
+        <label>
+          Fuel aboard
+          <input
+            type="number"
+            min={0}
+            step={0.5}
+            inputMode="decimal"
+            value={plan.fuelAboardGal ?? ''}
+            placeholder="not given"
+            onChange={(e) => set({ fuelAboardGal: e.target.value === '' ? null : Number(e.target.value) })}
+          />
+          <span className="field-note-line">
+            <span className="field-note">US gallons at departure — checked against the CARs 602.88 reserve</span>
           </span>
         </label>
       </div>
