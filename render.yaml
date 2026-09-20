@@ -56,8 +56,10 @@ services:
       # The published page is on GitHub Pages, which is a different origin,
       # so without its name here the browser refuses every request it makes.
       # Add the custom domain alongside it once there is one.
+      # Both, because the GitHub Pages address keeps working after a custom
+      # domain is attached and it is useful to be able to compare the two.
       - key: DEPBRIEF_ALLOWED_ORIGINS
-        value: https://nberkyilmaz.github.io
+        value: https://departurebrief.com,https://www.departurebrief.com,https://nberkyilmaz.github.io
 
       # No model is called in a request path, ever. Unset means NOTAMs are
       # fetched, decoded, filtered and shown, but not ranked — which is the
