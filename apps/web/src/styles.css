@@ -609,3 +609,58 @@ summary:focus-visible,
 }
 .start-card:hover { border-color: var(--muted); }
 .start-card b { font-size: 1.05rem; }
+
+/* --- Wind on the runways ------------------------------------------------
+   The row that is most into wind is marked rather than the others dimmed:
+   nothing is hidden or de-emphasised, only ordered, which is the same rule
+   the findings list follows. */
+.runway-wind .best td { background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.runway-wind td.over { color: var(--nogo); font-weight: 600; }
+.runway-wind .pill {
+  display: inline-block;
+  margin-left: var(--s2);
+  padding: 0 var(--s2);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  vertical-align: middle;
+  background: color-mix(in srgb, var(--ok) 22%, transparent);
+  color: var(--fg);
+}
+.runway-wind .pill.warn { background: color-mix(in srgb, var(--marginal) 28%, transparent); }
+
+/* --- The observation, read back -----------------------------------------
+   A definition list rather than a table: these are label/value pairs, not
+   rows of comparable numbers, and a screen reader should hear them that
+   way. The whole row is the hover target so the pointer never falls into a
+   gap between the label and the value. */
+.decoded { margin: var(--s2) 0 var(--s3); display: grid; gap: 1px; }
+.decoded-row {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 9rem) 1fr;
+  gap: var(--s3);
+  padding: var(--s1) var(--s2);
+  border-radius: 3px;
+  cursor: default;
+}
+.decoded-row dt { color: var(--muted); font-size: 0.85rem; }
+.decoded-row dd { margin: 0; }
+.decoded-row dd code {
+  margin-left: var(--s2);
+  padding: 0 0.3em;
+  border-radius: 2px;
+  font-size: 0.82em;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--muted) 12%, transparent);
+}
+.decoded-row.active,
+.decoded-row:focus-visible { background: color-mix(in srgb, var(--mark) 45%, transparent); outline: none; }
+.decoded-row:focus-visible { outline: 2px solid var(--advisory); outline-offset: -2px; }
+/* A reading the station said it could not take. Marked, never dropped. */
+.decoded-row.indeterminate dd { color: var(--marginal); }
+
+@media (max-width: 40rem) {
+  .decoded-row { grid-template-columns: 1fr; gap: 0; }
+  .decoded-row dt { font-size: 0.78rem; }
+}

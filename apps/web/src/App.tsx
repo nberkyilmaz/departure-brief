@@ -243,7 +243,11 @@ export function App() {
 
         {route.name === 'home' && <StartPage engine={engine} recordedAt={recordedText} home={plan.departure || 'CYSN'} />}
 
-        {route.name === 'aerodrome' && <AerodromePage id={route.id} engine={engine} />}
+        {/*
+          The field page compares against the same limits as a briefing, so
+          a runway that is inside your crosswind here is inside it there.
+        */}
+        {route.name === 'aerodrome' && <AerodromePage id={route.id} engine={engine} crosswindLimitKt={profile.crosswindKt ?? null} />}
 
         {route.name === 'navlog' && <NavLogPage briefing={briefing} />}
 

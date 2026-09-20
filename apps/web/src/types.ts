@@ -238,6 +238,18 @@ export interface AerodromeReport {
   forecastCategory: FlightCategory | null;
   night: boolean;
   daylight: { sunrise: string | null; sunset: string | null; civilDawn: string | null; civilDusk: string | null; allDay: boolean; allNight: boolean };
+  /** Wind on every runway end, best first. Null when nothing reported a wind. */
+  crosswind: {
+    speed: number;
+    gust: number | null;
+    /** VRB: every runway carries the full speed, because any of them might. */
+    variable: boolean;
+    calm: boolean;
+    runways: { runway: string; end: string; heading: number; crosswind: number; headwind: number; crosswindGust: number; headwindGust: number }[];
+    unknownHeading: string[];
+  } | null;
+  /** The observation in words, each line pointing into the raw report. */
+  explained: { label: string; text: string; span: { start: number; end: number } | null; indeterminate: boolean }[];
   findings: Finding[];
   nearby: { id: string; name: string; distanceNm: number; bearingTrue: number; ageMinutes: number | null }[];
 }

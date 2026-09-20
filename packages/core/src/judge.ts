@@ -29,6 +29,8 @@ export * from './brief/index.js';
 export * from './navlog/index.js';
 // Everything about one field, arranged around the place rather than a route.
 export * from './aerodrome/index.js';
+// A report read back in words, each line citing the characters it came from.
+export * from './explain/index.js';
 export * from './hash/sha256.js';
 // Weight and balance: the computation and the handbook limits it fills in.
 export * from './wb/compute.js';

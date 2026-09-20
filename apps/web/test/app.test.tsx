@@ -222,9 +222,71 @@ describe('a field of its own', () => {
     // The classification, the raw report, and the runways — about the place.
     await waitFor(() => expect(document.querySelector('.aerodrome-page .raw')).not.toBeNull(), { timeout: 10_000 });
     expect(document.querySelector('.aerodrome-page .raw')!.textContent).toContain('METAR');
-    expect(screen.getByText(/Runways/i)).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Runways' })).toBeTruthy();
+    // And the wind resolved onto each of them, which is the first thing a
+    // pilot works out about a field and used to be left as an exercise.
+    expect(screen.getByRole('heading', { name: /Wind on the runways/i })).toBeTruthy();
     // Never a form: looking a field up does not require planning a flight.
     expect(document.querySelector('.inputs')).toBeNull();
+  });
+
+  it('resolves the wind onto every runway, most into wind first', async () => {
+    window.location.hash = '#/aerodrome/CYSN';
+    render(<App />);
+
+    await waitFor(() => expect(document.querySelector('.runway-wind')).not.toBeNull(), { timeout: 10_000 });
+    const table = document.querySelector('.runway-wind')!;
+    const rows = [...table.querySelectorAll('tbody tr')];
+    expect(rows.length).toBeGreaterThan(1);
+
+    // Ordered, never filtered: every end with a heading is on the page.
+    expect(rows[0]!.className).toContain('best');
+    expect(rows[0]!.textContent).toContain('most into wind');
+    expect(rows.slice(1).every((r) => !r.className.includes('best'))).toBe(true);
+
+    // A component in knots against each one, not a runway heading to subtract.
+    expect(table.textContent).toMatch(/\d+ kt/);
+  });
+
+  it('reads the observation back in words, pointing at the report it came from', async () => {
+    window.location.hash = '#/aerodrome/CYSN';
+    render(<App />);
+
+    await waitFor(() => expect(document.querySelector('.decoded')).not.toBeNull(), { timeout: 10_000 });
+    const rows = [...document.querySelectorAll('.decoded-row')];
+    expect(rows.length).toBeGreaterThan(3);
+
+    // Plain words, not the codes repeated back.
+    const text = document.querySelector('.decoded')!.textContent ?? '';
+    expect(text).toMatch(/Wind/);
+    expect(text).toMatch(/Observed/);
+
+    // The raw report is still there in full: the decode is an aid to
+    // reading it, never a replacement for it.
+    const raw = document.querySelector('.aerodrome-page .raw')!.textContent ?? '';
+    expect(raw).toContain('METAR');
+
+    // Hovering a line lights up the characters it was read from.
+    expect(document.querySelector('.aerodrome-page .raw mark')).toBeNull();
+    fireEvent.mouseEnter(rows[0]!);
+    await waitFor(() => expect(document.querySelector('.aerodrome-page .raw mark')).not.toBeNull());
+    const marked = document.querySelector('.aerodrome-page .raw mark')!.textContent!;
+    expect(marked.length).toBeGreaterThan(0);
+    expect(raw).toContain(marked);
+
+    // And the whole report is still readable with the highlight on it.
+    expect(document.querySelector('.aerodrome-page .raw')!.textContent).toBe(raw);
+  });
+
+  it('says whose wind it is when the field borrowed one', async () => {
+    window.location.hash = '#/aerodrome/CYSN';
+    render(<App />);
+
+    await waitFor(() => expect(document.querySelector('.runway-wind')).not.toBeNull(), { timeout: 10_000 });
+    const page = document.querySelector('.aerodrome-page')!.textContent ?? '';
+    // Either it is this field's own reading, or it names the field it came
+    // from and how far away that is. Never an unattributed number.
+    expect(/Computed from this field's own observation|Computed from .* nm away/s.test(page.replace(/’/g, "'"))).toBe(true);
   });
 
   it('offers the neighbours, with the age of each reading', async () => {

@@ -1814,3 +1814,84 @@ actually was: every place the code assumed it was running on a laptop.
 - 812 tests, typecheck clean, the web app builds.
 - No trace of the old name outside two deliberate factual references and
   the upstream data that legitimately contains the phrase.
+
+---
+
+## Session 23 — 2026-09-20 — Finishing the move, and two things the field page was making the pilot do
+
+254. **The rename is complete.** The database and role could not simply be
+     renamed — `ALTER ROLE` refuses to rename the session user, and the
+     bootstrap superuser of a cluster cannot be dropped at all — so the
+     volume was recreated under the new name and the suite run against it.
+     812 tests including the Postgres contract. Nothing named holdshort
+     survives in the cluster.
+
+     What is left is the working directory, which cannot be renamed from
+     inside itself. It is cosmetic: the compose project name derives from it,
+     so the container is still `holdshort-db-1` until the folder moves.
+
+### The wind, resolved onto the runways
+
+255. The field page printed the runway headings, printed the METAR, and left
+     the trigonometry to the reader. That is the first thing a pilot works
+     out about a field they are going to, and the one thing the page made
+     them do by hand.
+
+     `analyseCrosswind` has existed since the crosswind rule was written and
+     already handles the hard parts — `VRB` gives every runway the full
+     speed because any of them might get it, calm is calm, an end with no
+     published heading is named rather than guessed, and ends are sorted
+     best first with reciprocals tied on headwind. It simply was not
+     surfaced. The report's own doc comment claimed it was, which is how
+     this was found.
+
+     So the page now shows every runway end with the wind down it and across
+     it, gusts in their own column when there are any, anything over the
+     pilot's limit marked, and a tailwind called a tailwind rather than a
+     negative number. At CYSN with KIAG's 36005KT, runway 01 lies on 358°
+     true and the table says so.
+256. Whose wind it is, said plainly. A field that is not reporting borrows
+     one, and a crosswind computed from eleven miles away is a real figure
+     about this runway from a reading taken somewhere else. The note under
+     the table names the station and the distance — the same discipline the
+     observation itself follows.
+
+### The report, read back
+
+257. **A raw METAR is a skill.** The page has always shown the raw report and
+     always should: it is the grounding, and replacing it with a paraphrase
+     would be the one unforgivable thing. But `BKN008 OVC015 04/03 A2989`
+     tells a pilot who is still learning nothing except that the site
+     fetched something.
+
+     `explainMetar` reads a decoded report back in words, one line per
+     group, each carrying the span it came from. Hovering or tabbing a line
+     lights up the characters it was read from in the report above, so the
+     reading can be checked against the text rather than taken on trust.
+     That is the project's whole claim — every line cites the report it came
+     from — made visible instead of merely true.
+258. It is in core, not in the browser, so the words the page shows and the
+     words a command line would print are the same words and both are
+     tested. Twenty-one cases, on real recorded reports.
+259. The rule throughout is the same one the decoders follow: **say what the
+     report says and stop.** `04/03` becomes "4 °C, dew point 3 °C" and goes
+     no further — whether that matters is what the findings are for. A group
+     the report marks unavailable gets a line, flagged, because "this
+     station cannot measure that" is information; a group the report simply
+     does not contain gets no line, because absence is not a reading of
+     none. `310//KT` is not calm. `BKN///` is not a missing layer. And
+     anything the decoder could not account for is listed as undecoded
+     rather than dropped, so a reader can check every group of the raw
+     report against a line.
+260. Remarks are where a Canadian station puts the thing this project most
+     wants — its own measured `DENSITY ALT`, which is the figure a
+     performance chart would otherwise have to be interpolated for. Thirty-one
+     kinds are decoded; the ones a pilot acts on are in words and the rest
+     appear as the report wrote them. An undecoded remark is labelled apart
+     from an undecoded body group, because one is a gap in a corner of the
+     format and the other is a gap in the part that matters.
+
+### State at end of session 23
+
+- 843 tests, typecheck clean, the whole suite green against real Postgres.
+- Both features cost about a kilobyte gzipped between them.

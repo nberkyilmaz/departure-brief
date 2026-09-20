@@ -36,6 +36,151 @@ function Missing({ id, kind, aerodromes }: { id: string; kind: 'malformed' | 'un
   );
 }
 
+/**
+ * The wind on each runway end, most into wind first.
+ *
+ * The first thing a pilot works out about a field they are going to, and
+ * until now the one thing this page made them work out themselves: it
+ * printed the runway headings and the METAR and left the trigonometry as an
+ * exercise. The components come from the same function a briefing uses, so
+ * a runway cannot read one way here and another way inside a flight.
+ *
+ * Whose wind it is matters as much as the number. A field that is not
+ * reporting borrows one, and a crosswind computed from a neighbour eleven
+ * miles away is a real figure about this runway from a reading taken
+ * somewhere else — said plainly rather than implied.
+ */
+function RunwayWinds({ report, limitKt }: { report: AerodromeReport; limitKt: number | null }) {
+  const cw = report.crosswind;
+  const o = report.observation;
+  if (!cw) {
+    return (
+      <p className="field-note">
+        {o ? 'That observation reports no wind direction, so there is nothing to resolve onto a runway. A missing direction is not a calm wind.' : 'No observation, so no wind to put on a runway.'}
+      </p>
+    );
+  }
+  if (cw.calm) return <p className="field-note">Calm. Every runway is the same runway.</p>;
+
+  const borrowed = o?.source === 'nearby';
+  const over = (kt: number) => limitKt !== null && kt > limitKt;
+
+  return (
+    <>
+      {cw.variable && (
+        <p className="field-note">
+          The wind is variable in direction, so each runway is shown with the full speed across it — the worst it could be, which is the only honest way to
+          resolve a direction that has not been given.
+        </p>
+      )}
+      <div className="table-scroll">
+        <table className="wb-table runway-wind">
+          <thead>
+            <tr>
+              <th>Runway</th>
+              <th>Down the runway</th>
+              <th>Across it</th>
+              {cw.gust !== null && <th>Across, in gusts</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {cw.runways.map((r, i) => (
+              <tr key={`${r.runway}-${r.end}`} className={i === 0 ? 'best' : undefined}>
+                <td className="leg-name">
+                  {r.end}
+                  {i === 0 && <span className="pill">most into wind</span>}
+                </td>
+                <td>
+                  {Math.abs(r.headwind) < 0.5 ? '—' : `${Math.round(Math.abs(r.headwind))} kt ${r.headwind > 0 ? 'head' : 'tail'}`}
+                  {r.headwind < -0.5 && <span className="pill warn">tailwind</span>}
+                </td>
+                <td className={over(r.crosswind) ? 'over' : undefined}>{Math.round(r.crosswind)} kt</td>
+                {cw.gust !== null && <td className={over(r.crosswindGust) ? 'over' : undefined}>{Math.round(r.crosswindGust)} kt</td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="field-note">
+        {borrowed ? (
+          <>
+            Computed from <b>{o!.station}</b>&apos;s wind, {Math.round(o!.distance)} nm away — {report.airport.icaoId ?? report.airport.faaId} is not reporting
+            one of its own. The runway is this field&apos;s; the wind is not.
+          </>
+        ) : (
+          <>Computed from this field&apos;s own observation.</>
+        )}{' '}
+        Headings are true and so is the reported wind, so no variation is applied. {limitKt !== null && <>Anything over your {limitKt} kt limit is marked.</>}
+        {cw.unknownHeading.length > 0 && <> No published heading for {cw.unknownHeading.join(', ')}, so {cw.unknownHeading.length === 1 ? 'it is' : 'they are'} left out rather than guessed.</>}
+      </p>
+    </>
+  );
+}
+
+/**
+ * The observation read back in words, against the report it came from.
+ *
+ * The raw METAR stays exactly where it was — it is the grounding, and the
+ * one thing that must never be replaced by a paraphrase. What is new is
+ * that the paraphrase points at it: hover or focus a line and the
+ * characters it was read from light up in the report above. A pilot
+ * learning to read a METAR can follow one into the other, and a pilot who
+ * already can check that this page read it correctly.
+ *
+ * Rows are the decoder's own output in the report's own order, so the list
+ * is complete: anything the decoder could not account for appears as "Not
+ * decoded" rather than being quietly left out.
+ */
+function DecodedReport({ report }: { report: AerodromeReport }) {
+  const [active, setActive] = useState<number | null>(null);
+  const o = report.observation;
+  if (!o) return null;
+
+  const raw = o.report.body;
+  const span = active === null ? null : report.explained[active]?.span ?? null;
+
+  return (
+    <>
+      <pre className="raw">
+        {span ? (
+          <>
+            {raw.slice(0, span.start)}
+            <mark>{raw.slice(span.start, span.end)}</mark>
+            {raw.slice(span.end)}
+          </>
+        ) : (
+          raw
+        )}
+      </pre>
+
+      {report.explained.length > 0 && (
+        <dl className="decoded" onMouseLeave={() => setActive(null)}>
+          {report.explained.map((line, i) => (
+            <div
+              key={`${line.label}-${i}`}
+              className={`decoded-row${active === i ? ' active' : ''}${line.indeterminate ? ' indeterminate' : ''}`}
+              tabIndex={line.span ? 0 : -1}
+              onMouseEnter={() => setActive(i)}
+              onFocus={() => setActive(i)}
+              onBlur={() => setActive(null)}
+            >
+              <dt>{line.label}</dt>
+              <dd>
+                {line.text}
+                {line.span && <code>{raw.slice(line.span.start, line.span.end)}</code>}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
+      <p className="field-note">
+        The report is the source; the lines under it are this page reading it. Hover or tab through one and it lights up in the report above, so you can check
+        the reading against the text rather than taking it on trust.
+      </p>
+    </>
+  );
+}
+
 function Runways({ report }: { report: AerodromeReport }) {
   const runways = report.airport.runways;
   if (runways.length === 0) return <p className="field-note">No runway data published for this field.</p>;
@@ -71,7 +216,7 @@ function Runways({ report }: { report: AerodromeReport }) {
   );
 }
 
-export function AerodromePage({ id, engine }: { id: string; engine: LocalEngine | null }) {
+export function AerodromePage({ id, engine, crosswindLimitKt }: { id: string; engine: LocalEngine | null; crosswindLimitKt: number | null }) {
   const [report, setReport] = useState<AerodromeReport | null | 'missing'>(null);
 
   useEffect(() => {
@@ -115,7 +260,7 @@ export function AerodromePage({ id, engine }: { id: string; engine: LocalEngine 
       {o ? (
         <>
           <h3>{o.source === 'nearby' ? `Nearest observation — ${o.station}, ${Math.round(o.distance)} nm` : 'Observation'}</h3>
-          <pre className="raw">{o.report.body}</pre>
+          <DecodedReport report={report} />
         </>
       ) : (
         <p className="field-note">No observation within {60} nm of this field.</p>
@@ -139,6 +284,9 @@ export function AerodromePage({ id, engine }: { id: string; engine: LocalEngine 
         {report.daylight.sunrise ? ` · sunrise ${hhmmZ(report.daylight.sunrise)}` : ''}
         {report.daylight.sunset ? ` · sunset ${hhmmZ(report.daylight.sunset)}` : ''}
       </p>
+
+      <h3>Wind on the runways</h3>
+      <RunwayWinds report={report} limitKt={crosswindLimitKt} />
 
       <h3>Runways</h3>
       <Runways report={report} />

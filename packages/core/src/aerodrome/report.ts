@@ -18,6 +18,8 @@ import { distanceNm, initialCourse } from '../domain/geo.js';
 import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
 import { isNight, solarEvents, type SolarEvents } from '../domain/sun.js';
 import { checkConditions } from '../rules/checks.js';
+import { analyseCrosswind, type CrosswindAnalysis } from '../rules/crosswind.js';
+import { explainMetar, type MetarLine } from '../explain/metar.js';
 import { checkDaylight } from '../rules/daylight.js';
 import { checkObservation } from '../rules/observation.js';
 import { metarConditions } from '../rules/evaluate.js';
@@ -48,6 +50,24 @@ export interface AerodromeReport {
   readonly forecastCategory: FlightCategory | null;
   readonly night: boolean;
   readonly daylight: SolarEvents;
+  /**
+   * The wind on every runway end, best first.
+   *
+   * `null` when there is no observation, or when the wind direction is not
+   * reported — `31///KT` and `VRB` are different things, and neither is a
+   * zero. The wind is whosever the observation is: a field that is not
+   * reporting borrows one, and a component computed from a neighbour's wind
+   * is a real number about this runway from a reading taken somewhere else.
+   * The page says which, because eleven miles of Niagara escarpment is
+   * exactly the sort of thing that changes a wind.
+   */
+  readonly crosswind: CrosswindAnalysis | null;
+  /**
+   * The observation read back in words, each line citing the characters it
+   * came from. Empty when there is no observation. The raw report is still
+   * carried and still shown: this is an aid to reading it, not a substitute.
+   */
+  readonly explained: readonly MetarLine[];
   /** The same lines a briefing of this field would produce, in the same order. */
   readonly findings: readonly Finding[];
   readonly nearby: readonly NearbyField[];
@@ -140,6 +160,8 @@ export async function aerodromeReport(store: Store, id: string, at: Date, profil
     forecastCategory: prevailing ? flightCategoryOf(ceilingOf(prevailing.conditions.sky)?.value ?? null, prevailing.conditions.visibility ? visibilityStatuteMiles(prevailing.conditions.visibility.value) : null) : null,
     night,
     daylight: solarEvents(position, at),
+    crosswind: observation?.decoded.wind ? analyseCrosswind(observation.decoded.wind.value, airport) : null,
+    explained: observation ? explainMetar(observation.decoded) : [],
     findings,
     nearby,
   };
