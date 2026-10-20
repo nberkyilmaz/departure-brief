@@ -1,0 +1,124 @@
+# Typecheck, test and build on every push.
+#
+# The suite is designed to degrade rather than fail when something is
+# absent: the Postgres tests skip without a database, and the document
+# extraction tests skip without the owner's handbook, which is deliberately
+# not in this repository. A database is provided here anyway, so the store
+# contract runs against real Postgres and not only the in-memory
+# implementation — those two have to behave identically and that is worth
+# proving on every push.
+#
+# Nothing here reaches the network for weather or NOTAMs: every test replays
+# recorded upstream responses committed alongside it.
+
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The floor the package declares, and the version it is developed on.
+        node: ['20.x', '22.x']
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: depbrief
+          POSTGRES_PASSWORD: depbrief
+          POSTGRES_DB: depbrief
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U depbrief"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+        env:
+          # Matches docker-compose, so the same URL works here and on a laptop.
+          DATABASE_URL: postgres://depbrief:depbrief@localhost:5433/depbrief
+
+      - name: Build the web app
+        run: npm run build -w apps/web
+
+  # The image the host runs, built here so a Dockerfile that would fail on
+  # deploy fails on push instead. Not pushed anywhere: Render builds its own
+  # from this same file, and what is being proved is that it can.
+  image:
+    name: Container image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: depbrief:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start it against a database and check it answers
+        run: |
+          docker network create depbrief-ci
+          docker run -d --name db --network depbrief-ci             -e POSTGRES_USER=depbrief -e POSTGRES_PASSWORD=depbrief -e POSTGRES_DB=depbrief             postgis/postgis:16-3.4
+          # -h 127.0.0.1 rather than the default: the postgis image restarts
+          # Postgres partway through its own initialisation, and until that
+          # is done pg_isready answers on the unix socket while nothing is
+          # listening on TCP. Asking over TCP is asking the question the
+          # other container will actually be asking.
+          for i in $(seq 1 45); do
+            docker exec db pg_isready -h 127.0.0.1 -U depbrief -d depbrief && break
+            sleep 2
+          done
+          docker run -d --name api --network depbrief-ci -p 3000:3000             -e DATABASE_URL=postgres://depbrief:depbrief@db:5432/depbrief             -e DEPBRIEF_USER_AGENT='depbrief/0.1 (ci@example.com)'             depbrief:ci
+          # The port opens before the airport snapshot is loaded, so what is
+          # proved here is that the process starts, migrates a real database
+          # and answers — not that it has finished booting. It reports 503
+          # with airportData: loading until the snapshot is in, which on a
+          # fresh database is the correct answer and the one being checked.
+          for i in $(seq 1 30); do
+            body=$(curl -s http://127.0.0.1:3000/api/health || true)
+            case "$body" in *'"airportData"'*) echo "$body"; exit 0;; esac
+            sleep 2
+          done
+          echo "the container never answered /api/health"
+          docker logs api
+          exit 1
+
+      - name: Logs, when it did not
+        if: failure()
+        run: docker logs api || true

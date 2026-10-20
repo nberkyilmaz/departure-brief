@@ -1,0 +1,7 @@
+# Store everything with LF; check out as-is on every platform. Stops Git's
+# CRLF warnings on Windows and keeps fixtures byte-identical across machines.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.pdf binary
+*.zip binary

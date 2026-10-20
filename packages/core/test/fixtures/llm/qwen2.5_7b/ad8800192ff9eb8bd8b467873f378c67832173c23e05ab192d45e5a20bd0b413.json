@@ -1,0 +1,86 @@
+{
+  "key": "ad8800192ff9eb8bd8b467873f378c67832173c23e05ab192d45e5a20bd0b413",
+  "request": {
+    "model": "qwen2.5:7b",
+    "system": "You assess NOTAMs for one specific general-aviation flight. You are given the flight (aircraft, rules, route, altitude, times, the aerodromes it uses and their runways), one NOTAM in ICAO format, and FACTS already worked out about it (which aerodrome it concerns and that aerodrome's role in the flight, whether it is in force during the flight). Decide whether the NOTAM matters to THIS flight. Runway closures, instrument procedures and trigger NOTAMs are decided elsewhere; you see the rest: obstacles, lighting, taxiways, markings, surface reports, services, navigation, airspace.\n\nRelevance:\n- \"critical\": changes whether or how the flight can be flown as planned — an unlit or unmarked obstacle within about 3 nm of an aerodrome the flight uses or on its departure or arrival path; a taxiway closure the facts say blocks the only route; airspace the flight would enter while it is active; a navaid or service this flight actually needs and will lack.\n- \"advisory\": worth knowing, not decisive — lighting, PAPI, approach lights or markings by day; a runway surface report; an obstacle that is lit or well off the path; a taxiway closure with other routes; a facility change that alters nothing operationally; a condition in force only outside the flight's times.\n- \"irrelevant\": cannot touch this flight — items for aircraft or operators this flight is not (other states' registrations, scheduled passenger service, heliports); airspace warnings about other regions of the world; administrative notices.\n\nExamples of the judgement wanted:\n- \"PAPI 26 U/S\" at the destination, day VFR arrival: advisory — no glidepath aid, a visual approach is still flown normally.\n- \"MULTIPLE CRANES … 1.4NM BFR THR 11 … NOT LGTD, NOT PAINTED\" at the departure aerodrome: critical — an unmarked obstacle beside the climb-out.\n- \"AIRSPACE SECURITY WARNING … FIR YANGON\": irrelevant — another region of the world.\n- \"RSC 08 6/6/6 DRY\" valid on a day before the flight: advisory — a surface report that will be superseded.\n- \"TWY B CLSD\" at the alternate: advisory — ground routing, other taxiways remain.\n\ncategory: the facility type the NOTAM is about.\naffects: which parts of the flight it touches (any of departure, enroute, arrival, alternate); empty when irrelevant.\nplain_text: the NOTAM in one or two plain-English sentences a pilot can read at a glance, expanding abbreviations.\ncited_span: copy, verbatim and unchanged, a SHORT piece of the NOTAM text — at most about twelve words, from one line — that your relevance judgement rests on. Copy it character for character from the NOTAM text given below; do not paraphrase, join lines or fix spelling.\nrationale: one sentence on why this relevance for this flight, then decide.\n\nNever invent facts not in the NOTAM. Do not default to \"advisory\": commit to \"critical\" or \"irrelevant\" when the definitions above say so.",
+    "prompt": "Aircraft: C172, VFR, cruise 3500 ft MSL.\nRoute: CYSN → CYKF, alternate CYHM.\nTimes (UTC): CYSN at 2026-09-14T15:00:00Z, CYKF at 2026-09-14T15:31:30Z, CYHM at 2026-09-14T15:46:29Z.\nEquipment: basic VFR (GNSS).\n\nNOTAM J4064/26\nQ code QOBCE (traffic IV, scope AE, FL0–FL6, radius 5 nm)\nLocation(s): CXXX\nFrom 2026-06-19T17:21:00.000Z\nTo 2026-09-18T18:00:00.000Z (EST)\n\nNOTAM text (cite from this, verbatim):\nCPJ3 HAMILTON (MCMASTER UNIVERSITY MEDICAL CENTRE) (HELI)\nCRANE 431528N 0795435W (APRX 5920FT SE AD (CPJ3)). 256FT AGL \n580FT AMSL. NOT LGTD, PAINTED.",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "plain_text": {
+          "type": "string"
+        },
+        "cited_span": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "runway",
+            "taxiway",
+            "approach",
+            "airspace",
+            "lighting",
+            "navaid",
+            "obstacle",
+            "services",
+            "other"
+          ]
+        },
+        "affects": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "departure",
+              "enroute",
+              "arrival",
+              "alternate"
+            ]
+          }
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "relevance": {
+          "type": "string",
+          "enum": [
+            "critical",
+            "advisory",
+            "irrelevant"
+          ]
+        }
+      },
+      "required": [
+        "plain_text",
+        "cited_span",
+        "category",
+        "affects",
+        "rationale",
+        "relevance"
+      ],
+      "additionalProperties": false
+    },
+    "maxTokens": 400
+  },
+  "response": {
+    "json": {
+      "plain_text": "A crane near Hamilton (McMaster University Medical Centre) is not lighted or painted and is about 256 feet AGL and 580 feet AMSL.",
+      "cited_span": "NOT LGTD, PAINTED.",
+      "category": "obstacle",
+      "affects": [
+        "departure"
+      ],
+      "rationale": "The crane is within about 3 nm of the departure aerodrome CYSN and is unlit and unpainted, posing a critical obstacle during departure.",
+      "relevance": "critical"
+    },
+    "text": "{\n  \"plain_text\": \"A crane near Hamilton (McMaster University Medical Centre) is not lighted or painted and is about 256 feet AGL and 580 feet AMSL.\",\n  \"cited_span\": \"NOT LGTD, PAINTED.\",\n  \"category\": \"obstacle\",\n  \"affects\": [\"departure\"],\n  \"rationale\": \"The crane is within about 3 nm of the departure aerodrome CYSN and is unlit and unpainted, posing a critical obstacle during departure.\",\n  \"relevance\": \"critical\"\n}",
+    "model": "qwen2.5:7b",
+    "provider": "ollama",
+    "usage": {
+      "input": 990,
+      "output": 123
+    }
+  },
+  "recordedAt": "2026-09-13T00:50:47.701Z"
+}

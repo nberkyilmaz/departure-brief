@@ -1,0 +1,639 @@
+{
+  "key": "1f895416b940774ff130d76e7a25dd494a7599f7cdf0c0c95b0ff9cfa0dd2bd5",
+  "request": {
+    "model": "qwen2.5vl:3b",
+    "system": "You read weight-and-balance figures off one page of an aircraft Pilot's Operating Handbook. You are given the page as OCR text lines, and usually the page image as well.\n\nFor every figure you report, quote the line you read it from, copied from the OCR lines exactly as they appear — including their spelling mistakes. The quote is checked against the page: a figure whose quote is not on the page, or whose number is not inside the quote, is thrown away.\n\nRules:\n- Report only figures printed on THIS page. Any field the page does not state is null. Never fill a gap from what you know about the aircraft type.\n- The quote must be a run of words from ONE line, long enough to contain both the number and the words that name it. Do not join lines, do not fix the OCR's spelling, do not paraphrase.\n- Report the number exactly as printed, in the page's units (lb, inches aft of datum, US gallons, knots). Where the page prints moment/1000, report moment/1000.\n- Many POHs print the same limits twice, once under \"NORMAL CATEGORY\" and once under \"UTILITY CATEGORY\". Put each figure in the field for the heading it appears under, and do not report a utility figure as a normal one.\n- Centre of gravity: the forward limit is a sloped line given as two points (\"35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.\") — report both points, each with its weight and its arm, quoting the line it came from. The aft limit is a single arm at all weights.\n- A worked example (\"SAMPLE LOADING PROBLEM\") states the sample airplane's own weights, which are not limits. Report its empty weight and empty moment in the sample fields, and take nothing else from it.\n- pageSummary: one line saying what this page is.",
+    "prompt": "Document: C172MPOH.pdf, page 88 of 148.\n\nOCR lines:\nCESSNA\nSECTION 6\nMODEL 172M WEIGHT & BALANCE/\nEQUIPMENT LIST\nTotal the weights and moments/1000 and plot these values on the Cane\nter of Gravity Moment Envelope to determine whether the point falls with\nin the envelope, and if the loading is acceptable,\n1C.G, ARM) (CG. ARM\nLOADING :\nARRANGEMENTS —E](%)\n|v\n+ Pot or pasesnger center of gravity\non adjustable seats positioned far\naverages ocougant, Numbers In paran-\ntheses indicate forward and aft Hmits\nof cecupast center of gravily caage.\n3% Arm measured to the center of the\nareas shown.\nNOTE: The rear cabin wall {approximate atation 108)\noF &ft baggoge wall (approximate station 142)\ncon be used as coavenlent interior rederence\npoints for determining the location of baggage STANDARD CPTIONAL\narea fuselage stations. SEATING SEATING\nSS\nFigure 6-3. Loading Arrangements\n6-7",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "pageSummary": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "object",
+          "properties": {
+            "maxTakeoffWeightNormalLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "maxTakeoffWeightUtilityLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "maxLandingWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "maxRampWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "frontSeatArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rearSeatArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage1ArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage1MaxLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage2ArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage2MaxLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggageCombinedMaxLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelLbPerGal": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelStandardUsableGal": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelLongRangeUsableGal": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "oilWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "oilArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "oilMomentPer1000": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "sampleEmptyWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "sampleEmptyMomentPer1000": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cgAftNormalIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cgAftUtilityIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "demonstratedCrosswindKt": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "cgForwardNormal": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "weightLb": {
+                "type": "number"
+              },
+              "armIn": {
+                "type": "number"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "weightLb",
+              "armIn",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 4
+        },
+        "cgForwardUtility": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "weightLb": {
+                "type": "number"
+              },
+              "armIn": {
+                "type": "number"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "weightLb",
+              "armIn",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 4
+        }
+      },
+      "required": [
+        "pageSummary",
+        "fields",
+        "cgForwardNormal",
+        "cgForwardUtility"
+      ],
+      "additionalProperties": false
+    },
+    "maxTokens": 1200,
+    "images": [
+      "sha256:28d584b2d66ef94bdac7d5349e80f0b5a5b6ac595b26794db447941e64be448c"
+    ]
+  },
+  "response": {
+    "json": {
+      "pageSummary": "CESSNA SECTION 6 MODEL 172M WEIGHT & BALANCE/EQUIPMENT LIST",
+      "fields": {
+        "cgAftNormalIn": {
+          "value": 38.5,
+          "quote": "38.5 inches aft of datum at 2300 lbs."
+        },
+        "cgAftUtilityIn": {
+          "value": 38.5,
+          "quote": "38.5 inches aft of datum at 2300 lbs."
+        },
+        "demonstratedCrosswindKt": {
+          "value": 10,
+          "quote": "10 knots."
+        }
+      },
+      "cgForwardNormal": [],
+      "cgForwardUtility": []
+    },
+    "text": "{ \"pageSummary\": \"CESSNA SECTION 6 MODEL 172M WEIGHT & BALANCE/EQUIPMENT LIST\", \"fields\": {\"cgAftNormalIn\": {\"value\": 38.5, \"quote\": \"38.5 inches aft of datum at 2300 lbs.\"}, \"cgAftUtilityIn\": {\"value\": 38.5, \"quote\": \"38.5 inches aft of datum at 2300 lbs.\"}, \"demonstratedCrosswindKt\": {\"value\": 10, \"quote\": \"10 knots.\"}},\"cgForwardNormal\": [],\"cgForwardUtility\": []}",
+    "model": "qwen2.5vl:3b",
+    "provider": "ollama",
+    "usage": {
+      "input": 1762,
+      "output": 167
+    }
+  },
+  "recordedAt": "2026-09-13T00:46:38.177Z"
+}

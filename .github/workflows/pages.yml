@@ -1,0 +1,82 @@
+# Publish the public site to GitHub Pages.
+#
+# What gets published is static files, but not a static briefing: the page
+# runs the pipeline itself, so a visitor can change their minimums, the
+# aircraft or the route and watch the verdict move.
+#
+# The weather comes through the relay (apps/relay) when the repository
+# variable RELAY_URL names one: the relay fetches the whole country on a
+# timer and the page reads its copy, so the services are asked once per
+# window however many people visit. Without the variable, or when the relay
+# cannot be reached, the page uses the recorded reports it carries, and
+# says so where nobody can miss it.
+#
+# The page bundles the core package, so a change there changes the site even
+# when nothing under apps/web has moved. That is why it is in the paths.
+
+name: Pages
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'apps/web/**'
+      - 'packages/core/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and let a run in progress finish rather than
+# leaving the site half-published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the demo
+        run: npm run build -w apps/web
+        env:
+          VITE_DEMO: '1'
+          # A project site is served from /<repo>/, so the build needs the prefix.
+          VITE_BASE: /${{ github.event.repository.name }}/
+          # Settings → Secrets and variables → Actions → Variables. Not a
+          # secret: it is in the page for anyone to read. Empty means recorded only.
+          VITE_RELAY: ${{ vars.RELAY_URL }}
+
+      - name: Fail if the recorded reports did not ship
+        # The page is nothing without them, and an empty site would deploy silently.
+        run: |
+          test -s apps/web/dist/demo/bundle.json
+          test -s apps/web/dist/demo/briefing.json
+          test -s apps/web/dist/demo/wb.json
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

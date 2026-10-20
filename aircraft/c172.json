@@ -1,0 +1,5 @@
+{
+  "type": "C172",
+  "demonstratedCrosswindKt": null,
+  "_note": "demonstratedCrosswindKt and the rest of the limitations come from the POH; fill in when available (step 4 defines the schema)"
+}

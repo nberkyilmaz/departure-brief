@@ -1,0 +1,336 @@
+{
+ "meta": {
+  "now": "2026-09-19T00:53:09.077",
+  "count": {
+   "notam": 25
+  },
+  "messages": []
+ },
+ "data": [
+  {
+   "type": "notam",
+   "pk": "1775817",
+   "location": "CYYZ",
+   "startValidity": "2026-09-18T21:21:00",
+   "endValidity": "2026-09-19T05:21:00",
+   "text": "{\"raw\" : \"(S3342/26 NOTAMR S3325/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609182121 C) 2609190521\\nE) RSC 05 6/6/6 DRY, DRY, DRY. VALID SEP 18 2121 - SEP 19 0521.\\n\\nRSC 23 6/6/6 DRY, DRY, DRY. VALID SEP 18 2121 - SEP 19 0521.\\n\\nRSC 06L 6/6/6 DRY, DRY, DRY. VALID SEP 18 2120 - SEP 19 0520.\\n\\nRSC 24R 6/6/6 DRY, DRY, DRY. VALID SEP 18 2120 - SEP 19 0520.\\n\\nRSC 06R 6/6/6 DRY, DRY, DRY. VALID SEP 18 2120 - SEP 19 0520.\\n\\nRSC 24L 6/6/6 DRY, DRY, DRY. VALID SEP 18 2120 - SEP 19 0520.\\n\\nRSC 15L 6/6/6 DRY, DRY, DRY. VALID SEP 18 2120 - SEP 19 0520.\\n\\nRSC 33R 6/6/6 DRY, DRY, DRY. VALID SEP 18 2120 - SEP 19 0520.\\n\\nRSC 15R 6/6/6 DRY, DRY, DRY. VALID SEP 18 2120 - SEP 19 0520.\\n\\nRSC 33L 6/6/6 DRY, DRY, DRY. VALID SEP 18 2120 - SEP 19 0520.\\n\\nADDN NON-GRF/TALPA INFO:)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1775380",
+   "location": "CYYZ",
+   "startValidity": "2026-09-18T12:38:13.963",
+   "endValidity": "2026-09-20T14:00:00",
+   "text": "{\"raw\" : \"(D3993/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609201200 C) 2609201400\\nE) TWY A BTN TWY C AND TWY D CLSD.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1774616",
+   "location": "CYYZ",
+   "startValidity": "2026-09-17T02:42:49.726",
+   "endValidity": "2026-09-20T10:00:00",
+   "text": "{\"raw\" : \"(D3968/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609190401 C) 2609201000\\nD) SEP 19 0401-1000, SEP 20 0701-1000\\nE) RWY 05/23 CLSD.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1774615",
+   "location": "CYYZ",
+   "startValidity": "2026-09-17T02:40:01.433",
+   "endValidity": "2026-09-19T08:00:00",
+   "text": "{\"raw\" : \"(D3967/26 NOTAMN\\nQ) CZYZ/QMXLT/IV/M/A/000/999/4341N07938W005\\nA) CYYZ B) 2609190401 C) 2609190800\\nE) TWY D BTN TWY DQ AND TWY DT NOT AVBL TO ACFT WITH WINGSPAN\\nGREATER THAN 118FT)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1774544",
+   "location": "CYYZ",
+   "startValidity": "2026-09-16T22:36:13.322",
+   "endValidity": "2026-09-23T22:00:00",
+   "text": "{\"raw\" : \"(D3961/26 NOTAMN\\nQ) CZYZ/QMXLC/IV/BO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609180900 C) 2609232200\\nE) TWY E BTN TWY EA AND CENTRAL DEICING FACILITY (CDF) PAD 4,\\n TWY T BTN RWY 15L/33R AND CDF TAXILANE 1 CLSD.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1774543",
+   "location": "CYYZ",
+   "startValidity": "2026-09-16T22:35:10.453",
+   "endValidity": "2026-09-29T22:00:00",
+   "text": "{\"raw\" : \"(D3960/26 NOTAMN\\nQ) CZYZ/QFIAU/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609180900 C) 2609292200\\nE) CENTRAL DE-ICING FACILITY PADS 5 AND 6 EAST OF TWY TC CLSD)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1774542",
+   "location": "CYYZ",
+   "startValidity": "2026-09-16T22:34:03.896",
+   "endValidity": "2026-09-23T20:00:00",
+   "text": "{\"raw\" : \"(D3959/26 NOTAMN\\nQ) CZYZ/QMRLC/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609181400 C) 2609232000\\nD) SEP 18 21-23 1400-2000\\nE) RWY 15L/33R CLSD AVBL AS TWY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1773319",
+   "location": "CYYZ",
+   "startValidity": "2026-09-14T23:12:00",
+   "endValidity": "2026-09-23T14:00:00",
+   "text": "{\"raw\" : \"(D3913/26 NOTAMR D3802/26\\nQ) CZYZ/QLAAS/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2609142312 C) 2609231400\\nE) ALS 06R AND 24L U/S. \\nAPPLY PROC FOR HIGH INTST APCH LGT INOPERATIVE (AIP AD 2.22.4)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1766826",
+   "location": "CYYZ",
+   "startValidity": "2026-09-03T12:48:00",
+   "endValidity": "2026-12-01T17:00:00",
+   "text": "{\"raw\" : \"(D3711/26 NOTAMR D3682/26\\nQ) CZYZ/QMXLL/IV/M/A/000/999/4341N07938W005\\nA) CYYZ B) 2609031248 C) 2612011700\\nE) ACFT WITH WINGSPAN UP TO 262FT AUTH ON TWY J BTN TWY P AND\\nRWY 15L)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1764699",
+   "location": "CYYZ",
+   "startValidity": "2026-08-31T12:04:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(D3615/26 NOTAMR D1993/26\\nQ) CZYZ/QOBCE/IV/M/AE/000/999/4341N07938W005\\nA) CYYZ B) 2608311204 C) 2611041800EST\\nE) MAINT CREW AND EQPT APRX 1750FT BEYOND DEP END RWY 15R AND APRX\\n350FT RIGHT RWY EXTENDED CENTRE LINE. 46FT AGL, 574FT AMSL.\\nLGTD, NOT PAINTED)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1764671",
+   "location": "CYYZ",
+   "startValidity": "2026-08-31T11:23:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(D3613/26 NOTAMR D3538/26\\nQ) CZYZ/QPICH/I/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2608311123 C) 2611301800EST\\nE) RNAV (GNSS) Z RWY 15R APCH: \\nLNAV/VNAV MINIMA: NOT AUTH \\nLNAV MINIMA TO READ: 1040 (489) 1 RVR 50 \\nDIST/ALT TABLE: LAST ALT TO READ 1.4/1040 INSTEAD OF 1.2/980)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1764667",
+   "location": "CYYZ",
+   "startValidity": "2026-08-31T11:19:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(D3611/26 NOTAMN\\nQ) CZYZ/QPMCH/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2608311119 C) 2611261600EST\\nE) ILS RWY 06L APCH: LOC/DME MINIMA TO READ: 980 (445) 1 RVR 50)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1761897",
+   "location": "CYYZ",
+   "startValidity": "2026-08-26T12:41:00",
+   "endValidity": "2026-09-30T23:59:00",
+   "text": "{\"raw\" : \"(G3020/26 NOTAMR G2908/26\\nQ) CZYZ/QNVAS/IV/BO/AE/000/999/4340N07940W025\\nA) CYYZ B) 2608261241 C) 2609302359\\nE) PEARSON (TORONTO/LBP INTL) VOR YTP 116.55MHZ U/S)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1759237",
+   "location": "CYYZ",
+   "startValidity": "2026-08-21T13:28:04.265",
+   "endValidity": "2026-11-01T23:00:00",
+   "text": "{\"raw\" : \"(D3362/26 NOTAMN\\nQ) CZYZ/QOBCE/IV/M/AE/000/007/4340N07938W005\\nA) CYYZ B) 2608241000 C) 2611012300\\nE) MOBILE CRANE WITHIN 628FT RADIUS CENTRED ON 434025N 0793737W APRX \\n530FT BEYOND DTHR 33L AND 1830FT NE RCL. 120FT AGL 681FT AMSL. \\nLGTD, PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1750858",
+   "location": null,
+   "startValidity": "2026-08-07T12:18:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2675/26 NOTAMR G1363/26\\nQ) CZXX/QOEXX/IV/NBO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2608071218 C) 2611061800EST\\nE) AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\\nIN RESPONSE TO THE SECURITY SITUATION IN MALI. CANADIAN AIR\\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL EQUAL TO OR ABOVE FL320 IN\\nTHE PORTIONS OF FIR DAKAR (GOOO) AND FIR NIAMEY (DRRR) LOCATED IN\\nTHE TERRITORY OF MALI DUE TO THE POTENTIAL RISK FROM MILITANT\\nACTIVITY AND ANTI-AIRCRAFT WEAPONRY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1750853",
+   "location": null,
+   "startValidity": "2026-08-07T12:16:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2674/26 NOTAMR G1362/26\\nQ) CZXX/QOEXX/IV/NBO/E/000/999/5245N09040W999\\nA) CZWG CZYZ B) 2608071216 C) 2611061800EST\\nE) AIRSPACE SECURITY WARNING ISSUED BY THE DEPARTMENT OF TRANSPORT\\nIN RESPONSE TO THE SECURITY SITUATION IN MYANMAR. CANADIAN AIR\\nOPERATORS AND OWNERS OF AIRCRAFT REGISTERED IN CANADA ARE\\nRECOMMENDED TO MAINTAIN A FLIGHT LEVEL AT OR ABOVE FL260 IN FIR\\nYANGON (VYYF) DUE TO THE RISK FROM ANTI-AIRCRAFT WEAPONRY.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1743534",
+   "location": "CYYZ",
+   "startValidity": "2026-07-25T11:30:27.452",
+   "endValidity": "2026-10-26T21:00:00",
+   "text": "{\"raw\" : \"(D2838/26 NOTAMN\\nQ) CZYZ/QMXLT/IV/M/A/000/999/4341N07938W005\\nA) CYYZ B) 2607271100 C) 2610262100\\nE) TWY TC NOT AUTH TO ACFT WITH WINGSPAN GREATER THAN 118FT.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1741094",
+   "location": null,
+   "startValidity": "2026-07-21T13:24:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(G2420/26 NOTAMR G1192/26\\nQ) CZXX/QOECH/IV/NBO/E/000/999/5518N09358W999\\nA) CZWG CZYZ B) 2607211324 C) 2610191800EST\\nE) ALL ACFT, REGARDLESS OF THE STATE OF REGISTRY, DIRECTLY OR \\nINDIRECTLY OWNED, CHARTERED, LEASED, OPERATED OR OTHERWISE \\nCONTROLLED BY A PERSON CONNECTED WITH EITHER THE RUSSIAN \\nFEDERATION OR OF BELARUS OR BY A CORPORATION OR ENTITY THAT IS \\nINCORPORATED OR FORMED UNDER THE LAWS OF THE RUSSIAN FEDERATION \\nOR BELARUS, AND ALL OPERATORS HOLDING AN AIR OPERATOR CERTIFICATE \\n(AOC) ISSUED BY RUSSIAN FEDERATION AND/OR BELARUSIAN AUTHORITIES \\nARE PROHIBITED TO ENTER, EXIT OR OVERFLY CANADA'S TERRITORIAL \\nAIRSPACE (INCLUDING FLT WITHIN 12NM OF CANADA'S COASTS). \\nEXCEPTIONS PERMITTED FOR ACFT EXPERIENCING INFLIGHT EMERG. \\n\\nALL AUTH OBTAINED PRIOR TO 27 FEB 2022 FOR ACFT AND OPS SUBJECT \\nTO THIS NOTAM ARE REVOKED.\\n\\nHUMANITARIAN, SAR, MEDEVAC AND ANY OTHER FLT SEEKING AN EXCEPTION \\nTO THIS RESTRICTION MUST RECEIVE AUTH GRANTED AFTER 27 FEB 2022 \\nFM THE MINISTER OF TRANSPORT TO OPERATE IN CANADA'S TERRITORIAL \\nAIRSPACE.  AFFECTED ACFT WISHING TO OBTAIN SUCH AN AUTH OR CLR \\nINTO CANADA'S TERRITORIAL AIRSPACE MAY APPLY TO THE MINISTER OF \\nTRANSPORT AT 1-877-992-6853 OR 1-613-992-6853 OR BY EMAIL AT \\nOPERATIONS.AVIATION(AT)TC.GC.CA.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1737177",
+   "location": "CYYZ",
+   "startValidity": "2026-07-14T13:32:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(D2655/26 NOTAMR D1303/26\\nQ) CZYZ/QPDCH/I/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2607141332 C) 2610121600EST\\nE) ALL SID AND DEPARTURE PROCEDURE: RWY 23: \\nADD: REQUIRES A MINIMUM CLIMB GRADIENT OF 230 FT/NM TO 1300. \\n\\nDEPARTURE CLIMB RATE V/V (FPM) \\nGROUND SPEED 90 120 140 160 180 200 250 300 \\n230 FT/NM   350 460 540 620 690 770 960 1150)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1734484",
+   "location": "CYYZ",
+   "startValidity": "2026-07-09T16:05:00",
+   "endValidity": "2026-10-09T15:00:00",
+   "text": "{\"raw\" : \"(D2552/26 NOTAMR D1076/26\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2607091605 C) 2610091500\\nE) DUE CONST: STAND 181 LEAD-IN LINE POSITION MODIFIED.\\nVISUAL DOCKING GUIDANCE SYSTEM NOT AVBL.\\nACFT TO TRANSITION FM STARTBOX 9C TO LEAD-IN\\nLINE TRIANGLE THEN STRICT ADHERANCE ALONG LEAD-IN LINE.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1727488",
+   "location": "CYYZ",
+   "startValidity": "2026-06-27T14:58:00",
+   "endValidity": "2026-09-25T15:00:00",
+   "text": "{\"raw\" : \"(D2306/26 NOTAMR D0835/26\\nQ) CZYZ/QMXXX/IV/M/A/000/999/4341N07938W005\\nA) CYYZ B) 2606271458 C) 2609251500\\nE) OPR TRIAL OF NEW ANGLED RWY HOLD POSITION IN EFFECT ON TWY D4 AND \\nTWY D5, SOUTH OF RWY 06L/24R, REFER TO AIC 15/21)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1721966",
+   "location": null,
+   "startValidity": "2026-06-17T17:58:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(M1141/26 NOTAMN\\nQ) CZYZ/QANCH/I/NBO/E/000/180/4355N07836W050\\nA) CZYZ B) 2606171758 C) PERM\\nE) AMEND PUBLICATIONS:\\nT781 BTN TESUK TO TALEB: MOCA TO READ 2500 INSTEAD OF 2300)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1717369",
+   "location": "CYYZ",
+   "startValidity": "2026-06-09T20:55:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(D2079/26 NOTAMN\\nQ) CZYZ/QFAXX/IV/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2606092055 C) PERM\\nE) AMEND PUBLICATIONS: \\nRWY DATA: TWY: \\nADD: TWY V: ACFT WITH WINGSPANS 214FT AND GREATER NOT AUTH BTWN \\nTWY E AND TWY F \\n\\nTAXI CHART: NOTES: RESTRICTIONS: \\nADD: ACFT WITH WINGSPANS 214FT AND GREATER NO TAXIING ON TWY V \\nBTWN TWY E AND TWY F)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1685656",
+   "location": "CYYZ",
+   "startValidity": "2026-04-23T15:20:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(D1308/26 NOTAMN\\nQ) CZYZ/QPICH/I/NBO/A/000/999/4341N07938W005\\nA) CYYZ B) 2604231520 C) PERM\\nE) AMEND PUBLICATIONS: ILS RWY 24L APCH: \\nLOC/DME MINIMA TO READ: 1040 (493) 1 RVR 50)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  },
+  {
+   "type": "notam",
+   "pk": "1638754",
+   "location": "CYYZ",
+   "startValidity": "2026-03-11T15:45:00",
+   "endValidity": null,
+   "text": "{\"raw\" : \"(D0670/26 NOTAMR D0563/26\\nQ) CZYZ/QOBCE/IV/M/AE/000/012/4340N07944W005\\nA) CYYZ B) 2603111545 C) PERM\\nE) AMEND PUBLICATIONS: NEW BUILDING 433941N 0794416W (APRX 4.7NM W \\nAD (CYYZ)). 429FT AGL 1121FT AMSL. NOT LGTD, NOT PAINTED.)\", \"english\" : null, \"french\" : null}",
+   "hasError": false,
+   "position": {
+    "pointReference": "CYYZ",
+    "radialDistance": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,44 @@
+{
+  "_source": "Cessna 1976 Skyhawk Model 172M Pilot's Operating Handbook (the owner's scanned copy, C172MPOH.pdf, sha256 a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446). Figures transcribed by hand from the page images on 2026-09-12: Section 2 page 2-6/2-7 (PDF pages 17-18) for weights and CG limits, Section 4 (PDF page 42) for the demonstrated crosswind, Section 6 figure 6-3 (PDF page 88) for station arms and figure 6-5 (PDF page 90) for the sample loading problem. This is the yardstick the model extraction is checked against.",
+  "limits": {
+    "maxTakeoffWeightNormalLb": 2300,
+    "maxLandingWeightNormalLb": 2300,
+    "maxTakeoffWeightUtilityLb": 2000,
+    "baggage1MaxLb": 120,
+    "baggage2MaxLb": 50,
+    "baggageCombinedMaxLb": 120,
+    "cgForwardNormal": [ { "weightLb": 1950, "armIn": 35.0 }, { "weightLb": 2300, "armIn": 38.5 } ],
+    "cgAftNormalIn": 47.3,
+    "cgForwardUtility": [ { "weightLb": 1950, "armIn": 35.0 }, { "weightLb": 2000, "armIn": 35.5 } ],
+    "cgAftUtilityIn": 40.5,
+    "demonstratedCrosswindKt": 15
+  },
+  "stations": {
+    "frontSeatArmIn": 37,
+    "frontSeatArmRangeIn": [34, 46],
+    "rearSeatArmIn": 73,
+    "baggage1ArmIn": 95,
+    "baggage1StationRangeIn": [82, 108],
+    "baggage2ArmIn": 123,
+    "baggage2StationRangeIn": [108, 142],
+    "fuelArmIn": 48,
+    "fuelStandardUsableGal": 38,
+    "fuelLongRangeUsableGal": 48,
+    "fuelLbPerGal": 6,
+    "oilWeightLb": 15,
+    "oilMomentPer1000": -0.2
+  },
+  "sampleLoadingProblem": {
+    "_note": "Figure 6-5, the POH's own worked example; the computation must reproduce its totals.",
+    "rows": [
+      { "item": "Licensed Empty Weight (sample airplane)", "weightLb": 1366, "momentPer1000": 53.8 },
+      { "item": "Oil (8 qts)", "weightLb": 15, "momentPer1000": -0.2 },
+      { "item": "Usable fuel, standard tanks 38 gal", "weightLb": 228, "momentPer1000": 10.9 },
+      { "item": "Pilot and front passenger", "weightLb": 340, "momentPer1000": 12.6, "_note": "The scan's OCR reads this as 12.8, but 340 lb at the 37 in front-seat arm is 12,580 lb-in, and only 12.6 makes the page's own printed total of 102.9 add up. Transcribed as 12.6." },
+      { "item": "Rear passengers", "weightLb": 340, "momentPer1000": 24.8 },
+      { "item": "Baggage area 1", "weightLb": 11, "momentPer1000": 1.0 }
+    ],
+    "totalWeightLb": 2300,
+    "totalMomentPer1000": 102.9
+  }
+}

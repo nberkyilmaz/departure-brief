@@ -1,0 +1,11 @@
+{
+  "departure": "KTEB",
+  "route": ["N07"],
+  "destination": "KHPN",
+  "alternate": "KJFK",
+  "departureTime": "2026-09-07T13:00:00Z",
+  "cruise": { "tas": 110, "altitude": 3500 },
+  "airspace": { "KTEB": "D", "N07": "G", "KHPN": "D", "KJFK": "B" },
+  "profile": "../profiles/default.json",
+  "aircraft": "../aircraft/c172.json"
+}

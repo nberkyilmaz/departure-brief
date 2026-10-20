@@ -1,0 +1,649 @@
+{
+  "key": "b0ee9b2b2be211545ee03193c4cbee29f7297bcb01973a0b2bdb722d80d6c873",
+  "request": {
+    "model": "qwen2.5vl:3b",
+    "system": "You read weight-and-balance figures off one page of an aircraft Pilot's Operating Handbook. You are given the page as OCR text lines, and usually the page image as well.\n\nFor every figure you report, quote the line you read it from, copied from the OCR lines exactly as they appear — including their spelling mistakes. The quote is checked against the page: a figure whose quote is not on the page, or whose number is not inside the quote, is thrown away.\n\nRules:\n- Report only figures printed on THIS page. Any field the page does not state is null. Never fill a gap from what you know about the aircraft type.\n- The quote must be a run of words from ONE line, long enough to contain both the number and the words that name it. Do not join lines, do not fix the OCR's spelling, do not paraphrase.\n- Report the number exactly as printed, in the page's units (lb, inches aft of datum, US gallons, knots). Where the page prints moment/1000, report moment/1000.\n- Many POHs print the same limits twice, once under \"NORMAL CATEGORY\" and once under \"UTILITY CATEGORY\". Put each figure in the field for the heading it appears under, and do not report a utility figure as a normal one.\n- Centre of gravity: the forward limit is a sloped line given as two points (\"35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.\") — report both points, each with its weight and its arm, quoting the line it came from. The aft limit is a single arm at all weights.\n- A worked example (\"SAMPLE LOADING PROBLEM\") states the sample airplane's own weights, which are not limits. Report its empty weight and empty moment in the sample fields, and take nothing else from it.\n- pageSummary: one line saying what this page is.",
+    "prompt": "Document: C172MPOH.pdf, page 42 of 148.\n\nOCR lines:\nCESSNA SECTION 4\nMODEL 172M . NORMAL PROCEDURES\nINTRODUCTION\nSection 4 provides checklist and amplified procedures for the conduct\nof normal operation. Normal procedures associated with Optional Syg-\ntems can be found in Section &.\nSPEEDS FOR SAFE OPERATION\nUnless otherwise noted, the following speeds are hased on a maxi-\nmum weight of 2300 pounds and may be used for any lesser weight. How-\never, to achieve the performance specified in Section 5 for takeoff dig-~\ntance, the speed appropriate to the particular weight must be used,\nTakeoff, Flaps Up:\nNormal ClHmb Out . . . . . , . . . ... ..... 70-80 KAS\nMaximum Performance Takeoff, Speed at 80 feet . . . . 59 XIAS\nEnroute Climb, Flaps Up:\nNermal, Sea level . . . . . . . . . . . ... ., . . 80-80 KIAS\nNormal, 10,000 Feet . . . . . . . . . . cee +o... 70-80 KIAS\n==Best Rate of Climb, Sea Level. . . . . . . . . .., . \"8KIAS\nBest Rate of Climb, 10,000 Peet, . . . , . . . . . . . 68 KIAS\n~—> Best Angle of Climb, Sea Level . . . . . . , . . . . . 84 KIAS\n«i Best Angle of Climb, 10,000 Feet” . . . . . . . . . . . 83 KIAS\nLanding Approach: .\nNormal Approach, Flaps Up. . . . . . . « . . . . . B0=T0 KI&S\nNormal Approach, Flaps 40° . . . . . . . .. . . . B55-65KIAS\nShort Field Approach, Flaps 40°. . . . . . . . . . . . 60 KIAS\nBalked Landing:\nDuring Transition to Maximum Power, Flaps 20° . . . . 55 KiAS\nMaximum Recommended Turbulent Air Penetration Speed:\n2300 Lbs + +. «oii a ee eee se ee. «97 KIAS\nI9BG Lbs +... o.oo ow ew se ew « «+. 89KIAS\n1600 The . . . . LL. oo. . eee... .. BOKAS\nMaximum Demonstrated Crosswind Velocity:\nTakeoff or Landing - « « + « + + « . « +. . «+ . . 15 KNOTS",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "pageSummary": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "object",
+          "properties": {
+            "maxTakeoffWeightNormalLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "maxTakeoffWeightUtilityLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "maxLandingWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "maxRampWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "frontSeatArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "rearSeatArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage1ArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage1MaxLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage2ArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggage2MaxLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "baggageCombinedMaxLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelLbPerGal": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelStandardUsableGal": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "fuelLongRangeUsableGal": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "oilWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "oilArmIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "oilMomentPer1000": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "sampleEmptyWeightLb": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "sampleEmptyMomentPer1000": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cgAftNormalIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cgAftUtilityIn": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "demonstratedCrosswindKt": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "number"
+                    },
+                    "quote": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "quote"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "cgForwardNormal": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "weightLb": {
+                "type": "number"
+              },
+              "armIn": {
+                "type": "number"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "weightLb",
+              "armIn",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 4
+        },
+        "cgForwardUtility": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "weightLb": {
+                "type": "number"
+              },
+              "armIn": {
+                "type": "number"
+              },
+              "quote": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "weightLb",
+              "armIn",
+              "quote"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 4
+        }
+      },
+      "required": [
+        "pageSummary",
+        "fields",
+        "cgForwardNormal",
+        "cgForwardUtility"
+      ],
+      "additionalProperties": false
+    },
+    "maxTokens": 1200,
+    "images": [
+      "sha256:1482c23f98bf6efb349c95209ebae6223b76ac5675ff29b0aaa6293371b790cb"
+    ]
+  },
+  "response": {
+    "json": {
+      "pageSummary": "SPEEDS FOR SAFE OPERATION",
+      "fields": {
+        "sampleEmptyWeightLb": null,
+        "sampleEmptyMomentPer1000": null,
+        "cgAftNormalIn": null,
+        "cgAftUtilityIn": null,
+        "demonstratedCrosswindKt": null
+      },
+      "cgForwardNormal": [
+        {
+          "weightLb": 1950,
+          "armIn": 35,
+          "quote": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs."
+        },
+        {
+          "weightLb": 2300,
+          "armIn": 38.5,
+          "quote": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs."
+        }
+      ],
+      "cgForwardUtility": [
+        {
+          "weightLb": 2300,
+          "armIn": 38.5,
+          "quote": "35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs."
+        }
+      ]
+    },
+    "text": "{\n  \"pageSummary\": \"SPEEDS FOR SAFE OPERATION\",\n  \"fields\": {\n    \"sampleEmptyWeightLb\": null,\n    \"sampleEmptyMomentPer1000\": null,\n    \"cgAftNormalIn\": null,\n    \"cgAftUtilityIn\": null,\n    \"demonstratedCrosswindKt\": null\n  },\n  \"cgForwardNormal\": [\n    {\n      \"weightLb\": 1950,\n      \"armIn\": 35.0,\n      \"quote\": \"35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.\"\n    },\n    {\n      \"weightLb\": 2300,\n      \"armIn\": 38.5,\n      \"quote\": \"35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.\"\n    }\n  ],\n  \"cgForwardUtility\": [\n    {\n      \"weightLb\": 2300,\n      \"armIn\": 38.5,\n      \"quote\": \"35.0 inches aft of datum at 1950 lbs. or less, with straight line variation to 38.5 inches aft of datum at 2300 lbs.\"\n    }\n  ]\n}",
+    "model": "qwen2.5vl:3b",
+    "provider": "ollama",
+    "usage": {
+      "input": 2130,
+      "output": 324
+    }
+  },
+  "recordedAt": "2026-09-13T00:46:34.976Z"
+}
