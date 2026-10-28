@@ -8,7 +8,7 @@ the time you will actually be there, and checks it all against your own
 personal minimums and the regulations — with every line citing the exact
 characters of the report it came from.
 
-**[Open the live site →](https://nberkyilmaz.github.io/departure-brief/)**
+**[Open the live site →](https://nberkyilmaz.com/departure-brief/)**
 The whole pipeline runs in your browser.
 
 > **Not for operational use.** This is a study and planning aid, not an
