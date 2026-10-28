@@ -46,43 +46,61 @@ export function StartPage({ engine, weather, home }: { engine: LocalEngine | nul
 
   return (
     <section className="start">
-      <p className="lede">
-        Every METAR, TAF and NOTAM you would read before a flight — decoded, placed on your route at the time you will be there, and checked against your own
-        minimums. Every line cites the report it came from. It does not decide whether to fly; that stays with you.
-      </p>
+      <div className="start-intro">
+        <p className="lede">
+          Every METAR, TAF and NOTAM you would read before a flight — decoded, placed on your route at the time you will be there, and checked against your
+          own minimums. Every line cites the report it came from. It does not decide whether to fly; that stays with you.
+        </p>
 
-      <form
-        className="start-search"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (code !== '') window.location.hash = aerodromeHref(code);
-        }}
-      >
-        <label>
-          Look up an aerodrome
-          <input
-            value={id}
-            onChange={(e) => setId(e.target.value.replace(/[^A-Za-z0-9 ]/g, ''))}
-            placeholder="CYSN, Toronto, KIAG…"
-            autoCapitalize="characters"
-            autoCorrect="off"
-            spellCheck={false}
-          />
-        </label>
-        <button type="submit" disabled={code === ''}>
-          Go
-        </button>
-      </form>
+        <form
+          className="start-search"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (code !== '') window.location.hash = aerodromeHref(code);
+          }}
+        >
+          <label>
+            Look up an aerodrome
+            <input
+              value={id}
+              onChange={(e) => setId(e.target.value.replace(/[^A-Za-z0-9 ]/g, ''))}
+              placeholder="CYSN, Toronto, KIAG…"
+              autoCapitalize="characters"
+              autoCorrect="off"
+              spellCheck={false}
+            />
+          </label>
+          <button type="submit" disabled={code === ''}>
+            Go
+          </button>
+        </form>
 
-      {code !== '' && known.length > 0 && (
-        <ul className="start-matches">
-          {known.map((a) => (
-            <li key={a.id}>
-              <a href={aerodromeHref(a.id)}>{a.id}</a> <span className="muted">{a.name}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+        {code !== '' && known.length > 0 && (
+          <ul className="start-matches">
+            {known.map((a) => (
+              <li key={a.id}>
+                <a href={aerodromeHref(a.id)}>{a.id}</a> <span className="muted">{a.name}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* The three ways on, above the map so they are on screen without scrolling; briefing a flight is the main one. */}
+      <div className="start-links">
+        <a className="start-card primary" href={hrefFor({ name: 'brief' })}>
+          <b>Brief a flight</b>
+          <span className="muted">route, times, your minimums</span>
+        </a>
+        <a className="start-card" href={aerodromeHref(home)}>
+          <b>{home}</b>
+          <span className="muted">your home field</span>
+        </a>
+        <a className="start-card" href={hrefFor({ name: 'about' })}>
+          <b>How this works</b>
+          <span className="muted">and how far to trust it</span>
+        </a>
+      </div>
 
       <div className="wx-card">
         <div className="wx-head">
@@ -121,21 +139,6 @@ export function StartPage({ engine, weather, home }: { engine: LocalEngine | nul
             </>
           )}
         </p>
-      </div>
-
-      <div className="start-links">
-        <a className="start-card" href={aerodromeHref(home)}>
-          <b>{home}</b>
-          <span className="muted">your home field</span>
-        </a>
-        <a className="start-card" href={hrefFor({ name: 'brief' })}>
-          <b>Brief a flight</b>
-          <span className="muted">route, times, your minimums</span>
-        </a>
-        <a className="start-card" href={hrefFor({ name: 'about' })}>
-          <b>How this works</b>
-          <span className="muted">and how far to trust it</span>
-        </a>
       </div>
 
       {weather?.mode === 'recorded' && (

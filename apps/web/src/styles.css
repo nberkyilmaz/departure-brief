@@ -1,18 +1,30 @@
 /*
- * The look is meant to read like a briefing document rather than a
- * dashboard: one column, generous line length, colour used only where it
- * carries meaning — a verdict, a severity, a cited span. Anything that
- * merely decorates would compete with the one thing a pilot is here to read.
+ * Two kinds of colour, kept apart. The frame (masthead, navigation, buttons)
+ * wears the sky at dusk, the same as nberkyilmaz.com, so the page feels like
+ * a place rather than a printout. Inside the briefing it still reads like a
+ * briefing document: one column, generous line length, colour used only
+ * where it carries meaning — a verdict, a severity, a cited span. Anything
+ * that merely decorates there would compete with the one thing a pilot is
+ * here to read.
  */
 :root {
-  /* Ink and paper. */
-  --bg: #f6f6f3;
+  /* Ink and paper: warm paper, slate ink. */
+  --bg: #faf7f2;
   --surface: #ffffff;
-  --surface-sunk: #f1f1ec;
-  --fg: #191917;
-  --muted: #5f5f59;
-  --line: #dedbd3;
-  --line-strong: #c6c2b8;
+  --surface-sunk: #f3efe8;
+  --fg: #142033;
+  --muted: #5a6478;
+  --line: #e7e0d4;
+  --line-strong: #cbc2b3;
+
+  /*
+   * The frame. Navy rather than any meaning colour, so a button is never
+   * mistaken for a verdict; the sun appears only as an accent on the dark sky.
+   */
+  --brand: #1f3f78;
+  --brand-ink: #ffffff;
+  --sun: #ffc65c;
+  --sunset: linear-gradient(90deg, #14396b, #4b4a8f, #c8643f, #f0a057);
 
   /*
    * Meaning. Each one is an attention level or a flight category; none is
@@ -40,10 +52,11 @@
   --s4: 1rem;
   --s5: 1.5rem;
   --s6: 2.25rem;
-  --radius: 8px;
-  --shadow: 0 1px 2px rgb(0 0 0 / 6%), 0 1px 1px rgb(0 0 0 / 4%);
+  --radius: 12px;
+  --shadow: 0 1px 2px rgb(20 32 51 / 5%), 0 6px 20px rgb(20 32 51 / 6%);
+  --shadow-lift: 0 2px 4px rgb(20 32 51 / 6%), 0 14px 32px rgb(20 32 51 / 11%);
 
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --sans: "Plus Jakarta Sans Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   font-family: var(--sans);
@@ -60,13 +73,15 @@
  */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #16161a;
-    --surface: #1e1e23;
-    --surface-sunk: #26262c;
-    --fg: #eceae4;
-    --muted: #a3a099;
-    --line: #35353d;
-    --line-strong: #4a4a54;
+    --bg: #0b1424;
+    --surface: #121e33;
+    --surface-sunk: #18263f;
+    --fg: #e9edf5;
+    --muted: #a3adc2;
+    --line: #22304a;
+    --line-strong: #33456a;
+    --brand: #8fb3ff;
+    --brand-ink: #0b1424;
     --ok: #6fbf73;
     --advisory: #7da7dd;
     --marginal: #e0a145;
@@ -77,7 +92,8 @@
     --ifr: #f0736a;
     --lifr: #d98fd9;
     --unknown: #8a8a84;
-    --shadow: 0 1px 2px rgb(0 0 0 / 40%);
+    --shadow: 0 1px 2px rgb(0 0 0 / 35%), 0 8px 24px rgb(0 0 0 / 28%);
+    --shadow-lift: 0 2px 4px rgb(0 0 0 / 40%), 0 14px 32px rgb(0 0 0 / 40%);
   }
 }
 
@@ -101,21 +117,52 @@ body { margin: 0; }
 
 main { max-width: 62rem; margin: 0 auto; padding: var(--s5) var(--s4) var(--s6); }
 
-header { margin-bottom: var(--s5); }
-header h1 {
+/*
+ * The masthead: the sky at dusk, a route climbing out across it, and the
+ * sunset along its lower edge. It is the frame, the one place colour is
+ * decoration, and it looks the same by day and by night.
+ */
+.masthead {
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(55% 140% at 92% 140%, rgb(240 160 87 / 55%), rgb(200 100 63 / 18%) 45%, transparent 70%),
+    linear-gradient(135deg, #081a35 0%, #14396b 55%, #3d4489 100%);
+  border-bottom: 4px solid transparent;
+  border-image: var(--sunset) 1;
+}
+.masthead::after {
+  content: '';
+  position: absolute;
+  /* Above the tabs, which run long on a field's page. */
+  top: 1rem;
+  right: max(1rem, calc((100% - 62rem) / 2 + 1rem));
+  width: 250px;
+  height: 80px;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 110'%3E%3Cpath d='M12 96C110 96 170 34 282 22' fill='none' stroke='white' stroke-opacity='.7' stroke-width='2.2' stroke-linecap='round' stroke-dasharray='.5 9'/%3E%3Ccircle cx='12' cy='96' r='5' fill='none' stroke='white' stroke-width='1.8'/%3E%3Ccircle cx='12' cy='96' r='2' fill='white'/%3E%3Cpath transform='translate(298 20) rotate(-6)' fill='white' d='M17 0C17-1.6 15.6-2.4 14-2.4H4.5L-3.5-13H-7L-3-2.4H-11L-14-6.5H-17L-15 0L-17 6.5H-14L-11 2.4H-3L-7 13H-3.5L4.5 2.4H14C15.6 2.4 17 1.6 17 0Z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+.masthead-inner { position: relative; z-index: 1; max-width: 62rem; margin: 0 auto; padding: var(--s5) var(--s4) var(--s3); }
+.masthead h1 {
   margin: 0;
-  font-size: clamp(1.9rem, 1.4rem + 2vw, 2.6rem);
-  letter-spacing: -0.02em;
+  font-size: clamp(1.8rem, 1.35rem + 2vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
   line-height: 1.1;
 }
-.tagline { margin: var(--s1) 0 0; color: var(--muted); font-size: 1.02rem; }
-header h1 a { color: inherit; text-decoration: none; }
-header h1 a:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+.masthead h1 a { color: inherit; text-decoration: none; }
+.masthead h1 a:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+.tagline { margin: var(--s1) 0 0; color: rgb(255 255 255 / 78%); font-size: 1rem; }
+@media (max-width: 52rem) {
+  .masthead::after { display: none; }
+}
 
 /*
- * The four things this does. A row of tabs rather than a menu, because
- * four is few enough to show all of them, and a reader should be able to
- * see what else is here without opening anything.
+ * The things this does. A row of tabs rather than a menu, because six is
+ * few enough to show all of them, and a reader should be able to see what
+ * else is here without opening anything.
  */
 .nav {
   display: flex;
@@ -123,7 +170,6 @@ header h1 a:hover { text-decoration: underline; text-decoration-thickness: 2px; 
   justify-content: space-between;
   gap: var(--s3);
   margin-top: var(--s4);
-  border-bottom: 1px solid var(--line);
 }
 .nav ul {
   display: flex;
@@ -135,15 +181,16 @@ header h1 a:hover { text-decoration: underline; text-decoration-thickness: 2px; 
 }
 .nav a {
   display: block;
-  padding: var(--s2) var(--s3);
-  color: var(--muted);
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  color: rgb(255 255 255 / 82%);
   text-decoration: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+  font-weight: 600;
 }
-.nav a:hover { color: var(--fg); }
-.nav a[aria-current='page'] { color: var(--fg); font-weight: 600; border-bottom-color: var(--fg); }
+.nav a:hover { color: #fff; background: rgb(255 255 255 / 12%); }
+.nav a[aria-current='page'] { color: #0b1f3f; background: #fff; }
+.nav a:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 /* The answer, still visible from wherever the reader has wandered to. */
 .nav .nav-verdict { border: 0; margin-bottom: 0; padding: 0.2rem 0.55rem; font-size: 0.78rem; font-weight: 600; color: #fff; }
 .nav .nav-verdict:hover { opacity: 0.85; }
@@ -173,7 +220,7 @@ fieldset {
 legend {
   padding: 0 var(--s2);
   margin-left: calc(var(--s2) * -1);
-  color: var(--fg);
+  color: var(--brand);
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -185,31 +232,33 @@ label.check { flex-direction: row; align-items: center; gap: var(--s2); align-se
 label.inline { flex-direction: row; align-items: center; gap: var(--s1); margin-right: var(--s4); }
 input, select {
   font: inherit;
-  padding: 0.4rem 0.55rem;
+  padding: 0.5rem 0.65rem;
   border: 1px solid var(--line-strong);
-  border-radius: 5px;
+  border-radius: 8px;
   color: var(--fg);
   background: var(--surface);
 }
 input:hover, select:hover { border-color: var(--muted); }
+input:focus-visible, select:focus-visible { border-color: var(--brand); }
 .airspace { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1); }
 .hint { font-size: 0.8rem; color: var(--muted); width: 100%; }
 .actions { display: flex; align-items: center; gap: var(--s4); flex-wrap: wrap; min-height: 2.2rem; }
 button {
   font: inherit;
-  padding: 0.55rem 1.1rem;
-  border-radius: 6px;
-  border: 1px solid var(--fg);
-  background: var(--fg);
-  color: var(--bg);
+  padding: 0.6rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--brand);
+  background: var(--brand);
+  color: var(--brand-ink);
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
+  transition: filter 0.15s ease;
 }
-button:hover { opacity: 0.9; }
-button:disabled { opacity: 0.55; cursor: not-allowed; }
+button:hover { filter: brightness(1.15); }
+button:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
 /* A second action that should not compete with the reading. */
-button.quiet { background: transparent; color: var(--muted); border-color: var(--line-strong); padding: 0.35rem 0.7rem; font-size: 0.85rem; font-weight: 400; }
-button.quiet:hover { color: var(--fg); border-color: var(--fg); opacity: 1; }
+button.quiet { background: transparent; color: var(--muted); border-color: var(--line-strong); padding: 0.35rem 0.8rem; font-size: 0.85rem; font-weight: 500; }
+button.quiet:hover { color: var(--fg); border-color: var(--fg); filter: none; }
 .error { color: var(--nogo); margin: 0; font-weight: 500; }
 
 footer {
@@ -241,6 +290,28 @@ footer p { margin: 0; max-width: 46rem; }
 .finding { border-top: 1px solid var(--line); }
 .finding .row { all: unset; display: grid; grid-template-columns: 5.5rem 11rem 1fr; gap: 0.6rem; width: 100%; padding: 0.4rem 0; cursor: pointer; align-items: baseline; }
 .finding .row:hover { background: var(--surface-sunk); }
+/*
+ * A NOTAM and a held report open the same way a finding does, so their rows
+ * are the same plain line rather than a filled button. Reset property by
+ * property, not with `all`, so each list keeps its own columns.
+ */
+.notam .row,
+.held .row {
+  display: grid;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.45rem var(--s1);
+  align-items: baseline;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 6px;
+}
+.notam .row:hover,
+.held .row:hover { background: var(--surface-sunk); filter: none; }
+.notam + .notam { border-top: 1px solid var(--line); }
 .badge { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.1rem 0.4rem; border-radius: 3px; color: #fff; text-align: center; }
 .badge.ok { background: var(--ok); }
 .badge.advisory { background: var(--advisory); }
@@ -342,7 +413,7 @@ select:focus-visible,
 button:focus-visible,
 summary:focus-visible,
 .row:focus-visible {
-  outline: 2px solid var(--advisory);
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
 }
 
@@ -352,8 +423,9 @@ summary:focus-visible,
  * table wide enough to push the page sideways.
  */
 @media (max-width: 40rem) {
-  main { padding: 0.75rem 0.75rem 3rem; }
-  header h1 { font-size: 1.5rem; }
+  main { padding: var(--s4) var(--s4) 3rem; }
+  .masthead-inner { padding: var(--s4) var(--s4) var(--s3); }
+  .masthead h1 { font-size: 1.6rem; }
   .grid { grid-template-columns: 1fr; }
   input, select, button { min-height: 2.75rem; font-size: 1rem; }
   .about-grid { grid-template-columns: 1fr; }
@@ -411,7 +483,10 @@ summary:focus-visible,
  */
 @media print {
   :root { --bg: #fff; --surface: #fff; --surface-sunk: #f4f4f0; --fg: #000; --muted: #444; --line: #bbb; }
-  .nav, .skip, .about, button.quiet, .flight-bar .actions { display: none !important; }
+  .nav, .skip, .about, button.quiet, .flight-bar .actions, .masthead::after { display: none !important; }
+  .masthead { background: none; color: #000; border: 0; }
+  .masthead-inner { padding: 0 0 var(--s3); }
+  .tagline { color: #444; }
   .banner { position: static; color: #000; background: #fff; border: 2px solid #000; font-weight: 600; }
   details { display: block; }
   details > summary { display: none; }
@@ -536,7 +611,8 @@ summary:focus-visible,
  * Attention: how much a line wants reading. Deliberately quieter than the
  * old verdict badges — an alert is "read this", not "do not go".
  */
-.badge.routine { background: var(--muted); }
+/* Routine is most of the list, so it is the quietest: a tint, not a block, and the lines that want reading stand out from it. */
+.badge.routine { background: color-mix(in srgb, var(--muted) 14%, transparent); color: var(--muted); }
 .badge.note { background: var(--advisory); }
 .badge.caution { background: var(--marginal); }
 .badge.alert { background: var(--nogo); }
@@ -594,21 +670,50 @@ summary:focus-visible,
 .nearby li { padding: var(--s1) 0; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: var(--s2); align-items: baseline; }
 .nearby a { font-weight: 600; font-family: var(--mono); }
 
-/* The way in. */
-.start .lede { font-size: 1.1rem; max-width: 44rem; }
-.start-search { display: flex; align-items: flex-end; gap: var(--s3); margin: var(--s5) 0 var(--s2); flex-wrap: wrap; }
-.start-search label { flex: 1 1 18rem; }
-.start-matches { list-style: none; margin: 0 0 var(--s4); padding: 0; }
-.start-matches li { padding: var(--s1) 0; }
+/* The way in: what this is and a search in one card, then the three ways on, then the map. */
+.start-intro {
+  padding: var(--s5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.start .lede { margin: 0; font-size: 1.1rem; max-width: 46rem; }
+.start-search { display: flex; align-items: flex-end; gap: var(--s3); margin: var(--s4) 0 0; flex-wrap: wrap; }
+/* Narrow enough that the button stays beside the field on a phone. */
+.start-search label { flex: 1 1 11rem; min-width: 0; font-weight: 600; color: var(--fg); }
+.start-search input { box-sizing: border-box; width: 100%; min-width: 0; font-size: 1.05rem; padding: 0 0.85rem; font-weight: 400; }
+.start-search input, .start-search button { height: 3rem; }
+.start-search button { padding: 0 1.6rem; }
+.start-matches { display: flex; flex-wrap: wrap; gap: var(--s2); list-style: none; margin: var(--s3) 0 0; padding: 0; }
+.start-matches li { padding: 0.25rem 0.7rem; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-sunk); font-size: 0.9rem; }
 .start-matches a { font-family: var(--mono); font-weight: 600; }
-.start-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: var(--s3); margin: var(--s5) 0; }
+.start-matches .muted { color: var(--muted); }
+.start-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: var(--s3); margin: var(--s4) 0; }
 .start-card {
   display: grid; gap: var(--s1); padding: var(--s4);
   border: 1px solid var(--line); border-radius: var(--radius);
   background: var(--surface); box-shadow: var(--shadow); text-decoration: none; color: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
-.start-card:hover { border-color: var(--muted); }
-.start-card b { font-size: 1.05rem; }
+.start-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-lift); }
+.start-card b { display: flex; justify-content: space-between; align-items: center; gap: var(--s2); font-size: 1.05rem; }
+.start-card b::after { content: '→'; color: var(--brand); transition: transform 0.15s ease; }
+.start-card .muted { color: var(--muted); font-size: 0.9rem; }
+/* The main way on wears the sky, like the masthead above it. */
+.start-card.primary {
+  color: #fff;
+  border-color: transparent;
+  background:
+    radial-gradient(80% 140% at 100% 120%, rgb(240 160 87 / 45%), transparent 60%),
+    linear-gradient(135deg, #14396b, #3d4489);
+}
+.start-card.primary .muted { color: rgb(255 255 255 / 80%); }
+.start-card.primary b::after { color: var(--sun); }
+@media (prefers-reduced-motion: no-preference) {
+  .start-card:hover { transform: translateY(-2px); }
+  .start-card:hover b::after { transform: translateX(3px); }
+}
 
 /* --- Wind on the runways ------------------------------------------------
    The row that is most into wind is marked rather than the others dimmed:
@@ -750,7 +855,7 @@ summary:focus-visible,
 @media (prefers-color-scheme: dark) {
   .wx-map .leaflet-tooltip.leaflet-tooltip { background: var(--surface); color: var(--fg); border-color: var(--line-strong); }
   .wx-map .leaflet-tooltip-top::before { border-top-color: var(--line-strong); }
-  .wx-map.leaflet-container .leaflet-control-attribution { background: rgb(22 22 26 / 80%); color: var(--muted); }
+  .wx-map.leaflet-container .leaflet-control-attribution { background: rgb(11 20 36 / 80%); color: var(--muted); }
   .wx-map.leaflet-container .leaflet-control-attribution a { color: var(--advisory); }
   .wx-map .leaflet-bar a { background: var(--surface); color: var(--fg); border-bottom-color: var(--line); }
 }
