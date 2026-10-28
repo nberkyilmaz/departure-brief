@@ -204,10 +204,17 @@ export function App() {
       </a>
       <header className="masthead">
         <div className="masthead-inner">
-          <h1>
-            <a href={hrefFor({ name: 'home' })}>Departure Brief</a>
-          </h1>
-          <p className="tagline">Stop before the line and brief before you cross it.</p>
+          <div className="brand">
+            <span className="sign" aria-hidden="true">
+              DB
+            </span>
+            <div>
+              <h1>
+                <a href={hrefFor({ name: 'home' })}>Departure Brief</a>
+              </h1>
+              <p className="tagline">Stop before the line and brief before you cross it.</p>
+            </div>
+          </div>
           <Nav route={route} attention={attentionOf(briefing)} />
         </div>
       </header>
