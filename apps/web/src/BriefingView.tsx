@@ -4,10 +4,11 @@ import { RouteStrip } from './RouteStrip.js';
 import { hhmmZ, local, zulu } from './time.js';
 import type { Attention, Citation, FlightCategory, Finding, PointReview, StoredBriefing } from './types.js';
 
+/** The time as a pilot says it; the date rides in the local time beside it, and the full stamp is a hover away. */
 function Zulu({ iso }: { iso: string }) {
   return (
-    <span className="time">
-      <b>{zulu(iso)}</b> <small>({local(iso)} local)</small>
+    <span className="time" title={zulu(iso)}>
+      <b>{hhmmZ(iso)}</b> <small>({local(iso)} local)</small>
     </span>
   );
 }

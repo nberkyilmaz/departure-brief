@@ -1,4 +1,4 @@
-import { zulu } from './time.js';
+import { hhmmZ } from './time.js';
 import type { BriefingDiff, FindingChange, PointDiff } from './types.js';
 
 const LABEL: Record<FindingChange['kind'], string> = {
@@ -61,7 +61,7 @@ export function DiffPanel({ d }: { d: BriefingDiff }) {
   return (
     <section className="diff">
       <h2>
-        Since your last briefing <span className="meta">{zulu(d.from.asOf)} → {zulu(d.to.asOf)}</span>
+        Since your last briefing <span className="meta">{hhmmZ(d.from.asOf)} → {hhmmZ(d.to.asOf)}</span>
       </h2>
       {d.warnings.map((w) => (
         <p key={w} className="error">

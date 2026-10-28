@@ -202,14 +202,16 @@ export function App() {
       <a className="skip" href="#verdict">
         Skip to the verdict
       </a>
-      <main>
-        <header>
+      <header className="masthead">
+        <div className="masthead-inner">
           <h1>
             <a href={hrefFor({ name: 'home' })}>Departure Brief</a>
           </h1>
           <p className="tagline">Stop before the line and brief before you cross it.</p>
           <Nav route={route} attention={attentionOf(briefing)} />
-        </header>
+        </div>
+      </header>
+      <main>
 
         {route.name === 'brief' && (
           <>
@@ -316,7 +318,8 @@ export function App() {
         <footer>
           <p>
             Departure Brief is a study and planning aid. Nothing here is an official weather briefing, an official weight-and-balance computation, or a substitute
-            for either. <a href="https://github.com/nberkyilmaz/departure-brief">Source code</a>.
+            for either. <a href="https://github.com/nberkyilmaz/departure-brief">Source code</a>. Built by{' '}
+            <a href="https://nberkyilmaz.com/">Berk Yilmaz</a>.
           </p>
         </footer>
       </main>
