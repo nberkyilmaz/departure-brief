@@ -411,7 +411,7 @@ summary:focus-visible,
  */
 @media print {
   :root { --bg: #fff; --surface: #fff; --surface-sunk: #f4f4f0; --fg: #000; --muted: #444; --line: #bbb; }
-  .nav, .inputs, .skip, .about, button.quiet { display: none !important; }
+  .nav, .skip, .about, button.quiet, .flight-bar .actions { display: none !important; }
   .banner { position: static; color: #000; background: #fff; border: 2px solid #000; font-weight: 600; }
   details { display: block; }
   details > summary { display: none; }
@@ -677,4 +677,108 @@ summary:focus-visible,
 .frozen.live {
   border-color: var(--advisory);
   background: color-mix(in srgb, var(--advisory) 8%, var(--surface));
+}
+
+/* --- The flight, in one bar above its briefing ----------------------------
+   The facts in a line, the limits they are judged against in another, and
+   the form behind a single control. */
+.flight-bar {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: var(--s3) var(--s4);
+  margin: 0 0 var(--s4);
+}
+.flight-bar .flight-line { margin: 0; }
+.limits-line { margin: var(--s1) 0 var(--s2); font-size: 0.85rem; color: var(--muted); }
+.edit-flight > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s1);
+  cursor: pointer;
+  list-style: none;
+  color: var(--advisory);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: var(--s1) 0;
+}
+.edit-flight > summary::-webkit-details-marker { display: none; }
+.edit-flight > summary::before { content: '▸'; font-size: 0.8em; transition: transform 0.15s; }
+.edit-flight[open] > summary::before { transform: rotate(90deg); }
+.edit-flight[open] > summary { margin-bottom: var(--s2); }
+.edit-flight fieldset { box-shadow: none; background: var(--surface-sunk); margin-bottom: var(--s2); }
+.flight-bar .actions { min-height: 0; }
+.flight-bar .actions .field-note { margin: 0; font-size: 0.8rem; }
+
+.minimums-page h2 { font-size: 1.3rem; margin: 0 0 var(--s2); }
+.minimums-page .explain { max-width: 44rem; }
+
+/* --- The weather, on a map ------------------------------------------------ */
+.wx-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  margin: var(--s4) 0 var(--s5);
+  overflow: hidden;
+}
+.wx-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s2) var(--s4);
+  padding: var(--s3) var(--s4);
+}
+.wx-head h2 { margin: 0; font-size: 1.05rem; }
+.wx-head .meta { font-size: 0.85rem; }
+.legend { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s4); list-style: none; margin: 0; padding: 0; font-size: 0.85rem; font-weight: 600; }
+.legend li { display: flex; align-items: center; gap: 0.35rem; }
+.legend .muted { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+.dot { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--unknown); display: inline-block; }
+.dot.vfr { background: var(--vfr); }
+.dot.mvfr { background: var(--mvfr); }
+.dot.ifr { background: var(--ifr); }
+.dot.lifr { background: var(--lifr); }
+.wx-map { height: clamp(18rem, 52vh, 30rem); background: var(--surface-sunk); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.wx-map-loading { display: grid; place-items: center; color: var(--muted); font-size: 0.9rem; }
+.wx-foot { padding: var(--s2) var(--s4) var(--s3); margin: 0; }
+.wx-map.leaflet-container { font: inherit; background: var(--surface-sunk); }
+.wx-map .leaflet-tooltip { font-size: 0.8rem; line-height: 1.35; }
+.wx-map .leaflet-interactive { cursor: pointer; }
+@media (prefers-color-scheme: dark) {
+  .wx-map .leaflet-tooltip.leaflet-tooltip { background: var(--surface); color: var(--fg); border-color: var(--line-strong); }
+  .wx-map .leaflet-tooltip-top::before { border-top-color: var(--line-strong); }
+  .wx-map.leaflet-container .leaflet-control-attribution { background: rgb(22 22 26 / 80%); color: var(--muted); }
+  .wx-map.leaflet-container .leaflet-control-attribution a { color: var(--advisory); }
+  .wx-map .leaflet-bar a { background: var(--surface); color: var(--fg); border-bottom-color: var(--line); }
+}
+
+/* The count of what wants reading sits in the navigation, and has to win over the plain links' colour. */
+.nav a.nav-attention { color: #fff; border: 0; margin-bottom: 0; padding: 0.2rem 0.55rem; font-size: 0.78rem; }
+@media (prefers-color-scheme: dark) {
+  .nav a.nav-attention { color: #15151a; }
+}
+
+@media print {
+  .edit-flight, .limits-line a, .wx-card { display: none !important; }
+}
+@media (prefers-color-scheme: dark) {
+  /* One tile style exists; at night it is turned inside out rather than left glaring. */
+  .wx-map .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.85) saturate(0.6); }
+}
+
+/*
+ * On a phone the warning is said in one line and scrolls away with the page:
+ * pinned at full length it took a fifth of the screen from the briefing it
+ * is warning about. The full wording is in the footer and on the About page.
+ */
+.banner-short { display: none; }
+@media (max-width: 40rem) {
+  .banner { position: static; font-size: 0.85rem; }
+  .banner-long { display: none; }
+  .banner-short { display: inline; }
+  .nav ul { justify-content: flex-start; }
+  .start .lede { font-size: 1rem; }
 }

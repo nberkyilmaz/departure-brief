@@ -79,18 +79,47 @@ describe('the published page', () => {
     const before = attentionCounts();
     const sky = categories();
 
-    // A visibility minimum no forecast is ever going to meet.
-    const visibility = screen.getByLabelText(/Visibility \(SM\)/i);
-    fireEvent.change(visibility, { target: { value: '99' } });
+    // A visibility minimum no forecast is ever going to meet, set on the minimums page.
+    window.location.hash = '#/minimums';
+    fireEvent.change(await screen.findByLabelText(/Visibility \(SM\)/i), { target: { value: '99' } });
 
+    // The briefing was rebuilt behind it.
+    window.location.hash = '#/brief';
     await waitFor(() => expect(attentionCounts().alert).toBeGreaterThan(before.alert), { timeout: 10_000 });
     // The pilot's limit moved; the weather did not, so the category cannot.
     expect(categories()).toEqual(sky);
-    expect(screen.getAllByText(/visibility/i).length).toBeGreaterThan(0);
+    // And the line above the briefing says what it is now judged against.
+    expect(document.querySelector('.limits-line')?.textContent).toMatch(/visibility 99 SM/);
 
     // Put it back, and the flag goes with it: nothing is sticky.
-    fireEvent.change(visibility, { target: { value: '5' } });
+    window.location.hash = '#/minimums';
+    fireEvent.change(await screen.findByLabelText(/Visibility \(SM\)/i), { target: { value: '5' } });
+    window.location.hash = '#/brief';
     await waitFor(() => expect(attentionCounts().alert).toBe(before.alert), { timeout: 10_000 });
+  });
+
+  it('puts the briefing first, with the flight one line above it and its form one tap away', async () => {
+    render(<App />);
+    await briefed();
+    const edit = document.querySelector('details.edit-flight') as HTMLDetailsElement;
+    // A plan that briefs needs no form in the way.
+    expect(edit.open).toBe(false);
+    expect(document.querySelector('.flight-line')?.textContent).toMatch(/CYSN → CYKF/);
+    fireEvent.click(within(edit).getByText(/Edit the flight/i));
+    await waitFor(() => expect(edit.open).toBe(true));
+    expect(within(edit).getByLabelText(/Destination/i)).toBeTruthy();
+  });
+
+  it('opens the form by itself when the plan cannot be briefed, and leaves it open', async () => {
+    render(<App />);
+    await briefed();
+    const edit = document.querySelector('details.edit-flight') as HTMLDetailsElement;
+    fireEvent.change(within(edit).getByLabelText(/Destination/i), { target: { value: 'K' } });
+    await waitFor(() => expect(edit.open).toBe(true));
+    // Fixed again, it stays open for whoever is still typing.
+    fireEvent.change(within(edit).getByLabelText(/Destination/i), { target: { value: 'CYKF' } });
+    await briefed();
+    expect(edit.open).toBe(true);
   });
 
   it('will not pretend to know an aerodrome it has no reports for', async () => {
@@ -210,6 +239,27 @@ describe('moving around it', () => {
     // An address that names nothing lands on the way in, not on a blank.
     window.location.hash = '#/nonsense';
     await waitFor(() => expect(document.querySelector('.start')).not.toBeNull());
+  });
+
+  it('gives your minimums a page of their own, rather than a blank one', async () => {
+    window.location.hash = '#/minimums';
+    render(<App />);
+    expect(await screen.findByRole('heading', { level: 2, name: /Your minimums/i })).toBeTruthy();
+    expect(screen.getByLabelText(/Ceiling \(ft AGL\)/i)).toBeTruthy();
+    expect(screen.getByLabelText(/Cruise fuel burn/i)).toBeTruthy();
+  });
+
+  it('opens on the weather: every reporting station on a map, counted by category', async () => {
+    window.location.hash = '#/';
+    render(<App />);
+    // The map's code is fetched on demand, which on a loaded runner takes longer than findBy's one-second default.
+    expect(await screen.findByRole('region', { name: /Map of reporting stations/i }, { timeout: 10_000 })).toBeTruthy();
+    const legend = screen.getByRole('list', { name: /Flight categories/i });
+    const counts = [...legend.querySelectorAll('li')].map((li) => Number(li.querySelector('.muted')?.textContent));
+    expect(counts).toHaveLength(4);
+    // The recorded snapshot is a real night in September: most of the country was reporting VFR.
+    expect(counts[0]).toBeGreaterThan(100);
+    expect(document.querySelector('.wx-head')?.textContent).toMatch(/\d+ stations/);
   });
 });
 

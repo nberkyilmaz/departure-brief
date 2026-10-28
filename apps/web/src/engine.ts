@@ -25,7 +25,9 @@ import {
   AwcCacheClient,
   AwcClient,
   CANADIAN_UPPERWIND_SITES,
+  decodeMetar,
   diffBriefings,
+  flightCategory,
   loadBundle,
   MemoryStore,
   NavCanadaClient,
@@ -40,6 +42,7 @@ import {
   withHandbookLimits,
   type Airport,
   type DemoBundle,
+  type FlightCategory,
   type HttpClient,
   type LLMProvider,
   type NotamSource,
@@ -97,6 +100,20 @@ export interface WeatherSource {
 export interface Aerodrome {
   readonly id: string;
   readonly name: string;
+  readonly lat: number;
+  readonly lon: number;
+}
+
+/** A reporting station as the map shows it: where it is, and what its latest METAR says. */
+export interface StationWeather {
+  readonly id: string;
+  readonly name: string;
+  readonly lat: number;
+  readonly lon: number;
+  /** Null when the report does not give both a ceiling and a visibility to classify. */
+  readonly category: FlightCategory | null;
+  readonly issuedAt: string | null;
+  readonly raw: string;
 }
 
 /** A briefing, and what changed since the one before it. */
@@ -134,6 +151,8 @@ export interface LocalEngine {
    * see. Read when shown: live NOTAMs arrive as flights are briefed.
    */
   readonly reports: readonly HeldReport[];
+  /** Every station with a METAR, at its latest one, for the map. Computed once. */
+  stations(): readonly StationWeather[];
   brief(plan: FlightPlanInput, profile: ProfileInput, aircraft: AircraftInput): Promise<LocalBriefing>;
   /**
    * Everything about one field now, or at the recorded instant, needing no
@@ -288,11 +307,35 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
   /** The last briefing produced here, so the next one can say what changed. */
   let previous: ReturnType<typeof assembleBriefing> | null = null;
 
+  const byId = new Map<string, Airport>();
+  for (const a of bundle.airports) byId.set((a.icaoId ?? a.faaId).toUpperCase(), a);
+  let stations: StationWeather[] | null = null;
+
   return {
     weather,
-    aerodromes: bundle.airports
-      .map((a) => ({ id: a.icaoId ?? a.faaId, name: a.name }))
-      .sort((a, b) => a.id.localeCompare(b.id)),
+    // One entry per identifier: the airport data lists a few twice, once per site type.
+    aerodromes: [...byId.entries()].map(([id, a]) => ({ id, name: a.name, lat: a.lat, lon: a.lon })).sort((a, b) => a.id.localeCompare(b.id)),
+    stations() {
+      if (stations) return stations;
+      const latest = new Map<string, HeldReport>();
+      for (const r of held.values()) {
+        if (r.kind !== 'metar' || !r.station) continue;
+        const cur = latest.get(r.station);
+        if (!cur || (r.issuedAt ?? '') > (cur.issuedAt ?? '')) latest.set(r.station, r);
+      }
+      stations = [...latest.values()].flatMap((r) => {
+        const a = byId.get(r.station!.toUpperCase());
+        if (!a) return [];
+        let category: FlightCategory | null = null;
+        try {
+          category = flightCategory(decodeMetar(r.body));
+        } catch {
+          // The decoder is total and should not throw; a station it cannot classify is shown grey, not dropped.
+        }
+        return [{ id: r.station!, name: a.name, lat: a.lat, lon: a.lon, category, issuedAt: r.issuedAt, raw: r.body }];
+      });
+      return stations;
+    },
     plan: asJson<FlightPlanInput>(bundle.plan),
     profile: asJson<ProfileInput>(bundle.profile),
     aircraft: asJson<AircraftInput>(bundle.aircraft),
