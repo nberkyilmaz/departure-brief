@@ -32,7 +32,7 @@ You have to create these yourself; nothing here can do it for you.
 | 1 | [Cloudflare](https://dash.cloudflare.com/sign-up) | free | Runs the relay. 100,000 requests a day, 1,000 storage writes a day (the relay uses about 600), and it does not sleep. |
 | 2 | [Neon](https://neon.tech) | free tier | Only for the API. Postgres that does not expire. Render's own free Postgres is deleted after 30 days, which would take every stored briefing with it. |
 | 3 | [Render](https://render.com) | free tier, or $7/month always on | Only for the API. The free tier sleeps after 15 minutes idle and the next request waits ~50 s. |
-| 4 | A registrar | ~$10/year | See [the domain](#the-domain). Optional: the site works at its GitHub address. |
+| 4 | A domain | ~$10/year | Registered: `nberkyilmaz.com`, at Cloudflare. See [the domain](#the-domain). |
 
 ---
 
@@ -54,9 +54,10 @@ It opens a browser to the Cloudflare account and asks to allow Wrangler.
 npx wrangler@4 kv namespace create SNAPSHOTS --config apps/relay/wrangler.toml
 ```
 
-It prints an `id`. Put it in [`apps/relay/wrangler.toml`](../apps/relay/wrangler.toml)
-in place of `REPLACE_WITH_THE_ID_WRANGLER_PRINTS`. The id is not a secret —
-it names a store only your account can reach — so it is committed.
+It prints an `id`, which goes in [`apps/relay/wrangler.toml`](../apps/relay/wrangler.toml).
+The one there now is the live relay's; deploying to a different account
+means creating its own and replacing it. The id is not a secret — it names
+a store only that account can reach — so it is committed.
 
 ### 3. Deploy
 
@@ -252,19 +253,108 @@ put a `Date` inside their output, and both are revived at the read site now.
 
 ## The domain
 
+The site lives at **`nberkyilmaz.com/departure-brief/`** — a path on the
+owner's own domain, beside the other projects, rather than a domain of its
+own. `departurebrief.com` was considered and not bought; the reasoning, and
+why the project was renamed before any domain was attached, is below.
+
+### How a path on another domain works
+
+GitHub Pages does it without any configuration in this repository. The
+domain is attached to the account's **user site** — the repository named
+`nberkyilmaz.github.io` — and every project site on the account that has no
+domain of its own is then served beneath it:
+
+| Repository | Served at |
+| --- | --- |
+| `nberkyilmaz.github.io` | `https://nberkyilmaz.com/` |
+| `departure-brief` | `https://nberkyilmaz.com/departure-brief/` |
+| `hours-to-go` | `https://nberkyilmaz.com/hours-to-go/` |
+
+The old `nberkyilmaz.github.io/departure-brief/` address redirects there, so
+links already handed out keep working.
+
+Which means three things in this repository **do not change**:
+
+- **`VITE_BASE`** in [`.github/workflows/pages.yml`](../.github/workflows/pages.yml)
+  stays `/departure-brief/`. The page is still served from that path; only
+  the host in front of it changed. Setting it to `/` — which is right for a
+  project with a domain of its own — would ship a page whose script,
+  stylesheet and recorded reports all 404.
+- **No `CNAME` file.** Neither this site nor the user site would read one:
+  this site deploys through Actions, and the domain belongs to the other
+  repository's settings.
+- **Settings → Pages** here stays as it is. The custom domain is set on
+  `nberkyilmaz.github.io`, not on this repository.
+
+What does change is the list of origins allowed to call the relay and the
+API. A browser sends the origin without a path, so the entry is the domain
+alone, `https://nberkyilmaz.com`:
+
+1. **`ALLOWED_ORIGINS`** in [`apps/relay/wrangler.toml`](../apps/relay/wrangler.toml).
+   Already set. A page the relay does not name cannot read its answers, and
+   falls back to the recorded weather.
+2. **`DEPBRIEF_ALLOWED_ORIGINS`** on the Render service, from
+   [`render.yaml`](../render.yaml). Already set there for when the API is
+   deployed.
+
+### DNS
+
+At Cloudflare, where the domain is registered. The apex points at GitHub
+Pages — all four A records and all four AAAA:
+
+```
+A     @   185.199.108.153        AAAA  @   2606:50c0:8000::153
+A     @   185.199.109.153        AAAA  @   2606:50c0:8001::153
+A     @   185.199.110.153        AAAA  @   2606:50c0:8002::153
+A     @   185.199.111.153        AAAA  @   2606:50c0:8003::153
+
+CNAME www   nberkyilmaz.github.io.
+```
+
+Every one of them **DNS only** (grey cloud). GitHub issues the certificate
+itself, and it cannot while Cloudflare's proxy is answering in its place.
+
+The `www` target is the user host. A CNAME target is a hostname and cannot
+carry a path, so it is never `nberkyilmaz.github.io/departure-brief`.
+
+The MX and TXT records already on the apex are the domain's email
+(Cloudflare Email Routing) and live alongside these untouched.
+
+Verify the domain on the account before attaching it — GitHub → Settings →
+Pages → **Add a domain** gives a TXT record to create. A verified domain
+cannot be claimed by another account's repository if it is ever detached
+from this one, which is the takeover that unverified Pages domains are
+known for.
+
+The API, if it is deployed, goes on a subdomain named for the project, so
+that the domain can carry other projects' services beside it:
+
+```
+CNAME depbrief-api   <your-service>.onrender.com.
+```
+
+Add `depbrief-api.nberkyilmaz.com` in Render (Settings → Custom Domains)
+**first** — it shows you the exact target — then create the CNAME, then
+Verify. Render issues and renews the certificate. Leave this record DNS
+only as well: proxying breaks Render's hostname validation.
+
+Then tick **Enforce HTTPS** on the user site once the certificate has been
+issued. Until it has, the domain answers with GitHub's certificate for
+`*.github.io` and browsers warn; wait rather than change DNS.
+
+### Why not departurebrief.com
+
 All three of `departurebrief.com`, `departurebrief.ca` and
 `departurebrief.dev` were free when checked directly at the registries on
 19 September 2026 — Verisign's RDAP for `.com`, CIRA's for `.ca`, Google's
 for `.dev`, each returning 404 with a known-registered control returning
 200, so the 404 means what it says.
 
-**Register `departurebrief.com` at Cloudflare Registrar: $10.46 a year,
-first year and every year.** Cloudflare sells at wholesale with no markup
-and no promotional first year, which is the whole trap in domain pricing —
-`holdshort.xyz`, for comparison, is $1.00 to register at Namecheap and
-$19.48 to renew. Take the `.ca` too if you want it ($9.19, and `.ca`
-requires Canadian presence, which you have); it is the better address for a
-CARs-first tool built by a Canadian, and $9 is not a decision.
+The owner bought one domain instead of one per project: an address for a
+portfolio and a professional email, with each project at a path beneath it.
+A project that outgrows the path can still be given its own domain later;
+that is the point at which `VITE_BASE` becomes `/`.
 
 ### Why the project is not called Hold Short any more
 
@@ -280,64 +370,6 @@ pre-flight information, and "hold short" is a standard ATC instruction that
 nobody owns. But the cost is real: anyone searching the name
 finds their product first. Renamed on 19 September 2026, before a domain was
 attached rather than after.
-
-### DNS, once you have one
-
-Replace `<domain>` throughout.
-
-Apex to GitHub Pages — all four A records and all four AAAA:
-
-```
-A     @   185.199.108.153        AAAA  @   2606:50c0:8000::153
-A     @   185.199.109.153        AAAA  @   2606:50c0:8001::153
-A     @   185.199.110.153        AAAA  @   2606:50c0:8002::153
-A     @   185.199.111.153        AAAA  @   2606:50c0:8003::153
-
-CNAME www   nberkyilmaz.github.io.
-```
-
-The `www` target is the **user** host. A CNAME target is a hostname and
-cannot carry a path, so it is never `nberkyilmaz.github.io/departure-brief`.
-
-The API subdomain:
-
-```
-CNAME api   <your-service>.onrender.com.
-```
-
-Add `api.<domain>` in Render (Settings → Custom Domains) **first** — it
-shows you the exact target — then create the CNAME, then Verify. Render
-issues and renews the certificate. A Hobby workspace includes two custom
-domains, so this one is free. If your DNS is at Cloudflare, leave this record
-DNS-only (grey cloud): proxying breaks Render's hostname validation.
-
-### Four things to change in this repository when the domain is attached
-
-1. **Settings → Pages → Custom domain**. Do not commit a `CNAME` file — this
-   site deploys through a custom Actions workflow, where GitHub does not use
-   one.
-
-2. **[`.github/workflows/pages.yml`](../.github/workflows/pages.yml)** sets
-   `VITE_BASE: /${{ github.event.repository.name }}/`, because a project
-   site is served from `/departure-brief/`. On a custom domain the site is at the
-   root, and leaving that line ships a page whose script, stylesheet and
-   recorded reports all 404. Change it to `/` or delete it —
-   `apps/web/vite.config.ts` already defaults to `/`.
-
-3. **`DEPBRIEF_ALLOWED_ORIGINS`** on the Render service: add
-   `https://<domain>`, comma separated. The page and the API are different
-   origins, and an origin that is not on that list is refused by the browser
-   before the server sees it.
-
-4. **`ALLOWED_ORIGINS`** in [`apps/relay/wrangler.toml`](../apps/relay/wrangler.toml):
-   add `https://<domain>` beside the GitHub address, then
-   `npm run deploy -w apps/relay`. Same reason: a page the relay does not
-   name cannot read its answers, and falls back to the recorded weather.
-
-Then tick **Enforce HTTPS** in Settings → Pages once DNS has propagated. If
-you chose a `.page`, `.dev` or `.app`, note that those are HSTS-preloaded:
-browsers refuse plain HTTP outright, so during the certificate window the
-site is unreachable rather than merely insecure. Wait; do not change DNS.
 
 ---
 

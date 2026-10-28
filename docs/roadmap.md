@@ -64,7 +64,7 @@ Next, in order: the nearest reporting station when a field's own is asleep;
 report age shown in colour; takeoff and landing distance from the POH; a
 page per aerodrome; fuel planning; airspace.
 
-### 1. Make the site usable — done, except for live weather
+### 1. Make the site usable — done
 
 The pipeline works and nobody could use it. That came before every feature
 below, because a feature nobody can reach is not finished.
@@ -76,14 +76,13 @@ stated beside the verdict rather than left to be inferred. And the page
 runs the pipeline itself, so changing a minimum rebuilds the verdict in the
 browser rather than showing a different picture of one.
 
-**Live weather** is built, for nothing a month. Neither weather service
+**Live weather** is live, for nothing a month. Neither weather service
 allows a browser to call it directly, so a relay on Cloudflare's free plan
 takes the whole country's METARs, TAFs, hazard advisories and upper winds on
 a timer and keeps the latest copy; the page reads it on every load and
 judges it itself, and fetches NOTAMs through it for the aerodromes being
 briefed. If the relay cannot be reached the page falls back to the recorded
-reports and says why. What is left is deploying it, which needs a
-Cloudflare account — ten minutes, in docs/deploy.md.
+reports and says why. Deployed on 27 October 2026; how, in docs/deploy.md.
 
 The API on Render remains the way to add memory — briefing history, "what
 changed" across visits, and forecast verification fed continuously — when

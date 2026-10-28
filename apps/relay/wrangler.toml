@@ -9,14 +9,17 @@ compatibility_date = "2026-10-01"
 [triggers]
 crons = ["*/5 * * * *"]
 
-# Create it once with `npx wrangler kv namespace create SNAPSHOTS` and put
-# the id it prints here.
+# Created once with `npx wrangler kv namespace create SNAPSHOTS`. Not a
+# secret: it names a store only this account can reach.
 [[kv_namespaces]]
 binding = "SNAPSHOTS"
-id = "REPLACE_WITH_THE_ID_WRANGLER_PRINTS"
+id = "a23fb8ceb97c40458022b4f4054206ed"
 
 [vars]
-# The pages allowed to read from this relay, comma separated. Add the
-# custom domain here if one is ever attached.
-ALLOWED_ORIGINS = "https://nberkyilmaz.github.io"
-USER_AGENT = "depbrief-relay/0.1 (+https://github.com/nberkyilmaz/departure-brief)"
+# The pages allowed to read from this relay, comma separated. The site is
+# served at nberkyilmaz.com/departure-brief/; an Origin carries no path, so
+# the domain alone is the whole entry. The GitHub address stays so the page
+# still works if the domain is ever detached.
+ALLOWED_ORIGINS = "https://nberkyilmaz.com,https://nberkyilmaz.github.io"
+# Both weather services ask for a way to reach whoever is calling.
+USER_AGENT = "depbrief-relay/0.1 (+https://github.com/nberkyilmaz/departure-brief; contact@nberkyilmaz.com)"
