@@ -43,6 +43,14 @@ function attentionOf(b: StoredBriefing | null): { level: 'caution' | 'alert'; co
   return { level: wanting.some((f) => f.attention === 'alert') ? 'alert' : 'caution', count: wanting.length };
 }
 
+/**
+ * The published build has no server to ask about an identifier, and asking
+ * anyway gets a 404 that the field would remember as "no such aerodrome".
+ * Until the page's own data has loaded, a lookup simply waits; the field asks
+ * again when the real one arrives.
+ */
+const untilLoaded = (): Promise<null> => new Promise<null>(() => {});
+
 /** How long to wait after a change before rebuilding the briefing, locally. */
 const SETTLE_MS = 250;
 
@@ -58,6 +66,8 @@ export function App() {
   const [diff, setDiff] = useState<BriefingDiff | null>(null);
   /** Set once the visitor has changed something, so the page can stop calling it "recorded". */
   const [touched, setTouched] = useState(false);
+  /** Whether the visitor has opened the flight form. With an API behind the page it starts open: there is nothing to show until it is filled in. */
+  const [editing, setEditing] = useState(!DEMO);
 
   useEffect(() => {
     if (!DEMO) return;
@@ -98,6 +108,15 @@ export function App() {
 
   const problems = planProblems(plan);
   const ready = problems.length === 0;
+
+  /*
+   * Open the form by itself when the plan cannot be briefed, and leave it
+   * open: closing it the moment a typo is fixed would snatch it away from
+   * somebody halfway through typing the next field.
+   */
+  useEffect(() => {
+    if (!ready || error !== null) setEditing(true);
+  }, [ready, error]);
 
   /*
    * Rebuild as the form settles. Judging is arithmetic over reports already
@@ -172,8 +191,12 @@ export function App() {
   return (
     <>
       <div className="banner" role="alert">
-        <strong>Not for operational use.</strong> Departure Brief is a study and planning aid, not an official weather briefing or weight-and-balance computation.
-        Obtain an official briefing from an approved source before any flight.
+        <strong>Not for operational use.</strong>{' '}
+        <span className="banner-long">
+          Departure Brief is a study and planning aid, not an official weather briefing or weight-and-balance computation. Obtain an official briefing from an
+          approved source before any flight.
+        </span>
+        <span className="banner-short">A study aid, not an official briefing.</span>
       </div>
       {/* Keyboard and screen reader users should not have to walk the form to reach the answer. */}
       <a className="skip" href="#verdict">
@@ -182,7 +205,7 @@ export function App() {
       <main>
         <header>
           <h1>
-            <a href={hrefFor({ name: 'brief' })}>Departure Brief</a>
+            <a href={hrefFor({ name: 'home' })}>Departure Brief</a>
           </h1>
           <p className="tagline">Stop before the line and brief before you cross it.</p>
           <Nav route={route} attention={attentionOf(briefing)} />
@@ -192,11 +215,23 @@ export function App() {
           <>
             {DEMO && weather && <WeatherNote weather={weather} />}
 
-            <FlightLine plan={plan} aircraft={aircraft} />
-
-            <section className="inputs">
-              <FlightForm plan={plan} onChange={change(setPlan)} lookup={engine ? engine.airport : null} aerodromes={engine?.aerodromes ?? []} />
-              <ProfileForm profile={profile} aircraft={aircraft} onProfile={change(setProfile)} onAircraft={change(setAircraft)} />
+            {/*
+              The briefing is what a visitor came for, so the flight is one
+              line above it and the form that spells it out opens on request —
+              or by itself, when the plan is missing something or the last
+              change made it impossible to brief.
+            */}
+            <section className="inputs flight-bar">
+              <FlightLine plan={plan} aircraft={aircraft} />
+              <p className="limits-line">
+                Judged against your minimums: ceiling {profile.ceilingAglFt.toLocaleString('en')} ft · visibility {profile.visibilitySm} SM · crosswind{' '}
+                {profile.crosswindKt} kt{profile.crosswindIncludesGust ? ' including gusts' : ''}
+                {profile.nightAllowed ? '' : ' · day only'} — <a href={hrefFor({ name: 'minimums' })}>change</a>
+              </p>
+              <details className="edit-flight" open={editing} onToggle={(e) => setEditing(e.currentTarget.open)}>
+                <summary>Edit the flight</summary>
+                <FlightForm plan={plan} onChange={change(setPlan)} lookup={engine ? engine.airport : DEMO ? untilLoaded : null} aerodromes={engine?.aerodromes ?? []} />
+              </details>
               <div className="actions">
                 {DEMO ? (
                   <>
@@ -247,6 +282,22 @@ export function App() {
         )}
 
         {route.name === 'home' && <StartPage engine={engine} weather={weather} home={plan.departure || 'CYSN'} />}
+
+        {route.name === 'minimums' && (
+          <section className="minimums-page">
+            <h2>Your minimums</h2>
+            <p className="explain">
+              Every briefing and every field page is checked against these. They are yours, not the regulation's — the regulatory VFR minima are checked
+              separately, and both are shown. They are kept in this browser and nowhere else.
+            </p>
+            <ProfileForm profile={profile} aircraft={aircraft} onProfile={change(setProfile)} onAircraft={change(setAircraft)} />
+            {briefing && (
+              <p className="field-note" aria-live="polite">
+                {busy ? 'Rebuilding the briefing…' : 'The briefing has been rebuilt with these.'} <a href={hrefFor({ name: 'brief' })}>Back to the briefing</a>
+              </p>
+            )}
+          </section>
+        )}
 
         {/*
           The field page compares against the same limits as a briefing, so
