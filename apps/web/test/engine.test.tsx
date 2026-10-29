@@ -44,9 +44,9 @@ beforeAll(() => {
   globalThis.fetch = (async (input: RequestInfo | URL) => {
     const url = String(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
     if (!url.startsWith(RELAY)) {
-      // The page's own files.
+      // The page's own files, the squares of aerodromes among them.
       try {
-        return new Response(file(DEMO, url.split('/').pop()!), { status: 200 });
+        return new Response(file(DEMO, url.slice(url.indexOf('demo/') + 'demo/'.length)), { status: 200 });
       } catch {
         return new Response('not found', { status: 404 });
       }
@@ -108,6 +108,30 @@ describe('live weather through the relay', () => {
     expect(asked.filter((u) => u.includes('site=CYSN&alpha=notam'))).toHaveLength(1);
   });
 
+  it('carries every field in Canada and the United States, and keeps the American reports', async () => {
+    const engine = await loadEngine('/', RELAY);
+    expect(engine.aerodromes.length).toBeGreaterThan(17_000);
+    expect(engine.aerodromes.find((a) => a.id === 'KMIA')).toMatchObject({ faaId: 'MIA', name: 'Miami International Airport' });
+    expect(engine.reports.some((r) => r.kind === 'metar' && r.station === 'KBUF')).toBe(true);
+    // Not Mexico's: there is neither an aerodrome nor a rule book here for it.
+    expect(engine.reports.some((r) => r.station === 'MMMY')).toBe(false);
+    // A field far from anywhere recorded, with its runways, fetched when it is asked about.
+    const miami = await engine.aerodrome('kmia');
+    expect(miami?.airport.name).toBe('Miami International Airport');
+    expect(miami?.airport.runways.map((r) => r.id)).toContain('09/27');
+    expect((await engine.airport('MIA'))?.icaoId).toBe('KMIA');
+  });
+
+  it('does not ask NAV CANADA for an American field’s NOTAMs, and says where to look', async () => {
+    const engine = await loadEngine('/', RELAY);
+    const plan = { ...engine.plan, departure: 'KBUF', destination: 'KIAG', alternate: null, route: [], departureTime: '2026-10-20T12:00:00Z' };
+    const r = await engine.brief(plan, engine.profile, engine.aircraft);
+    expect(asked.filter((u) => u.includes('alpha=notam'))).toEqual([]);
+    const errors = r.briefing.document.notams?.fetchErrors ?? [];
+    expect(errors.map((e) => e.site).sort()).toEqual(['KBUF', 'KIAG']);
+    expect(errors[0]!.error).toMatch(/FAA.*notams\.aim\.faa\.gov/);
+  });
+
   it('carries on without upper winds, and says they are missing', async () => {
     answers['upperwind'] = { status: 503, body: '{"error":"down"}' };
     const engine = await loadEngine('/', RELAY);
@@ -133,6 +157,14 @@ describe('falling back to the recorded weather', () => {
     const engine = await loadEngine('/', RELAY);
     expect(engine.weather.mode).toBe('recorded');
     expect(engine.weather.problem).toMatch(/relay could not be reached/);
+  });
+
+  it('says when a field’s NOTAMs were not among those recorded, rather than showing none', async () => {
+    const engine = await loadEngine('/');
+    const r = await engine.brief({ ...engine.plan, destination: 'CNC3', alternate: null }, engine.profile, engine.aircraft);
+    const errors = r.briefing.document.notams?.fetchErrors ?? [];
+    expect(errors.map((e) => e.site)).toEqual(['CNC3']);
+    expect(errors[0]!.error).toMatch(/none were recorded for it; the recording has NOTAMs for CYHM, CYKF, CYOW, CYSN, CYTZ, CYYZ only/);
   });
 
   it('and with no relay configured, it never asks one', async () => {

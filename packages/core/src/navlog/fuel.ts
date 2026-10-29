@@ -18,11 +18,22 @@
  * name the destination only — but a pilot who planned one wants to know
  * what reaching it would take, so that figure is shown beside the required
  * one rather than folded into it.
+ *
+ * FAR 91.151(a) says the same thing in the same numbers for a flight in the
+ * United States, night by the same civil twilight, so the arithmetic is
+ * shared and only the regulation cited changes. Which one is decided by
+ * where the flight starts.
  */
+import type { Jurisdiction } from '../rules/vfrMinima.js';
 import type { NavLog } from './compute.js';
 
-/** CARs 602.88(3) and (4): minutes at normal cruising speed, after the destination. */
+/** CARs 602.88(3) and (4), and FAR 91.151(a)(1) and (2): minutes at normal cruising speed, after the destination. */
 export const RESERVE_MINUTES = { day: 30, night: 45 } as const;
+
+const RESERVE_RULE = {
+  CA: { day: 'CARs 602.88(3)', night: 'CARs 602.88(4)' },
+  US: { day: 'FAR 91.151(a)(1)', night: 'FAR 91.151(a)(2)' },
+} as const;
 
 export interface FuelPlan {
   /** From the nav log's legs, departure to destination. */
@@ -33,7 +44,7 @@ export interface FuelPlan {
     readonly minutes: 30 | 45;
     /** Which subsection applies and why. */
     readonly basis: 'day' | 'night';
-    readonly rule: 'CARs 602.88(3)' | 'CARs 602.88(4)';
+    readonly rule: (typeof RESERVE_RULE)[Jurisdiction]['day' | 'night'];
     readonly gal: number | null;
   };
   /** Trip plus reserve: what the regulation requires at the moment of departure. */
@@ -61,11 +72,11 @@ const round1 = (n: number): number => {
  * is at night, which is what makes it a night VFR flight for 602.88(4).
  * The alternate leg does not count: a diversion is a different flight.
  */
-export function fuelPlan(log: NavLog, aboardGal: number | null, night: boolean): FuelPlan {
+export function fuelPlan(log: NavLog, aboardGal: number | null, night: boolean, jurisdiction: Jurisdiction = 'CA'): FuelPlan {
   const gaps: string[] = [];
   const gph = log.fuelGph;
   const reserveMinutes = night ? RESERVE_MINUTES.night : RESERVE_MINUTES.day;
-  const rule = night ? 'CARs 602.88(4)' : 'CARs 602.88(3)';
+  const rule = RESERVE_RULE[jurisdiction][night ? 'night' : 'day'];
 
   if (gph === null) gaps.push('no cruise burn rate in the aircraft file, so neither the trip fuel nor the reserve can be worked out');
   if (log.totalFuelGal === null && gph !== null) gaps.push('a leg has no time, so the trip fuel cannot be totalled');

@@ -24,7 +24,7 @@ beforeAll(() => {
   // The published site is static files; so is this.
   globalThis.fetch = (async (input: RequestInfo | URL) => {
     const url = String(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
-    const name = url.split('/').pop()!;
+    const name = url.slice(url.indexOf('demo/') + 'demo/'.length);
     try {
       return new Response(readFileSync(join(DEMO, name), 'utf8'), { status: 200, headers: { 'content-type': 'application/json' } });
     } catch {

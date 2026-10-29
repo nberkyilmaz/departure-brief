@@ -5,13 +5,13 @@
  * The published site is not a picture of a briefing: it holds the same
  * reports the pipeline would have fetched, and builds the briefing itself.
  * That is only possible if what a store holds can travel as JSON, which is
- * what this is — reports verbatim, the aerodromes they concern, and the
- * model's recorded answers about the NOTAMs.
+ * what this is — reports verbatim and the model's recorded answers about
+ * the NOTAMs. The aerodromes travel separately, in `airports.ts`, because
+ * there are too many of them to load at once.
  *
  * Nothing here is a summary of anything. A report's bytes are its bytes,
  * and the hash is recomputed on arrival to prove it.
  */
-import type { Airport } from '../domain/airport.js';
 import type { AssessmentRow } from '../notam/assess.js';
 import { storeAndDecode } from '../store/decode.js';
 import type { MemoryStore } from '../store/memory.js';
@@ -47,7 +47,6 @@ export interface DemoBundle {
   readonly plan: unknown;
   readonly profile: unknown;
   readonly aircraft: unknown;
-  readonly airports: readonly Airport[];
   readonly reports: readonly BundledReport[];
   readonly assessments: readonly AssessmentRow[];
 }
@@ -74,14 +73,13 @@ function reportOf(b: BundledReport): RawReport {
 /**
  * Fill a store from a bundle, exactly as a fetch would have. Decoding runs
  * here too, so what comes out is a store the pipeline cannot tell from one
- * that fetched the same reports itself.
+ * that fetched the same reports itself. The store brings its own airports.
  *
  * Throws if a report's bytes do not hash to the name it arrived under: a
  * briefing built on reports that changed in transit is worth nothing.
  */
 export async function loadBundle(store: MemoryStore, bundle: DemoBundle): Promise<{ reports: number; assessments: number }> {
   const recordedAt = new Date(bundle.recordedAt);
-  await store.putAirports([...bundle.airports]);
   for (const b of bundle.reports) {
     const report = reportOf(b);
     if (report.sha256 !== b.sha256) throw new BundleIntegrityError(b, report.sha256);

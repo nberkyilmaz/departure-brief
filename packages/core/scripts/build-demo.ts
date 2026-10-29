@@ -14,6 +14,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assembleBriefing } from '../src/brief/assemble.js';
+import { CatalogStore, type AirportCell, type AirportIndex } from '../src/demo/airports.js';
 import type { BundledReport, DemoBundle } from '../src/demo/bundle.js';
 import { parseFlightPlan } from '../src/domain/flight.js';
 import { parseAircraftLimits, parsePilotProfile } from '../src/domain/profile.js';
@@ -21,12 +22,10 @@ import { AWC_BASE_URL, AwcClient } from '../src/fetch/awc.js';
 import type { HttpClient } from '../src/fetch/http.js';
 import { storeAndDecode } from '../src/store/decode.js';
 import { NAVCANADA_CFPS_BASE_URL, NavCanadaClient } from '../src/fetch/navcanada.js';
-import { readOurAirportsDirectory } from '../src/fetch/ourairports.js';
 import { FixtureProvider, RecordingProvider } from '../src/llm/fixture.js';
 import { OllamaProvider } from '../src/llm/ollama.js';
 import { notamsForFlight } from '../src/notam/flight.js';
 import { resolveFlight } from '../src/resolve/flight.js';
-import { MemoryStore } from '../src/store/memory.js';
 import type { RawReport } from '../src/store/types.js';
 import { withHandbookLimits } from '../src/wb/aircraft.js';
 import type { WeightBalanceSpec } from '../src/wb/types.js';
@@ -77,15 +76,15 @@ const replay: HttpClient = {
 };
 
 /*
- * Every aerodrome in Canada, plus every station that reported — including
- * the American ones just across the border, because a field with no
- * observation of its own borrows from the nearest that has one and a border
- * is not a weather boundary. Heliports and seaplane bases are left out:
- * this is a tool for an aeroplane on wheels.
+ * Every aerodrome the page carries, read through the same store the page
+ * uses: the index, and each square of full records fetched from disk the
+ * first time a question needs it. `build-airports.ts` writes them. The
+ * briefing built here is then built over exactly the airports a visitor's
+ * browser will hold, which is what lets the page rebuild it to the byte.
  */
-const store = new MemoryStore();
-const airports = readOurAirportsDirectory(join(snapshot, 'ourairports'), { snapshot: '2026-09-14' }).filter((a) => a.siteType === 'A');
-await store.putAirports(airports);
+const airportFiles = join(out, 'airports');
+const readJson = <T,>(path: string): T => JSON.parse(readFileSync(path, 'utf8')) as T;
+const store = new CatalogStore(readJson<AirportIndex>(join(airportFiles, 'index.json')), async (cell) => readJson<AirportCell>(join(airportFiles, `${cell}.json`)));
 
 /*
  * Everything that goes into the store also goes into the bundle the web app
@@ -226,9 +225,6 @@ const bundle: DemoBundle = {
   plan: planJson,
   profile: profileJson,
   aircraft: aircraftJson,
-  // Every aerodrome, not only the ones on this flight: the page is meant to
-  // answer for whatever a visitor types.
-  airports,
   reports: [...bundled.values()].sort((a, b) => a.sha256.localeCompare(b.sha256)),
   assessments: notams.items.map((i) => i.assessment).filter((a): a is NonNullable<typeof a> => a !== null),
 };
@@ -244,7 +240,7 @@ console.log(`  ${briefing.document.briefing.points.map((p) => `${p.waypoint} ${p
 console.log(`  NOTAMs: ${briefing.document.notams?.items.length ?? 0}${counts ? ` (${Object.entries(counts).filter(([, n]) => n > 0).map(([k, n]) => `${n} ${k}`).join(', ')})` : ''}`);
 console.log(`  ranked by ${briefing.document.notams?.model ?? 'no model'}`);
 console.log(`  weight and balance: ${wb ? `${wb.figures.length} figures, ${wb.review.length} in review` : 'none'}`);
-console.log(`  bundle: ${bundle.reports.length} reports, ${bundle.airports.length} aerodromes, ${bundle.assessments.length} recorded model answers`);
+console.log(`  bundle: ${bundle.reports.length} reports, ${store.index.airports.length} aerodromes, ${bundle.assessments.length} recorded model answers`);
 const kinds = new Map<string, number>();
 for (const r of bundle.reports) kinds.set(r.kind, (kinds.get(r.kind) ?? 0) + 1);
 console.log(`    ${[...kinds].map(([k, n]) => `${n} ${k}`).join(', ')}`);

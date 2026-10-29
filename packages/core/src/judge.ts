@@ -85,5 +85,8 @@ export { recordFetchAttempt } from './fetch/freshness.js';
 // Carrying a store's contents somewhere with no database and no network.
 export { BundleIntegrityError, loadBundle } from './demo/bundle.js';
 export type { BundledReport, DemoBundle } from './demo/bundle.js';
+// Every aerodrome in Canada and the United States, fetched a square at a time as questions need them.
+export { CatalogStore, cellOf, CELL_DEGREES, unpackAirport } from './demo/airports.js';
+export type { AirportCell, AirportIndex, CellLoader, IndexedAirport, PackedAirport } from './demo/airports.js';
 // Implemented by the caller when there is no model to call; the type is erased.
 export type { LLMProvider, LLMRequest, LLMResponse } from './llm/provider.js';

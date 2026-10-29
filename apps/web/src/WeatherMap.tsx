@@ -9,6 +9,12 @@
  * A station is a link: tapping it opens the field's own page, where the
  * report is read back line by line. The map shows where to look; the field
  * page shows why.
+ *
+ * Canada and the United States together are a few thousand stations, which
+ * at the scale of a continent would be a carpet of overlapping dots. So
+ * they are drawn on a canvas, and until the map is zoomed in far enough to
+ * show every one, each small patch of screen shows only its worst station:
+ * the overview never hides an IFR field under a VFR one beside it.
  */
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -19,13 +25,38 @@ import { hhmmZ } from './time.js';
 
 /** Drawn last, so a red dot is never hidden under a green one. */
 const DRAW_ORDER: Readonly<Record<string, number>> = { unknown: 0, VFR: 1, MVFR: 2, IFR: 3, LIFR: 4 };
+const orderOf = (s: StationWeather): number => DRAW_ORDER[s.category ?? 'unknown'] ?? 0;
+
+/** From this zoom on, every station is drawn: about a county on screen, where they no longer crowd. */
+const EVERY_STATION_FROM_ZOOM = 8;
+
+/**
+ * The stations to draw at a zoom: the worst in each square of `spacing`
+ * pixels, or every one when `spacing` is zero. Best first, so the worst are
+ * drawn last and on top.
+ */
+function declutter(map: L.Map, stations: readonly StationWeather[], spacing: number): StationWeather[] {
+  const worstFirst = [...stations].sort((a, b) => orderOf(b) - orderOf(a));
+  if (spacing === 0) return worstFirst.reverse();
+  const zoom = map.getZoom();
+  const taken = new Set<string>();
+  const kept: StationWeather[] = [];
+  for (const s of worstFirst) {
+    const p = map.project([s.lat, s.lon], zoom);
+    const square = `${Math.floor(p.x / spacing)},${Math.floor(p.y / spacing)}`;
+    if (taken.has(square)) continue;
+    taken.add(square);
+    kept.push(s);
+  }
+  return kept.reverse();
+}
 
 const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 function draw(container: HTMLElement, stations: readonly StationWeather[], centre: { lat: number; lon: number } | null): L.Map {
   const dark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
   // Scrolling the page past the map should scroll the page; the wheel zooms only once the map has been clicked.
-  const map = L.map(container, { scrollWheelZoom: false, minZoom: 3, maxZoom: 11 });
+  const map = L.map(container, { scrollWheelZoom: false, minZoom: 3, maxZoom: 11, preferCanvas: true });
   map.once('click', () => map.scrollWheelZoom.enable());
   /*
    * OpenStreetMap's own tiles: no key, attribution shown, and light use like
@@ -40,10 +71,15 @@ function draw(container: HTMLElement, stations: readonly StationWeather[], centr
   const css = getComputedStyle(document.documentElement);
   const colour = (category: string | null) => css.getPropertyValue(`--${(category ?? 'unknown').toLowerCase()}`).trim() || '#888';
   const touch = window.matchMedia?.('(pointer: coarse)').matches ?? false;
-  const ordered = [...stations].sort((a, b) => (DRAW_ORDER[a.category ?? 'unknown'] ?? 0) - (DRAW_ORDER[b.category ?? 'unknown'] ?? 0));
-  for (const s of ordered) {
+  const radius = touch ? 7 : 6;
+  const layer = L.layerGroup().addTo(map);
+  const plot = () => {
+    layer.clearLayers();
+    for (const s of declutter(map, stations, map.getZoom() >= EVERY_STATION_FROM_ZOOM ? 0 : radius * 2 + 3)) marker(s).addTo(layer);
+  };
+  const marker = (s: StationWeather) =>
     L.circleMarker([s.lat, s.lon], {
-      radius: touch ? 7 : 6,
+      radius,
       weight: 1.5,
       color: dark ? '#0d0d10' : '#ffffff',
       fillColor: colour(s.category),
@@ -55,10 +91,11 @@ function draw(container: HTMLElement, stations: readonly StationWeather[], centr
       })
       .on('click', () => {
         window.location.hash = aerodromeHref(s.id);
-      })
-      .addTo(map);
-  }
-  map.setView(centre ? [centre.lat, centre.lon] : [52, -95], centre ? 6 : 4);
+      });
+  map.on('zoomend', plot);
+  // Both countries, when there is no home field to start from.
+  map.setView(centre ? [centre.lat, centre.lon] : [47, -98], centre ? 6 : 4);
+  plot();
   return map;
 }
 

@@ -11,6 +11,7 @@ import { fuelPlan } from '../navlog/fuel.js';
 import { checkFuel } from '../rules/fuel.js';
 import { navLog } from '../navlog/compute.js';
 import { evaluateFlight } from '../rules/evaluate.js';
+import { jurisdictionOf } from '../rules/vfrMinima.js';
 import { RULES_VERSION, type Briefing } from '../rules/types.js';
 import { contentHash } from './canonical.js';
 import type { BriefingDocument, BriefingPointInputs, BriefingReportRef, StoredBriefing } from './types.js';
@@ -74,7 +75,10 @@ export function assembleBriefing(
    * alternate is a different flight and does not count.
    */
   const nightPoint = evaluated.points.find((p) => p.night) ?? null;
-  const fuel = fuelPlan(navlog, resolved.plan.fuelAboardGal, nightPoint !== null);
+  // Whose regulation: the country the flight leaves from, or arrives at if it leaves from a position.
+  const [first, last] = [resolved.points[0], resolved.points[resolved.points.length - 1]];
+  const country = first?.point.waypoint.airport?.country ?? last?.point.waypoint.airport?.country ?? null;
+  const fuel = fuelPlan(navlog, resolved.plan.fuelAboardGal, nightPoint !== null, jurisdictionOf(country) ?? 'CA');
   const destination = evaluated.points[evaluated.points.length - 1];
   const briefing: Briefing = destination
     ? {

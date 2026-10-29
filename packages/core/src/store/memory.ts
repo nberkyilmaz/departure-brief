@@ -87,9 +87,20 @@ export class MemoryStore implements Store {
     const wanted = id.trim().toUpperCase();
     let best: Airport | null = null;
     const rank = airportPreference;
+    /*
+     * When two records tie, the one whose ICAO identifier is the one asked
+     * for, then the lower site number. Without a rule the answer would be
+     * whichever was loaded first, and a store that loads airports as they
+     * are asked about must give the same answer as one that loaded them all.
+     */
+    const tieBreak = (a: Airport, b: Airport): boolean => {
+      const exactA = a.icaoId?.toUpperCase() === wanted;
+      const exactB = b.icaoId?.toUpperCase() === wanted;
+      return exactA !== exactB ? exactA : a.siteNo < b.siteNo;
+    };
     for (const a of this.airports.values()) {
       if (a.icaoId?.toUpperCase() !== wanted && a.faaId.toUpperCase() !== wanted) continue;
-      if (!best || rank(a) > rank(best) || (rank(a) === rank(best) && a.cycle > best.cycle)) best = a;
+      if (!best || rank(a) > rank(best) || (rank(a) === rank(best) && (a.cycle > best.cycle || (a.cycle === best.cycle && tieBreak(a, best))))) best = a;
     }
     return best;
   }
@@ -105,7 +116,8 @@ export class MemoryStore implements Store {
     return [...newest.values()]
       .map((a) => ({ a, d: distanceNm(here, a) }))
       .filter((x) => x.d <= radiusNm)
-      .sort((x, y) => x.d - y.d)
+      // Equal distances by site number, for the same reason as above.
+      .sort((x, y) => x.d - y.d || (x.a.siteNo < y.a.siteNo ? -1 : x.a.siteNo > y.a.siteNo ? 1 : 0))
       .map((x) => x.a);
   }
 

@@ -9,7 +9,8 @@ personal minimums and the regulations — with every line citing the exact
 characters of the report it came from.
 
 **[Open the live site →](https://nberkyilmaz.com/departure-brief/)**
-The whole pipeline runs in your browser.
+The whole pipeline runs in your browser, over live weather for every
+aeroplane field in Canada and the United States — 17,647 of them.
 
 > **Not for operational use.** This is a study and planning aid, not an
 > official weather briefing. It does not decide whether to fly — that is the
@@ -72,9 +73,13 @@ flowchart LR
   rebuilds the briefing instantly — and produces a briefing with the same
   content hash the server would.
 - **`apps/relay`** exists because neither weather service allows a browser to
-  call it directly. It takes the whole country's reports on a timer and
+  call it directly. It takes the whole continent's reports on a timer and
   keeps the latest copy, so visitors never multiply requests to the
   services. It runs on Cloudflare's free plan and holds no weather logic.
+- **The aerodromes** travel as an index the page loads up front (300 KB)
+  and two-degree squares of full records it fetches only when a question
+  touches one. The store answers exactly as one holding all of them would,
+  and a test holds it to that.
 - **`apps/api`** is the full server: every raw report stored verbatim and
   content-addressed, briefings immutable and reproducible, forecast
   verification over time.
@@ -147,6 +152,6 @@ All public, with no redistribution restrictions:
 - [aviationweather.gov](https://aviationweather.gov/) (NOAA/AWC) — METAR, TAF, SIGMET/AIRMET
 - NAV CANADA CFPS — Canadian NOTAMs and upper winds (the endpoint behind plan.navcanada.ca; unofficial, so the client fails loudly if its shape changes)
 - FAA NASR — US airports, runways, magnetic variation
-- OurAirports — airports and runways outside the US (public domain)
+- OurAirports — airports and runways; the public site's whole set of Canadian and American fields (public domain)
 
 Requests carry a real `User-Agent`, and nothing fetched is committed.

@@ -52,6 +52,11 @@ describe('the reserve', () => {
     const plan = fuelPlan(log(), 20, true);
     expect(plan.reserve).toEqual({ minutes: RESERVE_MINUTES.night, basis: 'night', rule: 'CARs 602.88(4)', gal: 6 });
   });
+
+  it('is the same arithmetic under FAR 91.151 for a flight from the United States, cited as such', () => {
+    expect(fuelPlan(log(), 20, false, 'US').reserve).toEqual({ minutes: 30, basis: 'day', rule: 'FAR 91.151(a)(1)', gal: 4 });
+    expect(fuelPlan(log(), 20, true, 'US').reserve).toEqual({ minutes: 45, basis: 'night', rule: 'FAR 91.151(a)(2)', gal: 6 });
+  });
 });
 
 describe('the sum', () => {

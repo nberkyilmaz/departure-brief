@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { AerodromeField, lookupViaApi, type AirportLookup } from './AerodromeField.js';
 import type { Aerodrome } from './engine.js';
+import { aerodromeSearch } from './search.js';
 import type { AirspaceClass, FlightPlanInput } from './types.js';
 
 const CLASSES: AirspaceClass[] = ['control-zone', 'controlled', 'uncontrolled', 'B', 'C', 'D', 'E', 'G'];
@@ -45,12 +47,13 @@ export function FlightForm({
   onChange: (p: FlightPlanInput) => void;
   /** Where identifiers are checked; null means ask the API. */
   lookup?: AirportLookup | null;
-  /** The aerodromes there is data for, offered as suggestions when the set is known. */
+  /** The aerodromes there is data for, offered as suggestions as an identifier is typed. */
   aerodromes?: readonly Aerodrome[];
 }) {
   const set = (patch: Partial<FlightPlanInput>) => onChange({ ...plan, ...patch });
   const ask = lookup ?? lookupViaApi;
-  const listId = aerodromes.length > 0 ? 'aerodromes-with-data' : undefined;
+  // Seventeen thousand options is not a list anyone can use; each field offers the few that match what is in it.
+  const suggest = useMemo(() => (aerodromes.length > 0 ? aerodromeSearch(aerodromes) : undefined), [aerodromes]);
   const ids = [plan.departure, ...plan.route, plan.destination, plan.alternate]
     .filter((s): s is string => !!s && /^[A-Z0-9]{3,4}$/i.test(s))
     .map((s) => s.toUpperCase());
@@ -62,25 +65,16 @@ export function FlightForm({
   return (
     <fieldset>
       <legend>The flight</legend>
-      {listId && (
-        <datalist id={listId}>
-          {aerodromes.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-            </option>
-          ))}
-        </datalist>
-      )}
       <div className="grid">
-        <AerodromeField label="Departure" value={plan.departure} onChange={(v) => set({ departure: v })} lookup={ask} listId={listId} />
-        <AerodromeField label="Destination" value={plan.destination} onChange={(v) => set({ destination: v })} lookup={ask} listId={listId} />
+        <AerodromeField label="Departure" value={plan.departure} onChange={(v) => set({ departure: v })} lookup={ask} suggest={suggest} />
+        <AerodromeField label="Destination" value={plan.destination} onChange={(v) => set({ destination: v })} lookup={ask} suggest={suggest} />
         <AerodromeField
           label="Alternate"
           value={plan.alternate ?? ''}
           optional
           hint="optional, but it is judged too"
           lookup={ask}
-          listId={listId}
+          suggest={suggest}
           onChange={(v) => set({ alternate: v || null })}
         />
         <label>
@@ -136,7 +130,7 @@ export function FlightForm({
             onChange={(e) => set({ fuelAboardGal: e.target.value === '' ? null : Number(e.target.value) })}
           />
           <span className="field-note-line">
-            <span className="field-note">US gallons at departure — checked against the CARs 602.88 reserve</span>
+            <span className="field-note">US gallons at departure — checked against the VFR reserve, CARs 602.88 or FAR 91.151</span>
           </span>
         </label>
       </div>

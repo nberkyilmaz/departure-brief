@@ -47,7 +47,10 @@ official briefing.
 - **Airspace transit** needs Canadian airspace geometry, which NAV CANADA
   does not publish. The FAA's layer is queryable, so the US half is
   buildable whenever it is wanted.
-- **US NOTAMs** need FAA API credentials. Canadian ones need no key.
+- **US NOTAMs** need FAA API credentials. Canadian ones need no key. The
+  site already carries every American field and its weather; until the
+  credentials arrive, a briefing that touches one says plainly that its
+  NOTAMs were not checked, and where to look them up.
 
 ---
 

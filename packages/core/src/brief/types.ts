@@ -61,7 +61,7 @@ export interface BriefingDocument {
   readonly briefing: Briefing;
   /** The wind triangle, leg by leg, from the same resolved flight. */
   readonly navlog: NavLog;
-  /** Trip, reserve and what is aboard, against CARs 602.88. */
+  /** Trip, reserve and what is aboard, against CARs 602.88 or FAR 91.151. */
   readonly fuel: FuelPlan;
 }
 

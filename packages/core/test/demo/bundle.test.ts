@@ -14,6 +14,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { assembleBriefing } from '../../src/brief/assemble.js';
 import type { StoredBriefing } from '../../src/brief/types.js';
+import { CatalogStore, type AirportCell, type AirportIndex } from '../../src/demo/airports.js';
 import { BundleIntegrityError, loadBundle, type DemoBundle } from '../../src/demo/bundle.js';
 import { parseFlightPlan } from '../../src/domain/flight.js';
 import { parseAircraftLimits, parsePilotProfile } from '../../src/domain/profile.js';
@@ -22,7 +23,6 @@ import { notamsForFlight } from '../../src/notam/flight.js';
 import { withHandbookLimits } from '../../src/wb/aircraft.js';
 import type { WeightBalanceSpec } from '../../src/wb/types.js';
 import { resolveFlight } from '../../src/resolve/flight.js';
-import { MemoryStore } from '../../src/store/memory.js';
 
 const DEMO = join(__dirname, '..', '..', '..', '..', 'apps', 'web', 'public', 'demo');
 const read = <T,>(name: string): T => JSON.parse(readFileSync(join(DEMO, name), 'utf8')) as T;
@@ -40,8 +40,11 @@ const noModel: LLMProvider = {
   },
 };
 
+/** The airports as the page holds them: the index, and each square read the first time it is needed. */
+const catalog = (): CatalogStore => new CatalogStore(read<AirportIndex>('airports/index.json'), async (cell) => read<AirportCell>(`airports/${cell}.json`));
+
 async function rebuild(bundle: DemoBundle): Promise<StoredBriefing> {
-  const store = new MemoryStore();
+  const store = catalog();
   await loadBundle(store, bundle);
   const plan = parseFlightPlan(bundle.plan);
   const profile = parsePilotProfile(bundle.profile);
