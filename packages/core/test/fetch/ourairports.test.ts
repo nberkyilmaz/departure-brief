@@ -6,7 +6,7 @@
  */
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { readOurAirportsDirectory } from '../../src/fetch/ourairports.js';
+import { parseOurAirports, readOurAirportsDirectory } from '../../src/fetch/ourairports.js';
 import { FIXTURES } from '../helpers/http.js';
 
 const dir = join(FIXTURES, 'ourairports', '2026-09-07');
@@ -64,5 +64,27 @@ describe('readOurAirportsDirectory', () => {
     const cnc3 = byIcao('CNC3');
     expect(cnc3.faaId).toBe('CNC3');
     expect(cnc3.icaoId).toBe('CNC3');
+  });
+
+  /*
+   * Rows as they appear in the 2026-10-28 snapshot. An American private
+   * strip's ident is often an identifier the FAA has since given to someone
+   * else, so it is not taken as an ICAO code the way a Canadian one is.
+   */
+  it('an American field is filed under its FAA identifier, or the K form of it, never a stale ident', () => {
+    const header = '"id","ident","type","name","latitude_deg","longitude_deg","elevation_ft","continent","iso_country","iso_region","municipality","scheduled_service","icao_code","iata_code","gps_code","local_code","home_link","wikipedia_link","keywords"';
+    const rows = [
+      '3685,"KMIA","large_airport","Miami International Airport",25.796011,-80.289751,8,"NA","US","US-FL","Miami","yes","KMIA","MIA","KMIA","MIA","https://www.miami-airport.com/","https://en.wikipedia.org/wiki/Miami_International_Airport","MFW, South Florida, Wilcox Field, Pan American Field"',
+      '45279,"AA05","small_airport","Shelby Strip",61.507867,-149.078925,40,"NA","US","US-AK","Palmer","no",,,"AA25","AA25",,,"AA05"',
+      '21403,"KX51","medium_airport","Miami Homestead General Aviation Airport",25.499201,-80.554296,7,"NA","US","US-FL","Homestead","no",,,,"X51","http://www.miami-airport.com/homestead.asp","https://en.wikipedia.org/wiki/Homestead_General_Aviation_Airport",',
+      '6551,"00N","small_airport","Bucks Airport",39.472998,-75.184346,105,"NA","US","US-NJ","Bridgeton","no",,,"K00N","00N",,"https://en.wikipedia.org/wiki/Bucks_Airport",',
+    ];
+    const ids = parseOurAirports([header, ...rows].join('\n'), new Map(), { snapshot: '2026-10-28' }).map((a) => [a.icaoId, a.faaId]);
+    expect(ids).toEqual([
+      ['KMIA', 'MIA'],
+      [null, 'AA25'],
+      ['KX51', 'X51'],
+      ['K00N', '00N'],
+    ]);
   });
 });

@@ -1,5 +1,5 @@
 {
-  "sha256": "6d00459f2f2b466a2dbcc1eefac6bd319e5d90fb932523309e67dfc5d1bc2da9",
+  "sha256": "1a75809033c5f86245f2331ba4d0ec9177f22ee2051b35323a0e84322484b180",
   "flightKey": "2c8115094cbf5965b4acc3bb0482ba82f940c10935f36d80648410ed0541d0a8",
   "asOf": "2026-09-19T00:52:00.000Z",
   "createdAt": "2026-09-19T00:52:00.000Z",
@@ -48,7 +48,7 @@
     },
     "asOf": "2026-09-19T00:52:00.000Z",
     "versions": {
-      "rules": 6,
+      "rules": 7,
       "metarDecoder": 2,
       "tafDecoder": 1,
       "notamDecoder": 1,
@@ -1422,7 +1422,7 @@
       ]
     },
     "briefing": {
-      "rulesVersion": 6,
+      "rulesVersion": 7,
       "profile": {
         "name": "default",
         "version": 1
@@ -1634,7 +1634,7 @@
                   "station": "CYSN",
                   "raw": null,
                   "span": null,
-                  "text": "ourairports 2026-09-14",
+                  "text": "ourairports 2026-10-28",
                   "sha256": null
                 },
                 {
@@ -2026,7 +2026,7 @@
                   "station": "CYSN",
                   "raw": null,
                   "span": null,
-                  "text": "ourairports 2026-09-14",
+                  "text": "ourairports 2026-10-28",
                   "sha256": null
                 },
                 {
@@ -2454,7 +2454,7 @@
                   "station": "CYKF",
                   "raw": null,
                   "span": null,
-                  "text": "ourairports 2026-09-14",
+                  "text": "ourairports 2026-10-28",
                   "sha256": null
                 },
                 {
@@ -2814,7 +2814,7 @@
                   "station": "CYKF",
                   "raw": null,
                   "span": null,
-                  "text": "ourairports 2026-09-14",
+                  "text": "ourairports 2026-10-28",
                   "sha256": null
                 },
                 {
@@ -3271,7 +3271,7 @@
                 "station": "CYHM",
                 "raw": null,
                 "span": null,
-                "text": "ourairports 2026-09-14",
+                "text": "ourairports 2026-10-28",
                 "sha256": null
               },
               {
@@ -3631,7 +3631,7 @@
                 "station": "CYHM",
                 "raw": null,
                 "span": null,
-                "text": "ourairports 2026-09-14",
+                "text": "ourairports 2026-10-28",
                 "sha256": null
               },
               {

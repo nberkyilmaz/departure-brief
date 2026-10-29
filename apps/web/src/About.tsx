@@ -28,7 +28,8 @@ export function About({ weather, aerodromes }: { weather: WeatherSource | null; 
           {live ? (
             <p>
               A real flight — St. Catharines to Waterloo in a Cessna 172, alternate Hamilton — over the weather being reported right now: every METAR and TAF
-              in the country, taken from the weather services at {weatherAge(weather!.at)}, and the NOTAMs for whichever aerodromes you brief. Every report
+              in Canada and the United States, taken from the weather services at {weatherAge(weather!.at)}, and the NOTAMs for whichever Canadian
+              aerodromes you brief. Every report
               came off NAV CANADA or the US weather service and is held here verbatim.
             </p>
           ) : (
@@ -45,10 +46,12 @@ export function About({ weather, aerodromes }: { weather: WeatherSource | null; 
           </p>
           {live ? (
             <p className="hint">
-              Neither weather service allows a page to call it directly, so a small relay does the asking: every few minutes it takes the whole country's
+              Neither weather service allows a page to call it directly, so a small relay does the asking: every few minutes it takes the whole continent's
               reports and keeps the latest copy, and this page reads that copy. However many people open it, the services are asked once per product per
               window. The relay does not read the reports — the page does, with the same code the server uses. {aerodromes.length.toLocaleString('en')}{' '}
-              aerodromes are carried; NOTAMs are ranked by deterministic rules only, since no model runs in a browser.
+              aerodromes are carried, every aeroplane field in both countries, and each field's runways are fetched only when it is asked about. NOTAMs
+              come from NAV CANADA, so an American field's are not here yet and the briefing says so; they are ranked by deterministic rules only, since
+              no model runs in a browser.
             </p>
           ) : (
             <p className="hint">

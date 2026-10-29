@@ -70,7 +70,7 @@ export interface FlightPlanInput {
   airspace: Record<string, AirspaceClass> | null;
 }
 
-/** Trip, reserve and what is aboard, against CARs 602.88. Every null has a reason in `gaps`. */
+/** Trip, reserve and what is aboard, against CARs 602.88 or FAR 91.151. Every null has a reason in `gaps`. */
 export interface FuelPlan {
   tripGal: number | null;
   alternateGal: number | null;

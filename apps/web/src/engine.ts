@@ -3,7 +3,7 @@
  *
  * Neither weather service lets a page call it directly, so the reports
  * reach the page one of two ways: live, through the relay, which fetches
- * the whole country on a timer and keeps the latest copy; or recorded,
+ * the whole continent on a timer and keeps the latest copy; or recorded,
  * carried with the page and frozen at the moment they were taken. Judging
  * them needs no server either way: decoding, resolution and the rules are
  * ordinary deterministic code, so the page loads the reports into an
@@ -25,11 +25,11 @@ import {
   AwcCacheClient,
   AwcClient,
   CANADIAN_UPPERWIND_SITES,
+  CatalogStore,
   decodeMetar,
   diffBriefings,
   flightCategory,
   loadBundle,
-  MemoryStore,
   NavCanadaClient,
   notamsForFlight,
   parseAircraftLimits,
@@ -40,7 +40,9 @@ import {
   storeAndDecode,
   UnknownWaypointError,
   withHandbookLimits,
-  type Airport,
+  type AirportCell,
+  type AirportIndex,
+  type CellLoader,
   type DemoBundle,
   type FlightCategory,
   type HttpClient,
@@ -76,7 +78,7 @@ export class NoDataError extends Error {
     readonly waypoint: string,
     readonly available: readonly string[],
   ) {
-    // Fifteen hundred identifiers is not an error message.
+    // Seventeen thousand identifiers is not an error message.
     super(
       available.length > 12
         ? `"${waypoint}" is not among the ${available.length.toLocaleString('en')} aerodromes this page carries.`
@@ -99,6 +101,8 @@ export interface WeatherSource {
 
 export interface Aerodrome {
   readonly id: string;
+  /** The FAA identifier, when the field has an ICAO one as well: `MIA` for `KMIA`. */
+  readonly faaId: string | null;
   readonly name: string;
   readonly lat: number;
   readonly lon: number;
@@ -166,6 +170,23 @@ export interface LocalEngine {
 /** The products a live briefing cannot do without are missing. Upper winds and hazards it can, and says so. */
 class LiveUnavailable extends Error {}
 
+/** Where to look up a NOTAM this page cannot fetch: said in the briefing, beside the field it concerns. */
+const FAA_NOTAM_SEARCH = 'notams.aim.faa.gov';
+
+/**
+ * NAV CANADA publishes Canada's NOTAMs, and only Canada's are taken from it.
+ * An American field's come from the FAA, which this page does not reach yet,
+ * and a briefing that showed none for Miami would read as though Miami had
+ * none. So the source refuses, and the refusal is printed in the briefing
+ * as what it could not see.
+ */
+async function canadianOnly(store: CatalogStore, site: string): Promise<void> {
+  const airport = await store.getAirport(site);
+  if (airport && airport.country !== 'CA') {
+    throw new Error(`the FAA publishes them, and this page does not reach the FAA yet. Look them up at ${FAA_NOTAM_SEARCH} before you fly`);
+  }
+}
+
 interface Live {
   /** When the relay took the METARs from the service: the age the page shows. */
   readonly at: string;
@@ -177,7 +198,7 @@ interface Live {
 /**
  * Fill the store from the relay: every METAR and TAF, the hazard
  * advisories and the upper winds — the products that cover the whole
- * country, which the relay keeps current on its own timer. NOTAMs are per
+ * continent, which the relay keeps current on its own timer. NOTAMs are per
  * aerodrome and come later, when a flight is briefed.
  *
  * Parsed by the same clients the server fetches with, pointed at the relay
@@ -185,7 +206,7 @@ interface Live {
  * there. Only stations the page has an aerodrome for are kept: a report
  * from a station with no position cannot be resolved to anywhere.
  */
-async function fetchLive(store: MemoryStore, relay: string, airports: readonly Airport[], hold: (reports: readonly RawReport[], site: string | null) => void): Promise<Live> {
+async function fetchLive(store: CatalogStore, relay: string, hold: (reports: readonly RawReport[], site: string | null) => void): Promise<Live> {
   const fetchedAt = new Map<string, string>();
   const http: HttpClient = {
     async get(url, init) {
@@ -201,7 +222,7 @@ async function fetchLive(store: MemoryStore, relay: string, airports: readonly A
       return { status: res.status, body: await res.text(), headers: {} };
     },
   };
-  const known = new Set(airports.flatMap((a) => [a.icaoId, a.faaId]).filter((id): id is string => !!id).map((id) => id.toUpperCase()));
+  const known = store.identifiers();
   const cache = new AwcCacheClient(http, `${relay}/awc/cache`);
   const awc = new AwcClient(http, `${relay}/awc`);
   const cfps = new NavCanadaClient(http, `${relay}/cfps/`);
@@ -241,6 +262,7 @@ async function fetchLive(store: MemoryStore, relay: string, airports: readonly A
     missing,
     notams: {
       async notams(site) {
+        await canadianOnly(store, site);
         const fetched = await cfps.notams(site);
         hold(fetched.reports, site);
         return fetched;
@@ -256,10 +278,32 @@ async function fetchLive(store: MemoryStore, relay: string, airports: readonly A
  * is why the page can recompute as the form is typed in.
  */
 export async function loadEngine(base: string, relay: string | null = null): Promise<LocalEngine> {
-  const [bundleRes, wbRes] = await Promise.all([fetch(`${base}demo/bundle.json`), fetch(`${base}demo/wb.json`)]);
+  const [bundleRes, wbRes, indexRes] = await Promise.all([fetch(`${base}demo/bundle.json`), fetch(`${base}demo/wb.json`), fetch(`${base}demo/airports/index.json`)]);
   if (!bundleRes.ok) throw new Error(`the recorded reports could not be loaded (HTTP ${bundleRes.status})`);
+  if (!indexRes.ok) throw new Error(`the list of aerodromes could not be loaded (HTTP ${indexRes.status})`);
   const bundle = (await bundleRes.json()) as DemoBundle;
+  const index = (await indexRes.json()) as AirportIndex;
   const wb = wbRes.ok ? ((await wbRes.json()) as WeightBalanceSpec) : null;
+
+  /*
+   * A square of full aerodrome records is fetched the first time a question
+   * needs it, and kept: if live weather falls through, the recorded store
+   * is built over the squares the live one already has.
+   */
+  const cells = new Map<string, Promise<AirportCell>>();
+  const loadCell: CellLoader = (name) => {
+    let pending = cells.get(name);
+    if (!pending) {
+      pending = fetch(`${base}demo/airports/${name}.json`).then(async (res) => {
+        if (!res.ok) throw new Error(`the aerodromes around ${name} could not be loaded (HTTP ${res.status})`);
+        return (await res.json()) as AirportCell;
+      });
+      cells.set(name, pending);
+      pending.catch(() => cells.delete(name));
+    }
+    return pending;
+  };
+  const newStore = (): CatalogStore => new CatalogStore(index, loadCell);
 
   const held = new Map<string, HeldReport>();
   const hold = (reports: readonly RawReport[], site: string | null): void => {
@@ -271,23 +315,22 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
   };
 
   /** The recorded reports, exactly as carried. Throws if a report's bytes do not hash to the name it arrived under. */
-  const recorded = async (): Promise<MemoryStore> => {
-    const s = new MemoryStore();
+  const recorded = async (): Promise<CatalogStore> => {
+    const s = newStore();
     await loadBundle(s, bundle);
     held.clear();
     for (const r of bundle.reports) held.set(r.sha256, { sha256: r.sha256, kind: r.kind, station: r.station, issuedAt: r.issuedAt, body: r.body, fetchedFor: r.fetchedFor });
     return s;
   };
 
-  let store: MemoryStore;
+  let store: CatalogStore;
   let live: Live | null = null;
   let weather: WeatherSource;
   if (relay) {
     try {
-      store = new MemoryStore();
-      // The aerodromes, and nothing recorded: no report, and no model answer about a NOTAM that may no longer exist.
-      await loadBundle(store, { ...bundle, reports: [], assessments: [] });
-      live = await fetchLive(store, relay.replace(/\/+$/, ''), bundle.airports, hold);
+      // Nothing recorded: no report, and no model answer about a NOTAM that may no longer exist.
+      store = newStore();
+      live = await fetchLive(store, relay.replace(/\/+$/, ''), hold);
       weather = { mode: 'live', at: live.at, problem: null, missing: live.missing };
     } catch (e) {
       // Anything else is a bug in this page, and should surface as one rather than be relabelled as weather.
@@ -307,14 +350,33 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
   /** The last briefing produced here, so the next one can say what changed. */
   let previous: ReturnType<typeof assembleBriefing> | null = null;
 
-  const byId = new Map<string, Airport>();
-  for (const a of bundle.airports) byId.set((a.icaoId ?? a.faaId).toUpperCase(), a);
+  /*
+   * Recorded, there are NOTAMs only for the aerodromes they were recorded
+   * for. Asked about any other, the source says so, and the briefing prints
+   * that as something it could not see rather than showing a field with
+   * none. The recorded sites themselves are never asked: what was recorded
+   * for them is in the store, fetched at the instant the briefing is judged.
+   */
+  const recordedSites = [...new Set(bundle.reports.filter((r) => r.kind === 'notam').flatMap((r) => r.fetchedFor))].sort();
+  const recordedNotams: NotamSource = {
+    async notams(site) {
+      await canadianOnly(store, site);
+      if (!recordedSites.includes(site.toUpperCase())) throw new Error(`none were recorded for it; the recording has NOTAMs for ${recordedSites.join(', ')} only`);
+      return { request: 'recorded', reports: [] };
+    },
+  };
+
+  /** One entry per identifier, the ICAO one where there is one. The index is sorted by it, and lists a few fields twice. */
+  const aerodromes: Aerodrome[] = [];
+  for (const [icao, faa, name, lat, lon] of index.airports) {
+    const id = (icao || faa).toUpperCase();
+    if (aerodromes[aerodromes.length - 1]?.id !== id) aerodromes.push({ id, faaId: icao && faa !== icao ? faa : null, name, lat, lon });
+  }
   let stations: StationWeather[] | null = null;
 
   return {
     weather,
-    // One entry per identifier: the airport data lists a few twice, once per site type.
-    aerodromes: [...byId.entries()].map(([id, a]) => ({ id, name: a.name, lat: a.lat, lon: a.lon })).sort((a, b) => a.id.localeCompare(b.id)),
+    aerodromes,
     stations() {
       if (stations) return stations;
       const latest = new Map<string, HeldReport>();
@@ -324,15 +386,16 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
         if (!cur || (r.issuedAt ?? '') > (cur.issuedAt ?? '')) latest.set(r.station, r);
       }
       stations = [...latest.values()].flatMap((r) => {
-        const a = byId.get(r.station!.toUpperCase());
+        const a = store.indexed(r.station!)[0];
         if (!a) return [];
+        const [, , name, lat, lon] = a;
         let category: FlightCategory | null = null;
         try {
           category = flightCategory(decodeMetar(r.body));
         } catch {
           // The decoder is total and should not throw; a station it cannot classify is shown grey, not dropped.
         }
-        return [{ id: r.station!, name: a.name, lat: a.lat, lon: a.lon, category, issuedAt: r.issuedAt, raw: r.body }];
+        return [{ id: r.station!, name, lat, lon, category, issuedAt: r.issuedAt, raw: r.body }];
       });
       return stations;
     },
@@ -354,7 +417,7 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
       try {
         resolved = await resolveFlight(store, plan, at);
       } catch (e) {
-        if (e instanceof UnknownWaypointError) throw new NoDataError(e.id, bundle.airports.map((a) => a.icaoId ?? a.faaId));
+        if (e instanceof UnknownWaypointError) throw new NoDataError(e.id, aerodromes.map((a) => a.id));
         throw e;
       }
       /*
@@ -365,7 +428,7 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
        */
       const notams = live
         ? await notamsForFlight({ store, navcanada: live.notams, provider: null, model: null }, resolved, aircraft.type)
-        : await notamsForFlight({ store, navcanada: null, provider: noModel, model: bundle.model, now: () => recordedAsOf }, resolved, aircraft.type);
+        : await notamsForFlight({ store, navcanada: recordedNotams, provider: noModel, model: bundle.model, now: () => recordedAsOf }, resolved, aircraft.type);
       const briefing = assembleBriefing(resolved, profile, aircraft, at, notams);
       /*
        * What moved since the last briefing of this flight. The API answers

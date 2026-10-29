@@ -1,6 +1,7 @@
 import { Component, lazy, Suspense, useMemo, useState, type ReactNode } from 'react';
 import type { LocalEngine, WeatherSource } from './engine.js';
 import { aerodromeHref, hrefFor } from './router.js';
+import { aerodromeSearch } from './search.js';
 import { recordedWhen, weatherAge } from './WeatherNote.js';
 
 // The map library is only worth downloading on the page that shows a map.
@@ -31,8 +32,9 @@ class MapBoundary extends Component<{ children: ReactNode }, { failed: boolean }
 export function StartPage({ engine, weather, home }: { engine: LocalEngine | null; weather: WeatherSource | null; home: string }) {
   const [id, setId] = useState('');
   const code = id.trim().toUpperCase();
-  const known = engine?.aerodromes.filter((a) => a.id.startsWith(code) || a.name.toUpperCase().includes(code)).slice(0, 8) ?? [];
   const stations = useMemo(() => engine?.stations() ?? [], [engine]);
+  const search = useMemo(() => aerodromeSearch(engine?.aerodromes ?? [], new Set(stations.map((s) => s.id))), [engine, stations]);
+  const known = search(code);
   const counts = useMemo(() => {
     const c = new Map<string, number>();
     for (const s of stations) c.set(s.category ?? 'unclassified', (c.get(s.category ?? 'unclassified') ?? 0) + 1);
@@ -64,7 +66,7 @@ export function StartPage({ engine, weather, home }: { engine: LocalEngine | nul
             <input
               value={id}
               onChange={(e) => setId(e.target.value.replace(/[^A-Za-z0-9 ]/g, ''))}
-              placeholder="CYSN, Toronto, KIAG…"
+              placeholder="CYSN, Toronto, KMIA…"
               autoCapitalize="characters"
               autoCorrect="off"
               spellCheck={false}
@@ -80,6 +82,7 @@ export function StartPage({ engine, weather, home }: { engine: LocalEngine | nul
             {known.map((a) => (
               <li key={a.id}>
                 <a href={aerodromeHref(a.id)}>{a.id}</a> <span className="muted">{a.name}</span>
+                {a.faaId && <span className="muted"> · {a.faaId}</span>}
               </li>
             ))}
           </ul>

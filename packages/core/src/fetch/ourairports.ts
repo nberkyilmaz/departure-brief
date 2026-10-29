@@ -91,6 +91,25 @@ export function parseOurAirportsRunways(csv: string): Map<string, Runway[]> {
   return byAirport;
 }
 
+/**
+ * The ICAO-shaped identifier a field's reports are filed under, when
+ * OurAirports gives no ICAO code.
+ *
+ * Canadian idents are alphanumeric (`CNC3`) and are what the weather
+ * network uses; OurAirports' own placeholders (`CA-0123`) are not
+ * ICAO-shaped. American ones are not to be trusted the same way: a private
+ * strip's ident is often an old FAA identifier (`AA05` for the field the FAA
+ * now calls `AA25`). There, only the K-prefixed form of the field's current
+ * FAA identifier counts (`K00C` for `00C`), which is how an automated
+ * station at a field with no ICAO code reports.
+ */
+function impliedIcao(r: Record<string, string>, ident: string): string | null {
+  if (r['iso_country'] !== 'US') return /^[A-Z][A-Z0-9]{3}$/.test(ident) ? ident : null;
+  const local = str(r['local_code']);
+  if (!local || !/^[A-Z0-9]{3}$/.test(local)) return null;
+  return [ident, str(r['gps_code'])].find((id) => id === `K${local}`) ?? null;
+}
+
 export function parseOurAirports(csv: string, runways: Map<string, Runway[]>, options: OurAirportsOptions): Airport[] {
   const airports: Airport[] = [];
   const country = options.country?.toUpperCase();
@@ -102,8 +121,7 @@ export function parseOurAirports(csv: string, runways: Map<string, Runway[]>, op
     const lon = num(r['longitude_deg']);
     if (lat === null || lon === null) continue;
     const ident = r['ident'] ?? '';
-    // Canadian idents are alphanumeric (`CNC3`); OurAirports' own placeholders (`CA-0123`) are not ICAO-shaped.
-    const icao = str(r['icao_code']) ?? (/^[A-Z][A-Z0-9]{3}$/.test(ident) ? ident : null);
+    const icao = str(r['icao_code']) ?? impliedIcao(r, ident);
     airports.push({
       source: 'ourairports',
       cycle: options.snapshot,

@@ -53,7 +53,7 @@ function Fuel({ plan }: { plan: FuelPlan | undefined }) {
             {plan.withAlternateGal !== null && (
               <tr>
                 <td>
-                  With the alternate as well <span className="muted">(not required by 602.88 for VFR; what a diversion would take)</span>
+                  With the alternate as well <span className="muted">(not required for VFR; what a diversion would take)</span>
                 </td>
                 <td>{gal(plan.withAlternateGal)}</td>
               </tr>

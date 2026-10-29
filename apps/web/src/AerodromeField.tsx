@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react';
+import type { AerodromeSearch } from './search.js';
 
 export interface Airport {
   icaoId: string | null;
@@ -40,7 +41,7 @@ export function AerodromeField({
   lookup = lookupViaApi,
   optional = false,
   hint,
-  listId,
+  suggest,
 }: {
   label: string;
   value: string;
@@ -49,12 +50,13 @@ export function AerodromeField({
   lookup?: AirportLookup;
   optional?: boolean;
   hint?: string;
-  /** A datalist of identifiers there is data for, when that set is small and known. */
-  listId?: string | undefined;
+  /** The fields there is data for that match what has been typed, when the page knows them. */
+  suggest?: AerodromeSearch | undefined;
 }) {
   const id = useId();
   const [state, setState] = useState<Lookup>({ state: 'empty' });
   const code = value.trim().toUpperCase();
+  const options = suggest && code !== '' ? suggest(code, 10) : [];
 
   useEffect(() => {
     if (code === '') {
@@ -120,7 +122,7 @@ export function AerodromeField({
         spellCheck={false}
         maxLength={4}
         placeholder="CYSN"
-        list={listId}
+        list={suggest ? `${id}-suggest` : undefined}
         aria-invalid={state.state === 'missing'}
         aria-describedby={`${id}-note`}
         onChange={(e) => onChange(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
@@ -128,6 +130,15 @@ export function AerodromeField({
       <span id={`${id}-note`} className="field-note-line">
         {describe()}
       </span>
+      {suggest && (
+        <datalist id={`${id}-suggest`}>
+          {options.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.name}
+            </option>
+          ))}
+        </datalist>
+      )}
     </label>
   );
 }

@@ -11,10 +11,10 @@ import { hhmmZ, local } from './time.js';
  * about a place, and they usually do not have a flight plan yet. So this
  * needs none — it takes an identifier and an instant and reports.
  *
- * The dominant case is a field that does not report at all. Of the 1,667
- * aerodromes this page carries, a few hundred have an observation of their
- * own; the rest borrow one, and the page has to be as useful for those as
- * for CYYZ.
+ * The dominant case is a field that does not report at all. Of the
+ * seventeen thousand aerodromes this page carries, a few thousand have an
+ * observation of their own; the rest borrow one, and the page has to be as
+ * useful for those as for CYYZ.
  */
 
 function Missing({ id, kind, aerodromes }: { id: string; kind: 'malformed' | 'unknown'; aerodromes: readonly { id: string; name: string }[] }) {
@@ -27,8 +27,8 @@ function Missing({ id, kind, aerodromes }: { id: string; kind: 'malformed' | 'un
         <>
           <p className="error">{id} is not among the {aerodromes.length.toLocaleString('en')} aerodromes this page carries.</p>
           <p className="explain">
-            The published build carries Canada, plus the fields across the border that report — because a field with no observation of its own borrows from
-            the nearest that has one. A live instance with the airport data loaded knows every field in Canada and the United States.
+            This page carries every aeroplane field in Canada and the United States, from the OurAirports data. Heliports and seaplane bases are left out, and
+            so is everywhere else for now: Mexico and the Caribbean have NOTAMs and rules of their own that this page does not read yet.
           </p>
         </>
       )}
