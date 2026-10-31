@@ -31,10 +31,10 @@ export function weatherPhrase(weather: WeatherSource): string {
 
 export function WeatherNote({ weather }: { weather: WeatherSource }) {
   if (weather.mode === 'live') {
+    // One line: where it comes from and how old it is. The rest is on the page that explains how this works.
     return (
       <div className="frozen live" role="note">
-        <b>Live weather.</b> Every METAR and TAF in Canada and the United States, taken from the weather services at {weatherAge(weather.at)}, and NOTAMs
-        fetched for the Canadian aerodromes you brief. The briefing below is built in your browser, by the same code the server runs.
+        <b>Live weather</b> from {weatherAge(weather.at)}.
         {weather.missing.length > 0 && <> Not available just now: {weather.missing.join(' and ')}; the briefing says where that matters.</>}
       </div>
     );

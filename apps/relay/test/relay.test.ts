@@ -8,7 +8,7 @@ import { gunzipSync, gzipSync } from 'node:zlib';
 import { AwcCacheClient, AwcClient, CANADIAN_UPPERWIND_SITES, NavCanadaClient, type HttpClient } from '@depbrief/core/judge';
 import { describe, expect, it } from 'vitest';
 import { MemoryKv } from '../src/memoryKv.js';
-import { CFPS, NOTAM_FETCHES_PER_MINUTE, PRODUCTS, Relay, UPPERWIND_SITES, type RelayResponse } from '../src/relay.js';
+import { AWC_API, CFPS, NOTAM_FETCHES_PER_MINUTE, PRODUCTS, Relay, UPPERWIND_SITES, type RelayResponse } from '../src/relay.js';
 
 const FIXTURES = join(__dirname, '..', '..', '..', 'packages', 'core', 'test', 'fixtures', 'fetch');
 const metarCsv = readFileSync(join(FIXTURES, 'awc-cache-2026-10-20', 'metars.cache.csv'), 'utf8');
@@ -186,7 +186,7 @@ describe('serving the page', () => {
 
   it('carries only what it carries', async () => {
     const r = relayWith();
-    expect((await r.get('/awc/metar?ids=CYSN&format=json')).status).toBe(404);
+    expect((await r.get('/awc/taf?ids=CYSN&format=json')).status).toBe(404);
     expect((await r.relay.handle({ method: 'POST', url: 'https://relay.example/awc/isigmet', origin: PAGE })).status).toBe(405);
     const pre = await r.relay.handle({ method: 'OPTIONS', url: 'https://relay.example/awc/isigmet', origin: PAGE });
     expect(pre.status).toBe(204);
@@ -242,6 +242,63 @@ describe('NOTAMs, which cannot be had for the whole country', () => {
   it('passes a NAV CANADA failure on as a failure, not as an aerodrome with no NOTAMs', async () => {
     const r = relayWith(upstream({ [`${CFPS}?site=CYSN&alpha=notam`]: () => new Response('nope', { status: 500 }) }));
     expect((await r.get('/cfps/?site=CYSN&alpha=notam')).status).toBe(502);
+  });
+});
+
+describe("one station's METAR, for a page that shows a single line", () => {
+  const CYTZ = `${AWC_API}/metar?ids=CYTZ&format=json`;
+  const cytz = '[{"icaoId":"CYTZ","rawOb":"METAR CYTZ 292000Z 24010KT 15SM FEW040 17/13 A2993","fltCat":"VFR"}]';
+
+  it('asks the AWC once per station per five minutes, and passes its answer on as it came', async () => {
+    const r = relayWith(upstream({ [CYTZ]: () => new Response(cytz) }));
+    const first = await r.get('/awc/metar?ids=CYTZ&format=json');
+    expect(first.status).toBe(200);
+    expect(text(first)).toBe(cytz);
+    expect(first.headers['Access-Control-Allow-Origin']).toBe(PAGE);
+    expect(first.headers['X-Fetched-At']).toBe('2026-10-20T05:00:00.000Z');
+    await r.get('/awc/metar?ids=cytz&format=json');
+    r.advance(4 * MIN);
+    await r.get('/awc/metar?ids=CYTZ&format=json');
+    expect(r.up.calls).toEqual([CYTZ]);
+    r.advance(2 * MIN);
+    await r.get('/awc/metar?ids=CYTZ&format=json');
+    expect(r.up.calls).toEqual([CYTZ, CYTZ]);
+  });
+
+  it('refuses anything but one four-letter station, without asking anybody', async () => {
+    const r = relayWith();
+    expect((await r.get('/awc/metar?ids=CYTZ,CYYZ&format=json')).status).toBe(400);
+    expect((await r.get('/awc/metar?ids=CYTZ&ids=CYYZ&format=json')).status).toBe(400);
+    expect((await r.get('/awc/metar?format=json')).status).toBe(400);
+    expect(r.up.calls).toEqual([]);
+  });
+
+  it('says a station with nothing to report is not found, and does not ask again for five minutes', async () => {
+    const r = relayWith(upstream({ [`${AWC_API}/metar?ids=CZZZ&format=json`]: () => new Response(null, { status: 204 }) }));
+    expect((await r.get('/awc/metar?ids=CZZZ&format=json')).status).toBe(404);
+    expect((await r.get('/awc/metar?ids=CZZZ&format=json')).status).toBe(404);
+    expect(r.up.calls).toHaveLength(1);
+  });
+
+  it('passes a failure on as a failure, and never keeps an error page as a report', async () => {
+    const down = relayWith(upstream({ [CYTZ]: () => new Response('busy', { status: 503 }) }));
+    expect((await down.get('/awc/metar?ids=CYTZ&format=json')).status).toBe(502);
+    const maintenance = relayWith(upstream({ [CYTZ]: () => new Response('<html>down for maintenance</html>') }));
+    expect((await maintenance.get('/awc/metar?ids=CYTZ&format=json')).status).toBe(502);
+    // Nothing was kept, so the next visitor asks again.
+    await maintenance.get('/awc/metar?ids=CYTZ&format=json');
+    expect(maintenance.up.calls).toEqual([CYTZ, CYTZ]);
+  });
+
+  it('draws on the same per-minute budget as NOTAMs', async () => {
+    const answers: Record<string, Answer> = { [CYTZ]: () => new Response(cytz) };
+    const ids = Array.from({ length: NOTAM_FETCHES_PER_MINUTE }, (_, i) => `CA${String.fromCharCode(65 + Math.floor(i / 26))}${String.fromCharCode(65 + (i % 26))}`);
+    for (const id of ids) answers[`${CFPS}?site=${id}&alpha=notam`] = () => new Response('{"data":[]}');
+    const r = relayWith(upstream(answers));
+    for (const id of ids) await r.get(`/cfps/?site=${id}&alpha=notam`);
+    expect((await r.get('/awc/metar?ids=CYTZ&format=json')).status).toBe(429);
+    r.advance(MIN);
+    expect((await r.get('/awc/metar?ids=CYTZ&format=json')).status).toBe(200);
   });
 });
 

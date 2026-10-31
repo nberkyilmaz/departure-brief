@@ -309,11 +309,6 @@ footer p { margin: 0; max-width: 46rem; }
 .verdict.go { background: var(--ok); }
 .verdict.marginal { background: var(--marginal); }
 .verdict.no-go { background: var(--nogo); }
-.point { border: 1px solid var(--line); border-left-width: 5px; border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); margin: var(--s3) 0; padding: var(--s2) var(--s4) var(--s3); }
-.point.go { border-left-color: var(--ok); }
-.point.marginal { border-left-color: var(--marginal); }
-.point.no-go { border-left-color: var(--nogo); }
-.point h3 { font-size: 1rem; margin: 0.4rem 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .at { color: var(--muted); font-weight: normal; }
 .time small { color: var(--muted); font-weight: normal; }
 .night { background: #333; color: #fff; font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 3px; }
@@ -466,7 +461,7 @@ summary:focus-visible,
   .change { grid-template-columns: 5rem 1fr; }
   .change .basis { grid-column: 2; font-size: 0.75rem; }
   .change .summary { grid-column: 1 / -1; }
-  .notam-group summary, .point h3 { flex-wrap: wrap; }
+  .notam-group summary { flex-wrap: wrap; }
   .nav { flex-direction: column; align-items: stretch; gap: var(--s2); }
   .nav ul { justify-content: space-between; }
   .nav a { padding: var(--s2); font-size: 0.9rem; }
@@ -516,7 +511,7 @@ summary:focus-visible,
  */
 @media print {
   :root { --bg: #fff; --surface: #fff; --surface-sunk: #f4f4f0; --fg: #000; --muted: #444; --line: #bbb; }
-  .nav, .skip, .about, button.quiet, .flight-bar .actions, .masthead::after { display: none !important; }
+  .nav, .skip, .about, button.quiet, .flight-bar .actions, .plan-card, .masthead::after { display: none !important; }
   .masthead { background: none; color: #000; }
   .sign { display: none; }
   .masthead-inner { padding: 0 0 var(--s3); }
@@ -525,73 +520,9 @@ summary:focus-visible,
   details { display: block; }
   details > summary { display: none; }
   .finding .detail, .met > *, details > * { display: block !important; }
-  .point, .notam-group, .diff, fieldset { break-inside: avoid; box-shadow: none; }
+  .field-card, .notam-group, .diff, fieldset { break-inside: avoid; box-shadow: none; }
   main { max-width: none; padding: 0; }
   a[href^='#'] { text-decoration: none; color: inherit; }
-}
-
-/*
- * The route as a strip. The findings say why; this says where — which a
- * list of findings is worst at, because "marginal, marginal, go" does not
- * tell you whether the trouble is at this end or the far one.
- */
-.strip {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: 0;
-  list-style: none;
-  margin: var(--s4) 0;
-  padding: 0;
-}
-.strip-point { display: flex; align-items: center; }
-.strip-leg {
-  color: var(--muted);
-  font-size: 0.78rem;
-  padding: 0 var(--s2);
-  white-space: nowrap;
-  position: relative;
-}
-/* The line between two points, with the distance sitting on it. */
-.strip-leg::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  border-top: 1px dashed var(--line-strong);
-  z-index: -1;
-}
-.strip-body {
-  display: grid;
-  gap: 0.1rem;
-  justify-items: center;
-  text-decoration: none;
-  color: inherit;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-top: 3px solid var(--line-strong);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: var(--s2) var(--s3);
-  min-width: 6.5rem;
-}
-.strip-body:hover { border-color: var(--muted); }
-.strip-point.go .strip-body { border-top-color: var(--ok); }
-.strip-point.marginal .strip-body { border-top-color: var(--marginal); }
-.strip-point.no-go .strip-body { border-top-color: var(--nogo); }
-.strip-id { font-weight: 600; font-size: 1.05rem; letter-spacing: 0.02em; }
-.strip-label { color: var(--muted); font-weight: 400; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; }
-.strip-time { color: var(--muted); font-size: 0.8rem; display: flex; align-items: center; gap: var(--s1); }
-.strip-body .verdict { font-size: 0.68rem; padding: 0.1rem 0.4rem; }
-
-@media (max-width: 40rem) {
-  /* One per row on a phone, with the distance between them as a rung. */
-  .strip { flex-direction: column; align-items: stretch; }
-  .strip-point { flex-direction: column; align-items: stretch; }
-  .strip-leg { padding: var(--s1) 0 var(--s1) var(--s4); }
-  .strip-leg::before { left: 0.9rem; right: auto; top: 0; bottom: 0; border-top: 0; border-left: 1px dashed var(--line-strong); }
-  .strip-body { grid-template-columns: 1fr auto auto; justify-items: start; align-items: center; gap: var(--s3); }
 }
 
 /* The nav log, laid out the way a pilot lays one out. */
@@ -628,18 +559,6 @@ summary:focus-visible,
 .category.forecast.lifr { color: var(--lifr); }
 
 .briefing-title { font-size: 1.15rem; }
-
-/* A point's stripe is its category. */
-.point.vfr { border-left-color: var(--vfr); }
-.point.mvfr { border-left-color: var(--mvfr); }
-.point.ifr { border-left-color: var(--ifr); }
-.point.lifr { border-left-color: var(--lifr); }
-.point.unknown { border-left-color: var(--unknown); }
-.strip-point.vfr .strip-body { border-top-color: var(--vfr); }
-.strip-point.mvfr .strip-body { border-top-color: var(--mvfr); }
-.strip-point.ifr .strip-body { border-top-color: var(--ifr); }
-.strip-point.lifr .strip-body { border-top-color: var(--lifr); }
-.strip-point.unknown .strip-body { border-top-color: var(--unknown); }
 
 /*
  * Attention: how much a line wants reading. Deliberately quieter than the
@@ -840,22 +759,6 @@ summary:focus-visible,
 }
 .flight-bar .flight-line { margin: 0; }
 .limits-line { margin: var(--s1) 0 var(--s2); font-size: 0.85rem; color: var(--muted); }
-.edit-flight > summary {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s1);
-  cursor: pointer;
-  list-style: none;
-  color: var(--advisory);
-  font-size: 0.9rem;
-  font-weight: 500;
-  padding: var(--s1) 0;
-}
-.edit-flight > summary::-webkit-details-marker { display: none; }
-.edit-flight > summary::before { content: '▸'; font-size: 0.8em; transition: transform 0.15s; }
-.edit-flight[open] > summary::before { transform: rotate(90deg); }
-.edit-flight[open] > summary { margin-bottom: var(--s2); }
-.edit-flight fieldset { box-shadow: none; background: var(--surface-sunk); margin-bottom: var(--s2); }
 .flight-bar .actions { min-height: 0; }
 .flight-bar .actions .field-note { margin: 0; font-size: 0.8rem; }
 
@@ -910,7 +813,7 @@ summary:focus-visible,
 }
 
 @media print {
-  .edit-flight, .limits-line a, .wx-card { display: none !important; }
+  .limits-line a, .wx-card { display: none !important; }
 }
 @media (prefers-color-scheme: dark) {
   /* One tile style exists; at night it is turned inside out rather than left glaring. */
@@ -929,4 +832,154 @@ summary:focus-visible,
   .banner-short { display: inline; }
   .nav ul { justify-content: flex-start; }
   .start .lede { font-size: 1rem; }
+}
+
+/* --- Where are you flying? ------------------------------------------------
+   Three fields, as big as the page's main search, and everything else
+   behind one disclosure. */
+.plan-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: var(--s4) var(--s5) var(--s5);
+  margin: 0 0 var(--s4);
+}
+.plan-card h2 { margin: 0 0 var(--s3); font-size: 1.35rem; }
+.plan-route { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: start; gap: var(--s3); }
+.plan-form input { box-sizing: border-box; width: 100%; min-width: 0; height: 3rem; font-size: 1.05rem; }
+.plan-form .aerodrome > label,
+.plan-when { font-size: 0.9rem; font-weight: 600; color: var(--fg); }
+.plan-when { margin-top: var(--s3); max-width: 22rem; }
+.plan-when input { font-weight: 400; }
+/* Level with the inputs, not with their labels. */
+.swap {
+  margin-top: 1.65rem;
+  height: 3rem;
+  width: 2.75rem;
+  padding: 0;
+  font-family: var(--sans);
+  font-size: 1.2rem;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line-strong);
+}
+.swap:hover:not(:disabled) { color: var(--fg); border-color: var(--fg); filter: none; }
+.plan-more { margin-top: var(--s4); border-top: 1px solid var(--line); padding-top: var(--s3); }
+.plan-more > summary { cursor: pointer; color: var(--advisory); font-weight: 500; }
+.plan-more[open] > summary { margin-bottom: var(--s3); }
+.plan-more .grid input { height: auto; font-size: 1rem; }
+.plan-card .actions { margin-top: var(--s4); }
+.plan-card .actions .field-note { margin: 0; font-size: 0.85rem; }
+
+/* An aerodrome field: the label, the box with its list of matches, and what was found. */
+.aerodrome { display: flex; flex-direction: column; gap: var(--s1); min-width: 0; font-size: 0.82rem; color: var(--muted); }
+.combo { position: relative; }
+.combo input { box-sizing: border-box; width: 100%; }
+.combo-list {
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  right: 0;
+  top: calc(100% + 2px);
+  margin: 0;
+  padding: var(--s1) 0;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lift);
+  max-height: 18rem;
+  overflow-y: auto;
+}
+.combo-list li { padding: 0.55rem var(--s3); cursor: pointer; font-size: 0.95rem; color: var(--fg); overflow-wrap: anywhere; }
+.combo-list li.active { background: var(--surface-sunk); }
+.combo-list b { font-family: var(--mono); font-size: 0.9rem; }
+.combo-list .muted { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+.combo-name { color: var(--muted); }
+
+/* The flight, once asked: one line, and the way back to the form. */
+.flight-bar-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s3); }
+.flight-line { gap: 0 var(--s3); }
+.flight-route { font-family: var(--display); font-size: 1.35rem; letter-spacing: 0.02em; }
+.change-flight { flex: none; }
+
+/* --- The briefing: a card per field ---------------------------------------
+   The stripe is the flight category at your time. A line that crosses a
+   limit you set is the one place inside a card that takes a colour. */
+.briefing-lede { margin: 0 0 var(--s3); }
+.field-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: var(--s3); margin: 0 0 var(--s4); }
+.field-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--unknown);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: var(--s3) var(--s4);
+}
+.field-card.vfr { border-top-color: var(--vfr); }
+.field-card.mvfr { border-top-color: var(--mvfr); }
+.field-card.ifr { border-top-color: var(--ifr); }
+.field-card.lifr { border-top-color: var(--lifr); }
+.field-card-top { display: flex; justify-content: space-between; align-items: center; gap: var(--s2); }
+.field-role { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.field-role .muted { font-weight: 400; text-transform: none; letter-spacing: normal; }
+.field-id { margin: var(--s1) 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s2); font-size: 1.4rem; font-family: var(--display); }
+.field-id a { color: inherit; text-decoration: none; }
+.field-id a:hover { text-decoration: underline; }
+.field-name { font-family: var(--sans); font-size: 0.9rem; font-weight: 400; color: var(--muted); }
+.field-time { margin: 0 0 var(--s2); font-size: 0.9rem; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
+.field-time b { color: var(--fg); font-weight: 600; }
+.field-lines { margin: 0; display: grid; gap: 0; }
+.field-lines > div { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: var(--s2); padding: 0.3rem 0; border-top: 1px solid var(--line); }
+.field-lines dt { color: var(--muted); font-size: 0.85rem; }
+.field-lines dd { margin: 0; overflow-wrap: anywhere; }
+.field-lines .over dd { color: var(--nogo); font-weight: 600; }
+.field-source, .field-missing { margin: var(--s2) 0 0; font-size: 0.8rem; color: var(--muted); }
+.field-missing { color: var(--marginal); font-size: 0.9rem; }
+.field-card .met { margin-top: var(--s2); }
+.field-card .finding .row { grid-template-columns: 5rem minmax(0, 1fr); }
+.field-card .finding .summary { grid-column: 1 / -1; }
+.field-card .detail { padding-left: 0; }
+
+/* Worth a look: one line per field and topic, opening to the findings behind it. */
+.concerns { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+.concern + .concern { border-top: 1px solid var(--line); }
+.concern.alert { border-left: 4px solid var(--nogo); }
+.concern.caution { border-left: 4px solid var(--marginal); }
+.concern .row {
+  display: grid;
+  grid-template-columns: 5.5rem 9rem minmax(0, 1fr);
+  gap: var(--s3);
+  align-items: baseline;
+  width: 100%;
+  padding: var(--s2) var(--s3);
+  text-align: left;
+  font: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+.concern .row:hover { background: var(--surface-sunk); filter: none; }
+.concern-where { font-weight: 600; font-size: 0.9rem; }
+.concern-text { overflow-wrap: anywhere; }
+.concern-when { display: block; color: var(--muted); font-size: 0.8rem; }
+.concern-detail { padding: 0 var(--s3) var(--s2); }
+
+/* Nothing on a phone may be wider than the phone. */
+@media (max-width: 40rem) {
+  .plan-card { padding: var(--s3) var(--s4) var(--s4); }
+  .plan-route { grid-template-columns: minmax(0, 1fr); gap: var(--s1); }
+  .swap { margin: 0; height: 2.25rem; min-height: 0; justify-self: end; transform: rotate(90deg); }
+  .plan-when { max-width: none; }
+  .flight-bar-top { flex-direction: column; }
+  .field-cards { grid-template-columns: minmax(0, 1fr); }
+  .concern .row { grid-template-columns: auto minmax(0, 1fr); gap: var(--s1) var(--s2); }
+  .concern-text { grid-column: 1 / -1; }
+  .briefing h2 { gap: 0 var(--s2); }
+  .briefing h2 .meta { flex-basis: 100%; }
 }
