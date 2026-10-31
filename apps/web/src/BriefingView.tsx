@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { NotamPanel } from './NotamPanel.js';
-import { RouteStrip } from './RouteStrip.js';
-import { hhmmZ, local, zulu } from './time.js';
-import type { Attention, Citation, FlightCategory, Finding, PointReview, StoredBriefing } from './types.js';
+import { aerodromeHref } from './router.js';
+import { concernsOf, fieldCards, TOPIC_LABEL, type Concern, type FieldCard } from './summary.js';
+import { hhmmZ, local, localClock, zulu } from './time.js';
+import type { Citation, Finding, StoredBriefing } from './types.js';
 
 /** The time as a pilot says it; the date rides in the local time beside it, and the full stamp is a hover away. */
 function Zulu({ iso }: { iso: string }) {
@@ -47,7 +48,7 @@ function AgeBadge({ f }: { f: Finding }) {
   return <span className={`age ${band}`}>{band}</span>;
 }
 
-function FindingRow({ f, waypoint = null }: { f: Finding; waypoint?: string | null }) {
+function FindingRow({ f }: { f: Finding }) {
   const [open, setOpen] = useState(false);
   const sources = f.citations.filter((c) => c.raw);
   const others = f.citations.filter((c) => !c.raw && c.text);
@@ -55,9 +56,7 @@ function FindingRow({ f, waypoint = null }: { f: Finding; waypoint?: string | nu
     <li className={`finding ${f.attention}`}>
       <button className="row" onClick={() => setOpen(!open)} aria-expanded={open}>
         {f.rule === 'observation.age' ? <AgeBadge f={f} /> : <span className={`badge ${f.attention}`}>{f.attention}</span>}
-        <span className="basis">
-          {waypoint ? <b>{waypoint}</b> : null} {f.basis}
-        </span>
+        <span className="basis">{f.basis}</span>
         <span className="summary">{f.summary}</span>
       </button>
       {open && (
@@ -75,44 +74,6 @@ function FindingRow({ f, waypoint = null }: { f: Finding; waypoint?: string | nu
         </div>
       )}
     </li>
-  );
-}
-
-const WEIGHT: Record<string, number> = { 'alert': 0, marginal: 1, advisory: 2, ok: 3 };
-
-/** A waypoint, and what to call it when it is the alternate rather than a leg. */
-interface LabelledPoint {
-  readonly point: PointReview;
-  readonly label: string | null;
-}
-
-/**
- * The reasons the verdict is what it is, and nothing else.
- *
- * A briefing produces dozens of lines and most of them say a limit was met.
- * Leading with all of them buries the two worth reading. This shows what
- * asked for attention, most first, with the detail one tap away — the rest
- * is still below, in full.
- *
- * It does not say what to do. It says what to look at.
- */
-function Why({ points }: { points: readonly LabelledPoint[] }) {
-  const driving = points
-    .flatMap(({ point, label }) => point.findings.filter((f) => f.attention === 'alert' || f.attention === 'caution').map((f) => ({ f, where: `${label ? `${label} ` : ''}${point.waypoint}` })))
-    .sort((a, b) => WEIGHT[a.f.attention]! - WEIGHT[b.f.attention]!);
-
-  if (driving.length === 0) {
-    return <p className="why-none">Nothing crossed your limits. Every check below is shown in full, each with the report it was read from.</p>;
-  }
-  return (
-    <div className="why">
-      <h3>Worth a look</h3>
-      <ul className="findings">
-        {driving.map(({ f, where }, i) => (
-          <FindingRow key={i} f={f} waypoint={where} />
-        ))}
-      </ul>
-    </div>
   );
 }
 
@@ -135,7 +96,13 @@ function Gaps({ stored }: { stored: StoredBriefing }) {
     notams === null ? 'NOTAMs were not part of this briefing' : null,
   ].filter((x): x is string => x !== null);
 
-  const items = [...missing, ...fetchErrors, ...notamNotes];
+  // A leg with no wind has no time, and the card's wind at cruise is blank; said once here, with the leg.
+  const navlog = stored.document.navlog;
+  const noWind = [...navlog.legs, ...(navlog.alternate ? [navlog.alternate] : [])].flatMap((leg) =>
+    leg.gaps.filter((g) => g.startsWith('no upper wind forecast')).map((g) => `${leg.from} → ${leg.to}: ${g}`),
+  );
+
+  const items = [...missing, ...noWind, ...fetchErrors, ...notamNotes];
   if (items.length === 0) return null;
   return (
     <div className="gaps" role="note">
@@ -167,79 +134,147 @@ export function FindingList({ findings }: { findings: readonly Finding[] }) {
   );
 }
 
-function Point({ p, label }: { p: PointReview; label: string | null }) {
-  const driving = p.findings.filter((f) => f.attention === 'alert' || f.attention === 'caution');
-  const rest = p.findings.filter((f) => f.attention !== 'alert' && f.attention !== 'caution');
+
+/**
+ * One field at the time you are there, in the numbers a pilot asks for
+ * first. The checks behind them are under the card, each with its report.
+ */
+function FieldCardView({ c, name }: { c: FieldCard; name: string | null }) {
+  const p = c.point;
+  const category = (c.category ?? 'unknown').toLowerCase();
   return (
-    <section className={`point ${(p.category ?? 'unknown').toLowerCase()}`}>
-      <h3>
-        {p.category && <span className={`category ${p.category.toLowerCase()}`}>{p.category}</span>}
-        {p.forecastCategory && p.forecastCategory !== p.category && (
-          <span className={`category forecast ${p.forecastCategory.toLowerCase()}`} title="the prevailing forecast at your ETA">
-            {p.forecastCategory} forecast
-          </span>
-        )}
-        {label ? `${label} ` : ''}
-        {p.waypoint} <span className="at">at</span> <Zulu iso={p.at} /> {p.night && <span className="night">night</span>}
+    <article className={`field-card ${category}`} aria-label={`${c.role} ${p.waypoint}`}>
+      <div className="field-card-top">
+        <span className="field-role">
+          {c.role}
+          {c.leg && (
+            <span className="muted">
+              {' · '}
+              {Math.round(c.leg.distanceNm)} nm{c.leg.minutes !== null ? `, ${Math.round(c.leg.minutes)} min` : ''}
+            </span>
+          )}
+        </span>
+        <span className={`category ${category}`} title="Flight category at your time">
+          {c.category ?? '—'}
+        </span>
+      </div>
+      <h3 className="field-id">
+        <a href={aerodromeHref(p.waypoint)} title={`Everything about ${p.waypoint}`}>
+          {p.waypoint}
+        </a>
+        {name && <span className="field-name">{name}</span>}
       </h3>
-      {driving.length > 0 && (
-        <ul className="findings">
-          {driving.map((f, i) => (
-            <FindingRow key={i} f={f} />
+      <p className="field-time">
+        <b>{localClock(p.at)}</b> · {hhmmZ(p.at)}
+        {p.night && <span className="night">night</span>}
+      </p>
+      {c.missing ? (
+        <p className="field-missing">{c.missing}</p>
+      ) : (
+        <dl className="field-lines">
+          {c.lines.map((l) => (
+            <div key={l.label} className={l.over ? 'over' : undefined}>
+              <dt>{l.label}</dt>
+              <dd>{l.text}</dd>
+            </div>
           ))}
-        </ul>
+        </dl>
       )}
-      {rest.length > 0 && (
-        <details className="met">
-          <summary>
-            {rest.length} check{rest.length === 1 ? '' : 's'} that met your limits
-          </summary>
-          <ul className="findings">
-            {rest.map((f, i) => (
-              <FindingRow key={i} f={f} />
-            ))}
-          </ul>
-        </details>
-      )}
-    </section>
+      {c.source && <p className="field-source">{c.source}</p>}
+      {c.now && <p className="field-source">{c.now}</p>}
+      <details className="met">
+        <summary>Every check here, with its report ({p.findings.length})</summary>
+        <FindingList findings={p.findings} />
+      </details>
+    </article>
   );
 }
 
-export function BriefingView({ stored }: { stored: StoredBriefing }) {
+function ConcernRow({ c }: { c: Concern }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <li className={`concern ${c.attention}`}>
+      <button className="row" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <span className={`badge ${c.attention}`}>{c.attention}</span>
+        <span className="concern-where">
+          {c.role === 'Alternate' ? 'Alternate ' : ''}
+          {c.waypoint} · {TOPIC_LABEL[c.topic]}
+        </span>
+        <span className="concern-text">
+          {c.headline}
+          {c.when.length > 0 && <span className="concern-when">{c.when.join(' · ')}</span>}
+        </span>
+      </button>
+      {open && (
+        <div className="concern-detail">
+          <FindingList findings={c.findings} />
+        </div>
+      )}
+    </li>
+  );
+}
+
+/**
+ * What crossed a limit, one line per field and topic, worst first. It does
+ * not say what to do; it says what to look at, and each line opens to the
+ * findings and reports behind it.
+ */
+function WorthALook({ concerns }: { concerns: readonly Concern[] }) {
+  if (concerns.length === 0) {
+    return <p className="why-none">Nothing crossed your limits at any field. Each card below has every check, with the report it came from.</p>;
+  }
+  return (
+    <div className="why">
+      <h3>Worth a look</h3>
+      <ul className="concerns">
+        {concerns.map((c) => (
+          <ConcernRow key={c.key} c={c} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export function BriefingView({ stored, nameOf }: { stored: StoredBriefing; nameOf?: (id: string) => string | null }) {
   const b = stored.document.briefing;
-  const points: LabelledPoint[] = [
-    ...b.points.map((point) => ({ point, label: null })),
-    ...(b.alternate ? [{ point: b.alternate, label: 'alternate' }] : []),
-  ];
+  const cards = fieldCards(stored);
   return (
     <section className="briefing" id="verdict">
       <h2>
         <span className="briefing-title">Your briefing</span>
         <span className="meta">
-          as of <Zulu iso={b.asOf} /> · profile {b.profile.name} v{b.profile.version}
-          {b.aircraft ? ` · ${b.aircraft}` : ''} · rules v{b.rulesVersion} · briefing <code title="content hash">{stored.sha256.slice(0, 12)}</code>
+          weather as of <Zulu iso={b.asOf} />
         </span>
       </h2>
+      <p className="explain briefing-lede">It compares the forecasts and reports with your minimums. It does not decide whether you go; that stays with you.</p>
 
-      <RouteStrip stored={stored} />
+      {/* Adverse conditions first, as a standard briefing gives them; then each field; then what it could not see. */}
+      <WorthALook concerns={concernsOf(stored)} />
 
-      <Why points={points} />
+      <div className="field-cards">
+        {cards.map((c) => (
+          <FieldCardView key={`${c.role}-${c.point.waypoint}-${c.point.at}`} c={c} name={nameOf?.(c.point.waypoint) ?? null} />
+        ))}
+      </div>
+
       <Gaps stored={stored} />
-
-      <p className="explain">
-        <b>This does not decide whether to fly.</b> It reports what the products say and compares them against the limits you set. A limit crossed in the
-        prevailing forecast or a current observation reads as an <b>alert</b>; the same crossed inside a TEMPO, PROB or an in-progress BECMG reads as a{' '}
-        <b>caution</b>, because the product is less certain. VFR, MVFR, IFR and LIFR are the standard classification of ceiling and visibility — a fact about
-        the sky, not a judgement about your flight. Every line opens to the report text it was read from. Nothing is hidden: collapsing changes what you see
-        first, never what exists.
-      </p>
-
-      {points.map(({ point, label }) => (
-        <Point key={point.waypoint + point.at} p={point} label={label} />
-      ))}
       {stored.document.notams && <NotamPanel doc={stored.document.notams} />}
+
+      <details className="inputs-used">
+        <summary>How to read this briefing</summary>
+        <p>
+          A limit crossed in the prevailing forecast or a current observation reads as an <b>alert</b>; the same crossed inside a TEMPO, PROB or an
+          in-progress BECMG reads as a <b>caution</b>, because the product is less certain. VFR, MVFR, IFR and LIFR are the standard classification of ceiling
+          and visibility, a fact about the sky and not a judgement about your flight. Winds and runway headings are true. Every line opens to the report text
+          it was read from, and nothing is hidden: collapsing changes what you see first, never what exists.
+        </p>
+      </details>
       <details className="inputs-used">
         <summary>Reports this briefing was made from ({stored.document.inputs.reports.length})</summary>
+        <p>
+          Judged against your minimums ({b.profile.name} v{b.profile.version}){b.aircraft ? ` and the ${b.aircraft}` : ''}, rules version {b.rulesVersion}.
+          Briefing <code title="content hash">{stored.sha256.slice(0, 12)}</code>.
+        </p>
         <ul>
           {stored.document.inputs.reports.map((r) => (
             <li key={r.sha256}>

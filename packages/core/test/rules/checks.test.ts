@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { decodeTaf } from '../../src/decode/taf/index.js';
 import { readOurAirportsDirectory } from '../../src/fetch/ourairports.js';
 import { parseAircraftLimits, parsePilotProfile } from '../../src/domain/profile.js';
-import { checkCeiling, checkCrosswind, checkNight, checkRegulatory, checkVisibility, type CheckContext } from '../../src/rules/checks.js';
+import { checkCeiling, checkCrosswind, checkNight, checkRegulatory, checkVisibility, checkWeather, checkWind, type CheckContext } from '../../src/rules/checks.js';
 import { FIXTURES } from '../helpers/http.js';
 
 const cysn = readOurAirportsDirectory(join(FIXTURES, 'ourairports', '2026-09-07'), { snapshot: '2026-09-07' }).find((a) => a.icaoId === 'CYSN')!;
@@ -86,6 +86,32 @@ describe('checkVisibility', () => {
     const { c, ctx: x } = cond('24010KT SKC');
     expect(checkVisibility(x, c)[0]!.attention).toBe('note');
   });
+  it('carries the visibility as reported, so "more than six" is not shown as six', () => {
+    const { c, ctx: x } = cond('24010KT P6SM SKC');
+    expect(checkVisibility(x, c)[0]!.values).toMatchObject({ visibilitySm: 6, text: '>6 SM' });
+  });
+});
+
+describe('checkWeather', () => {
+  it.each([
+    ['TSRA', 'TSRA — a thunderstorm with rain'],
+    ['VCSH', 'VCSH — in the vicinity: showers'],
+    ['VCTS', 'VCTS — in the vicinity: a thunderstorm'],
+    ['-SHRA', '-SHRA — showers of light rain'],
+    ['BCFG', 'BCFG — patches of fog'],
+  ])('reads %s in words, with no word left hanging', (group, summary) => {
+    const { c, ctx: x } = cond(`24010KT P6SM ${group} SCT040`);
+    expect(checkWeather(x, c)[0]!.summary).toBe(summary);
+  });
+});
+
+describe('checkWind', () => {
+  it('carries where the wind is from, so it can be shown without decoding the group again', () => {
+    const { c, ctx: x } = cond('24015G25KT P6SM SKC');
+    expect(checkWind(x, c)[0]!.values).toMatchObject({ directionTrue: 240, variable: false, speedKt: 15, gustKt: 25 });
+    const vrb = cond('VRB03KT P6SM SKC');
+    expect(checkWind(vrb.ctx, vrb.c)[0]!.values).toMatchObject({ directionTrue: null, variable: true, speedKt: 3 });
+  });
 });
 
 describe('checkCrosswind', () => {
@@ -157,6 +183,8 @@ describe('checkRegulatory', () => {
     expect(fs[0]!.summary).toContain('CARs 602.114 (control zone)');
     // BKN008 at CYSN (321 ft): base 1,121 ft MSL is 2,379 ft below a 3,500 ft cruise — the aircraft would be inside it.
     expect(fs[2]!.values['clearance']).toBe(1121 - 3500);
+    // Said as below, never as a negative distance above.
+    expect(fs[2]!.summary).toBe('BKN008 base 1121 ft MSL is 2379 ft below your 3500 ft cruise; CARs 602.114 (control zone) requires 500 ft below cloud');
   });
   it('passes clear conditions', () => {
     const { c, ctx: x } = cond('24010KT P6SM FEW050 BKN100');

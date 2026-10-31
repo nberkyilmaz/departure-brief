@@ -1,5 +1,5 @@
 {
-  "sha256": "1a75809033c5f86245f2331ba4d0ec9177f22ee2051b35323a0e84322484b180",
+  "sha256": "f50e788abe6911a9634b7959c5541b563c189cc1f91bda9a8a7fe93d6a73e903",
   "flightKey": "2c8115094cbf5965b4acc3bb0482ba82f940c10935f36d80648410ed0541d0a8",
   "asOf": "2026-09-19T00:52:00.000Z",
   "createdAt": "2026-09-19T00:52:00.000Z",
@@ -48,7 +48,7 @@
     },
     "asOf": "2026-09-19T00:52:00.000Z",
     "versions": {
-      "rules": 7,
+      "rules": 8,
       "metarDecoder": 2,
       "tafDecoder": 1,
       "notamDecoder": 1,
@@ -1422,7 +1422,7 @@
       ]
     },
     "briefing": {
-      "rulesVersion": 7,
+      "rulesVersion": 8,
       "profile": {
         "name": "default",
         "version": 1
@@ -1481,6 +1481,7 @@
               "at": "2026-09-19T04:00:00.000Z",
               "values": {
                 "visibilitySm": 6,
+                "text": ">6 SM",
                 "minimum": 5
               },
               "citations": [
@@ -1514,6 +1515,8 @@
               "basisKind": "prevailing",
               "at": "2026-09-19T04:00:00.000Z",
               "values": {
+                "directionTrue": null,
+                "variable": true,
                 "speedKt": 4,
                 "gustKt": null,
                 "crosswindLimit": 15,
@@ -1754,7 +1757,7 @@
             {
               "rule": "vfr.cloudClearance",
               "attention": "routine",
-              "summary": "BKN200 base 20321 ft MSL is 16821 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+              "summary": "BKN200 base 20321 ft MSL is 16821 ft above your 3500 ft cruise; CARs 602.114 (control zone) requires 500 ft below cloud",
               "waypoint": "CYSN",
               "basis": "prevailing (TAF KIAG, 11 nm away)",
               "basisKind": "prevailing",
@@ -1873,6 +1876,7 @@
               "at": "2026-09-19T04:00:00.000Z",
               "values": {
                 "visibilitySm": 15,
+                "text": "15 SM",
                 "minimum": 5
               },
               "citations": [
@@ -1906,6 +1910,8 @@
               "basisKind": "observed",
               "at": "2026-09-19T04:00:00.000Z",
               "values": {
+                "directionTrue": 40,
+                "variable": false,
                 "speedKt": 6,
                 "gustKt": null,
                 "crosswindLimit": 15,
@@ -2146,7 +2152,7 @@
             {
               "rule": "vfr.cloudClearance",
               "attention": "routine",
-              "summary": "BKN150 base 15321 ft MSL is 11821 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+              "summary": "BKN150 base 15321 ft MSL is 11821 ft above your 3500 ft cruise; CARs 602.114 (control zone) requires 500 ft below cloud",
               "waypoint": "CYSN",
               "basis": "observed 00:00Z",
               "basisKind": "observed",
@@ -2319,6 +2325,7 @@
               "at": "2026-09-19T04:31:30.378Z",
               "values": {
                 "visibilitySm": 6,
+                "text": ">6 SM",
                 "minimum": 5
               },
               "citations": [
@@ -2352,6 +2359,8 @@
               "basisKind": "prevailing",
               "at": "2026-09-19T04:31:30.378Z",
               "values": {
+                "directionTrue": 60,
+                "variable": false,
                 "speedKt": 5,
                 "gustKt": null,
                 "crosswindLimit": 15,
@@ -2574,7 +2583,7 @@
             {
               "rule": "vfr.cloudClearance",
               "attention": "routine",
-              "summary": "BKN200 base 21054 ft MSL is 17554 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+              "summary": "BKN200 base 21054 ft MSL is 17554 ft above your 3500 ft cruise; CARs 602.114 (control zone) requires 500 ft below cloud",
               "waypoint": "CYKF",
               "basis": "prevailing",
               "basisKind": "prevailing",
@@ -2679,6 +2688,7 @@
               "at": "2026-09-19T04:31:30.378Z",
               "values": {
                 "visibilitySm": 9,
+                "text": "9 SM",
                 "minimum": 5
               },
               "citations": [
@@ -2712,6 +2722,8 @@
               "basisKind": "observed",
               "at": "2026-09-19T04:31:30.378Z",
               "values": {
+                "directionTrue": 20,
+                "variable": false,
                 "speedKt": 8,
                 "gustKt": null,
                 "crosswindLimit": 15,
@@ -2934,7 +2946,7 @@
             {
               "rule": "vfr.cloudClearance",
               "attention": "routine",
-              "summary": "OVC160 base 17054 ft MSL is 13554 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+              "summary": "OVC160 base 17054 ft MSL is 13554 ft above your 3500 ft cruise; CARs 602.114 (control zone) requires 500 ft below cloud",
               "waypoint": "CYKF",
               "basis": "observed 00:00Z",
               "basisKind": "observed",
@@ -3136,6 +3148,7 @@
             "at": "2026-09-19T04:46:29.121Z",
             "values": {
               "visibilitySm": 6,
+              "text": ">6 SM",
               "minimum": 5
             },
             "citations": [
@@ -3169,6 +3182,8 @@
             "basisKind": "prevailing",
             "at": "2026-09-19T04:46:29.121Z",
             "values": {
+              "directionTrue": 30,
+              "variable": false,
               "speedKt": 7,
               "gustKt": null,
               "crosswindLimit": 15,
@@ -3391,7 +3406,7 @@
           {
             "rule": "vfr.cloudClearance",
             "attention": "routine",
-            "summary": "BKN160 base 16780 ft MSL is 13280 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+            "summary": "BKN160 base 16780 ft MSL is 13280 ft above your 3500 ft cruise; CARs 602.114 (control zone) requires 500 ft below cloud",
             "waypoint": "CYHM",
             "basis": "prevailing",
             "basisKind": "prevailing",
@@ -3496,6 +3511,7 @@
             "at": "2026-09-19T04:46:29.121Z",
             "values": {
               "visibilitySm": 15,
+              "text": "15 SM",
               "minimum": 5
             },
             "citations": [
@@ -3529,6 +3545,8 @@
             "basisKind": "observed",
             "at": "2026-09-19T04:46:29.121Z",
             "values": {
+              "directionTrue": 360,
+              "variable": false,
               "speedKt": 8,
               "gustKt": null,
               "crosswindLimit": 15,
@@ -3751,7 +3769,7 @@
           {
             "rule": "vfr.cloudClearance",
             "attention": "routine",
-            "summary": "BKN140 base 14780 ft MSL is 11280 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+            "summary": "BKN140 base 14780 ft MSL is 11280 ft above your 3500 ft cruise; CARs 602.114 (control zone) requires 500 ft below cloud",
             "waypoint": "CYHM",
             "basis": "observed 00:00Z",
             "basisKind": "observed",
@@ -3787,7 +3805,7 @@
           {
             "rule": "vfr.cloudClearance",
             "attention": "routine",
-            "summary": "BKN210 base 21780 ft MSL is 18280 ft above cruise 3500 ft; CARs 602.114 (control zone) requires 500 ft below cloud",
+            "summary": "BKN210 base 21780 ft MSL is 18280 ft above your 3500 ft cruise; CARs 602.114 (control zone) requires 500 ft below cloud",
             "waypoint": "CYHM",
             "basis": "observed 00:00Z",
             "basisKind": "observed",

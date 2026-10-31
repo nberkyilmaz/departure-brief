@@ -24,6 +24,11 @@
  * way to ask for the whole country. They are fetched when asked for, kept
  * for the same half hour the server keeps them, and throttled.
  *
+ * One station's METAR is the other, for a page that shows a single line —
+ * the home page at nberkyilmaz.com — and should not download the country's
+ * reports to show it. Kept for the five minutes the snapshot is, and drawn
+ * from the same per-minute budget as NOTAMs.
+ *
  * Nothing here knows it is running on Cloudflare. `worker.ts` adapts it to
  * a Worker, `scripts/dev.ts` to Node, and the tests call it directly.
  */
@@ -83,9 +88,11 @@ const SLACK_MS = 1 * MIN;
 const UPSTREAM_TIMEOUT_MS = 20_000;
 /** The same half hour the server waits before asking CFPS about a site again. */
 export const NOTAM_FRESH_MS = 30 * MIN;
-/** Upstream NOTAM requests one instance will make in a minute, for anybody. */
+/** The same five minutes the country's METARs are kept for. */
+export const METAR_FRESH_MS = 5 * MIN;
+/** Upstream requests for one aerodrome — NOTAMs or a METAR — one instance will make in a minute, for anybody. */
 export const NOTAM_FETCHES_PER_MINUTE = 20;
-const NOTAM_MEMO_MAX = 2_000;
+const MEMO_MAX = 2_000;
 
 export interface SnapshotMeta {
   /** When the relay received it from the service: the age a page shows. */
@@ -175,7 +182,8 @@ export class Relay {
   private readonly allowed: ReadonlySet<string>;
   private readonly userAgent: string;
   private readonly notams = new Map<string, { at: number; body: string }>();
-  private notamFetches: number[] = [];
+  private readonly stationMetars = new Map<string, { at: number; status: number; body: string }>();
+  private upstreamFetches: number[] = [];
 
   constructor(
     private readonly env: RelayEnv,
@@ -203,7 +211,8 @@ export class Relay {
       const product = productFor(url);
       if (product) res = await this.serveSnapshot(product, cors);
       else if ((url.pathname === '/cfps/' || url.pathname === '/cfps') && url.searchParams.get('alpha') === 'notam') res = await this.serveNotams(url, cors);
-      else res = json(404, { error: 'not something this relay carries', carries: ['/awc/cache/metars.cache.csv.gz', '/awc/cache/tafs.cache.xml.gz', '/awc/isigmet', '/awc/airsigmet', '/cfps/?alpha=upperwind', '/cfps/?site=<id>&alpha=notam', '/status'] }, cors);
+      else if (url.pathname === '/awc/metar') res = await this.serveStationMetar(url, cors);
+      else res = json(404, { error: 'not something this relay carries', carries: ['/awc/cache/metars.cache.csv.gz', '/awc/cache/tafs.cache.xml.gz', '/awc/isigmet', '/awc/airsigmet', '/awc/metar?ids=<id>&format=json', '/cfps/?alpha=upperwind', '/cfps/?site=<id>&alpha=notam', '/status'] }, cors);
     }
     return req.method === 'HEAD' ? { ...res, body: null } : res;
   }
@@ -288,12 +297,10 @@ export class Relay {
     const memo = this.notams.get(site);
     if (memo && now - memo.at < NOTAM_FRESH_MS) return notamResponse(memo, cors);
 
-    this.notamFetches = this.notamFetches.filter((t) => now - t < MIN);
-    if (this.notamFetches.length >= NOTAM_FETCHES_PER_MINUTE) {
-      const retry = Math.ceil((this.notamFetches[0]! + MIN - now) / 1000);
+    const retry = this.spend(now);
+    if (retry !== null) {
       return json(429, { error: `this relay is asking NAV CANADA for as many NOTAMs as it will in a minute; try again in ${retry}s` }, { ...cors, 'Retry-After': String(retry) });
     }
-    this.notamFetches.push(now);
 
     const upstream = `${CFPS}?site=${site}&alpha=notam`;
     let body: string;
@@ -305,9 +312,50 @@ export class Relay {
       return json(502, { error: `NAV CANADA could not be reached for ${site}: ${(e as Error).message}` }, cors);
     }
     const entry = { at: now, body };
-    if (this.notams.size >= NOTAM_MEMO_MAX) this.notams.delete(this.notams.keys().next().value!);
+    if (this.notams.size >= MEMO_MAX) this.notams.delete(this.notams.keys().next().value!);
     this.notams.set(site, entry);
     return notamResponse(entry, cors);
+  }
+
+  /** One station's latest METAR, as the AWC answers it. A station with nothing to report is kept as such, so it is not asked again either. */
+  private async serveStationMetar(url: URL, cors: Record<string, string>): Promise<RelayResponse> {
+    const ids = url.searchParams.getAll('ids').map((s) => s.trim().toUpperCase());
+    if (ids.length !== 1 || !/^[A-Z][A-Z0-9]{3}$/.test(ids[0]!)) return json(400, { error: 'a METAR is asked for one station at a time, by its four-letter identifier' }, cors);
+    const station = ids[0]!;
+    const now = this.deps.now();
+    const memo = this.stationMetars.get(station);
+    if (memo && now - memo.at < METAR_FRESH_MS) return stationMetarResponse(memo, cors);
+
+    const retry = this.spend(now);
+    if (retry !== null) {
+      return json(429, { error: `this relay is asking the AWC for as many stations as it will in a minute; try again in ${retry}s` }, { ...cors, 'Retry-After': String(retry) });
+    }
+
+    const upstream = `${AWC_API}/metar?ids=${station}&format=json`;
+    let entry: { at: number; status: number; body: string };
+    try {
+      const res = await this.deps.fetch(upstream, { headers: { 'User-Agent': this.userAgent, Accept: 'application/json' }, signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });
+      if (res.status === 204) entry = { at: now, status: 404, body: JSON.stringify({ error: `the AWC has no recent METAR from ${station}` }) };
+      else if (!res.ok) return json(502, { error: `HTTP ${res.status} from the AWC for ${station}` }, cors);
+      else {
+        const bytes = await res.arrayBuffer();
+        if (!looksLikeJson(bytes)) return json(502, { error: `the AWC did not send JSON for ${station}` }, cors);
+        entry = { at: now, status: 200, body: new TextDecoder().decode(bytes) };
+      }
+    } catch (e) {
+      return json(502, { error: `the AWC could not be reached for ${station}: ${(e as Error).message}` }, cors);
+    }
+    if (this.stationMetars.size >= MEMO_MAX) this.stationMetars.delete(this.stationMetars.keys().next().value!);
+    this.stationMetars.set(station, entry);
+    return stationMetarResponse(entry, cors);
+  }
+
+  /** Takes one request from the per-minute upstream budget, or says how many seconds until one is free. */
+  private spend(now: number): number | null {
+    this.upstreamFetches = this.upstreamFetches.filter((t) => now - t < MIN);
+    if (this.upstreamFetches.length >= NOTAM_FETCHES_PER_MINUTE) return Math.ceil((this.upstreamFetches[0]! + MIN - now) / 1000);
+    this.upstreamFetches.push(now);
+    return null;
   }
 
   /** What is held and how old it is. 200 only when everything is there and none of it has gone stale. */
@@ -333,4 +381,8 @@ function json(status: number, value: unknown, headers: Record<string, string>): 
 
 function notamResponse(entry: { at: number; body: string }, cors: Record<string, string>): RelayResponse {
   return { status: 200, headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300', 'X-Fetched-At': new Date(entry.at).toISOString() }, body: entry.body };
+}
+
+function stationMetarResponse(entry: { at: number; status: number; body: string }, cors: Record<string, string>): RelayResponse {
+  return { status: entry.status, headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=60', 'X-Fetched-At': new Date(entry.at).toISOString() }, body: entry.body };
 }

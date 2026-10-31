@@ -27,12 +27,16 @@ export interface Citation {
   sha256: string | null;
 }
 
+/** Where a finding's conditions came from: the stable part of `basis`. */
+export type BasisKind = 'prevailing' | 'overlay' | 'observed' | 'forecast' | 'time' | 'plan';
+
 export interface Finding {
   rule: string;
   attention: Attention;
   summary: string;
   waypoint: string;
   basis: string;
+  basisKind: BasisKind;
   at: string;
   values: Record<string, unknown>;
   citations: Citation[];

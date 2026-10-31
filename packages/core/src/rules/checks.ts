@@ -155,7 +155,7 @@ export function checkVisibility(ctx: CheckContext, c: Conditions): Finding[] {
       'personal.visibility',
       ok ? 'routine' : ctx.violation,
       `visibility ${fmtVis(v)} ${ok ? 'meets' : 'is below'} personal minimum ${min} SM`,
-      { visibilitySm: miles, minimum: min },
+      { visibilitySm: miles, text: fmtVis(v), minimum: min },
       [cite(ctx, c.visibility.span), profileCitation(ctx.profile)],
     ),
   ];
@@ -263,7 +263,9 @@ export function checkRegulatory(ctx: CheckContext, c: Conditions): Finding[] {
       const baseMsl = v.base + elevation;
       const clearance = baseMsl - ctx.cruiseAltitude;
       const ok = clearance >= minima.cloudClearance.below;
-      findings.push(finding(ctx, 'vfr.cloudClearance', ok ? 'routine' : ctx.violation, `${sliceSpan(ctx.source.raw, layer.span)} base ${baseMsl} ft MSL is ${Math.round(clearance)} ft above cruise ${ctx.cruiseAltitude} ft; ${minima.rule} requires ${minima.cloudClearance.below} ft below cloud`, { baseMsl, cruiseMsl: ctx.cruiseAltitude, clearance, required: minima.cloudClearance.below }, [cite(ctx, layer.span), ruleCitation]));
+      // A base under the cruise altitude is said as "below", never as a negative distance above.
+      const where = clearance < 0 ? `${Math.round(-clearance)} ft below` : `${ok ? '' : 'only '}${Math.round(clearance)} ft above`;
+      findings.push(finding(ctx, 'vfr.cloudClearance', ok ? 'routine' : ctx.violation, `${sliceSpan(ctx.source.raw, layer.span)} base ${baseMsl} ft MSL is ${where} your ${ctx.cruiseAltitude} ft cruise; ${minima.rule} requires ${minima.cloudClearance.below} ft below cloud`, { baseMsl, cruiseMsl: ctx.cruiseAltitude, clearance, required: minima.cloudClearance.below }, [cite(ctx, layer.span), ruleCitation]));
     }
   }
   if (findings.length === 0) {
@@ -322,8 +324,8 @@ export function weatherText(g: WeatherGroup): string {
   const phenomena = g.phenomena.map((ph) => PHENOMENON_TEXT[ph] ?? ph).join(' and ');
   const descriptor = g.descriptor ? DESCRIPTOR_TEXT[g.descriptor] ?? g.descriptor : null;
   const intensity = g.intensity === 'heavy' ? 'heavy ' : g.intensity === 'light' ? 'light ' : '';
-  // `TS` alone is a thunderstorm; `TSRA` is a thunderstorm with rain.
-  const body = descriptor && phenomena ? `${descriptor} ${intensity}${phenomena}` : descriptor ? descriptor.replace(/ with$/, '') : `${intensity}${phenomena}`;
+  // `TS` alone is a thunderstorm and `TSRA` a thunderstorm with rain; `VCSH` is showers, not "showers of".
+  const body = descriptor && phenomena ? `${descriptor} ${intensity}${phenomena}` : descriptor ? descriptor.replace(/ (with|of)$/, '') : `${intensity}${phenomena}`;
   return `${g.vicinity ? 'in the vicinity: ' : ''}${body}`.trim();
 }
 
@@ -365,6 +367,8 @@ export function checkWind(ctx: CheckContext, c: Conditions): Finding[] {
   // The gust is what the aeroplane actually meets, so it is what is compared.
   const against = gust ?? w.speed;
   const citations = [cite(ctx, c.wind.span), profileCitation(ctx.profile)];
+  // Where it is from, so a reader of the values need not parse the group again.
+  const where = { directionTrue: typeof direction === 'number' ? direction : null, variable: direction === 'VRB' };
 
   const limit = ctx.profile.maxWind;
   if (limit !== null) {
@@ -375,7 +379,7 @@ export function checkWind(ctx: CheckContext, c: Conditions): Finding[] {
         'wind.surface',
         ok ? 'routine' : ctx.violation,
         `${text} — ${ok ? 'within' : 'above'} your total wind limit of ${limit} kt`,
-        { speedKt: w.speed, gustKt: gust, limit, comparedAgainst: against },
+        { ...where, speedKt: w.speed, gustKt: gust, limit, comparedAgainst: against },
         citations,
       ),
     ];
@@ -405,7 +409,7 @@ export function checkWind(ctx: CheckContext, c: Conditions): Finding[] {
          */
         'caution',
         `${text} — more than your ${crosswindLimit} kt crosswind limit in total, so any runway more than ${angle}° off the wind is outside it`,
-        { speedKt: w.speed, gustKt: gust, crosswindLimit, comparedAgainst: against, anglePastLimitDeg: angle },
+        { ...where, speedKt: w.speed, gustKt: gust, crosswindLimit, comparedAgainst: against, anglePastLimitDeg: angle },
         citations,
       ),
     ];
@@ -416,7 +420,7 @@ export function checkWind(ctx: CheckContext, c: Conditions): Finding[] {
       'wind.surface',
       'routine',
       `${text} — below your ${crosswindLimit} kt crosswind limit whatever the runway`,
-      { speedKt: w.speed, gustKt: gust, crosswindLimit, comparedAgainst: against },
+      { ...where, speedKt: w.speed, gustKt: gust, crosswindLimit, comparedAgainst: against },
       citations,
     ),
   ];
