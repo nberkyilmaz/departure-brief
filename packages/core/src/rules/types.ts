@@ -2,7 +2,7 @@ import type { FlightCategory } from '../decode/metar/derive.js';
 import type { Span } from '../decode/span.js';
 
 /** Bump when a rule's meaning or a finding's shape changes. */
-export const RULES_VERSION = 7;
+export const RULES_VERSION = 8;
 
 /**
  * How much attention a line deserves — an ordering, not a decision.

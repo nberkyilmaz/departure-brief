@@ -40,22 +40,28 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
-/** The flight categories the briefing is showing, in route order. */
+/** The flight categories the briefing is showing, one per field card, in route order. */
 function categories(): string[] {
-  return [...document.querySelectorAll('#verdict .point h3 .category:not(.forecast)')].map((e) => e.textContent ?? '');
+  return [...document.querySelectorAll('#verdict .field-card .category')].map((e) => e.textContent ?? '');
 }
 
-/** How many lines are asking to be read, at each level. */
+/** How many lines under "Worth a look" are asking to be read, at each level. */
 function attentionCounts(): { alert: number; caution: number } {
   return {
-    alert: document.querySelectorAll('#verdict .finding.alert').length,
-    caution: document.querySelectorAll('#verdict .finding.caution').length,
+    alert: document.querySelectorAll('#verdict .concern.alert').length,
+    caution: document.querySelectorAll('#verdict .concern.caution').length,
   };
 }
 
 /** Waits for the briefing to be on the page. */
 async function briefed(): Promise<void> {
-  await waitFor(() => expect(document.querySelector('#verdict .point')).not.toBeNull(), { timeout: 10_000 });
+  await waitFor(() => expect(document.querySelector('#verdict .field-card')).not.toBeNull(), { timeout: 10_000 });
+}
+
+/** Opens the flight form from the line above the briefing. */
+async function changeFlight(): Promise<HTMLFormElement> {
+  fireEvent.click(screen.getByRole('button', { name: /Change flight/i }));
+  return (await screen.findByRole('heading', { name: /Change the flight/i })).closest('form')!;
 }
 
 describe('the published page', () => {
@@ -101,47 +107,98 @@ describe('the published page', () => {
   it('puts the briefing first, with the flight one line above it and its form one tap away', async () => {
     render(<App />);
     await briefed();
-    const edit = document.querySelector('details.edit-flight') as HTMLDetailsElement;
-    // A plan that briefs needs no form in the way.
-    expect(edit.open).toBe(false);
+    // A flight that briefs needs no form in the way.
+    expect(document.querySelector('.plan-card')).toBeNull();
     expect(document.querySelector('.flight-line')?.textContent).toMatch(/CYSN → CYKF/);
-    fireEvent.click(within(edit).getByText(/Edit the flight/i));
-    await waitFor(() => expect(edit.open).toBe(true));
-    expect(within(edit).getByLabelText(/Destination/i)).toBeTruthy();
+    const form = await changeFlight();
+    // Three questions: from, to and when. The rest waits under "more".
+    expect(within(form).getByRole('combobox', { name: 'From' })).toBeTruthy();
+    expect(within(form).getByRole('combobox', { name: 'To' })).toBeTruthy();
+    expect(within(form).getByLabelText(/Departing/i)).toBeTruthy();
+    // While the form is open, the briefing below it is not of a flight half typed.
+    expect(document.querySelector('#verdict')).toBeNull();
+    fireEvent.click(within(form).getByRole('button', { name: /Cancel/i }));
+    await briefed();
   });
 
-  it('opens the form by itself when the plan cannot be briefed, and leaves it open', async () => {
+  it('finds a field by name, and briefs the flight only when asked', async () => {
     render(<App />);
     await briefed();
-    const edit = document.querySelector('details.edit-flight') as HTMLDetailsElement;
-    fireEvent.change(within(edit).getByLabelText(/Destination/i), { target: { value: 'K' } });
-    await waitFor(() => expect(edit.open).toBe(true));
-    // Fixed again, it stays open for whoever is still typing.
-    fireEvent.change(within(edit).getByLabelText(/Destination/i), { target: { value: 'CYKF' } });
+    const form = await changeFlight();
+    const to = within(form).getByRole('combobox', { name: 'To' });
+    fireEvent.focus(to);
+    fireEvent.change(to, { target: { value: 'Hamilton' } });
+    const list = await within(form).findByRole('listbox');
+    const option = within(list)
+      .getAllByRole('option')
+      .find((o) => o.textContent?.startsWith('CYHM'))!;
+    fireEvent.mouseDown(option);
+    expect((to as HTMLInputElement).value).toBe('CYHM');
+    // Nothing changes until the flight is asked for.
+    expect(document.querySelector('#verdict')).toBeNull();
+    fireEvent.click(within(form).getByRole('button', { name: /Brief this flight/i }));
     await briefed();
-    expect(edit.open).toBe(true);
+    expect(document.querySelector('.flight-line')?.textContent).toMatch(/CYSN → CYHM/);
+    expect(screen.getByRole('article', { name: 'Destination CYHM' })).toBeTruthy();
   });
 
-  it('will not pretend to know an aerodrome it has no reports for', async () => {
+  it('will not brief a field half typed', async () => {
     render(<App />);
     await briefed();
-    // New York: a real aerodrome, and not one this page carries — it holds
-    // Canada, which is a statement it should make rather than fail blankly.
-    fireEvent.change(screen.getByLabelText(/Destination/i), { target: { value: 'KJFK' } });
-    await waitFor(() => expect(document.querySelector('.error')?.textContent ?? '').toMatch(/KJFK/), { timeout: 10_000 });
+    const form = await changeFlight();
+    const to = within(form).getByRole('combobox', { name: 'To' });
+    const brief = within(form).getByRole('button', { name: /Brief this flight/i }) as HTMLButtonElement;
+    fireEvent.change(to, { target: { value: 'CYK' } });
+    // "CYK" is on its way to somewhere, not a place.
+    expect(brief.disabled).toBe(true);
+    expect(form.textContent).toMatch(/Still needs where you are going/);
+    // A whole identifier is taken as typed, either kind.
+    fireEvent.change(to, { target: { value: 'cykf' } });
+    expect(brief.disabled).toBe(false);
   });
 
-  it('shows the route as a strip, with the category at each point', async () => {
+  it('will not pretend to know an aerodrome it does not carry', async () => {
     render(<App />);
     await briefed();
-    const points = [...document.querySelectorAll('.strip-point')];
+    // Heathrow is well formed, and outside Canada and the United States.
+    const form = await changeFlight();
+    fireEvent.change(within(form).getByRole('combobox', { name: 'To' }), { target: { value: 'EGLL' } });
+    expect(form.textContent).toMatch(/no aerodrome in Canada or the US matches “EGLL”/);
+    expect((within(form).getByRole('button', { name: /Brief this flight/i }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('says whose forecast a field is borrowing, and what it could not see there', async () => {
+    render(<App />);
+    await briefed();
+    // New York has no TAF among the recorded reports; the nearest one stands in, and says so on the card.
+    const form = await changeFlight();
+    fireEvent.change(within(form).getByRole('combobox', { name: 'To' }), { target: { value: 'KJFK' } });
+    fireEvent.click(within(form).getByRole('button', { name: /Brief this flight/i }));
+    await waitFor(() => expect(screen.getByRole('article', { name: 'Destination KJFK' })).toBeTruthy(), { timeout: 10_000 });
+    const card = screen.getByRole('article', { name: 'Destination KJFK' });
+    expect(card.querySelector('.field-source')!.textContent).toMatch(/^Forecast for your time from the K\w{3} TAF, \d+ nm away\. KJFK has no forecast of its own\.$/);
+    // US NOTAMs are not reached yet, and that is said where the gaps are, with where to look instead.
+    expect(document.querySelector('.gaps')!.textContent).toMatch(/NOTAMs for KJFK could not be fetched.*notams\.aim\.faa\.gov/);
+  });
+
+  it('gives each field a card: the category, the wind and the runway, at the time you are there', async () => {
+    render(<App />);
+    await briefed();
+    const cards = [...document.querySelectorAll('#verdict .field-card')];
     // Departure, destination and the alternate, in that order.
-    expect(points.map((p) => p.querySelector('.strip-id')!.textContent)).toEqual(['CYSN', 'CYKF', 'alternate CYHM']);
-    // Each carries its own classification, which is a fact about that field.
-    for (const p of points) expect(p.querySelector('.category')!.textContent).toMatch(/^(VFR|MVFR|IFR|LIFR|—)$/);
-    // And the distance between them, from the resolver's own numbers.
-    expect(document.querySelectorAll('.strip-leg').length).toBe(points.length - 1);
-    expect(document.querySelector('.strip-leg')!.textContent).toMatch(/^\d+ nm$/);
+    expect(cards.map((c) => c.getAttribute('aria-label'))).toEqual(['Departure CYSN', 'Destination CYKF', 'Alternate CYHM']);
+    for (const c of cards) {
+      // A classification of what was forecast, which is a fact about that field.
+      expect(c.querySelector('.category')!.textContent).toMatch(/^(VFR|MVFR|IFR|LIFR|—)$/);
+      const lines = [...c.querySelectorAll('.field-lines dt')].map((d) => d.textContent);
+      expect(lines).toEqual(expect.arrayContaining(['Wind', 'Runway', 'Ceiling', 'Visibility']));
+      // Every check behind it, one tap away.
+      expect(c.querySelector('details.met summary')!.textContent).toMatch(/Every check here, with its report \(\d+\)/);
+    }
+    // The legs, from the nav log's own numbers.
+    expect(cards[1]!.querySelector('.field-role')!.textContent).toMatch(/Destination · \d+ nm/);
+    // Engine internals are not in the reader's way.
+    expect(document.querySelector('#verdict h2')!.textContent).not.toMatch(/rules v|profile/);
   });
 
   it('says plainly that the weather is frozen and it fetches nothing', async () => {
@@ -225,7 +282,7 @@ describe('moving around it', () => {
     expect(chip!.getAttribute('href')).toBe('#/brief');
 
     window.location.hash = chip!.getAttribute('href')!;
-    await waitFor(() => expect(document.querySelector('#verdict .point')).not.toBeNull());
+    await waitFor(() => expect(document.querySelector('#verdict .field-card')).not.toBeNull());
   });
 
   it('lands on the page an address names, and says which one it is on', async () => {

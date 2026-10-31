@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { About } from './About.js';
 import { BriefingView } from './BriefingView.js';
 import { DiffPanel } from './DiffPanel.js';
 import { loadEngine, type LocalEngine } from './engine.js';
-import { FlightForm, defaultDeparture, defaultPlan, planProblems } from './FlightForm.js';
+import { FlightForm, defaultDeparture, defaultPlan, departureTimeNote, planProblems } from './FlightForm.js';
 import { FlightLine } from './FlightLine.js';
 import { Nav } from './Nav.js';
 import { NavLogPage } from './NavLogPage.js';
@@ -12,6 +12,7 @@ import { ReportsPage } from './ReportsPage.js';
 import { StartPage } from './StartPage.js';
 import { AerodromePage } from './AerodromePage.js';
 import { hrefFor, useRoute } from './router.js';
+import { concernsOf } from './summary.js';
 import { useStored } from './useStored.js';
 import { WbPanel } from './WbPanel.js';
 import { WeatherNote, weatherPhrase } from './WeatherNote.js';
@@ -32,15 +33,14 @@ const RELAY = import.meta.env.VITE_RELAY?.trim() || null;
 const base = import.meta.env.BASE_URL;
 
 /**
- * How much of the briefing wants reading: the count of lines asking for
- * attention, and the most any of them asks for. A count, never a verdict.
+ * How much of the briefing wants reading: the lines under "Worth a look",
+ * and the most any of them asks for. A count, never a verdict.
  */
 function attentionOf(b: StoredBriefing | null): { level: 'caution' | 'alert'; count: number } | null {
   if (!b) return null;
-  const points = [...b.document.briefing.points, ...(b.document.briefing.alternate ? [b.document.briefing.alternate] : [])];
-  const wanting = points.flatMap((p) => p.findings.filter((f) => f.attention === 'alert' || f.attention === 'caution'));
+  const wanting = concernsOf(b);
   if (wanting.length === 0) return null;
-  return { level: wanting.some((f) => f.attention === 'alert') ? 'alert' : 'caution', count: wanting.length };
+  return { level: wanting.some((c) => c.attention === 'alert') ? 'alert' : 'caution', count: wanting.length };
 }
 
 /**
@@ -57,7 +57,8 @@ const SETTLE_MS = 250;
 export function App() {
   const route = useRoute();
   const [engine, setEngine] = useState<LocalEngine | null>(null);
-  const [plan, setPlan] = useStored<FlightPlanInput>('plan', defaultPlan);
+  // A new key: plans saved under the old one were the sample flight, not the visitor's.
+  const [plan, setPlan] = useStored<FlightPlanInput>('flight', defaultPlan);
   const [profile, setProfile] = useStored<ProfileInput>('profile', defaultProfile);
   const [aircraft, setAircraft] = useStored<AircraftInput>('aircraft', defaultAircraft);
   const [busy, setBusy] = useState(DEMO);
@@ -66,8 +67,13 @@ export function App() {
   const [diff, setDiff] = useState<BriefingDiff | null>(null);
   /** Set once the visitor has changed something, so the page can stop calling it "recorded". */
   const [touched, setTouched] = useState(false);
-  /** Whether the visitor has opened the flight form. With an API behind the page it starts open: there is nothing to show until it is filled in. */
-  const [editing, setEditing] = useState(!DEMO);
+  /**
+   * The flight being entered, while the form is open. The briefing is always
+   * of the flight last asked for, never of one half typed: a destination of
+   * "CYK" on its way to "CYKF" is not a place to brief. It opens by itself
+   * when there is no flight yet, which is how every visit begins.
+   */
+  const [draft, setDraft] = useState<FlightPlanInput | null>(() => (planProblems(plan).length > 0 ? plan : null));
 
   useEffect(() => {
     if (!DEMO) return;
@@ -85,15 +91,17 @@ export function App() {
            * difference.
            */
           setPlan(e.plan);
-        } else if (!(Date.parse(plan.departureTime) > Date.now())) {
+          setDraft(null);
+        } else {
           /*
            * Live, the visitor's own plan stands — except a departure that has
-           * already happened, which is what a plan saved last week, or one
-           * left over from the recorded flight, will have. Briefing a
-           * departure in the past against this morning's weather answers no
-           * question anybody asked.
+           * already happened, which is what a plan saved last week will
+           * have. Briefing a departure in the past against this morning's
+           * weather answers no question anybody asked.
            */
-          setPlan({ ...plan, departureTime: defaultDeparture() });
+          const stale = (p: FlightPlanInput) => !(Date.parse(p.departureTime) > Date.now());
+          if (stale(plan)) setPlan({ ...plan, departureTime: defaultDeparture() });
+          setDraft((d) => (d && stale(d) ? { ...d, departureTime: defaultDeparture() } : d));
         }
       })
       .catch((e: Error) => {
@@ -106,22 +114,13 @@ export function App() {
     };
   }, []);
 
-  const problems = planProblems(plan);
-  const ready = problems.length === 0;
+  const ready = planProblems(plan).length === 0;
 
   /*
-   * Open the form by itself when the plan cannot be briefed, and leave it
-   * open: closing it the moment a typo is fixed would snatch it away from
-   * somebody halfway through typing the next field.
-   */
-  useEffect(() => {
-    if (!ready || error !== null) setEditing(true);
-  }, [ready, error]);
-
-  /*
-   * Rebuild as the form settles. Judging is arithmetic over reports already
-   * in memory — a few milliseconds — so there is no reason to make somebody
-   * press a button to find out what raising their ceiling minimum does.
+   * Rebuild whenever the flight, the minimums or the aircraft change.
+   * Judging is arithmetic over reports already in memory — a few
+   * milliseconds — so there is no reason to make somebody press a button to
+   * find out what raising their ceiling minimum does.
    */
   const firstRun = useRef(true);
   useEffect(() => {
@@ -139,7 +138,13 @@ export function App() {
             setError(null);
           })
           // A NoDataError already says which aerodromes there are reports for.
-          .catch((e: Error) => live && setError(e.message))
+          .catch((e: Error) => {
+            if (!live) return;
+            setError(e.message);
+            // The last flight's briefing under this flight's name would be worse than none.
+            setBriefing(null);
+            setDiff(null);
+          })
           .finally(() => {
             if (!live) return;
             setBusy(false);
@@ -162,14 +167,14 @@ export function App() {
   }, []);
 
   /** The API path: the server fetches, judges, stores, and can say what changed since last time. */
-  async function briefRemotely() {
+  async function briefRemotely(flight: FlightPlanInput) {
     setBusy(true);
     setError(null);
     try {
       const res = await fetch('/api/briefings', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ plan, profile, aircraft, fetch: true }),
+        body: JSON.stringify({ plan: flight, profile, aircraft, fetch: true }),
       });
       const body = (await res.json()) as StoredBriefing | { error: string };
       if (!res.ok || 'error' in body) throw new Error('error' in body ? body.error : `HTTP ${res.status}`);
@@ -187,6 +192,27 @@ export function App() {
 
   const weather = engine?.weather ?? null;
   const isLive = weather?.mode === 'live';
+
+  /** What the flight being entered still needs before it can be briefed, in words. */
+  const draftProblems = draft
+    ? [...planProblems(draft), ...((isLive || !DEMO) && departureTimeNote(draft.departureTime)?.blocks ? ['a departure time still to come'] : [])]
+    : [];
+
+  function commit() {
+    if (!draft || draftProblems.length > 0) return;
+    setTouched(true);
+    setPlan(draft);
+    setDraft(null);
+    // The last flight's cards under this flight's name, even for the moment it takes to rebuild, would be the wrong flight.
+    setBriefing(null);
+    setDiff(null);
+    setError(null);
+    if (!DEMO) void briefRemotely(draft);
+    document.querySelector('main')?.scrollIntoView?.({ block: 'start' });
+  }
+
+  const names = useMemo(() => new Map((engine?.aerodromes ?? []).map((a) => [a.id, a.name])), [engine]);
+  const nameOf = useCallback((id: string) => names.get(id) ?? null, [names]);
 
   return (
     <>
@@ -225,65 +251,100 @@ export function App() {
             {DEMO && weather && <WeatherNote weather={weather} />}
 
             {/*
-              The briefing is what a visitor came for, so the flight is one
-              line above it and the form that spells it out opens on request —
-              or by itself, when the plan is missing something or the last
-              change made it impossible to brief.
+              Asked first, in three fields: where from, where to, and when.
+              Once a flight has been briefed it is one line above its
+              briefing, and the form is one button away.
             */}
-            <section className="inputs flight-bar">
-              <FlightLine plan={plan} aircraft={aircraft} />
-              <p className="limits-line">
-                Judged against your minimums: ceiling {profile.ceilingAglFt.toLocaleString('en')} ft · visibility {profile.visibilitySm} SM · crosswind{' '}
-                {profile.crosswindKt} kt{profile.crosswindIncludesGust ? ' including gusts' : ''}
-                {profile.nightAllowed ? '' : ' · day only'} — <a href={hrefFor({ name: 'minimums' })}>change</a>
+            {DEMO && !engine && !error ? (
+              // Until the reports are in, there is no telling whether this is a live visit or the recorded flight.
+              <p className="explain" role="status">
+                {RELAY ? 'Fetching the live reports…' : 'Loading the recorded reports…'}
               </p>
-              <details className="edit-flight" open={editing} onToggle={(e) => setEditing(e.currentTarget.open)}>
-                <summary>Edit the flight</summary>
-                <FlightForm plan={plan} onChange={change(setPlan)} lookup={engine ? engine.airport : DEMO ? untilLoaded : null} aerodromes={engine?.aerodromes ?? []} />
-              </details>
-              <div className="actions">
-                {DEMO ? (
-                  <>
-                    <p className="field-note" aria-live="polite">
-                      {busy ? 'Rebuilding the briefing…' : briefing ? `Rebuilt from the ${isLive ? 'live' : 'recorded'} reports${touched ? ' with your changes' : ''}.` : ''}
-                    </p>
-                    {touched && engine && !isLive && (
-                      <button
-                        className="quiet"
-                        onClick={() => {
-                          setPlan(engine.plan);
-                          setProfile(engine.profile);
-                          setAircraft(engine.aircraft);
-                          setTouched(false);
-                        }}
-                      >
-                        Back to the recorded flight
-                      </button>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <button onClick={briefRemotely} disabled={busy || !ready}>
-                      {busy ? 'Fetching and judging…' : 'Brief this flight'}
+            ) : draft ? (
+              <form
+                className="inputs plan-card"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  commit();
+                }}
+              >
+                <h2>{ready ? 'Change the flight' : 'Where are you flying?'}</h2>
+                <FlightForm
+                  plan={draft}
+                  onChange={setDraft}
+                  lookup={engine ? engine.airport : DEMO ? untilLoaded : null}
+                  aerodromes={engine?.aerodromes ?? []}
+                  live={isLive || !DEMO}
+                />
+                <div className="actions">
+                  <button type="submit" disabled={draftProblems.length > 0}>
+                    Brief this flight
+                  </button>
+                  {ready && (
+                    <button type="button" className="quiet" onClick={() => setDraft(null)}>
+                      Cancel
                     </button>
-                    {!ready && <p className="field-note">Still needs {problems.join(', ')}.</p>}
-                  </>
-                )}
-                {error && (
-                  <p className="error" role="alert">
-                    {error}
-                  </p>
-                )}
-              </div>
-            </section>
-
-            {diff && <DiffPanel d={diff} />}
-            {briefing ? (
-              <BriefingView stored={briefing} />
+                  )}
+                  {draftProblems.length > 0 && <p className="field-note">Still needs {draftProblems.join(', ')}.</p>}
+                </div>
+              </form>
             ) : (
-              busy && (
+              <section className="inputs flight-bar">
+                <div className="flight-bar-top">
+                  <FlightLine plan={plan} aircraft={aircraft} />
+                  <button type="button" className="quiet change-flight" onClick={() => setDraft(plan)}>
+                    Change flight
+                  </button>
+                </div>
+                <p className="limits-line">
+                  Your minimums: ceiling {profile.ceilingAglFt.toLocaleString('en')} ft · visibility {profile.visibilitySm} SM · crosswind {profile.crosswindKt} kt
+                  {profile.crosswindIncludesGust ? ' including gusts' : ''}
+                  {profile.nightAllowed ? '' : ' · day only'} — <a href={hrefFor({ name: 'minimums' })}>change</a>
+                </p>
+                <div className="actions">
+                  {DEMO ? (
+                    <>
+                      {busy && (
+                        <p className="field-note" aria-live="polite">
+                          Building the briefing…
+                        </p>
+                      )}
+                      {touched && engine && !isLive && (
+                        <button
+                          className="quiet"
+                          onClick={() => {
+                            setPlan(engine.plan);
+                            setProfile(engine.profile);
+                            setAircraft(engine.aircraft);
+                            setTouched(false);
+                          }}
+                        >
+                          Back to the recorded flight
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <button onClick={() => void briefRemotely(plan)} disabled={busy || !ready}>
+                      {busy ? 'Fetching and judging…' : 'Brief again'}
+                    </button>
+                  )}
+                  {error && (
+                    <p className="error" role="alert">
+                      {error}
+                    </p>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {!draft && diff && <DiffPanel d={diff} />}
+            {draft ? null : briefing ? (
+              <BriefingView stored={briefing} nameOf={nameOf} />
+            ) : (
+              busy &&
+              !DEMO && (
                 <p className="explain" role="status">
-                  {DEMO ? (RELAY ? 'Fetching the live reports…' : 'Loading the recorded reports…') : 'Fetching and judging…'}
+                  Fetching and judging…
                 </p>
               )
             )}

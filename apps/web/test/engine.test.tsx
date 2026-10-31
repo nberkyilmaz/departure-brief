@@ -177,8 +177,8 @@ describe('falling back to the recorded weather', () => {
 describe('what the page says about it', () => {
   it('names live weather and its age', () => {
     render(<WeatherNote weather={{ mode: 'live', at: FETCHED_AT, problem: null, missing: ['upper winds'] }} />);
-    expect(screen.getByText(/Live weather\./)).toBeTruthy();
-    expect(document.body.textContent).toMatch(/04:55Z, 5 min ago/);
+    // One line, with the age in it: the rest is on the page that explains how this works.
+    expect(document.body.textContent).toMatch(/^Live weather from 04:55Z, 5 min ago\./);
     expect(document.body.textContent).toMatch(/Not available just now: upper winds/);
   });
 

@@ -83,7 +83,7 @@ export function NotamPanel({ doc }: { doc: NotamDocument }) {
       </p>
       {doc.fetchErrors.map((e) => (
         <p key={e.site} className="error">
-          {e.site}: NOTAM fetch failed — {e.error}
+          {e.site}: NOTAMs not shown — {e.error}
         </p>
       ))}
       {groups.map((g) => (
