@@ -192,6 +192,8 @@ export interface NavLogLeg {
   to: string;
   distanceNm: number;
   trueCourse: number;
+  /** Degrees east positive, where the leg begins; null outside the magnetic model's years. */
+  variation: number | null;
   magneticCourse: number | null;
   wind: NavLogWind | null;
   windCorrectionAngle: number | null;
@@ -257,6 +259,8 @@ export interface AerodromeReport {
   forecastCategory: FlightCategory | null;
   night: boolean;
   daylight: { sunrise: string | null; sunset: string | null; civilDawn: string | null; civilDusk: string | null; allDay: boolean; allNight: boolean };
+  /** Degrees east positive, from the World Magnetic Model; null outside its years. */
+  variation: number | null;
   /** Wind on every runway end, best first. Null when nothing reported a wind. */
   crosswind: {
     speed: number;

@@ -153,5 +153,6 @@ All public, with no redistribution restrictions:
 - NAV CANADA CFPS — Canadian NOTAMs and upper winds (the endpoint behind plan.navcanada.ca; unofficial, so the client fails loudly if its shape changes)
 - FAA NASR — US airports, runways, magnetic variation
 - OurAirports — airports and runways; the public site's whole set of Canadian and American fields (public domain)
+- NOAA/NCEI World Magnetic Model (WMM2025) — magnetic variation anywhere, for the date flown (public domain)
 
 Requests carry a real `User-Agent`, and nothing fetched is committed.
