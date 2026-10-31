@@ -108,15 +108,19 @@ describe('navLog', () => {
     expect(log.totalFuelGal).toBe(leg.fuelGal);
     expect(log.totalMinutes).toBe(leg.minutes);
 
-    // OurAirports publishes no magnetic variation, so the courses are true
-    // and the log says why rather than quietly printing true as magnetic.
-    expect(leg.magneticCourse).toBeNull();
-    expect(leg.magneticHeading).toBeNull();
-    expect(leg.gaps.some((g) => g.includes('magnetic variation'))).toBe(true);
+    // Magnetic from the World Magnetic Model where the leg begins: about ten
+    // west at St. Catharines, so magnetic reads about ten more than true.
+    expect(leg.variation).toBeGreaterThan(-11);
+    expect(leg.variation).toBeLessThan(-9);
+    const off = (a: number, b: number) => ((a - b + 540) % 360) - 180;
+    expect(Math.abs(off(leg.magneticCourse!, leg.trueCourse - leg.variation!))).toBeLessThanOrEqual(1);
+    expect(Math.abs(off(leg.magneticHeading!, leg.trueHeading! - leg.variation!))).toBeLessThanOrEqual(1);
+    expect(leg.gaps.some((g) => g.includes('magnetic'))).toBe(false);
 
     // The alternate is worked out too, and kept out of the totals.
     expect(log.alternate!.to).toBe('CYHM');
     expect(log.alternate!.cumulativeMinutes).toBeNull();
+    expect(log.alternate!.magneticCourse).not.toBeNull();
     expect(log.totalDistanceNm).toBe(leg.distanceNm);
   });
 
@@ -143,5 +147,17 @@ describe('navLog', () => {
     expect(log.legs[0]!.fuelGal).toBeNull();
     expect(log.totalFuelGal).toBeNull();
     expect(log.totalMinutes).not.toBeNull();
+  });
+});
+
+describe('navLog magnetic', () => {
+  it('says so, rather than printing true as magnetic, past the years the model covers', async () => {
+    const later = parseFlightPlan({ ...JSON.parse(readFileSync(join(ROOT, 'flights', 'demo-cysn-cykf.json'), 'utf8')), departureTime: '2031-06-01T15:00:00Z' });
+    const store = new MemoryStore();
+    await store.putAirports(readOurAirportsDirectory(join(FIXTURES, 'ourairports', '2026-09-07'), { snapshot: '2026-09-07' }));
+    const leg = navLog(await resolveFlight(store, later, new Date('2031-06-01T14:00:00Z')), 8.5).legs[0]!;
+    expect(leg.variation).toBeNull();
+    expect(leg.magneticCourse).toBeNull();
+    expect(leg.gaps).toContain('the WMM2025 magnetic model does not cover this date, so courses are true');
   });
 });

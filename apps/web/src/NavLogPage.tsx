@@ -21,6 +21,13 @@ const deg = (d: number | null): string => (d === null ? '—' : `${String(d).pad
 
 const gal = (g: number | null): string => (g === null ? '—' : `${g} gal`);
 
+/** Variation as a chart prints it: whole degrees, east or west, never split across a line. */
+export const variationText = (v: number | null): string => {
+  if (v === null) return '—';
+  const d = Math.round(Math.abs(v));
+  return d === 0 ? '0°' : `${d}°${v < 0 ? 'W' : 'E'}`;
+};
+
 /**
  * CARs 602.88 as a short table: the trip, the reserve the regulation adds,
  * the sum, and what the pilot said is aboard. A row that cannot be filled
@@ -91,6 +98,7 @@ function Leg({ leg, label }: { leg: NavLogLeg; label?: string }) {
         </td>
         <td>{leg.distanceNm}</td>
         <td>{deg(leg.trueCourse)}</td>
+        <td>{variationText(leg.variation)}</td>
         <td>{deg(leg.magneticCourse)}</td>
         <td>{leg.wind ? `${String(leg.wind.directionTrue).padStart(3, '0')}°/${leg.wind.speedKt}` : '—'}</td>
         <td>{leg.windCorrectionAngle === null ? '—' : `${leg.windCorrectionAngle > 0 ? '+' : ''}${leg.windCorrectionAngle}°`}</td>
@@ -103,7 +111,7 @@ function Leg({ leg, label }: { leg: NavLogLeg; label?: string }) {
       </tr>
       {leg.gaps.length > 0 && (
         <tr className="leg-gaps">
-          <td colSpan={12}>
+          <td colSpan={13}>
             {leg.gaps.map((g, i) => (
               <span key={i} className="field-note">
                 {g}
@@ -135,8 +143,8 @@ export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
       <h2>Nav log</h2>
       <p className="explain">
         {log.tas} kt true at {log.altitudeFt.toLocaleString('en')} ft. The wind for a leg is the one forecast at the point it ends at — the usual
-        simplification, and the finer alternative would need a forecast at the midpoint, which nobody publishes. Courses and headings are true unless a
-        magnetic column is filled in; the airport data has to publish the variation for that, and not every source does.
+        simplification, and the finer alternative would need a forecast at the midpoint, which nobody publishes. Magnetic is true less the variation where
+        the leg begins, from NOAA&apos;s World Magnetic Model for the day you fly: west is added, east is taken away.
       </p>
 
       <div className="table-scroll">
@@ -146,6 +154,7 @@ export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
               <th>Leg</th>
               <th>nm</th>
               <th>TC</th>
+              <th>Var</th>
               <th>MC</th>
               <th>Wind</th>
               <th>WCA</th>
@@ -164,7 +173,7 @@ export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
             <tr className="total">
               <td>Total</td>
               <td>{log.totalDistanceNm}</td>
-              <td colSpan={7}></td>
+              <td colSpan={8}></td>
               <td>{minutes(log.totalMinutes)}</td>
               <td></td>
               <td>{log.totalFuelGal ?? '—'}</td>

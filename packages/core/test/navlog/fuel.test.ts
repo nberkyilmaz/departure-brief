@@ -15,6 +15,7 @@ const leg = (from: string, to: string, minutes: number | null, fuelGal: number |
   to,
   distanceNm: 50,
   trueCourse: 270,
+  variation: null,
   magneticCourse: null,
   wind: null,
   windCorrectionAngle: null,

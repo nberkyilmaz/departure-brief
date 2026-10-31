@@ -15,6 +15,7 @@ import { flightCategory, flightCategoryOf, visibilityStatuteMiles, ceilingOf } f
 import type { FlightCategory } from '../decode/metar/derive.js';
 import type { Airport } from '../domain/airport.js';
 import { distanceNm, initialCourse } from '../domain/geo.js';
+import { magneticVariation } from '../domain/magnetic.js';
 import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
 import { isNight, solarEvents, type SolarEvents } from '../domain/sun.js';
 import { checkConditions } from '../rules/checks.js';
@@ -50,6 +51,8 @@ export interface AerodromeReport {
   readonly forecastCategory: FlightCategory | null;
   readonly night: boolean;
   readonly daylight: SolarEvents;
+  /** Degrees east positive, from the World Magnetic Model for this instant; `null` outside its years. */
+  readonly variation: number | null;
   /**
    * The wind on every runway end, best first.
    *
@@ -160,6 +163,7 @@ export async function aerodromeReport(store: Store, id: string, at: Date, profil
     forecastCategory: prevailing ? flightCategoryOf(ceilingOf(prevailing.conditions.sky)?.value ?? null, prevailing.conditions.visibility ? visibilityStatuteMiles(prevailing.conditions.visibility.value) : null) : null,
     night,
     daylight: solarEvents(position, at),
+    variation: magneticVariation(position, at),
     crosswind: observation?.decoded.wind ? analyseCrosswind(observation.decoded.wind.value, airport) : null,
     explained: observation ? explainMetar(observation.decoded) : [],
     findings,
