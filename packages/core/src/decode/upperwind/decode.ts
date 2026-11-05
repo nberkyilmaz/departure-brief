@@ -12,13 +12,17 @@
  * is stored verbatim, so a pilot can see the numbers the service sent
  * beside the ones this tool derived from them.
  *
+ * The US bulletin arrives as text instead, and is read by `fb.ts` into the
+ * same shape, so everything downstream treats the two alike.
+ *
  *   ["FBCN31","CWAO","2026-09-14T03:20:00+00:00", … ,[[9000,290,23,1,0], …]]
  *     0        1      2 issued    3 based on   4 valid  5 use from  6 use to
  */
 import { sourced, type Span, type Sourced } from '../span.js';
+import { decodeFbWinds } from './fb.js';
 import type { DecodedUpperWind, UpperWindLevel } from './types.js';
 
-export const UPPERWIND_DECODER_VERSION = 1;
+export const UPPERWIND_DECODER_VERSION = 2;
 
 /** Where in the array each field lives. Named, so nothing reads by number twice. */
 const BULLETIN = 0;
@@ -98,9 +102,11 @@ function decodeLevel(raw: string, entry: unknown, unparsed: string[]): UpperWind
 /**
  * Decode one upper wind record. `raw` is the record's text exactly as the
  * service sent it, which is what the store holds and what the spans index
- * into.
+ * into. `reference` dates a US bulletin's day-of-month times; NAV CANADA's
+ * carry full dates and need none.
  */
-export function decodeUpperWind(raw: string): DecodedUpperWind {
+export function decodeUpperWind(raw: string, reference: Date | null = null): DecodedUpperWind {
+  if (!raw.trimStart().startsWith('[') && /\bFB[A-Z]{2}\d{2}\b/.test(raw)) return decodeFbWinds(raw, reference);
   const unparsed: string[] = [];
   let parsed: unknown;
   try {

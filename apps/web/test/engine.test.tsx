@@ -23,6 +23,9 @@ const file = (...p: string[]) => readFileSync(join(...p), 'utf8');
 
 type Answer = { status: number; body: string } | 'unreachable';
 
+const windtemp = (region: string, forecast: string) => `/awc/windtemp?region=${region}&level=low&fcst=${forecast}`;
+const FB = ['us', 'alaska', 'hawaii'].flatMap((region) => ['06', '12', '24'].map((forecast) => windtemp(region, forecast)));
+
 /** The relay's answers by path, as a browser would see them. */
 function relayAnswers(): Record<string, Answer> {
   return {
@@ -32,6 +35,9 @@ function relayAnswers(): Record<string, Answer> {
     '/awc/airsigmet?format=json': { status: 200, body: '[]' },
     upperwind: { status: 200, body: file(FETCH, 'canada-2026-09-18', 'upperwind.json') },
     ...Object.fromEntries(['CYSN', 'CYKF', 'CYHM'].map((s) => [`/cfps/?site=${s}&alpha=notam`, { status: 200, body: file(FETCH, 'canada-2026-09-18', 'notam', `${s}.json`) }])),
+    // The US winds aloft: the last six-hour bulletin NOAA issued, and nothing for the rest, as NOAA has answered since.
+    ...Object.fromEntries(FB.map((path) => [path, { status: 204, body: '' }])),
+    [windtemp('us', '06')]: { status: 200, body: file(FETCH, 'awc', 'windtemp', 'fbus31.kwno.fd1.us1.txt') },
   };
 }
 
@@ -56,7 +62,8 @@ beforeAll(() => {
     const answer = path.includes('alpha=upperwind') ? answers['upperwind'] : answers[path];
     // What a refused connection, or a relay that does not name this page, looks like from inside fetch.
     if (!answer || answer === 'unreachable') throw new TypeError('Failed to fetch');
-    return new Response(answer.body, { status: answer.status, headers: { 'X-Fetched-At': FETCHED_AT } });
+    // A 204 may not carry a body, not even an empty one.
+    return new Response(answer.status === 204 ? null : answer.body, { status: answer.status, headers: { 'X-Fetched-At': FETCHED_AT } });
   }) as typeof fetch;
 });
 
@@ -136,7 +143,35 @@ describe('live weather through the relay', () => {
     answers['upperwind'] = { status: 503, body: '{"error":"down"}' };
     const engine = await loadEngine('/', RELAY);
     expect(engine.weather.mode).toBe('live');
-    expect(engine.weather.missing).toEqual(['upper winds']);
+    expect(engine.weather.missing).toEqual(['Canadian upper winds']);
+  });
+
+  it('says plainly when NOAA sends no US winds aloft, rather than calling it a fault', async () => {
+    for (const path of FB) answers[path] = { status: 204, body: '' };
+    const engine = await loadEngine('/', RELAY);
+    expect(engine.weather.mode).toBe('live');
+    expect(engine.weather.missing).toEqual(['US upper winds, because NOAA is not issuing its winds aloft bulletin']);
+  });
+
+  it('gives a US leg its groundspeed and time from the US winds aloft', async () => {
+    // The morning the last bulletin was issued, inside its 08Z to 15Z window.
+    vi.setSystemTime(new Date('2026-11-03T09:00:00Z'));
+    try {
+      const engine = await loadEngine('/', RELAY);
+      const boston = engine.reports.find((r) => r.kind === 'upperwind' && r.station === 'KBOS');
+      expect(boston?.body.split('\n').at(-1)).toBe('BOS 2710 2815+09 2916+02 2822-03 3038-12 3152-22 335439 335749 335861');
+      const plan = { ...engine.plan, departure: 'KBOS', destination: 'KJFK', alternate: null, route: [], departureTime: '2026-11-03T10:00:00Z' };
+      const leg = (await engine.brief(plan, engine.profile, engine.aircraft)).briefing.document.navlog.legs[0]!;
+      // Kennedy's own column, at the cruise altitude: 3,000 ft 2516 and 6,000 ft 2413+09 between them.
+      expect(leg.wind).toMatchObject({ station: 'KJFK', distanceNm: 0 });
+      expect(leg.wind!.directionTrue).toBeGreaterThanOrEqual(240);
+      expect(leg.wind!.directionTrue).toBeLessThanOrEqual(250);
+      expect(leg.groundspeedKt).not.toBeNull();
+      expect(leg.minutes).toBe(Math.round((leg.distanceNm / leg.groundspeedKt!) * 60));
+      expect(leg.gaps).toEqual([]);
+    } finally {
+      vi.setSystemTime(new Date('2026-10-20T05:00:00Z'));
+    }
   });
 });
 

@@ -28,6 +28,7 @@ import {
   CatalogStore,
   decodeMetar,
   diffBriefings,
+  fbStationFrom,
   flightCategory,
   loadBundle,
   NavCanadaClient,
@@ -227,7 +228,15 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
   const awc = new AwcClient(http, `${relay}/awc`);
   const cfps = new NavCanadaClient(http, `${relay}/cfps/`);
 
-  const [metars, tafs, hazards, winds] = await Promise.allSettled([cache.metars(), cache.tafs(), awc.sigmets(), cfps.upperWinds([...CANADIAN_UPPERWIND_SITES])]);
+  // A US bulletin names its sites by FAA identifier; the index says which aerodrome each one is, without loading any.
+  const usStation = (site: string) => fbStationFrom(site, store.indexed(site).map(([icaoId, faaId]) => ({ icaoId: icaoId || null, faaId })));
+  const [metars, tafs, hazards, winds, usWinds] = await Promise.allSettled([
+    cache.metars(),
+    cache.tafs(),
+    awc.sigmets(),
+    cfps.upperWinds([...CANADIAN_UPPERWIND_SITES]),
+    awc.windsAloft(usStation, new Date()),
+  ]);
   /*
    * Observations and forecasts are the briefing. Without either there is no
    * live briefing to give, and the recorded one, labelled as recorded, is
@@ -255,7 +264,17 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
       await storeAndDecode(store, mine, winds.value.request, now, site);
       hold(mine, site);
     }
-  } else missing.push('upper winds');
+  } else missing.push('Canadian upper winds');
+  if (usWinds.status === 'fulfilled') {
+    await storeAndDecode(store, usWinds.value.reports, usWinds.value.request, now);
+    hold(usWinds.value.reports, null);
+    /*
+     * Every bulletin empty is not a fault here: it is NOAA sending none, as
+     * it has since the model they were built from was retired on 3 November
+     * 2026. Said in the note, so a US leg with no time has its reason.
+     */
+    if (usWinds.value.reports.length === 0) missing.push('US upper winds, because NOAA is not issuing its winds aloft bulletin');
+  } else missing.push('US upper winds');
 
   return {
     at: fetchedAt.get(metars.value.request) ?? now.toISOString(),

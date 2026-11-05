@@ -36,7 +36,7 @@ official briefing.
 | **Briefing diff** | What changed since last time, measured against the verdict rather than the text. |
 | **Weight and balance** | Read out of a scanned handbook, every figure checked against the ink before it is used. |
 | **Forecast verification** | Did the TAF turn out to be right, and which way was it wrong. |
-| **Winds and temperatures aloft** | Interpolated to the altitude flown; the temperature at cruise as the first question about icing. |
+| **Winds and temperatures aloft** | Canada's from NAV CANADA, the United States' from NOAA's FB bulletin, interpolated to the altitude flown; the temperature at cruise as the first question about icing. |
 | **Daylight** | Last light on arrival and how much of it is left, from the same solar arithmetic the night rules use. |
 | **Nav log** | The wind triangle leg by leg, true and magnetic, with a blank and a reason wherever a number cannot be had. |
 | **Magnetic variation** | NOAA's World Magnetic Model, checked against all hundred of its published test values, so a Canadian field gets a magnetic heading as readily as an American one. |
@@ -100,7 +100,11 @@ verbatim, feed the rules — so they get cheaper as they go.
 - ~~**Winds and temperatures aloft.**~~ Done. Interpolated to the altitude
   being flown, with the temperature at cruise as the first question about
   icing. Fetched for the route rather than the aerodromes, because a small
-  field is almost never an upper wind site.
+  field is almost never an upper wind site. The US half reads NOAA's FB
+  bulletin, column by column, since a high site leaves its lowest levels
+  blank. NOAA has issued no FB bulletin since it retired the NAM model on
+  3 November 2026; until it does again, a US leg says it has no wind rather
+  than borrowing one from a model nobody issued as a forecast.
 - ~~**SIGMET and AIRMET.**~~ Done. In force, at your altitude, and across
   your route — all three, or it is not mentioned. An area the geometry
   cannot answer for is reported as needing to be checked by eye.
