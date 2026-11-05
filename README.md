@@ -36,6 +36,9 @@ and shows its working.
 - **Resolves the route in time**: ETA at each waypoint, the TAF period that
   governs each one (prevailing versus TEMPO/PROB overlays), the nearest
   reporting station when a field has closed for the night.
+- **Reads the weather between the ends**: every reporting station within
+  25 nm of the track, at the time you would be abeam it, so VFR at both
+  ends cannot hide IFR or a thunderstorm half way.
 - **Checks** each point against personal minimums, Canadian VFR minima
   (CARs 602.114/115), US minima (FAR 91.155), crosswind per runway, daylight,
   fuel reserve (CARs 602.88), hazard areas crossing the route, and the
@@ -48,9 +51,9 @@ and shows its working.
 - **Diffs briefings**: what changed since you last looked, measured against
   your limits rather than the text.
 - **Shows when you could go**: the same checks for each of the next twelve
-  hours you might leave, the destination at the time you would arrive, so
-  an earlier or later departure can be compared at a glance and briefed
-  with a tap.
+  hours you might leave, the destination at the time you would arrive and
+  the stations along the way when you would pass them, so an earlier or
+  later departure can be compared at a glance and briefed with a tap.
 - **Reads weight and balance out of a scanned 1976 handbook** with OCR, and
   only uses a figure once it has been found on the page.
 

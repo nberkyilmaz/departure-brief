@@ -70,6 +70,15 @@ export function flightText(f: ResolvedFlight): string {
     '',
   ];
   for (const p of f.points) lines.push(...pointText(p), '');
+  if (f.enroute.length > 0) {
+    lines.push('along the way:');
+    for (const s of f.enroute) {
+      lines.push(`${s.cumulative.toFixed(1).padStart(6)} nm  ${s.station} ${s.airport.name}, ${Math.abs(s.offset).toFixed(0)} nm ${s.offset > 0 ? 'right' : 'left'} of track  abeam ${toZulu(s.eta)}`);
+      if (s.metar) lines.push(`  METAR ${s.metar.report.issuedAt ? toZulu(s.metar.report.issuedAt) : ''}: ${s.metar.report.body}`);
+      if (s.forecast) lines.push(`  TAF ${s.forecast.station} issued ${toZulu(s.forecast.resolved.issued)}`, ...forecastText(s.forecast.resolved));
+    }
+    lines.push('');
+  }
   if (f.alternate) lines.push('alternate:', ...pointText(f.alternate), '');
   return lines.join('\n');
 }

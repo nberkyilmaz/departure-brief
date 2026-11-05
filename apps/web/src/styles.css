@@ -973,6 +973,39 @@ summary:focus-visible,
 .concern-when { display: block; color: var(--muted); font-size: 0.8rem; }
 .concern-detail { padding: 0 var(--s3) var(--s2); }
 
+/* Along the way: the stations beside the track in the order you pass them, read like the list above. */
+.along { margin: 0 0 var(--s4); }
+.along h3 { font-size: 0.95rem; margin: 0 0 0.2rem; }
+.along .explain { margin: 0 0 var(--s2); }
+.along-leg + .along-leg { margin-top: var(--s3); }
+.along-leg-title { font-family: var(--mono); font-size: 0.85rem; margin: 0 0 var(--s1); }
+.along-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+.along-row + .along-row { border-top: 1px solid var(--line); }
+.along-row.alert { border-left: 4px solid var(--nogo); }
+.along-row.caution { border-left: 4px solid var(--marginal); }
+.along-row > details > summary {
+  display: grid;
+  grid-template-columns: 3.4rem 3.6rem minmax(0, 1fr);
+  gap: var(--s2);
+  align-items: baseline;
+  padding: var(--s2) var(--s3);
+  cursor: pointer;
+  list-style: none;
+}
+.along-row > details > summary::-webkit-details-marker { display: none; }
+.along-row > details > summary:hover { background: var(--surface-sunk); }
+.along-nm { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.along-row .category { justify-self: start; }
+.along-what { min-width: 0; overflow-wrap: anywhere; }
+.along-name { color: var(--muted); font-size: 0.9rem; }
+.along-meta, .along-crossed { display: block; font-size: 0.8rem; color: var(--muted); }
+.along-crossed { color: var(--fg); }
+.along-row.alert .along-crossed { color: var(--nogo); font-weight: 600; }
+.along-detail { padding: 0 var(--s3) var(--s2); }
+.along-more { margin-top: var(--s2); }
+.along-more > summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; padding: 0.3rem 0; }
+.along-more > .along-list { margin-top: var(--s1); }
+
 /* Nothing on a phone may be wider than the phone. */
 @media (max-width: 40rem) {
   .plan-card { padding: var(--s3) var(--s4) var(--s4); }
@@ -983,6 +1016,7 @@ summary:focus-visible,
   .field-cards { grid-template-columns: minmax(0, 1fr); }
   .concern .row { grid-template-columns: auto minmax(0, 1fr); gap: var(--s1) var(--s2); }
   .concern-text { grid-column: 1 / -1; }
+  .along-row > details > summary { grid-template-columns: 3rem 3.4rem minmax(0, 1fr); padding: var(--s2); }
   .briefing h2 { gap: 0 var(--s2); }
   .briefing h2 .meta { flex-basis: 100%; }
 }
@@ -1012,6 +1046,7 @@ summary:focus-visible,
 .window-table th.window-zone, .window-table tbody th { width: 3.4rem; text-align: left; }
 .window-table tbody th { font-family: var(--mono); font-size: 0.8rem; font-weight: 600; padding-right: var(--s1); }
 .window-table td { padding: 0; }
+.window-table tr.window-along th { font-family: var(--sans); font-weight: 500; color: var(--muted); }
 button.window-cell {
   position: relative; display: block; width: 100%; min-width: 1.35rem; height: 2rem; padding: 0;
   border: 0; border-radius: 3px; font-family: var(--mono); font-size: 0.75rem; font-weight: 600;

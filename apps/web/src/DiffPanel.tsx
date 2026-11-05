@@ -77,6 +77,10 @@ export function DiffPanel({ d }: { d: BriefingDiff }) {
         <Point key={p.waypoint} p={p} />
       ))}
       {d.alternate && <Point p={d.alternate} label="alternate " />}
+      {/* Along the way, a station coming or going with nothing to say is not news; one that crossed a limit, or stopped, is. */}
+      {(d.enroute ?? []).map((p) => (
+        <Point key={`along-${p.waypoint}`} p={{ ...p, changes: p.changes.filter((c) => c.crossesLimit || c.kind === 'worsened' || c.kind === 'eased') }} label="along the way · " />
+      ))}
       {(newNotams.length > 0 || rankChanged.length > 0) && (
         <div className="diff-point">
           <h4>NOTAMs</h4>

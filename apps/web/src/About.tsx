@@ -13,7 +13,7 @@ export function About({ weather, aerodromes }: { weather: WeatherSource | null; 
       <h2>What this is</h2>
       <p className="lede">
         Departure Brief puts in front of a pilot everything they would look at before a flight, in one place, with the report behind every line. It decodes the raw
-        products, resolves them to each point along the route at the time the aircraft will actually be there, and compares them against that pilot's own
+        products, resolves them to each point along the route, and every reporting station beside it, at the time the aircraft will actually be there, and compares them against that pilot's own
         personal minimums. <b>It does not decide whether to fly.</b> That is the pilot's, and this exists to make sure nothing they needed was missed.
       </p>
 

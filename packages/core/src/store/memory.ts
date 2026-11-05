@@ -21,15 +21,34 @@ export class MemoryStore implements Store {
 
   private readonly fetchedFor = new Map<string, Map<string, Date>>();
 
+  /*
+   * By station, so asking for one station's reports does not read every
+   * report held. A briefing asks that of every station near its route,
+   * and the page holds the whole continent's. The order each report was
+   * first put is kept, so the answer is the one a scan would give.
+   */
+  private readonly order = new Map<string, number>();
+  private readonly byStation = new Map<string, Set<string>>();
+  private readonly byFetchedFor = new Map<string, Set<string>>();
+
+  private static file(index: Map<string, Set<string>>, station: string, sha256: string): void {
+    const set = index.get(station);
+    if (set) set.add(sha256);
+    else index.set(station, new Set([sha256]));
+  }
+
   async putRaw(report: RawReport, fetch: FetchEvent): Promise<{ inserted: boolean }> {
     this.fetches.push({ sha256: report.sha256, event: fetch });
     if (fetch.station) {
       const m = this.fetchedFor.get(report.sha256) ?? new Map<string, Date>();
       if (!m.has(fetch.station)) m.set(fetch.station, fetch.fetchedAt);
       this.fetchedFor.set(report.sha256, m);
+      MemoryStore.file(this.byFetchedFor, fetch.station, report.sha256);
     }
     if (this.raw.has(report.sha256)) return { inserted: false };
     this.raw.set(report.sha256, report);
+    this.order.set(report.sha256, this.order.size);
+    if (report.station !== null) MemoryStore.file(this.byStation, report.station, report.sha256);
     this.firstSeen.set(report.sha256, fetch.fetchedAt);
     return { inserted: true };
   }
@@ -48,7 +67,13 @@ export class MemoryStore implements Store {
       const at = this.fetchedFor.get(sha)?.get(station);
       return at !== undefined && at.getTime() <= knownBy;
     };
-    return [...this.raw.values()]
+    const held =
+      station === null
+        ? [...this.raw.values()]
+        : [...new Set([...(this.byStation.get(station) ?? []), ...(this.byFetchedFor.get(station) ?? [])])]
+            .sort((a, b) => this.order.get(a)! - this.order.get(b)!)
+            .map((sha) => this.raw.get(sha)!);
+    return held
       .filter((r) => r.kind === query.kind)
       // No station asked for means every report of this kind: a SIGMET
       // belongs to an area, not to an aerodrome.

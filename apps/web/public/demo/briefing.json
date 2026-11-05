@@ -1,10 +1,10 @@
 {
-  "sha256": "82c83c66b0cf23aee131d26815527cbd62906276a49bad64a778ceca68a35bb0",
+  "sha256": "36cd0381c2080ea4a4ba1cfbdb80b829b2bc688c51ae5fe68215554acc7efb18",
   "flightKey": "2c8115094cbf5965b4acc3bb0482ba82f940c10935f36d80648410ed0541d0a8",
   "asOf": "2026-09-19T00:52:00.000Z",
   "createdAt": "2026-09-19T00:52:00.000Z",
   "document": {
-    "format": 3,
+    "format": 4,
     "plan": {
       "departure": "CYSN",
       "destination": "CYKF",
@@ -48,7 +48,7 @@
     },
     "asOf": "2026-09-19T00:52:00.000Z",
     "versions": {
-      "rules": 8,
+      "rules": 9,
       "metarDecoder": 2,
       "tafDecoder": 1,
       "notamDecoder": 1,
@@ -1238,6 +1238,26 @@
           "sha256": "c622a183db8bbb402a2b7dbbe9d989ef24998ac3188f88ffb1adfd821cc03979"
         }
       },
+      "enroute": [
+        {
+          "station": "CYTZ",
+          "leg": 0,
+          "eta": "2026-09-19T04:09:47.759Z",
+          "cumulativeNm": 17.1429884895226,
+          "offsetNm": 22.079657655444084,
+          "forecast": "995e4286465d67a7459d6ce1d870f64c8d26657e61a25f12561884a70664c7f6",
+          "metar": "d21f168543f0a1e8f3c29052365119319ab4f990630fded09f20fcdbc4b30afa"
+        },
+        {
+          "station": "CYYZ",
+          "leg": 0,
+          "eta": "2026-09-19T04:15:49.819Z",
+          "cumulativeNm": 27.703080931498615,
+          "offsetNm": 21.827945222809507,
+          "forecast": "26a0470273982d9e09d40cc67377d7cb8f51d98f109482b32f47c1faa2f3489d",
+          "metar": "8f254728ea5905086b7dac90625bcafda95a3c605cfa8507675efcc9ee6f1d8e"
+        }
+      ],
       "reports": [
         {
           "kind": "notam",
@@ -1280,6 +1300,12 @@
           "station": "CPJ3",
           "sha256": "1aee8b316854c80eed10093455287eff18dd9304839e0e018ad19fa6bc5acd3e",
           "issuedAt": "2026-09-18T17:15:00.000Z"
+        },
+        {
+          "kind": "taf",
+          "station": "CYYZ",
+          "sha256": "26a0470273982d9e09d40cc67377d7cb8f51d98f109482b32f47c1faa2f3489d",
+          "issuedAt": "2026-09-18T23:40:00.000Z"
         },
         {
           "kind": "notam",
@@ -1348,6 +1374,18 @@
           "issuedAt": "2026-07-27T13:14:00.000Z"
         },
         {
+          "kind": "metar",
+          "station": "CYYZ",
+          "sha256": "8f254728ea5905086b7dac90625bcafda95a3c605cfa8507675efcc9ee6f1d8e",
+          "issuedAt": "2026-09-19T00:00:00.000Z"
+        },
+        {
+          "kind": "taf",
+          "station": "CYTZ",
+          "sha256": "995e4286465d67a7459d6ce1d870f64c8d26657e61a25f12561884a70664c7f6",
+          "issuedAt": "2026-09-18T19:40:00.000Z"
+        },
+        {
           "kind": "notam",
           "station": null,
           "sha256": "a6ba0102117cc6bad2f2dbe13d53dc641c401c1a8e8576d01ec9fe61197c4b14",
@@ -1402,6 +1440,12 @@
           "issuedAt": "2026-09-17T14:14:31.034Z"
         },
         {
+          "kind": "metar",
+          "station": "CYTZ",
+          "sha256": "d21f168543f0a1e8f3c29052365119319ab4f990630fded09f20fcdbc4b30afa",
+          "issuedAt": "2026-09-19T00:00:00.000Z"
+        },
+        {
           "kind": "notam",
           "station": "CYSN",
           "sha256": "dd5457c19e89072911e4855c6d220192a7d3b9d0ec1527ff1296be66225c96e3",
@@ -1422,7 +1466,7 @@
       ]
     },
     "briefing": {
-      "rulesVersion": 8,
+      "rulesVersion": 9,
       "profile": {
         "name": "default",
         "version": 1
@@ -3926,7 +3970,447 @@
             ]
           }
         ]
-      }
+      },
+      "enroute": [
+        {
+          "station": "CYTZ",
+          "leg": 0,
+          "alongNm": 17.1429884895226,
+          "offsetNm": 22.079657655444084,
+          "at": "2026-09-19T04:09:47.759Z",
+          "category": "VFR",
+          "forecastCategory": "VFR",
+          "night": true,
+          "findings": [
+            {
+              "rule": "personal.ceiling",
+              "attention": "routine",
+              "summary": "ceiling 18000 ft AGL meets personal minimum 2500 ft",
+              "waypoint": "CYTZ",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-19T04:09:47.759Z",
+              "values": {
+                "ceiling": 18000,
+                "minimum": 2500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYTZ",
+                  "raw": "TAF CYTZ 181940Z 1820/1920 22010KT P6SM SCT050 BECMG 1822/1824 01008KT FM190000 01008KT P6SM BKN180 BECMG 1904/1906 06012KT FM191200 06015KT P6SM BKN020 FM191600 08012KT P6SM SCT030 FM191900 08012KT P6SM FEW030 RMK FCST BASED ON AUTO OBS. NXT FCST BY 190200Z",
+                  "span": {
+                    "start": 93,
+                    "end": 99
+                  },
+                  "text": "BKN180",
+                  "sha256": "995e4286465d67a7459d6ce1d870f64c8d26657e61a25f12561884a70664c7f6"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.visibility",
+              "attention": "routine",
+              "summary": "visibility >6 SM meets personal minimum 5 SM",
+              "waypoint": "CYTZ",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-19T04:09:47.759Z",
+              "values": {
+                "visibilitySm": 6,
+                "text": ">6 SM",
+                "minimum": 5
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYTZ",
+                  "raw": "TAF CYTZ 181940Z 1820/1920 22010KT P6SM SCT050 BECMG 1822/1824 01008KT FM190000 01008KT P6SM BKN180 BECMG 1904/1906 06012KT FM191200 06015KT P6SM BKN020 FM191600 08012KT P6SM SCT030 FM191900 08012KT P6SM FEW030 RMK FCST BASED ON AUTO OBS. NXT FCST BY 190200Z",
+                  "span": {
+                    "start": 88,
+                    "end": 92
+                  },
+                  "text": "P6SM",
+                  "sha256": "995e4286465d67a7459d6ce1d870f64c8d26657e61a25f12561884a70664c7f6"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.ceiling",
+              "attention": "routine",
+              "summary": "ceiling 18000 ft AGL meets personal minimum 2500 ft",
+              "waypoint": "CYTZ",
+              "basis": "BECMG 04:00Z–06:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-19T04:09:47.759Z",
+              "values": {
+                "ceiling": 18000,
+                "minimum": 2500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYTZ",
+                  "raw": "TAF CYTZ 181940Z 1820/1920 22010KT P6SM SCT050 BECMG 1822/1824 01008KT FM190000 01008KT P6SM BKN180 BECMG 1904/1906 06012KT FM191200 06015KT P6SM BKN020 FM191600 08012KT P6SM SCT030 FM191900 08012KT P6SM FEW030 RMK FCST BASED ON AUTO OBS. NXT FCST BY 190200Z",
+                  "span": {
+                    "start": 93,
+                    "end": 99
+                  },
+                  "text": "BKN180",
+                  "sha256": "995e4286465d67a7459d6ce1d870f64c8d26657e61a25f12561884a70664c7f6"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.visibility",
+              "attention": "routine",
+              "summary": "visibility >6 SM meets personal minimum 5 SM",
+              "waypoint": "CYTZ",
+              "basis": "BECMG 04:00Z–06:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-19T04:09:47.759Z",
+              "values": {
+                "visibilitySm": 6,
+                "text": ">6 SM",
+                "minimum": 5
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYTZ",
+                  "raw": "TAF CYTZ 181940Z 1820/1920 22010KT P6SM SCT050 BECMG 1822/1824 01008KT FM190000 01008KT P6SM BKN180 BECMG 1904/1906 06012KT FM191200 06015KT P6SM BKN020 FM191600 08012KT P6SM SCT030 FM191900 08012KT P6SM FEW030 RMK FCST BASED ON AUTO OBS. NXT FCST BY 190200Z",
+                  "span": {
+                    "start": 88,
+                    "end": 92
+                  },
+                  "text": "P6SM",
+                  "sha256": "995e4286465d67a7459d6ce1d870f64c8d26657e61a25f12561884a70664c7f6"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.ceiling",
+              "attention": "routine",
+              "summary": "ceiling 18000 ft AGL meets personal minimum 2500 ft",
+              "waypoint": "CYTZ",
+              "basis": "observed 00:00Z",
+              "basisKind": "observed",
+              "at": "2026-09-19T04:09:47.759Z",
+              "values": {
+                "ceiling": 18000,
+                "minimum": 2500
+              },
+              "citations": [
+                {
+                  "kind": "metar",
+                  "station": "CYTZ",
+                  "raw": "METAR CYTZ 190000Z AUTO 34011G18KT 9SM BKN180 BKN200 18/07 A3021 RMK SLP234",
+                  "span": {
+                    "start": 39,
+                    "end": 45
+                  },
+                  "text": "BKN180",
+                  "sha256": "d21f168543f0a1e8f3c29052365119319ab4f990630fded09f20fcdbc4b30afa"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.visibility",
+              "attention": "routine",
+              "summary": "visibility 9 SM meets personal minimum 5 SM",
+              "waypoint": "CYTZ",
+              "basis": "observed 00:00Z",
+              "basisKind": "observed",
+              "at": "2026-09-19T04:09:47.759Z",
+              "values": {
+                "visibilitySm": 9,
+                "text": "9 SM",
+                "minimum": 5
+              },
+              "citations": [
+                {
+                  "kind": "metar",
+                  "station": "CYTZ",
+                  "raw": "METAR CYTZ 190000Z AUTO 34011G18KT 9SM BKN180 BKN200 18/07 A3021 RMK SLP234",
+                  "span": {
+                    "start": 35,
+                    "end": 38
+                  },
+                  "text": "9SM",
+                  "sha256": "d21f168543f0a1e8f3c29052365119319ab4f990630fded09f20fcdbc4b30afa"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "station": "CYYZ",
+          "leg": 0,
+          "alongNm": 27.703080931498615,
+          "offsetNm": 21.827945222809507,
+          "at": "2026-09-19T04:15:49.819Z",
+          "category": "VFR",
+          "forecastCategory": "VFR",
+          "night": true,
+          "findings": [
+            {
+              "rule": "personal.ceiling",
+              "attention": "routine",
+              "summary": "ceiling 25000 ft AGL meets personal minimum 2500 ft",
+              "waypoint": "CYYZ",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-19T04:15:49.819Z",
+              "values": {
+                "ceiling": 25000,
+                "minimum": 2500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYYZ",
+                  "raw": "TAF CYYZ 182340Z 1900/2006 35010KT P6SM SCT180 BKN250 BECMG 1904/1906 04005KT FM191200 05007KT P6SM BKN015 BECMG 1914/1916 11008KT FM191700 11008KT P6SM SCT030 SCT160 FM192200 10005KT P6SM -SHRA OVC120 FM200200 05005KT P6SM -SHRA SCT030 OVC060 RMK NXT FCST BY 190300Z",
+                  "span": {
+                    "start": 47,
+                    "end": 53
+                  },
+                  "text": "BKN250",
+                  "sha256": "26a0470273982d9e09d40cc67377d7cb8f51d98f109482b32f47c1faa2f3489d"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.visibility",
+              "attention": "routine",
+              "summary": "visibility >6 SM meets personal minimum 5 SM",
+              "waypoint": "CYYZ",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-19T04:15:49.819Z",
+              "values": {
+                "visibilitySm": 6,
+                "text": ">6 SM",
+                "minimum": 5
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYYZ",
+                  "raw": "TAF CYYZ 182340Z 1900/2006 35010KT P6SM SCT180 BKN250 BECMG 1904/1906 04005KT FM191200 05007KT P6SM BKN015 BECMG 1914/1916 11008KT FM191700 11008KT P6SM SCT030 SCT160 FM192200 10005KT P6SM -SHRA OVC120 FM200200 05005KT P6SM -SHRA SCT030 OVC060 RMK NXT FCST BY 190300Z",
+                  "span": {
+                    "start": 35,
+                    "end": 39
+                  },
+                  "text": "P6SM",
+                  "sha256": "26a0470273982d9e09d40cc67377d7cb8f51d98f109482b32f47c1faa2f3489d"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.ceiling",
+              "attention": "routine",
+              "summary": "ceiling 25000 ft AGL meets personal minimum 2500 ft",
+              "waypoint": "CYYZ",
+              "basis": "BECMG 04:00Z–06:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-19T04:15:49.819Z",
+              "values": {
+                "ceiling": 25000,
+                "minimum": 2500
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYYZ",
+                  "raw": "TAF CYYZ 182340Z 1900/2006 35010KT P6SM SCT180 BKN250 BECMG 1904/1906 04005KT FM191200 05007KT P6SM BKN015 BECMG 1914/1916 11008KT FM191700 11008KT P6SM SCT030 SCT160 FM192200 10005KT P6SM -SHRA OVC120 FM200200 05005KT P6SM -SHRA SCT030 OVC060 RMK NXT FCST BY 190300Z",
+                  "span": {
+                    "start": 47,
+                    "end": 53
+                  },
+                  "text": "BKN250",
+                  "sha256": "26a0470273982d9e09d40cc67377d7cb8f51d98f109482b32f47c1faa2f3489d"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.visibility",
+              "attention": "routine",
+              "summary": "visibility >6 SM meets personal minimum 5 SM",
+              "waypoint": "CYYZ",
+              "basis": "BECMG 04:00Z–06:00Z",
+              "basisKind": "overlay",
+              "at": "2026-09-19T04:15:49.819Z",
+              "values": {
+                "visibilitySm": 6,
+                "text": ">6 SM",
+                "minimum": 5
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYYZ",
+                  "raw": "TAF CYYZ 182340Z 1900/2006 35010KT P6SM SCT180 BKN250 BECMG 1904/1906 04005KT FM191200 05007KT P6SM BKN015 BECMG 1914/1916 11008KT FM191700 11008KT P6SM SCT030 SCT160 FM192200 10005KT P6SM -SHRA OVC120 FM200200 05005KT P6SM -SHRA SCT030 OVC060 RMK NXT FCST BY 190300Z",
+                  "span": {
+                    "start": 35,
+                    "end": 39
+                  },
+                  "text": "P6SM",
+                  "sha256": "26a0470273982d9e09d40cc67377d7cb8f51d98f109482b32f47c1faa2f3489d"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.ceiling",
+              "attention": "routine",
+              "summary": "ceiling 17000 ft AGL meets personal minimum 2500 ft",
+              "waypoint": "CYYZ",
+              "basis": "observed 00:00Z",
+              "basisKind": "observed",
+              "at": "2026-09-19T04:15:49.819Z",
+              "values": {
+                "ceiling": 17000,
+                "minimum": 2500
+              },
+              "citations": [
+                {
+                  "kind": "metar",
+                  "station": "CYYZ",
+                  "raw": "METAR CYYZ 190000Z 36011G17KT 15SM BKN170 16/07 A3023 RMK AC7 SLP240",
+                  "span": {
+                    "start": 35,
+                    "end": 41
+                  },
+                  "text": "BKN170",
+                  "sha256": "8f254728ea5905086b7dac90625bcafda95a3c605cfa8507675efcc9ee6f1d8e"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "personal.visibility",
+              "attention": "routine",
+              "summary": "visibility 15 SM meets personal minimum 5 SM",
+              "waypoint": "CYYZ",
+              "basis": "observed 00:00Z",
+              "basisKind": "observed",
+              "at": "2026-09-19T04:15:49.819Z",
+              "values": {
+                "visibilitySm": 15,
+                "text": "15 SM",
+                "minimum": 5
+              },
+              "citations": [
+                {
+                  "kind": "metar",
+                  "station": "CYYZ",
+                  "raw": "METAR CYYZ 190000Z 36011G17KT 15SM BKN170 16/07 A3023 RMK AC7 SLP240",
+                  "span": {
+                    "start": 30,
+                    "end": 34
+                  },
+                  "text": "15SM",
+                  "sha256": "8f254728ea5905086b7dac90625bcafda95a3c605cfa8507675efcc9ee6f1d8e"
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     "navlog": {
       "version": 2,

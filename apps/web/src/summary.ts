@@ -1,4 +1,4 @@
-import type { Attention, FlightCategory, Finding, NavLogLeg, PointReview, StoredBriefing } from './types.js';
+import type { Attention, EnrouteReview, FlightCategory, Finding, NavLogLeg, PointReview, StoredBriefing } from './types.js';
 
 /**
  * The briefing said the way a pilot says it.
@@ -15,7 +15,7 @@ import type { Attention, FlightCategory, Finding, NavLogLeg, PointReview, Stored
  * and caution belongs to exactly one of those lines; none is dropped.
  */
 
-export type Role = 'Departure' | 'Via' | 'Destination' | 'Alternate';
+export type Role = 'Departure' | 'Via' | 'Destination' | 'Alternate' | 'Along the way';
 
 export interface LabelledPoint {
   readonly point: PointReview;
@@ -205,6 +205,58 @@ export function fieldCards(stored: StoredBriefing): FieldCard[] {
   return labelledPoints(stored).map((lp) => card(lp, cruise));
 }
 
+/* --------------------------------------------------------- along the way */
+
+/** Where beside the track a station is, as a pilot reads it off a chart: "102 nm along, 18 nm left". */
+function abeamText(s: Pick<EnrouteReview, 'alongNm' | 'offsetNm'>): string {
+  const off = Math.round(Math.abs(s.offsetNm));
+  return `${Math.round(s.alongNm)} nm along, ${off === 0 ? 'on the track' : `${off} nm ${s.offsetNm > 0 ? 'right' : 'left'}`}`;
+}
+
+export interface AlongStation {
+  readonly review: EnrouteReview;
+  /** At the time you pass it: the forecast's category where a TAF covers that time, the observation's otherwise. */
+  readonly category: FlightCategory | null;
+  /** Which of the two the category is: the observation is now, not when you pass. */
+  readonly from: 'forecast' | 'now' | null;
+  readonly attention: Extract<Attention, 'alert' | 'caution'> | null;
+  /** What crossed a limit there, by topic, in the order the briefing reads them. */
+  readonly crossed: readonly string[];
+}
+
+export interface AlongLeg {
+  /** The leg's index: the stations between point `leg` and point `leg + 1`. */
+  readonly leg: number;
+  readonly from: string;
+  readonly to: string;
+  readonly distanceNm: number;
+  readonly stations: readonly AlongStation[];
+}
+
+function alongStation(review: EnrouteReview): AlongStation {
+  const asks = review.findings.filter(asking);
+  const seen = new Set(asks.map((f) => topicOf(f.rule)));
+  return {
+    review,
+    category: review.forecastCategory ?? review.category,
+    from: review.forecastCategory ? 'forecast' : review.category ? 'now' : null,
+    attention: asks.some((f) => f.attention === 'alert') ? 'alert' : asks.length > 0 ? 'caution' : null,
+    crossed: TOPICS.filter((t) => seen.has(t)).map((t) => TOPIC_LABEL[t].toLowerCase()),
+  };
+}
+
+/** Every leg of the route with the stations beside it, a leg with none included so the page can say so. */
+export function alongTheWay(stored: StoredBriefing): AlongLeg[] {
+  const enroute = stored.document.briefing.enroute ?? [];
+  return stored.document.navlog.legs.map((leg, i) => ({
+    leg: i,
+    from: leg.from,
+    to: leg.to,
+    distanceNm: leg.distanceNm,
+    stations: enroute.filter((s) => s.leg === i).map(alongStation),
+  }));
+}
+
 /* ----------------------------------------------------------- worth a look */
 
 export type Topic = 'wind' | 'cloud' | 'visibility' | 'weather' | 'hazard' | 'daylight' | 'cruise' | 'observation' | 'fuel' | 'other';
@@ -253,6 +305,7 @@ const SAID_ELSEWHERE: ReadonlySet<string> = new Set(['forecast.coverage', 'forec
 
 export interface Concern {
   readonly key: string;
+  /** The field, or along the way the station that asks most. */
   readonly waypoint: string;
   readonly role: Role;
   readonly topic: Topic;
@@ -358,6 +411,57 @@ function whenOf(f: Finding): string | null {
 }
 
 const KIND_ORDER = ['prevailing', 'overlay', 'observed', 'forecast', 'time', 'plan'];
+const byKind = (fs: readonly Finding[]) => [...fs].sort((a, b) => KIND_ORDER.indexOf(a.basisKind) - KIND_ORDER.indexOf(b.basisKind));
+const weight = (a: Attention) => (a === 'alert' ? 0 : 1);
+
+/**
+ * Along the way, one line per leg and topic rather than per station: a
+ * corridor through a cloudy afternoon can hold a dozen stations saying the
+ * same thing, and a dozen lines saying it would bury the one at the
+ * destination. The line names the station that asks most — an alert before
+ * a caution, then the first one passed — and the others after it, and
+ * opens to every finding of every one of them.
+ */
+function alongConcerns(stored: StoredBriefing): (Concern & { order: number })[] {
+  const out: (Concern & { order: number })[] = [];
+  for (const { leg, stations } of alongTheWay(stored)) {
+    const groups = new Map<Topic, { review: EnrouteReview; findings: Finding[] }[]>();
+    for (const { review } of stations) {
+      const mine = new Map<Topic, Finding[]>();
+      for (const f of review.findings) {
+        if (!asking(f)) continue;
+        const topic = topicOf(f.rule);
+        mine.set(topic, [...(mine.get(topic) ?? []), f]);
+      }
+      for (const [topic, findings] of mine) groups.set(topic, [...(groups.get(topic) ?? []), { review, findings }]);
+    }
+    for (const [topic, list] of groups) {
+      const most = (fs: readonly Finding[]) => (fs.some((f) => f.attention === 'alert') ? 'alert' : 'caution');
+      const ranked = [...list].sort((a, b) => weight(most(a.findings)) - weight(most(b.findings)) || a.review.alongNm - b.review.alongNm);
+      const first = ranked[0]!;
+      const sorted = byKind(first.findings);
+      const others = ranked.slice(1).map((r) => r.review.station);
+      out.push({
+        key: `along-${leg}-${topic}`,
+        // Between the field the leg leaves and the one it reaches.
+        order: leg + 0.5,
+        waypoint: first.review.station,
+        role: 'Along the way',
+        topic,
+        attention: ranked.some((r) => most(r.findings) === 'alert') ? 'alert' : 'caution',
+        headline: `${headline(topic, sorted, first.review.findings)}, at ${first.review.station}`,
+        when: [
+          abeamText(first.review),
+          ...new Set(sorted.map(whenOf).filter((w): w is string => w !== null)),
+          // A dozen identifiers is a list nobody reads on a phone; the line opens to every one of them.
+          ...(others.length > 0 ? [`also ${others.length > 4 ? `${others.slice(0, 4).join(', ')} and ${others.length - 4} more` : others.join(', ')}`] : []),
+        ],
+        findings: ranked.flatMap((r) => byKind(r.findings)),
+      });
+    }
+  }
+  return out;
+}
 
 export function concernsOf(stored: StoredBriefing): Concern[] {
   const out: (Concern & { order: number })[] = [];
@@ -369,7 +473,7 @@ export function concernsOf(stored: StoredBriefing): Concern[] {
       groups.set(topic, [...(groups.get(topic) ?? []), f]);
     }
     for (const [topic, fs] of groups) {
-      const sorted = [...fs].sort((a, b) => KIND_ORDER.indexOf(a.basisKind) - KIND_ORDER.indexOf(b.basisKind));
+      const sorted = byKind(fs);
       out.push({
         key: `${order}-${topic}`,
         order,
@@ -383,7 +487,7 @@ export function concernsOf(stored: StoredBriefing): Concern[] {
       });
     }
   });
-  const weight = (a: Attention) => (a === 'alert' ? 0 : 1);
+  out.push(...alongConcerns(stored));
   return out
     .sort((a, b) => weight(a.attention) - weight(b.attention) || a.order - b.order || TOPICS.indexOf(a.topic) - TOPICS.indexOf(b.topic))
     .map(({ order: _, ...c }) => c);
