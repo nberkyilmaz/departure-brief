@@ -36,6 +36,9 @@ const tafXml = readFileSync(join(FIXTURES, 'awc-cache-2026-10-20', 'tafs.cache.x
 const fbus31 = readFileSync(join(FIXTURES, 'awc', 'windtemp', 'fbus31.kwno.fd1.us1.txt'), 'utf8');
 const FB_US_06 = `${AWC_API}/windtemp?region=us&level=low&fcst=06`;
 const FB_KEYS = FB_PRODUCTS.map((p) => p.key);
+/** Toronto's and Val-d'Or's upper winds, and CFPS refusing a request over a site it does not know: both as recorded on 5 November 2026. */
+const upperwinds = readFileSync(join(FIXTURES, 'navcanada', 'upperwind', '2026-11-05', 'CYYZ-CYVO.json'), 'utf8');
+const refusedCyei = readFileSync(join(FIXTURES, 'navcanada', 'upperwind', '2026-11-05', 'refused-CYEI.json'), 'utf8');
 
 const PAGE = 'https://nberkyilmaz.github.io';
 const T0 = Date.parse('2026-10-20T05:00:00Z');
@@ -51,7 +54,7 @@ function upstream(overrides: Record<string, Answer> = {}) {
     [PRODUCTS.tafs.upstream]: () => new Response(gzipSync(tafXml), { headers: { 'Content-Type': 'application/octet-stream' } }),
     [PRODUCTS.isigmet.upstream]: () => new Response('[{"firId":"CZYZ","rawSigmet":"..."}]'),
     [PRODUCTS.airsigmet.upstream]: () => new Response(null, { status: 204 }),
-    [PRODUCTS.upperwind.upstream]: () => new Response('{"meta":{},"data":[]}'),
+    [PRODUCTS.upperwind.upstream]: () => new Response(upperwinds),
     [`${CFPS}?site=CYSN&alpha=notam`]: () => new Response('{"meta":{},"data":[{"type":"notam"}]}'),
     // One US bulletin as it was, and the rest as NOAA has answered since 3 November: nothing.
     ...Object.fromEntries(FB_PRODUCTS.map((p) => [p.upstream, () => new Response(null, { status: 204 })])),
@@ -154,6 +157,33 @@ describe('the timer', () => {
     expect((await r.kv.getWithMetadata('metars')).value).toBeNull();
   });
 
+  it('never replaces the country\'s upper winds with a refusal that arrived as a 200', async () => {
+    let refusing = false;
+    const r = relayWith(upstream({ [PRODUCTS.upperwind.upstream]: () => new Response(refusing ? refusedCyei : upperwinds) }));
+    await r.relay.refresh();
+    refusing = true;
+    r.advance(60 * MIN);
+    const outcomes = await r.relay.refresh();
+    expect(outcomes.find((o) => o.key === 'upperwind')).toMatchObject({ state: 'failed', error: expect.stringContaining('alpha.geomInvalid (CYEI)') });
+    const served = await r.get('/cfps/?alpha=upperwind');
+    expect(text(served)).toBe(upperwinds);
+    expect(served.headers['X-Fetched-At']).toBe('2026-10-20T05:00:00.000Z');
+  });
+
+  it('asks again without a site NAV CANADA stops recognising, and says so on the status page', async () => {
+    // The recorded refusal, naming one of the relay's own sites rather than CYEI.
+    const gone = UPPERWIND_SITES[0];
+    const refusal = refusedCyei.replace('CYEI', gone);
+    const without = `${CFPS}?${UPPERWIND_SITES.filter((s) => s !== gone).map((s) => `site=${s}`).join('&')}&alpha=upperwind`;
+    const r = relayWith(upstream({ [PRODUCTS.upperwind.upstream]: () => new Response(refusal), [without]: () => new Response(upperwinds) }));
+    const outcomes = await r.relay.refresh();
+    expect(outcomes.find((o) => o.key === 'upperwind')).toMatchObject({ state: 'refreshed' });
+    expect(r.up.calls.filter((u) => u.includes('alpha=upperwind'))).toEqual([PRODUCTS.upperwind.upstream, without]);
+    expect(text(await r.get('/cfps/?alpha=upperwind'))).toBe(upperwinds);
+    const status = JSON.parse(text(await r.get('/status'))) as { products: { product: string; note?: string }[] };
+    expect(status.products.find((p) => p.product === 'upperwind')?.note).toBe(`NAV CANADA does not recognise ${gone}; asked without it`);
+  });
+
   it('stores "nothing in force" as an empty list, because that is what a 204 means here', async () => {
     const r = relayWith();
     await r.relay.refresh();
@@ -222,7 +252,7 @@ describe('serving the page', () => {
     await r.relay.refresh();
     const res = await r.get('/cfps/?site=CYYZ&site=CYOW&alpha=upperwind');
     expect(res.status).toBe(200);
-    expect(text(res)).toBe('{"meta":{},"data":[]}');
+    expect(text(res)).toBe(upperwinds);
   });
 
   it('fetches once on a fresh deployment, before the first tick has run', async () => {

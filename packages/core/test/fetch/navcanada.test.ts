@@ -46,3 +46,30 @@ describe('NavCanadaClient.notams', () => {
     await expect(c.notams('not a site')).rejects.toThrow('invalid site');
   });
 });
+
+describe('NavCanadaClient.upperWinds', () => {
+  /*
+   * Recorded on 5 November 2026. CYEI is a point in NAV CANADA's winds
+   * bulletin but not an aerodrome CFPS knows, and asking for it alongside
+   * Toronto and Val-d'Or empties the answer for all three.
+   */
+  const refused = `${NAVCANADA_CFPS_BASE_URL}?site=CYEI&site=CYYZ&site=CYVO&alpha=upperwind`;
+  const without = `${NAVCANADA_CFPS_BASE_URL}?site=CYYZ&site=CYVO&alpha=upperwind`;
+  const recorded = {
+    [refused]: { status: 200, file: 'navcanada/upperwind/2026-11-05/refused-CYEI-CYYZ-CYVO.json' },
+    [without]: { status: 200, file: 'navcanada/upperwind/2026-11-05/CYYZ-CYVO.json' },
+  };
+
+  it('asks again without a site the service does not know, rather than losing every site', async () => {
+    const http = replayHttp(recorded);
+    const { request, reports } = await new NavCanadaClient(http).upperWinds(['CYEI', 'CYYZ', 'CYVO']);
+    expect(http.calls.map((c) => c.url)).toEqual([refused, without]);
+    expect(request).toBe(without);
+    expect([...new Set(reports.map((r) => r.station))].sort()).toEqual(['CYVO', 'CYYZ']);
+  });
+
+  it('treats a refusal it cannot get around as a failure, not as a country with no winds', async () => {
+    const http = replayHttp({ [`${NAVCANADA_CFPS_BASE_URL}?site=CYEI&alpha=upperwind`]: { status: 200, file: 'navcanada/upperwind/2026-11-05/refused-CYEI.json' } });
+    await expect(new NavCanadaClient(http).upperWinds(['CYEI'])).rejects.toThrow(/refused: alpha\.geomInvalid/);
+  });
+});

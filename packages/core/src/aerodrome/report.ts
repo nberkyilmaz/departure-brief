@@ -23,6 +23,7 @@ import { analyseCrosswind, type CrosswindAnalysis } from '../rules/crosswind.js'
 import { explainMetar, type MetarLine } from '../explain/metar.js';
 import { checkDaylight } from '../rules/daylight.js';
 import { checkObservation } from '../rules/observation.js';
+import { checkUnread } from '../rules/unread.js';
 import { metarConditions } from '../rules/evaluate.js';
 import type { Finding } from '../rules/types.js';
 import type { Store } from '../store/types.js';
@@ -111,26 +112,19 @@ export async function aerodromeReport(store: Store, id: string, at: Date, profil
   };
 
   if (prevailing) {
-    findings.push(
-      ...checkConditions(
-        { ...base, basis: 'prevailing', basisKind: 'prevailing', violation: 'alert', source: { kind: 'taf', station: forecast!.station, raw: forecast!.resolved.raw, sha256: forecast!.report.sha256 } },
-        prevailing.conditions,
-      ),
-    );
+    const source = { kind: 'taf' as const, station: forecast!.station, raw: forecast!.resolved.raw, sha256: forecast!.report.sha256 };
+    findings.push(...checkConditions({ ...base, basis: 'prevailing', basisKind: 'prevailing', violation: 'alert', source }, prevailing.conditions));
+    findings.push(...checkUnread({ waypoint: base.waypoint, at, basis: 'forecast', basisKind: 'forecast', source }, forecast!.taf.unparsed));
   }
   if (observation) {
-    findings.push(
-      ...checkConditions(
-        {
-          ...base,
-          basis: `observed${observation.source === 'nearby' ? ` at ${observation.station}` : ''}`,
-          basisKind: 'observed',
-          violation: 'alert',
-          source: { kind: 'metar', station: observation.station, raw: observation.report.body, sha256: observation.report.sha256 },
-        },
-        metarConditions(observation.decoded),
-      ),
-    );
+    const ctx = {
+      ...base,
+      basis: `observed${observation.source === 'nearby' ? ` at ${observation.station}` : ''}`,
+      basisKind: 'observed' as const,
+      violation: 'alert' as const,
+      source: { kind: 'metar' as const, station: observation.station, raw: observation.report.body, sha256: observation.report.sha256 },
+    };
+    findings.push(...checkConditions(ctx, metarConditions(observation.decoded)), ...checkUnread(ctx, observation.decoded.unparsed));
   }
   findings.push(...checkDaylight({ waypoint: airport.icaoId ?? airport.faaId, position, at, nightAllowed: profile.nightAllowed }));
 
