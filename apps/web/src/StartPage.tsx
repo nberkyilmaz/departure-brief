@@ -29,7 +29,10 @@ class MapBoundary extends Component<{ children: ReactNode }, { failed: boolean }
  * itself: every station reporting, coloured the way every weather service
  * colours them, each one a link to its own page.
  */
-export function StartPage({ engine, weather, home }: { engine: LocalEngine | null; weather: WeatherSource | null; home: string }) {
+/** `home`: where the visitor last departed from, or null for somebody who has not briefed a flight here yet. */
+export function StartPage({ engine, weather, home }: { engine: LocalEngine | null; weather: WeatherSource | null; home: string | null }) {
+  // Somewhere to start for a first visit: a field, not a claim about whose it is.
+  const field = home ?? 'CYSN';
   const [id, setId] = useState('');
   const code = id.trim().toUpperCase();
   const stations = useMemo(() => engine?.stations() ?? [], [engine]);
@@ -40,9 +43,9 @@ export function StartPage({ engine, weather, home }: { engine: LocalEngine | nul
     for (const s of stations) c.set(s.category ?? 'unclassified', (c.get(s.category ?? 'unclassified') ?? 0) + 1);
     return c;
   }, [stations]);
-  const homeStation = engine?.stations().find((s) => s.id === home) ?? null;
+  const homeStation = home ? (engine?.stations().find((s) => s.id === home) ?? null) : null;
   const centre = useMemo(() => {
-    const a = engine?.aerodromes.find((x) => x.id === home);
+    const a = home ? engine?.aerodromes.find((x) => x.id === home) : undefined;
     return a ? { lat: a.lat, lon: a.lon } : null;
   }, [engine, home]);
 
@@ -95,9 +98,9 @@ export function StartPage({ engine, weather, home }: { engine: LocalEngine | nul
           <b>Brief a flight</b>
           <span className="muted">route, times, your minimums</span>
         </a>
-        <a className="start-card" href={aerodromeHref(home)}>
-          <b>{home}</b>
-          <span className="muted">your home field</span>
+        <a className="start-card" href={aerodromeHref(field)}>
+          <b>{field}</b>
+          <span className="muted">{home ? 'where you last left from' : 'a field to look at first'}</span>
         </a>
         <a className="start-card" href={hrefFor({ name: 'about' })}>
           <b>How this works</b>
@@ -134,10 +137,10 @@ export function StartPage({ engine, weather, home }: { engine: LocalEngine | nul
         )}
         <p className="field-note wx-foot">
           Tap a station for its report, read back line by line.
-          {homeStation && (
+          {home && homeStation && (
             <>
               {' '}
-              Your home field <a href={aerodromeHref(home)}>{home}</a> is {homeStation.category ?? 'unclassified'} at{' '}
+              <a href={aerodromeHref(home)}>{home}</a>, where you last left from, is {homeStation.category ?? 'unclassified'} at{' '}
               {homeStation.issuedAt ? homeStation.issuedAt.slice(11, 16) + 'Z' : 'its last report'}.
             </>
           )}

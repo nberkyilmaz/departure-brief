@@ -149,12 +149,12 @@ export function WbPanel({
       <h2>
         Weight and balance{' '}
         <span className="meta">
-          {spec.aircraftType} · from {spec.source?.filename ?? 'typed-in data'} · {spec.review.length} figures awaiting your review
+          {spec.aircraftType} · from {spec.source?.filename ?? 'typed-in data'} · {spec.review.length} to check
         </span>
       </h2>
       <p className="explain">
-        Every limit below was read out of the handbook by a model and then checked against the words on the page. A figure the page does not back is never
-        used — it is listed at the bottom for you to confirm. Empty weight and moment are yours to supply, from the aircraft's own weight-and-balance record.
+        The limits below were read out of the handbook and each one checked against the page; a figure the page does not confirm is never used. Enter the
+        empty weight and moment from your aircraft&apos;s own weight-and-balance record.
       </p>
       {!usable && (
         <p className="error">
@@ -257,7 +257,7 @@ export function WbPanel({
       )}
       {spec.review.length > 0 && (
         <details className="inputs-used">
-          <summary>{spec.review.length} figures the page did not back — for your review, never used in the numbers above</summary>
+          <summary>{spec.review.length} figures the handbook scan could not confirm — listed for you to check, never used above</summary>
           <ul>
             {spec.review.map((r, i) => (
               <li key={`${r.field}-${i}`}>

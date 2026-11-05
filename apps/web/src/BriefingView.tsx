@@ -132,20 +132,55 @@ function Gaps({ stored }: { stored: StoredBriefing }) {
 }
 
 /**
+ * The same line from two products — "airspace class not given" read once
+ * from the forecast and again from the observation — said once, with both
+ * products behind it.
+ */
+function sayOnce(findings: readonly Finding[]): Finding[] {
+  const out = new Map<string, Finding>();
+  for (const f of findings) {
+    const key = `${f.waypoint}|${f.rule}|${f.attention}|${f.summary}`;
+    const seen = out.get(key);
+    out.set(key, seen ? { ...seen, basis: seen.basis.split(' · ').includes(f.basis) ? seen.basis : `${seen.basis} · ${f.basis}`, citations: [...seen.citations, ...f.citations] } : f);
+  }
+  return [...out.values()];
+}
+
+/**
  * A list of findings, most wanting of attention first, each opening to the
  * report it was read from. Shared with the aerodrome page so a field looked
  * up on its own reads exactly as it does inside a briefing.
+ *
+ * The checks that came out within your limits are folded under one line:
+ * on a quiet day they are most of the list, and a page of "meets your
+ * minimum" hides the one line that does not. Folded is not hidden — the
+ * count is on the line and every one is a tap away.
  */
 export function FindingList({ findings, where = false }: { findings: readonly Finding[]; where?: boolean }) {
   const order: Record<string, number> = { alert: 0, caution: 1, note: 2, routine: 3 };
-  const sorted = [...findings].sort((a, b) => (order[a.attention] ?? 9) - (order[b.attention] ?? 9));
+  const sorted = sayOnce(findings).sort((a, b) => (order[a.attention] ?? 9) - (order[b.attention] ?? 9));
   if (sorted.length === 0) return <p className="field-note">Nothing to report.</p>;
-  return (
+  const worth = sorted.filter((f) => f.attention !== 'routine');
+  const routine = sorted.filter((f) => f.attention === 'routine');
+  const list = (fs: readonly Finding[]) => (
     <ul className="findings">
-      {sorted.map((f, i) => (
+      {fs.map((f, i) => (
         <FindingRow key={`${f.rule}-${i}`} f={f} where={where} />
       ))}
     </ul>
+  );
+  return (
+    <>
+      {worth.length > 0 ? list(worth) : <p className="field-note">Nothing here crosses your limits.</p>}
+      {routine.length > 0 && (
+        <details className="routine-checks">
+          <summary>
+            {routine.length} {routine.length === 1 ? 'check' : 'checks'} within your limits
+          </summary>
+          {list(routine)}
+        </details>
+      )}
+    </>
   );
 }
 
@@ -298,8 +333,8 @@ function AlongTheWay({ legs, nameOf }: { legs: readonly AlongLeg[]; nameOf: ((id
     <section className="along" aria-labelledby="along-title">
       <h3 id="along-title">Along the way</h3>
       <p className="explain">
-        {total} reporting station{total === 1 ? '' : 's'} within {CORRIDOR_NM} nm of the track, each read for the time you would pass it. More than{' '}
-        {ON_TRACK_NM} nm off the line, a station describes the weather beside the route, so a limit it crosses is a caution rather than an alert.
+        {total} reporting station{total === 1 ? '' : 's'} within {CORRIDOR_NM} nm of your track, each at the time you pass it. More than {ON_TRACK_NM} nm off
+        the line, a crossed limit is a caution rather than an alert.
       </p>
       {shown.map((leg) => {
         const asks = leg.stations.filter((s) => s.attention !== null);
@@ -369,7 +404,7 @@ export function BriefingView({ stored, nameOf, whenCanIGo }: { stored: StoredBri
           weather as of <Zulu iso={b.asOf} />
         </span>
       </h2>
-      <p className="explain briefing-lede">It compares the forecasts and reports with your minimums. It does not decide whether you go; that stays with you.</p>
+      <p className="explain briefing-lede">Checked against your minimums. Whether to go stays with you.</p>
 
       {/* Adverse conditions first, as a standard briefing gives them; then the hours either side; then each field; then what it could not see. */}
       <WorthALook concerns={concernsOf(stored)} />

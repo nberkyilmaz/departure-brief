@@ -261,6 +261,17 @@ export function AerodromePage({ id, engine, crosswindLimitKt }: { id: string; en
 
   const a = report.airport;
   const o = report.observation;
+  const reporting = report.nearby.filter((n) => n.ageMinutes !== null);
+  const quiet = report.nearby.filter((n) => n.ageMinutes === null);
+  const nearbyRow = (n: (typeof report.nearby)[number]) => (
+    <li key={n.id}>
+      <a href={aerodromeHref(n.id)}>{n.id}</a> <span className="muted">{n.name}</span>{' '}
+      <span className="muted">
+        {n.distanceNm} nm, {String(n.bearingTrue).padStart(3, '0')}°T
+      </span>
+      {n.ageMinutes !== null && <span className="field-note"> · observation {n.ageMinutes} min old</span>}
+    </li>
+  );
   const dusk = report.daylight.civilDusk;
   const dawn = report.daylight.civilDawn;
 
@@ -315,17 +326,20 @@ export function AerodromePage({ id, engine, crosswindLimitKt }: { id: string; en
       <Runways report={report} />
 
       <h3>Nearby fields</h3>
-      <ul className="nearby">
-        {report.nearby.map((n) => (
-          <li key={n.id}>
-            <a href={aerodromeHref(n.id)}>{n.id}</a> <span className="muted">{n.name}</span>{' '}
-            <span className="muted">
-              {n.distanceNm} nm, {String(n.bearingTrue).padStart(3, '0')}°T
-            </span>{' '}
-            {n.ageMinutes === null ? <span className="field-note">no observation</span> : <span className="field-note">observation {n.ageMinutes} min old</span>}
-          </li>
-        ))}
-      </ul>
+      {/* The ones that report the weather first: at four in the morning that is how a pilot finds the field that is awake. */}
+      {reporting.length > 0 ? (
+        <ul className="nearby">{reporting.map(nearbyRow)}</ul>
+      ) : (
+        <p className="field-note">None of the nearest fields reports the weather.</p>
+      )}
+      {quiet.length > 0 && (
+        <details className="nearby-quiet">
+          <summary>
+            {quiet.length} more nearby that {quiet.length === 1 ? 'does' : 'do'} not report
+          </summary>
+          <ul className="nearby">{quiet.map(nearbyRow)}</ul>
+        </details>
+      )}
     </section>
   );
 }
