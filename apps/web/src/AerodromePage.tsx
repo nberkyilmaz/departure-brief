@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { AerodromeReport, LocalEngine } from './engine.js';
 import { FindingList } from './BriefingView.js';
+import { variationText } from './NavLogPage.js';
 import { aerodromeHref } from './router.js';
 import { hhmmZ, local } from './time.js';
 
@@ -183,34 +184,56 @@ function DecodedReport({ report }: { report: AerodromeReport }) {
 
 function Runways({ report }: { report: AerodromeReport }) {
   const runways = report.airport.runways;
+  const v = report.variation;
+  const three = (d: number) => `${String(((Math.round(d) % 360) + 360) % 360 || 360).padStart(3, '0')}°`;
   if (runways.length === 0) return <p className="field-note">No runway data published for this field.</p>;
+  // One end to a line, so each heading sits beside the end it belongs to; the length and surface are the pair's.
+  const ends = (r: (typeof runways)[number], text: (e: (typeof r.ends)[number]) => string) =>
+    r.ends.length === 0
+      ? '—'
+      : r.ends.map((e) => (
+          <span key={e.id} className="runway-end">
+            {text(e)}
+          </span>
+        ));
   return (
     <div className="table-scroll">
-      <table className="wb-table">
+      <table className="wb-table runways">
         <thead>
           <tr>
             <th>Runway</th>
+            <th>True</th>
+            {v !== null && <th>Magnetic</th>}
             <th>Length</th>
             <th>Width</th>
             <th>Surface</th>
-            <th>Heading</th>
           </tr>
         </thead>
         <tbody>
           {runways.map((r) => (
             <tr key={r.id}>
-              <td className="leg-name">{r.id}</td>
+              <td className="leg-name">{r.ends.length === 0 ? r.id : ends(r, (e) => e.id)}</td>
+              <td>{ends(r, (e) => (e.trueHeading === null ? '—' : three(e.trueHeading)))}</td>
+              {v !== null && <td>{ends(r, (e) => (e.trueHeading === null ? '—' : three(e.trueHeading - v)))}</td>}
               <td>{r.length === null ? '—' : `${r.length.toLocaleString('en')} ft`}</td>
               <td>{r.width === null ? '—' : `${r.width} ft`}</td>
               <td>{r.surface ?? '—'}</td>
-              <td>{r.ends.map((e) => (e.trueHeading === null ? `${e.id} —` : `${e.id} ${String(Math.round(e.trueHeading)).padStart(3, '0')}°T`)).join(' · ')}</td>
             </tr>
           ))}
         </tbody>
       </table>
       <p className="field-note">
-        Headings are true. The airport data carries no magnetic variation for Canadian fields, so there is no magnetic column rather than a guessed one.
-        Declared distances are not published here either — these are the physical lengths.
+        {v === null ? (
+          <>Headings are true; the magnetic model does not cover this date, so there is no magnetic heading rather than a guessed one.</>
+        ) : Math.round(Math.abs(v)) === 0 ? (
+          <>Variation here is under half a degree, from NOAA&apos;s World Magnetic Model for today, so magnetic and true are the same.</>
+        ) : (
+          <>
+            Variation here is {variationText(v)}, from NOAA&apos;s World Magnetic Model for today, so magnetic is true {v < 0 ? 'plus' : 'minus'}{' '}
+            {Math.round(Math.abs(v))}°.
+          </>
+        )}{' '}
+        Declared distances are not published here — these are the physical lengths.
       </p>
     </div>
   );

@@ -251,12 +251,20 @@ describe('moving around it', () => {
     expect(rows.some((r) => r?.includes('alternate'))).toBe(true);
 
     // Every leg either has a groundspeed or says why it has not.
-    for (const row of document.querySelectorAll('.navlog-table tbody tr')) {
-      const cells = [...row.querySelectorAll('td')].map((c) => c.textContent ?? '');
-      if (cells.length < 12) continue;
-      const groundspeed = cells[8]!;
+    const legRows = [...document.querySelectorAll('.navlog-table tbody tr')]
+      .map((row) => ({ row, cells: [...row.querySelectorAll('td')].map((c) => c.textContent ?? '') }))
+      .filter((r) => r.cells.length === 13);
+    for (const { row, cells } of legRows) {
+      const groundspeed = cells[9]!;
       if (groundspeed === '—') expect(row.nextElementSibling?.className).toContain('leg-gaps');
     }
+
+    // Magnetic from the variation where the leg begins: about ten west at St. Catharines, added to true.
+    const [, , tc, variation, mc] = legRows[0]!.cells;
+    expect(variation).toBe('10°W');
+    expect((parseInt(mc!, 10) - parseInt(tc!, 10) + 360) % 360).toBeGreaterThanOrEqual(9);
+    expect((parseInt(mc!, 10) - parseInt(tc!, 10) + 360) % 360).toBeLessThanOrEqual(11);
+    expect(document.querySelector('.navlog-page')!.textContent).not.toMatch(/courses are true/);
 
     // No burn rate has been given, so there is no fuel column and it says so.
     expect(screen.getByText(/nothing here will invent a figure/i)).toBeTruthy();
@@ -353,6 +361,16 @@ describe('a field of its own', () => {
     await waitFor(() => expect(document.querySelector('.aerodrome-page .raw')).not.toBeNull(), { timeout: 10_000 });
     expect(document.querySelector('.aerodrome-page .raw')!.textContent).toContain('METAR');
     expect(screen.getByRole('heading', { name: 'Runways' })).toBeTruthy();
+    // Each runway end in true and magnetic, with the variation that turns one into the other.
+    const runways = screen.getByRole('heading', { name: 'Runways' }).nextElementSibling!;
+    expect([...runways.querySelectorAll('th')].map((th) => th.textContent)).toEqual(['Runway', 'True', 'Magnetic', 'Length', 'Width', 'Surface']);
+    for (const row of runways.querySelectorAll('tbody tr')) {
+      const [end, t, m] = [...row.querySelectorAll('td')].slice(0, 3).map((td) => [...td.querySelectorAll('.runway-end')].map((s) => s.textContent ?? ''));
+      expect(end!.length).toBe(t!.length);
+      // Each is rounded on its own, so the two can sit a degree further apart than the variation.
+      t!.forEach((heading, i) => expect(Math.abs(((parseInt(m![i]!, 10) - parseInt(heading, 10) + 360) % 360) - 10)).toBeLessThanOrEqual(1));
+    }
+    expect(runways.textContent).toMatch(/Variation here is 10°W/);
     // And the wind resolved onto each of them, which is the first thing a
     // pilot works out about a field and used to be left as an exercise.
     expect(screen.getByRole('heading', { name: /Wind on the runways/i })).toBeTruthy();

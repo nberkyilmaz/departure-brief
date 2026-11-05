@@ -738,6 +738,9 @@ summary:focus-visible,
    gets, because it means the same thing: a number the pilot set has been
    crossed. */
 .fuel td:last-child { white-space: nowrap; }
+/* One runway end to a line, so true and magnetic stay beside the end they belong to. */
+.runways td { white-space: nowrap; }
+.runways .runway-end { display: block; }
 .fuel .over td { color: var(--nogo); font-weight: 600; }
 
 /* Live weather: stated as plainly as frozen weather, in a calmer colour. */

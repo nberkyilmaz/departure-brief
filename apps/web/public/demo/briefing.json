@@ -1,5 +1,5 @@
 {
-  "sha256": "f50e788abe6911a9634b7959c5541b563c189cc1f91bda9a8a7fe93d6a73e903",
+  "sha256": "82c83c66b0cf23aee131d26815527cbd62906276a49bad64a778ceca68a35bb0",
   "flightKey": "2c8115094cbf5965b4acc3bb0482ba82f940c10935f36d80648410ed0541d0a8",
   "asOf": "2026-09-19T00:52:00.000Z",
   "createdAt": "2026-09-19T00:52:00.000Z",
@@ -3929,7 +3929,7 @@
       }
     },
     "navlog": {
-      "version": 1,
+      "version": 2,
       "tas": 105,
       "altitudeFt": 3500,
       "fuelGph": null,
@@ -3939,7 +3939,8 @@
           "to": "CYKF",
           "distanceNm": 55.1,
           "trueCourse": 287,
-          "magneticCourse": null,
+          "variation": -10.2,
+          "magneticCourse": 298,
           "wind": {
             "directionTrue": 110,
             "speedKt": 11,
@@ -3950,13 +3951,11 @@
           },
           "windCorrectionAngle": -0.3,
           "trueHeading": 287,
-          "magneticHeading": null,
+          "magneticHeading": 297,
           "groundspeedKt": 116,
           "minutes": 29,
           "fuelGal": null,
-          "gaps": [
-            "no magnetic variation published for CYKF; courses are true"
-          ],
+          "gaps": [],
           "cumulativeMinutes": 29,
           "cumulativeFuelGal": null
         }
@@ -3969,7 +3968,8 @@
         "to": "CYHM",
         "distanceNm": 26.2,
         "trueCourse": 131,
-        "magneticCourse": null,
+        "variation": -9.5,
+        "magneticCourse": 141,
         "wind": {
           "directionTrue": 110,
           "speedKt": 11,
@@ -3980,13 +3980,11 @@
         },
         "windCorrectionAngle": -2.2,
         "trueHeading": 129,
-        "magneticHeading": null,
+        "magneticHeading": 139,
         "groundspeedKt": 94.7,
         "minutes": 17,
         "fuelGal": null,
-        "gaps": [
-          "no magnetic variation published for CYHM; courses are true"
-        ],
+        "gaps": [],
         "cumulativeMinutes": null,
         "cumulativeFuelGal": null
       }

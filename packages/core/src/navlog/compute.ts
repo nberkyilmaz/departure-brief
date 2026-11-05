@@ -14,12 +14,12 @@
  * with a blank, because the blank is the only honest way to say "you will
  * have to work this one out yourself".
  */
-import type { Airport } from '../domain/airport.js';
 import { toMagnetic } from '../domain/airport.js';
+import { MAGNETIC_MODEL, magneticVariation } from '../domain/magnetic.js';
 import type { ResolvedFlight } from '../resolve/flight.js';
 import type { WaypointWind } from '../resolve/wind.js';
 
-export const NAVLOG_VERSION = 1;
+export const NAVLOG_VERSION = 2;
 
 export interface NavLogWind {
   readonly directionTrue: number;
@@ -36,7 +36,11 @@ export interface NavLogLeg {
   readonly to: string;
   readonly distanceNm: number;
   readonly trueCourse: number;
-  /** `null` where the airport data carries no magnetic variation, which OurAirports never does. */
+  /**
+   * Degrees, east positive, where the leg begins, from the World Magnetic
+   * Model for the date flown. `null` only outside the years the model covers.
+   */
+  readonly variation: number | null;
   readonly magneticCourse: number | null;
   readonly wind: NavLogWind | null;
   /** Degrees to turn into wind; positive is right. `null` without a wind. */
@@ -123,11 +127,6 @@ function windOf(w: WaypointWind | null): NavLogWind | null {
   };
 }
 
-/** Variation is east-positive; `null` from any source that does not publish it. */
-function variationOf(airport: Airport | null): number | null {
-  return airport?.magneticVariation ?? null;
-}
-
 interface LegInput {
   readonly from: string;
   readonly to: string;
@@ -148,7 +147,7 @@ function computeLeg(leg: LegInput, tas: number, fuelGph: number | null): Omit<Na
     );
   }
   const magneticCourse = leg.variation === null ? null : toMagnetic(leg.trueCourse as never, leg.variation);
-  if (leg.variation === null) gaps.push(`no magnetic variation published for ${leg.to}; courses are true`);
+  if (leg.variation === null) gaps.push(`the ${MAGNETIC_MODEL.name} magnetic model does not cover this date, so courses are true`);
 
   const solved = wind ? solveWind(leg.trueCourse, tas, wind) : null;
   if (wind && !solved) gaps.push(`the wind at ${leg.to} is stronger across the course than the aircraft is fast; this course cannot be held`);
@@ -167,6 +166,7 @@ function computeLeg(leg: LegInput, tas: number, fuelGph: number | null): Omit<Na
     to: leg.to,
     distanceNm: Math.round(leg.distanceNm * 10) / 10,
     trueCourse: compass(Math.round(leg.trueCourse)),
+    variation: leg.variation === null ? null : round1(leg.variation),
     magneticCourse: magneticCourse === null ? null : compass(Math.round(magneticCourse)),
     wind,
     windCorrectionAngle: solved?.windCorrectionAngle ?? (trueHeading !== null ? 0 : null),
@@ -183,7 +183,8 @@ function computeLeg(leg: LegInput, tas: number, fuelGph: number | null): Omit<Na
  * Build the nav log for a resolved flight. The wind for a leg is the one
  * forecast at the point it ends at — the usual simplification, and the
  * finer alternative would need a forecast at the midpoint, which nobody
- * publishes.
+ * publishes. The variation is taken where the leg begins, which is where
+ * its great-circle course is measured, so the two belong to the same place.
  */
 export function navLog(flight: ResolvedFlight, fuelGph: number | null = null): NavLog {
   const tas = flight.plan.cruise.tas;
@@ -198,7 +199,7 @@ export function navLog(flight: ResolvedFlight, fuelGph: number | null = null): N
       distanceNm: leg.distance,
       trueCourse: leg.trueCourse,
       wind: to.wind,
-      variation: variationOf(to.point.waypoint.airport),
+      variation: magneticVariation(points[i - 1]!.point.waypoint.position, points[i - 1]!.point.eta),
     });
   }
 
@@ -230,7 +231,7 @@ export function navLog(flight: ResolvedFlight, fuelGph: number | null = null): N
         distanceNm: flight.route.alternate.leg.distance,
         trueCourse: flight.route.alternate.leg.trueCourse,
         wind: flight.alternate.wind,
-        variation: variationOf(flight.alternate.point.waypoint.airport),
+        variation: magneticVariation(last.point.waypoint.position, last.point.eta),
       },
       tas,
       fuelGph,

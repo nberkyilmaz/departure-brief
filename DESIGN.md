@@ -128,8 +128,6 @@ truncating each other's tables mid-test. Each run now gets its own database.
 
 - **Airspace transit.** Canadian airspace geometry isn't published in a
   usable form; the US half is buildable from the FAA's layer.
-- **Magnetic headings for Canadian fields**, from the World Magnetic Model
-  rather than a data source.
 - **PIREPs**, which are often the only honest answer about icing.
 - **Memory across visits.** Briefing history and continuous forecast
   verification need the API's database; the relay deliberately has none.

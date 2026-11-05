@@ -38,7 +38,8 @@ official briefing.
 | **Forecast verification** | Did the TAF turn out to be right, and which way was it wrong. |
 | **Winds and temperatures aloft** | Interpolated to the altitude flown; the temperature at cruise as the first question about icing. |
 | **Daylight** | Last light on arrival and how much of it is left, from the same solar arithmetic the night rules use. |
-| **Nav log** | The wind triangle leg by leg, with a blank and a reason wherever a number cannot be had. |
+| **Nav log** | The wind triangle leg by leg, true and magnetic, with a blank and a reason wherever a number cannot be had. |
+| **Magnetic variation** | NOAA's World Magnetic Model, checked against all hundred of its published test values, so a Canadian field gets a magnetic heading as readily as an American one. |
 | **Hazard advisories** | SIGMETs and AIRMETs that are in force, at your altitude, and across your route. |
 | **The site** | Five pages, running the whole pipeline in the browser over reports it carries. |
 
@@ -113,10 +114,12 @@ verbatim, feed the rules — so they get cheaper as they go.
 True course, the wind triangle, heading, groundspeed, time and fuel, leg by
 leg, with the reason printed wherever a number is missing.
 
-Two things it still wants. **Magnetic** courses need variation, which
-OurAirports does not publish and NASR does — so a US field gets magnetic
-today and a Canadian one does not; the fix is a variation model rather than
-a data source. And **fuel reserve** against fuel aboard, which needs the
+~~**Magnetic** courses.~~ Done, from the World Magnetic Model rather than a
+data source: OurAirports publishes no variation and NASR's is decades old
+at many fields. The variation is taken where each leg begins, for the date
+flown, and the aerodrome page gives every runway end in both.
+
+Still wanted: **fuel reserve** against fuel aboard, which needs the
 handbook's burn table read out the way the weight-and-balance figures
 were.
 
