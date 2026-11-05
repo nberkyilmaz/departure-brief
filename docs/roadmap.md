@@ -34,6 +34,7 @@ official briefing.
 | **NOTAM relevance** | Decoded, filtered by time and geography, deduped; deterministic rules where there is one right answer, a local model for the rest. |
 | **Evaluation harness** | A reviewed labelled set and a gate that fails the build, not a claim in a README. |
 | **Briefing diff** | What changed since last time, measured against the verdict rather than the text. |
+| **When can I go?** | The flight judged again for each of the next twelve hours, by the same code as the briefing, the destination at the time you would arrive; pick an hour and it is briefed. |
 | **Weight and balance** | Read out of a scanned handbook, every figure checked against the ink before it is used. |
 | **Forecast verification** | Did the TAF turn out to be right, and which way was it wrong. |
 | **Winds and temperatures aloft** | Interpolated to the altitude flown; the temperature at cruise as the first question about icing. |

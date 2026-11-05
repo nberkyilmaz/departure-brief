@@ -328,6 +328,56 @@ describe('moving around it', () => {
   });
 });
 
+describe('when can I go', () => {
+  /** The strip, once it has been worked out behind the briefing. */
+  async function strip(): Promise<HTMLElement> {
+    return (await screen.findByRole('heading', { name: /When can I go\?/i }, {}, { timeout: 10_000 })).closest('section')!;
+  }
+  const hours = (s: HTMLElement) => [...s.querySelectorAll('thead th:not(.window-zone)')];
+  const departureCells = (s: HTMLElement) => [...s.querySelectorAll<HTMLButtonElement>('tbody tr:first-child .window-cell')];
+
+  it('shows each hour ahead at both ends of the flight, and nothing that says go', async () => {
+    render(<App />);
+    await briefed();
+    const s = await strip();
+    // Recorded at 00:52Z: the next twelve whole hours.
+    expect(hours(s).map((th) => th.getAttribute('title'))).toEqual(['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map((h) => `${h}:00Z`));
+    expect([...s.querySelectorAll('tbody th')].map((th) => th.textContent)).toEqual(['CYSN', 'CYKF']);
+    for (const b of s.querySelectorAll('.window-cell')) expect(b.textContent).toMatch(/^[VMIL–]$/);
+    expect(s.textContent).not.toMatch(/\bGO\b|NO-GO/);
+  });
+
+  it('starts on the hour being briefed, and says so', async () => {
+    render(<App />);
+    await briefed();
+    const s = await strip();
+    // The recorded flight leaves at 04:00Z, the fourth hour.
+    expect(hours(s).findIndex((th) => th.classList.contains('window-current'))).toBe(3);
+    expect(departureCells(s)[3]!.getAttribute('aria-pressed')).toBe('true');
+    expect(within(s).getByText(/This is the time this briefing is for/)).toBeTruthy();
+  });
+
+  it('says what another hour would be judged as, and briefs it when asked', async () => {
+    render(<App />);
+    await briefed();
+    const s = await strip();
+    fireEvent.click(departureCells(s)[0]!);
+    const detail = s.querySelector('.window-detail')!;
+    expect(detail.textContent).toMatch(/Leave .*· 01:00Z/);
+    // Both ends, each with its category and what it crosses, in words.
+    expect(detail.querySelectorAll('li')).toHaveLength(2);
+    expect(detail.textContent).toMatch(/CYKF at .*: (VFR|MVFR|IFR|LIFR|No forecast)/);
+
+    fireEvent.click(within(s).getByRole('button', { name: /Brief this time/i }));
+    // The flight now leaves at 01:00Z, and the briefing is of that.
+    await waitFor(() => expect(document.querySelector('.flight-line')?.textContent).toMatch(/01:00Z/), { timeout: 10_000 });
+    await waitFor(() => expect(document.querySelector('#verdict .field-card .field-time')?.textContent).toMatch(/01:00Z/), { timeout: 10_000 });
+    const after = await strip();
+    expect(hours(after).findIndex((th) => th.classList.contains('window-current'))).toBe(0);
+    expect(within(after).getByText(/This is the time this briefing is for/)).toBeTruthy();
+  });
+});
+
 describe('fuel', () => {
   it('shows the CARs 602.88 sum, and says what it is missing rather than inventing it', async () => {
     window.location.hash = '#/navlog';

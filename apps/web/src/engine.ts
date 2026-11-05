@@ -27,6 +27,7 @@ import {
   CANADIAN_UPPERWIND_SITES,
   CatalogStore,
   decodeMetar,
+  departureWindow,
   diffBriefings,
   flightCategory,
   loadBundle,
@@ -51,7 +52,7 @@ import {
   type RawReport,
   type WeightBalanceSpec as CoreWeightBalanceSpec,
 } from '@depbrief/core/judge';
-import type { AerodromeReport, AircraftInput, BriefingDiff, FlightPlanInput, ProfileInput, StoredBriefing, WeightBalanceSpec } from './types.js';
+import type { AerodromeReport, AircraftInput, BriefingDiff, DepartureSlot, FlightPlanInput, ProfileInput, StoredBriefing, WeightBalanceSpec } from './types.js';
 
 export type { AerodromeReport };
 
@@ -158,6 +159,11 @@ export interface LocalEngine {
   /** Every station with a METAR, at its latest one, for the map. Computed once. */
   stations(): readonly StationWeather[];
   brief(plan: FlightPlanInput, profile: ProfileInput, aircraft: AircraftInput): Promise<LocalBriefing>;
+  /**
+   * When can I go: the same flight judged at each whole hour ahead, by the
+   * same code as the briefing. The plan's own departure time is not used.
+   */
+  window(plan: FlightPlanInput, profile: ProfileInput, aircraft: AircraftInput): Promise<DepartureSlot[]>;
   /**
    * Everything about one field now, or at the recorded instant, needing no
    * flight plan: a pilot looking a place up has usually not planned one yet.
@@ -446,6 +452,17 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
       await store.putBriefing(briefing);
       const diff = before ? diffBriefings(before, briefing) : null;
       return { briefing: asJson<StoredBriefing>(briefing), diff: diff && !diff.quiet ? asJson<BriefingDiff>(diff) : null };
+    },
+    async window(planInput, profileInput, aircraftInput) {
+      const plan = parseFlightPlan(planInput);
+      const profile = parsePilotProfile(profileInput);
+      const aircraft = withHandbookLimits(parseAircraftLimits(aircraftInput), wb as CoreWeightBalanceSpec | null);
+      try {
+        return asJson<DepartureSlot[]>(await departureWindow(store, plan, profile, aircraft, asOf()));
+      } catch (e) {
+        if (e instanceof UnknownWaypointError) throw new NoDataError(e.id, aerodromes.map((a) => a.id));
+        throw e;
+      }
     },
     async aerodrome(id) {
       const report = await aerodromeReport(store, id, asOf(), parsePilotProfile(bundle.profile), withHandbookLimits(parseAircraftLimits(bundle.aircraft), wb as CoreWeightBalanceSpec | null));

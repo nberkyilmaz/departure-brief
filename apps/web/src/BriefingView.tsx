@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { NotamPanel } from './NotamPanel.js';
 import { aerodromeHref } from './router.js';
 import { concernsOf, fieldCards, TOPIC_LABEL, type Concern, type FieldCard } from './summary.js';
@@ -235,7 +235,7 @@ function WorthALook({ concerns }: { concerns: readonly Concern[] }) {
   );
 }
 
-export function BriefingView({ stored, nameOf }: { stored: StoredBriefing; nameOf?: (id: string) => string | null }) {
+export function BriefingView({ stored, nameOf, whenCanIGo }: { stored: StoredBriefing; nameOf?: (id: string) => string | null; whenCanIGo?: ReactNode }) {
   const b = stored.document.briefing;
   const cards = fieldCards(stored);
   return (
@@ -248,8 +248,9 @@ export function BriefingView({ stored, nameOf }: { stored: StoredBriefing; nameO
       </h2>
       <p className="explain briefing-lede">It compares the forecasts and reports with your minimums. It does not decide whether you go; that stays with you.</p>
 
-      {/* Adverse conditions first, as a standard briefing gives them; then each field; then what it could not see. */}
+      {/* Adverse conditions first, as a standard briefing gives them; then the hours either side; then each field; then what it could not see. */}
       <WorthALook concerns={concernsOf(stored)} />
+      {whenCanIGo}
 
       <div className="field-cards">
         {cards.map((c) => (

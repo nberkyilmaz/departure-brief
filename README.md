@@ -47,6 +47,10 @@ and shows its working.
   evaluation harness that fails the build.
 - **Diffs briefings**: what changed since you last looked, measured against
   your limits rather than the text.
+- **Shows when you could go**: the same checks for each of the next twelve
+  hours you might leave, the destination at the time you would arrive, so
+  an earlier or later departure can be compared at a glance and briefed
+  with a tap.
 - **Reads weight and balance out of a scanned 1976 handbook** with OCR, and
   only uses a figure once it has been found on the page.
 
