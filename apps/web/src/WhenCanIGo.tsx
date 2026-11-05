@@ -133,8 +133,8 @@ export function WhenCanIGo({ slots, departure, onPick }: { slots: readonly Depar
     <section className="window" aria-labelledby="window-title">
       <h3 id="window-title">When can I go?</h3>
       <p className="explain">
-        The same checks for each hour you could leave in the next {slots.length}, with the destination at the time you would get there
-        {along ? ' and each station along the way when you would pass it' : ''}. Pick an hour to see what it says.
+        Each hour you could leave in the next {slots.length}, judged the same way: the destination when you would arrive
+        {along ? ', the way between when you would pass it' : ''}. Tap an hour for why.
       </p>
       <div className="window-scroll">
         <table className="window-table">

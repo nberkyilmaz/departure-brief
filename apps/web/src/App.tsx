@@ -185,6 +185,25 @@ export function App() {
     };
   }, [engine, ready, shape, profile, aircraft]);
 
+  /*
+   * Whether the flight touches the United States, so a note about American
+   * products — NOAA's silent winds bulletin — is shown to the flights it
+   * concerns rather than to everyone.
+   */
+  const [usFlight, setUsFlight] = useState(false);
+  const places = [plan.departure, plan.destination, ...plan.route, plan.alternate].filter((p): p is string => typeof p === 'string' && p.trim() !== '');
+  const placesKey = places.join(' ');
+  useEffect(() => {
+    if (!engine) return;
+    let live = true;
+    Promise.all(places.map((id) => engine.airport(id).catch(() => null))).then((found) => {
+      if (live) setUsFlight(found.some((a) => a?.country === 'US'));
+    });
+    return () => {
+      live = false;
+    };
+  }, [engine, placesKey]);
+
   /** Brief the hour picked in the strip: the same flight, leaving then. */
   function pickHour(departAt: string) {
     setTouched(true);
@@ -280,7 +299,7 @@ export function App() {
 
         {route.name === 'brief' && (
           <>
-            {DEMO && weather && <WeatherNote weather={weather} />}
+            {DEMO && weather && <WeatherNote weather={weather} usFlight={usFlight} />}
 
             {/*
               Asked first, in three fields: where from, where to, and when.
@@ -387,14 +406,13 @@ export function App() {
           </>
         )}
 
-        {route.name === 'home' && <StartPage engine={engine} weather={weather} home={plan.departure || 'CYSN'} />}
+        {route.name === 'home' && <StartPage engine={engine} weather={weather} home={plan.departure || null} />}
 
         {route.name === 'minimums' && (
           <section className="minimums-page">
             <h2>Your minimums</h2>
             <p className="explain">
-              Every briefing and every field page is checked against these. They are yours, not the regulation's — the regulatory VFR minima are checked
-              separately, and both are shown. They are kept in this browser and nowhere else.
+              Every briefing and field page is checked against these, and against the legal VFR minima separately. They stay in this browser.
             </p>
             <ProfileForm profile={profile} aircraft={aircraft} onProfile={change(setProfile)} onAircraft={change(setAircraft)} />
             {briefing && (
