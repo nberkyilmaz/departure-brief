@@ -16,7 +16,8 @@ import { concernsOf } from './summary.js';
 import { useStored } from './useStored.js';
 import { WbPanel } from './WbPanel.js';
 import { WeatherNote, weatherPhrase } from './WeatherNote.js';
-import type { AircraftInput, BriefingDiff, FlightPlanInput, ProfileInput, StoredBriefing } from './types.js';
+import { WhenCanIGo } from './WhenCanIGo.js';
+import type { AircraftInput, BriefingDiff, DepartureSlot, FlightPlanInput, ProfileInput, StoredBriefing } from './types.js';
 
 /**
  * Two ways to brief, one form.
@@ -158,6 +159,37 @@ export function App() {
       window.clearTimeout(t);
     };
   }, [engine, plan, profile, aircraft, ready]);
+
+  /*
+   * When can I go: the same flight judged at each hour ahead. It does not
+   * depend on the departure time, so briefing a picked hour does not redo
+   * it; a different route, minimums or aircraft does. Started after the
+   * briefing has had its turn, so it never holds the briefing up.
+   */
+  const [slots, setSlots] = useState<DepartureSlot[]>([]);
+  const shape = JSON.stringify({ ...plan, departureTime: null });
+  useEffect(() => {
+    setSlots([]);
+    if (!engine || !ready) return;
+    let live = true;
+    const t = window.setTimeout(() => {
+      engine
+        .window(plan, profile, aircraft)
+        .then((s) => live && setSlots(s))
+        // The briefing says what is wrong with a flight that cannot be judged; the strip just stays away.
+        .catch(() => live && setSlots([]));
+    }, SETTLE_MS * 2);
+    return () => {
+      live = false;
+      window.clearTimeout(t);
+    };
+  }, [engine, ready, shape, profile, aircraft]);
+
+  /** Brief the hour picked in the strip: the same flight, leaving then. */
+  function pickHour(departAt: string) {
+    setTouched(true);
+    setPlan({ ...plan, departureTime: new Date(departAt).toISOString().replace(/\.000Z$/, 'Z') });
+  }
 
   const change = useCallback(<T,>(set: (v: T) => void) => {
     return (v: T) => {
@@ -339,7 +371,11 @@ export function App() {
 
             {!draft && diff && <DiffPanel d={diff} />}
             {draft ? null : briefing ? (
-              <BriefingView stored={briefing} nameOf={nameOf} />
+              <BriefingView
+                stored={briefing}
+                nameOf={nameOf}
+                whenCanIGo={slots.length > 0 ? <WhenCanIGo slots={slots} departure={plan.departureTime} onPick={pickHour} /> : null}
+              />
             ) : (
               busy &&
               !DEMO && (

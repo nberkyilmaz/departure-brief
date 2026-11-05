@@ -4,3 +4,5 @@ export type { BriefingDocument, BriefingPointInputs, BriefingReportRef, StoredBr
 export { diffBriefings } from './diff.js';
 export type { BriefingDiff, FindingChange, FindingChangeKind, NotamChange, PointDiff } from './diff.js';
 export { diffText } from './describeDiff.js';
+export { departureWindow, WINDOW_HOURS } from './window.js';
+export type { DepartureSlot, WindowPoint } from './window.js';

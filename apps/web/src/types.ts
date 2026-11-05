@@ -140,6 +140,26 @@ export interface NotamDocument {
   items: NotamItem[];
 }
 
+/** One end of the flight at one hour you might leave: what the briefing would say for it. */
+export interface WindowPoint {
+  waypoint: string;
+  /** When you would be there. */
+  at: string;
+  /** From the prevailing forecast; null when there is none, or it gives neither ceiling nor visibility. */
+  category: FlightCategory | null;
+  covered: boolean;
+  forecastStation: string | null;
+  night: boolean;
+  /** The limits crossed then, from the forecast and the clock; never the observation now. */
+  findings: Finding[];
+}
+
+export interface DepartureSlot {
+  departAt: string;
+  /** The departure, then the destination. */
+  points: WindowPoint[];
+}
+
 export interface FindingChange {
   kind: 'appeared' | 'resolved' | 'worsened' | 'eased' | 'restated';
   waypoint: string;

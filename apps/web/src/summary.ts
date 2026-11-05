@@ -246,7 +246,7 @@ export const TOPIC_LABEL: Readonly<Record<Topic, string>> = {
   other: 'Other',
 };
 
-const topicOf = (rule: string): Topic => TOPIC_OF[rule] ?? (rule.startsWith('hazard.') ? 'hazard' : 'other');
+export const topicOf = (rule: string): Topic => TOPIC_OF[rule] ?? (rule.startsWith('hazard.') ? 'hazard' : 'other');
 
 /** A forecast that does not cover the time is said on the card and under what the briefing could not see; not twice more here. */
 const SAID_ELSEWHERE: ReadonlySet<string> = new Set(['forecast.coverage', 'forecast.borrowed']);
