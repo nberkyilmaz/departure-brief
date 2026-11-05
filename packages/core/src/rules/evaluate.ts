@@ -3,13 +3,15 @@ import { ceilingOf, flightCategory, flightCategoryOf, visibilityStatuteMiles, ty
 import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
 import { isNight } from '../domain/sun.js';
 import { toZulu } from '../domain/time.js';
+import { ON_TRACK_NM, type EnrouteStation } from '../resolve/enroute.js';
 import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
-import { checkConditions, checkNight, type CheckContext } from './checks.js';
+import type { Overlay, ResolvedForecast } from '../resolve/taf.js';
+import { checkCeiling, checkConditions, checkNight, checkVisibility, checkWeather, type CheckContext } from './checks.js';
 import { checkDaylight } from './daylight.js';
 import { checkHazards } from './hazards.js';
 import { ageText, checkObservation } from './observation.js';
 import { checkWindAloft } from './windAloft.js';
-import { RULES_VERSION, type Briefing, type Finding, type PointReview } from './types.js';
+import { RULES_VERSION, type Briefing, type EnrouteReview, type Finding, type PointReview } from './types.js';
 
 /** A METAR's body as forecast-shaped conditions, so the same checks apply. */
 export function metarConditions(m: DecodedMetar): Conditions {
@@ -27,6 +29,16 @@ const hhmm = (d: Date) => toZulu(d).slice(11, 16) + 'Z';
 
 /** Prevailing visibility in statute miles, or null when none was forecast. */
 const visibilityOf = (c: Conditions) => (c.visibility ? visibilityStatuteMiles(c.visibility.value) : null);
+
+/** A TAF's temporary or probable period as a pilot names it: `TEMPO 15:00Z–17:00Z`, `PROB30 21:00Z–00:00Z`. */
+function overlayLabel(o: Overlay): string {
+  return `${o.probability ? `PROB${o.probability} ` : ''}${o.kind === 'PROB' ? '' : o.kind} ${hhmm(o.window.from)}–${hhmm(o.window.to)}`.replace(/\s+/g, ' ').trim();
+}
+
+/** The category of the prevailing forecast, when there is one to classify. */
+function prevailingCategory(f: ResolvedForecast | undefined) {
+  return f?.prevailing ? flightCategoryOf(ceilingOf(f.prevailing.conditions.sky)?.value ?? null, visibilityOf(f.prevailing.conditions)) : null;
+}
 
 /** How long a METAR is treated as describing "now" for a point's ETA. */
 export const OBSERVATION_WINDOW_MS = 90 * 60_000;
@@ -67,8 +79,7 @@ function evaluatePoint(
     if (f.prevailing) {
       findings.push(...checkConditions({ ...base, basis: `prevailing${borrowed}`, basisKind: 'prevailing', violation: 'alert', source }, f.prevailing.conditions));
       for (const o of f.overlays) {
-        const label = `${o.probability ? `PROB${o.probability} ` : ''}${o.kind === 'PROB' ? '' : o.kind} ${hhmm(o.window.from)}–${hhmm(o.window.to)}`.replace(/\s+/g, ' ').trim();
-        findings.push(...checkConditions({ ...base, basis: `${label}${borrowed}`, basisKind: 'overlay', violation: 'caution', source }, o.conditions));
+        findings.push(...checkConditions({ ...base, basis: `${overlayLabel(o)}${borrowed}`, basisKind: 'overlay', violation: 'caution', source }, o.conditions));
       }
     } else {
       findings.push({
@@ -166,8 +177,77 @@ function evaluatePoint(
    * different facts and collapsing them would lose the one that matters.
    */
   const observed = p.metar ? flightCategory(p.metar.decoded) : null;
-  const forecast = p.forecast?.resolved.prevailing ? flightCategoryOf(ceilingOf(p.forecast.resolved.prevailing.conditions.sky)?.value ?? null, visibilityOf(p.forecast.resolved.prevailing.conditions)) : null;
+  const forecast = prevailingCategory(p.forecast?.resolved);
   return { waypoint: w.id, at: at.toISOString(), category: observed, forecastCategory: forecast, night, findings };
+}
+
+/**
+ * What a station beside the route is read for: what is falling, how low
+ * the cloud, how far you can see. Not the runways, which are for the fields
+ * you land at, and not the legal minima, which need an airspace class
+ * nobody has given for a place the flight only passes.
+ */
+function checkAlongTheWay(ctx: CheckContext, c: Conditions): Finding[] {
+  return [...checkWeather(ctx, c), ...checkCeiling(ctx, c), ...checkVisibility(ctx, c)];
+}
+
+/**
+ * A station near the track, at the time the aircraft is abeam it, judged
+ * by the same checks against the same limits as the ends.
+ *
+ * Off the line it is a step quieter. A station fifteen miles to the side
+ * describes the weather beside the route, not on it, so a limit it crosses
+ * is a caution there — as a hazard near the route is — and not an alert.
+ */
+function evaluateEnroute(s: EnrouteStation, flight: ResolvedFlight, profile: PilotProfile, aircraft: AircraftLimits | null): EnrouteReview {
+  const at = s.eta;
+  const night = isNight(s.airport, at);
+  const onTrack = Math.abs(s.offset) <= ON_TRACK_NM;
+  const base = {
+    waypoint: s.station,
+    at,
+    profile,
+    aircraft,
+    airport: s.airport,
+    airspace: null,
+    cruiseAltitude: flight.plan.cruise.altitude,
+    night,
+  };
+  const findings: Finding[] = [];
+  const f = s.forecast?.resolved;
+  if (s.forecast && f?.prevailing) {
+    const source = { kind: 'taf' as const, station: s.station, raw: f.raw, sha256: s.forecast.report.sha256 };
+    findings.push(...checkAlongTheWay({ ...base, basis: 'prevailing', basisKind: 'prevailing', violation: onTrack ? 'alert' : 'caution', source }, f.prevailing.conditions));
+    for (const o of f.overlays) {
+      findings.push(...checkAlongTheWay({ ...base, basis: overlayLabel(o), basisKind: 'overlay', violation: 'caution', source }, o.conditions));
+    }
+  }
+  if (s.metar?.report.issuedAt) {
+    const age = at.getTime() - s.metar.report.issuedAt.getTime();
+    findings.push(
+      ...checkAlongTheWay(
+        {
+          ...base,
+          basis: `observed ${hhmm(s.metar.report.issuedAt)}${s.metar.ageMinutes > 60 ? `, ${ageText(s.metar.ageMinutes)}` : ''}`,
+          basisKind: 'observed',
+          violation: onTrack && Math.abs(age) <= OBSERVATION_WINDOW_MS ? 'alert' : 'caution',
+          source: { kind: 'metar', station: s.station, raw: s.metar.report.body, sha256: s.metar.report.sha256 },
+        },
+        metarConditions(s.metar.decoded),
+      ),
+    );
+  }
+  return {
+    station: s.station,
+    leg: s.leg,
+    alongNm: s.cumulative,
+    offsetNm: s.offset,
+    at: at.toISOString(),
+    category: s.metar ? flightCategory(s.metar.decoded) : null,
+    forecastCategory: prevailingCategory(f),
+    night,
+    findings,
+  };
 }
 
 /**
@@ -185,5 +265,6 @@ export function evaluateFlight(flight: ResolvedFlight, profile: PilotProfile, ai
     asOf: flight.asOf.toISOString(),
     points,
     alternate,
+    enroute: flight.enroute.map((s) => evaluateEnroute(s, flight, profile, aircraft)),
   };
 }

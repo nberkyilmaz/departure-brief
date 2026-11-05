@@ -11,8 +11,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { concernsOf, fieldCards } from '../src/summary.js';
-import type { Attention, BasisKind, Finding, NavLogLeg, PointReview, StoredBriefing } from '../src/types.js';
+import { alongTheWay, concernsOf, fieldCards } from '../src/summary.js';
+import type { Attention, BasisKind, EnrouteReview, Finding, NavLogLeg, PointReview, StoredBriefing } from '../src/types.js';
 
 const f = (rule: string, attention: Attention, basisKind: BasisKind, basis: string, summary: string, values: Record<string, unknown> = {}): Finding => ({
   rule,
@@ -51,19 +51,19 @@ const gusty: Finding[] = [
   f('wind.aloft', 'routine', 'forecast', 'FBCN33 upper wind', 'wind at 3,500 ft: 250°T at 30 kt, +4 °C', { altitudeFt: 3500, directionTrue: 250, speedKt: 30, tempC: 4 }),
 ];
 
-function stored(points: PointReview[], legs: Partial<NavLogLeg>[] = []): StoredBriefing {
+function stored(points: PointReview[], legs: Partial<NavLogLeg>[] = [], enroute: EnrouteReview[] = []): StoredBriefing {
   return {
     sha256: 'x',
     flightKey: 'x',
     asOf: '2026-10-29T19:54:00.000Z',
     createdAt: '2026-10-29T19:54:00.000Z',
     document: {
-      format: 3,
+      format: 4,
       plan: {} as never,
       asOf: '2026-10-29T19:54:00.000Z',
       notams: null,
-      inputs: { points: [], alternate: null, reports: [] },
-      briefing: { rulesVersion: 8, profile: { name: 'default', version: 1 }, aircraft: 'C172', asOf: '2026-10-29T19:54:00.000Z', points, alternate: null },
+      inputs: { points: [], alternate: null, enroute: [], reports: [] },
+      briefing: { rulesVersion: 9, profile: { name: 'default', version: 1 }, aircraft: 'C172', asOf: '2026-10-29T19:54:00.000Z', points, alternate: null, enroute },
       navlog: { legs: legs as NavLogLeg[], alternate: null } as never,
       fuel: {} as never,
     },
@@ -168,6 +168,81 @@ describe('a card per field', () => {
     const empty = fieldCards(stored([point('CYSN', [f('forecast.coverage', 'caution', 'forecast', 'forecast', 'no TAF for CYSN and none within reach — nothing to evaluate at ETA')], { category: null, forecastCategory: null })]))[0]!;
     expect(empty.missing).toBe('No TAF for CYSN and none within reach — nothing to evaluate at ETA');
     expect(empty.category).toBeNull();
+  });
+});
+
+describe('along the way', () => {
+  const station = (id: string, leg: number, alongNm: number, offsetNm: number, findings: Finding[], over: Partial<EnrouteReview> = {}): EnrouteReview => ({
+    station: id,
+    leg,
+    alongNm,
+    offsetNm,
+    at: '2026-10-29T21:20:00.000Z',
+    category: 'VFR',
+    forecastCategory: 'VFR',
+    night: false,
+    findings: findings.map((x) => ({ ...x, waypoint: id })),
+    ...over,
+  });
+  const ceiling = (attention: Attention, feet: number) =>
+    f('personal.ceiling', attention, 'prevailing', 'prevailing', `ceiling ${feet} ft AGL is below personal minimum 2500 ft`, { ceiling: feet, minimum: 2500 });
+  const clear = f('personal.ceiling', 'routine', 'prevailing', 'prevailing', 'no ceiling (SCT040); personal minimum 2500 ft AGL', { ceiling: null, minimum: 2500 });
+  const storm = f('weather.present', 'alert', 'prevailing', 'prevailing', 'TSRA — a thunderstorm with rain');
+  const legs: Partial<NavLogLeg>[] = [{ from: 'CYSN', to: 'CYOW', distanceNm: 204 }];
+  const corridor = [
+    station('CYTZ', 0, 30, 22, [ceiling('caution', 1800)]),
+    station('CYPQ', 0, 80, -4, [ceiling('alert', 1200), storm], { forecastCategory: 'IFR' }),
+    station('CYTR', 0, 110, 8, [ceiling('alert', 2000)], { forecastCategory: 'MVFR' }),
+    station('CYGK', 0, 150, 15, [clear], { forecastCategory: null, category: 'VFR' }),
+  ];
+  const flight = stored([point('CYSN', []), point('CYOW', [])], legs, corridor);
+
+  it('says a cloudy corridor in one line per topic, naming the station that asks most', () => {
+    const along = concernsOf(flight);
+    expect(along.map((c) => `${c.attention} ${c.topic} ${c.waypoint} ${c.role}`)).toEqual(['alert weather CYPQ Along the way', 'alert cloud CYPQ Along the way']);
+    const cloud = along.find((c) => c.topic === 'cloud')!;
+    expect(cloud.headline).toBe('Ceiling as low as 1,200 ft, below your 2,500 ft minimum, at CYPQ');
+    // Where it is, which part of the forecast says so, and who else does: alerts first, then in the order passed.
+    expect(cloud.when).toEqual(['80 nm along, 4 nm left', 'forecast for your time', 'also CYTR, CYTZ']);
+  });
+
+  it('loses nothing: every station that asked is behind the line for its topic', () => {
+    const cloud = concernsOf(flight).find((c) => c.topic === 'cloud')!;
+    expect(cloud.findings.map((x) => x.waypoint)).toEqual(['CYPQ', 'CYTR', 'CYTZ']);
+  });
+
+  it('names four of the others and counts the rest, rather than printing a dozen identifiers', () => {
+    const many = ['CYOO', 'CYKZ', 'CYTR', 'CYPQ', 'CYGK', 'CYTZ', 'CYBN'].map((id, i) => station(id, 0, 20 + i * 20, 5, [ceiling('caution', 1800 - i * 10)]));
+    const cloud = concernsOf(stored([point('CYSN', []), point('CYOW', [])], legs, many)).find((c) => c.topic === 'cloud')!;
+    expect(cloud.when.at(-1)).toBe('also CYKZ, CYTR, CYPQ, CYGK and 2 more');
+    expect(cloud.findings).toHaveLength(7);
+  });
+
+  it('puts the way between the departure and the destination', () => {
+    const worse = stored(
+      [point('CYSN', [ceiling('caution', 2000)]), point('CYOW', [ceiling('caution', 2200)])],
+      legs,
+      [station('CYTR', 0, 110, 8, [ceiling('caution', 1500)])],
+    );
+    expect(concernsOf(worse).map((c) => `${c.role} ${c.waypoint}`)).toEqual(['Departure CYSN', 'Along the way CYTR', 'Destination CYOW']);
+  });
+
+  it('gives each station the category for when you pass it, and says when that is only the observation now', () => {
+    const [leg] = alongTheWay(flight);
+    expect(leg!.stations.map((s) => `${s.review.station} ${s.category} ${s.from} ${s.attention}`)).toEqual([
+      'CYTZ VFR forecast caution',
+      'CYPQ IFR forecast alert',
+      'CYTR MVFR forecast alert',
+      'CYGK VFR now null',
+    ]);
+    expect(leg!.stations[1]!.crossed).toEqual(['weather', 'cloud']);
+  });
+
+  it('lists every leg, one with nothing beside it as empty, so the page can say so', () => {
+    const turns = stored([point('CYSN', []), point('CYPQ', []), point('CYOW', [])], [{ from: 'CYSN', to: 'CYPQ', distanceNm: 90 }, { from: 'CYPQ', to: 'CYOW', distanceNm: 114 }], [
+      station('CYTZ', 0, 18, -21, [clear]),
+    ]);
+    expect(alongTheWay(turns).map((l) => `${l.from}-${l.to} ${l.stations.length}`)).toEqual(['CYSN-CYPQ 1', 'CYPQ-CYOW 0']);
   });
 });
 

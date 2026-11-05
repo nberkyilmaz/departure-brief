@@ -6,6 +6,7 @@ import { PROMPT_VERSION } from '../notam/assess.js';
 import { NOTAM_DECODER_VERSION } from '../notam/decode.js';
 import { notamDocument } from '../notam/describe.js';
 import type { NotamBriefing } from '../notam/flight.js';
+import type { EnrouteStation } from '../resolve/enroute.js';
 import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
 import { fuelPlan } from '../navlog/fuel.js';
 import { checkFuel } from '../rules/fuel.js';
@@ -14,7 +15,7 @@ import { evaluateFlight } from '../rules/evaluate.js';
 import { jurisdictionOf } from '../rules/vfrMinima.js';
 import { RULES_VERSION, type Briefing } from '../rules/types.js';
 import { contentHash } from './canonical.js';
-import type { BriefingDocument, BriefingPointInputs, BriefingReportRef, StoredBriefing } from './types.js';
+import type { BriefingDocument, BriefingEnrouteInputs, BriefingPointInputs, BriefingReportRef, StoredBriefing } from './types.js';
 
 /** The flight's identity: what it is, not how it is judged. */
 export function flightKey(plan: FlightPlan): string {
@@ -41,7 +42,19 @@ function pointInputs(p: ResolvedPoint): BriefingPointInputs {
   };
 }
 
-function reportRefs(points: readonly ResolvedPoint[], notams: NotamBriefing | null): BriefingReportRef[] {
+function enrouteInputs(s: EnrouteStation): BriefingEnrouteInputs {
+  return {
+    station: s.station,
+    leg: s.leg,
+    eta: s.eta.toISOString(),
+    cumulativeNm: s.cumulative,
+    offsetNm: s.offset,
+    forecast: s.forecast?.report.sha256 ?? null,
+    metar: s.metar?.report.sha256 ?? null,
+  };
+}
+
+function reportRefs(points: readonly (ResolvedPoint | EnrouteStation)[], notams: NotamBriefing | null): BriefingReportRef[] {
   const seen = new Map<string, BriefingReportRef>();
   const add = (r: { kind: BriefingReportRef['kind']; station: string | null; sha256: string; issuedAt: Date | null } | undefined) => {
     if (r && !seen.has(r.sha256)) seen.set(r.sha256, { kind: r.kind, station: r.station, sha256: r.sha256, issuedAt: r.issuedAt?.toISOString() ?? null });
@@ -49,7 +62,7 @@ function reportRefs(points: readonly ResolvedPoint[], notams: NotamBriefing | nu
   for (const p of points) {
     add(p.forecast?.report);
     add(p.metar?.report);
-    add(p.wind?.report);
+    if ('wind' in p) add(p.wind?.report);
   }
   for (const n of notams?.items ?? []) add(n.report);
   return [...seen.values()].sort((a, b) => a.sha256.localeCompare(b.sha256));
@@ -92,7 +105,7 @@ export function assembleBriefing(
     : evaluated;
   const allPoints = [...resolved.points, ...(resolved.alternate ? [resolved.alternate] : [])];
   const document: BriefingDocument = {
-    format: 3,
+    format: 4,
     plan: resolved.plan,
     profile,
     aircraft,
@@ -108,7 +121,8 @@ export function assembleBriefing(
     inputs: {
       points: resolved.points.map(pointInputs),
       alternate: resolved.alternate ? pointInputs(resolved.alternate) : null,
-      reports: reportRefs(allPoints, notams),
+      enroute: resolved.enroute.map(enrouteInputs),
+      reports: reportRefs([...allPoints, ...resolved.enroute], notams),
     },
     briefing,
     navlog,

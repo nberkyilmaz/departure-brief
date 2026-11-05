@@ -57,6 +57,18 @@ that time, judged separately. When a field isn't reporting (CYSN closes
 overnight) it borrows the nearest station that is, and every finding says
 whose observation it was and how far away.
 
+A flight flown direct names two places, and a briefing of two places can
+say VFR at both ends of a flight that crosses IFR half way. So every
+station within 25 nm of the track is read as well, at the time the
+aircraft would be abeam it, with its own TAF and its own METAR and never a
+neighbour's. On one afternoon's live weather, about one random flight in
+four had a station near its track reporting worse than either end. More
+than 10 nm off the line a station describes the weather beside the route
+rather than on it, so a limit it crosses is a caution rather than an
+alert, the same step down a hazard near the route gets. A dense corridor
+can hold twenty stations, so the page says them as one line per topic and
+keeps the quiet ones folded away.
+
 ## 5. The same pipeline in the browser
 
 The core package has a second entry point, `judge`, containing only

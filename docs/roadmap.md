@@ -29,12 +29,13 @@ official briefing.
 | **METAR / TAF decoders** | Span-annotated, total, no model anywhere near them. Under 0.3 % of tokens unparsed across 8,000 real reports. |
 | **Fetch and store** | Every report kept verbatim, content-addressed, append-only, so what was known at any moment can be reconstructed. |
 | **Route and time** | ETA per waypoint; the forecast period that governs each one, prevailing versus overlay. |
+| **Along the way** | Every reporting station within 25 nm of the track, read for the time you are abeam it, by the same checks as the ends; more than 10 nm off the line, a crossed limit is a caution rather than an alert. |
 | **Rules engine** | Personal minimums, CARs 602.114/115, FAR 91.155, crosswind per runway on true headings. Every finding cited. |
 | **Briefings** | Immutable, content-addressed, reproducible; an API and a web view. |
 | **NOTAM relevance** | Decoded, filtered by time and geography, deduped; deterministic rules where there is one right answer, a local model for the rest. |
 | **Evaluation harness** | A reviewed labelled set and a gate that fails the build, not a claim in a README. |
 | **Briefing diff** | What changed since last time, measured against the verdict rather than the text. |
-| **When can I go?** | The flight judged again for each of the next twelve hours, by the same code as the briefing, the destination at the time you would arrive; pick an hour and it is briefed. |
+| **When can I go?** | The flight judged again for each of the next twelve hours, by the same code as the briefing, the destination at the time you would arrive and the stations along the way when you would pass them; pick an hour and it is briefed. |
 | **Weight and balance** | Read out of a scanned handbook, every figure checked against the ink before it is used. |
 | **Forecast verification** | Did the TAF turn out to be right, and which way was it wrong. |
 | **Winds and temperatures aloft** | Canada's from NAV CANADA, the United States' from NOAA's FB bulletin, interpolated to the altitude flown; the temperature at cruise as the first question about icing. |

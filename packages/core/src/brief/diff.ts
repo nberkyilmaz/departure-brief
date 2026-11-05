@@ -12,7 +12,7 @@
  */
 
 import type { FlightCategory } from '../decode/metar/derive.js';
-import type { BasisKind, Finding, PointReview, Attention } from '../rules/types.js';
+import type { BasisKind, EnrouteReview, Finding, PointReview, Attention } from '../rules/types.js';
 import type { NotamDocumentItem } from '../notam/describe.js';
 import type { BriefingDocument, BriefingReportRef } from './types.js';
 
@@ -67,6 +67,8 @@ export interface BriefingDiff {
   readonly to: { readonly sha256: string; readonly asOf: string };
   readonly points: readonly PointDiff[];
   readonly alternate: PointDiff | null;
+  /** The stations along the way that moved, in the order they are passed; one that came or went is in here too. */
+  readonly enroute: readonly PointDiff[];
   readonly notams: readonly NotamChange[];
   /** Reports that came or went — context for why a finding moved. */
   readonly reports: { readonly added: readonly BriefingReportRef[]; readonly removed: readonly BriefingReportRef[] };
@@ -134,6 +136,27 @@ function pointDiff(before: PointReview | undefined, after: PointReview): PointDi
   return { waypoint: after.waypoint, category, changes };
 }
 
+/**
+ * The stations along the way, matched by identifier. A station can come
+ * onto the list — its TAF starts to cover the time you pass it — or go off
+ * it, and either way what it said is what changed.
+ */
+function enrouteDiffs(before: readonly EnrouteReview[], after: readonly EnrouteReview[]): PointDiff[] {
+  const b = new Map(before.map((s) => [s.station, s]));
+  const a = new Map(after.map((s) => [s.station, s]));
+  const order = [...after, ...before.filter((s) => !a.has(s.station))];
+  return order
+    .map((s) => {
+      const was = b.get(s.station);
+      const now = a.get(s.station);
+      const changes = findingChanges(was?.findings ?? [], now?.findings ?? []);
+      const from = was?.category ?? null;
+      const to = now?.category ?? null;
+      return { waypoint: s.station, category: was && now && from !== to ? { from, to } : null, changes };
+    })
+    .filter((d) => d.category !== null || d.changes.length > 0);
+}
+
 function notamChanges(before: BriefingDocument, after: BriefingDocument): NotamChange[] {
   const b = before.notams?.items ?? [];
   const a = after.notams?.items ?? [];
@@ -182,6 +205,8 @@ export function diffBriefings(
   const bPoints = new Map(before.document.briefing.points.map((p) => [p.waypoint, p]));
   const points = after.document.briefing.points.map((p) => pointDiff(bPoints.get(p.waypoint), p));
   const alternate = after.document.briefing.alternate ? pointDiff(before.document.briefing.alternate ?? undefined, after.document.briefing.alternate) : null;
+  // A briefing from before the stations along the way were read has none to compare.
+  const enroute = enrouteDiffs(before.document.briefing.enroute ?? [], after.document.briefing.enroute ?? []);
 
   const bReports = new Map(before.document.inputs.reports.map((r) => [r.sha256, r]));
   const aReports = new Map(after.document.inputs.reports.map((r) => [r.sha256, r]));
@@ -190,15 +215,23 @@ export function diffBriefings(
 
   const notams = notamChanges(before.document, after.document);
 
+  /*
+   * Stations along the way come and go as their reports age and their TAFs
+   * start and stop covering the time you pass them. One that joins with
+   * nothing to say is not news; one that crosses a limit, or stops crossing
+   * it, is.
+   */
   const material =
     notams.some((n) => n.notable) ||
-    [...points, ...(alternate ? [alternate] : [])].some((p) => p.category !== null || p.changes.some((c) => c.kind !== 'restated'));
+    [...points, ...(alternate ? [alternate] : [])].some((p) => p.category !== null || p.changes.some((c) => c.kind !== 'restated')) ||
+    enroute.some((p) => p.category !== null || p.changes.some((c) => c.crossesLimit || c.kind === 'worsened' || c.kind === 'eased'));
 
   return {
     from: { sha256: before.sha256, asOf: before.document.asOf },
     to: { sha256: after.sha256, asOf: after.document.asOf },
     points,
     alternate,
+    enroute,
     notams,
     reports: { added, removed },
     warnings,

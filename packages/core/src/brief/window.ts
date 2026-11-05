@@ -9,6 +9,9 @@
  * arrive there. Nothing is reinterpreted: an hour here says what the
  * briefing would have said, had you asked for that hour.
  *
+ * Between the ends, the stations along the way are read for the time you
+ * would pass each one, and the hour says the worst any of them forecasts.
+ *
  * What it leaves out is the observation. The METAR describes now, and now
  * does not move when the departure time does; the briefing already says
  * what it shows. An hour is judged on what is forecast for it and on the
@@ -17,9 +20,11 @@
 import type { FlightCategory } from '../decode/metar/derive.js';
 import type { FlightPlan } from '../domain/flight.js';
 import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
+import { corridorOf } from '../resolve/enroute.js';
 import { resolveFlight } from '../resolve/flight.js';
+import { resolveRoute } from '../resolve/route.js';
 import { evaluateFlight } from '../rules/evaluate.js';
-import type { Finding } from '../rules/types.js';
+import type { EnrouteReview, Finding } from '../rules/types.js';
 import type { Store } from '../store/types.js';
 
 /** How far ahead the window looks. A TAF covers a day at most, and the useful question is today's. */
@@ -46,10 +51,40 @@ export interface WindowPoint {
   readonly findings: readonly Finding[];
 }
 
+/** The stations along the way at one hour, said as one: the worst forecast among them, and every limit any of them crosses. */
+export interface WindowAlong {
+  /** How many stations along the way have a forecast that classifies the time you would pass them. */
+  readonly covered: number;
+  /** The worst prevailing category among them; `null` when none has one. */
+  readonly category: FlightCategory | null;
+  /** The station forecasting it, the first passed when several do. */
+  readonly station: string | null;
+  /** The limits crossed along the way at that time, from the forecasts: alert and caution only, each naming its station. */
+  readonly findings: readonly Finding[];
+}
+
 export interface DepartureSlot {
   readonly departAt: string;
   /** The departure and the destination, in that order. */
   readonly points: readonly WindowPoint[];
+  readonly along: WindowAlong;
+}
+
+const WORSE: Readonly<Record<FlightCategory, number>> = { VFR: 0, MVFR: 1, IFR: 2, LIFR: 3 };
+
+/** What the window keeps of a point's findings: what the forecast and the clock say crosses a limit. */
+const crossing = (f: Finding): boolean =>
+  (f.attention === 'alert' || f.attention === 'caution') && f.basisKind !== 'observed' && f.basisKind !== 'plan' && !ABOUT_THE_FORECAST.has(f.rule);
+
+function alongAt(enroute: readonly EnrouteReview[]): WindowAlong {
+  const forecast = enroute.filter((s) => s.forecastCategory !== null);
+  const worst = forecast.reduce<EnrouteReview | null>((w, s) => (!w || WORSE[s.forecastCategory!] > WORSE[w.forecastCategory!] ? s : w), null);
+  return {
+    covered: forecast.length,
+    category: worst?.forecastCategory ?? null,
+    station: worst?.station ?? null,
+    findings: enroute.flatMap((s) => s.findings.filter(crossing)),
+  };
 }
 
 /**
@@ -66,10 +101,12 @@ export async function departureWindow(
   hours: number = WINDOW_HOURS,
 ): Promise<DepartureSlot[]> {
   const first = Math.ceil(asOf.getTime() / HOUR_MS) * HOUR_MS;
+  // Where the stations beside the route are does not move with the hour; only when you pass them does.
+  const corridor = await corridorOf(store, await resolveRoute(store, plan));
   const slots: DepartureSlot[] = [];
   for (let h = 0; h < hours; h++) {
     const departAt = new Date(first + h * HOUR_MS).toISOString();
-    const resolved = await resolveFlight(store, { ...plan, departureTime: departAt }, asOf);
+    const resolved = await resolveFlight(store, { ...plan, departureTime: departAt }, asOf, corridor);
     const judged = evaluateFlight(resolved, profile, aircraft);
     const ends = [0, resolved.points.length - 1];
     slots.push({
@@ -84,11 +121,10 @@ export async function departureWindow(
           covered: forecast?.resolved.prevailing != null,
           forecastStation: forecast?.station ?? null,
           night: review.night,
-          findings: review.findings.filter(
-            (f) => (f.attention === 'alert' || f.attention === 'caution') && f.basisKind !== 'observed' && f.basisKind !== 'plan' && !ABOUT_THE_FORECAST.has(f.rule),
-          ),
+          findings: review.findings.filter(crossing),
         };
       }),
+      along: alongAt(judged.enroute),
     });
   }
   return slots;

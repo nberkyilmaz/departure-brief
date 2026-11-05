@@ -1,5 +1,6 @@
 import type { FlightPlan } from '../domain/flight.js';
 import type { Store } from '../store/types.js';
+import { stationsAlong, type CorridorStation, type EnrouteStation } from './enroute.js';
 import { forecastAt, type WaypointForecast } from './forecast.js';
 import { hazardsKnownBy, type HazardAdvisory } from './hazards.js';
 import { observationAt, type WaypointObservation } from './observation.js';
@@ -37,6 +38,11 @@ export interface ResolvedFlight {
    * decided by geometry, not by which aerodrome it was filed under.
    */
   readonly hazards: readonly HazardAdvisory[];
+  /**
+   * The reporting stations near the track between the points, in the order
+   * they are passed, each read for the time the aircraft is abeam it.
+   */
+  readonly enroute: readonly EnrouteStation[];
 }
 
 async function resolvePoint(store: Store, point: RoutePoint, asOf: Date, cruiseAltitudeFt: number): Promise<ResolvedPoint> {
@@ -49,9 +55,11 @@ async function resolvePoint(store: Store, point: RoutePoint, asOf: Date, cruiseA
 
 /**
  * Resolve a flight plan to conditions at each point at the time the aircraft
- * will be there, using only what the store knew at `asOf`.
+ * will be there, using only what the store knew at `asOf`. `corridor` is
+ * the stations beside the route, when the caller has already found them for
+ * the same route at another time.
  */
-export async function resolveFlight(store: Store, plan: FlightPlan, asOf: Date): Promise<ResolvedFlight> {
+export async function resolveFlight(store: Store, plan: FlightPlan, asOf: Date, corridor?: readonly CorridorStation[]): Promise<ResolvedFlight> {
   const route = await resolveRoute(store, plan);
   const cruise = plan.cruise.altitude;
   const points = [];
@@ -59,5 +67,14 @@ export async function resolveFlight(store: Store, plan: FlightPlan, asOf: Date):
   const alternate = route.alternate ? await resolvePoint(store, route.alternate.point, asOf, cruise) : null;
   const last = [...points, ...(alternate ? [alternate] : [])].reduce((latest, p) => Math.max(latest, p.point.eta.getTime()), asOf.getTime());
   const hazards = await hazardsKnownBy(store, asOf, new Date(last));
-  return { plan, asOf, route, points, alternate, hazards };
+  // Every station a named field already reads, its own or borrowed, so none of them is read twice.
+  const known = new Set<string>();
+  for (const p of [...points, ...(alternate ? [alternate] : [])]) {
+    const id = p.point.waypoint.airport?.icaoId;
+    if (id) known.add(id.toUpperCase());
+    if (p.forecast) known.add(p.forecast.station.toUpperCase());
+    if (p.metar) known.add(p.metar.station.toUpperCase());
+  }
+  const enroute = await stationsAlong(store, route, plan.cruise.tas, asOf, known, corridor);
+  return { plan, asOf, route, points, alternate, hazards, enroute };
 }

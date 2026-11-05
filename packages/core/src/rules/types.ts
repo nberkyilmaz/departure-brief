@@ -2,7 +2,7 @@ import type { FlightCategory } from '../decode/metar/derive.js';
 import type { Span } from '../decode/span.js';
 
 /** Bump when a rule's meaning or a finding's shape changes. */
-export const RULES_VERSION = 8;
+export const RULES_VERSION = 9;
 
 /**
  * How much attention a line deserves — an ordering, not a decision.
@@ -78,6 +78,27 @@ export interface PointReview {
   readonly findings: readonly Finding[];
 }
 
+/**
+ * A reporting station near the track, at the time the aircraft is abeam
+ * it. Read for what matters where you are not landing — what is falling,
+ * how low the cloud, how far you can see — and not for runways or the
+ * paperwork of the fields the flight names.
+ */
+export interface EnrouteReview {
+  readonly station: string;
+  /** Which leg of the route it is beside: 0 for the first. */
+  readonly leg: number;
+  /** From the departure, along the track, to the point abeam it. */
+  readonly alongNm: number;
+  /** How far off the track, positive to the right of the direction of flight. */
+  readonly offsetNm: number;
+  readonly at: string;
+  readonly category: FlightCategory | null;
+  readonly forecastCategory: FlightCategory | null;
+  readonly night: boolean;
+  readonly findings: readonly Finding[];
+}
+
 export interface Briefing {
   readonly rulesVersion: number;
   readonly profile: { readonly name: string; readonly version: number };
@@ -85,6 +106,8 @@ export interface Briefing {
   readonly asOf: string;
   readonly points: readonly PointReview[];
   readonly alternate: PointReview | null;
+  /** The stations along the way, in the order they are passed. */
+  readonly enroute: readonly EnrouteReview[];
 }
 
 /** Most wanting of attention first. Used for ordering, never for deciding. */

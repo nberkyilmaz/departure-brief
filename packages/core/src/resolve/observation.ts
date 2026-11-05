@@ -52,7 +52,8 @@ export interface WaypointObservation {
   readonly ownAsleep: boolean;
 }
 
-async function latestFor(store: Store, station: string, asOf: Date): Promise<{ report: RawReport; decoded: DecodedMetar } | null> {
+/** The newest METAR from a station issued at or before `asOf`, decoded, however old. */
+export async function latestMetar(store: Store, station: string, asOf: Date): Promise<{ report: RawReport; decoded: DecodedMetar } | null> {
   /*
    * Filtered by when the report was *issued*, not by when this store first
    * saw it. A briefing fetches for itself and then reads what it fetched, so
@@ -66,7 +67,8 @@ async function latestFor(store: Store, station: string, asOf: Date): Promise<{ r
   return { report, decoded: stored ? (stored.decoded as DecodedMetar) : decodeMetar(report.body) };
 }
 
-const ageOf = (report: RawReport, asOf: Date): number => Math.round((asOf.getTime() - (report.issuedAt?.getTime() ?? asOf.getTime())) / 60_000);
+/** Minutes between a report's issue and `asOf`. */
+export const ageOf = (report: RawReport, asOf: Date): number => Math.round((asOf.getTime() - (report.issuedAt?.getTime() ?? asOf.getTime())) / 60_000);
 
 /**
  * The observation for a position at the briefing instant.
@@ -78,7 +80,7 @@ const ageOf = (report: RawReport, asOf: Date): number => Math.round((asOf.getTim
  * it said four hours ago" is information and a blank is not.
  */
 export async function observationAt(store: Store, position: LatLon, ownStation: string | null, asOf: Date): Promise<WaypointObservation | null> {
-  const own = ownStation ? await latestFor(store, ownStation, asOf) : null;
+  const own = ownStation ? await latestMetar(store, ownStation, asOf) : null;
   const ownAge = own ? ageOf(own.report, asOf) : null;
   const ownIsCurrent = ownAge !== null && ownAge * 60_000 <= CURRENT_WITHIN_MS;
 
@@ -89,7 +91,7 @@ export async function observationAt(store: Store, position: LatLon, ownStation: 
   for (const airport of await store.listAirportsNear(position.lat, position.lon, OBSERVATION_RADIUS_NM)) {
     const id = airport.icaoId;
     if (!id || id === ownStation) continue;
-    const found = await latestFor(store, id, asOf);
+    const found = await latestMetar(store, id, asOf);
     if (!found) continue;
     const age = ageOf(found.report, asOf);
     if (age * 60_000 > CURRENT_WITHIN_MS) continue;

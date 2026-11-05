@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { NotamPanel } from './NotamPanel.js';
 import { aerodromeHref } from './router.js';
-import { concernsOf, fieldCards, TOPIC_LABEL, type Concern, type FieldCard } from './summary.js';
+import { alongTheWay, concernsOf, fieldCards, TOPIC_LABEL, type AlongLeg, type AlongStation, type Concern, type FieldCard } from './summary.js';
 import { hhmmZ, local, localClock, zulu } from './time.js';
 import type { Citation, Finding, StoredBriefing } from './types.js';
 
@@ -48,7 +48,14 @@ function AgeBadge({ f }: { f: Finding }) {
   return <span className={`age ${band}`}>{band}</span>;
 }
 
-function FindingRow({ f }: { f: Finding }) {
+/** How far either side of the track a station counts as on the way, and how far off it a station is still on the line: the core's `CORRIDOR_NM` and `ON_TRACK_NM`. */
+const CORRIDOR_NM = 25;
+const ON_TRACK_NM = 10;
+
+/** Under this, a leg with nothing reporting between its ends is the ends' weather, and not worth a line. */
+const QUIET_LEG_NM = 30;
+
+function FindingRow({ f, where = false }: { f: Finding; where?: boolean }) {
   const [open, setOpen] = useState(false);
   const sources = f.citations.filter((c) => c.raw);
   const others = f.citations.filter((c) => !c.raw && c.text);
@@ -56,7 +63,10 @@ function FindingRow({ f }: { f: Finding }) {
     <li className={`finding ${f.attention}`}>
       <button className="row" onClick={() => setOpen(!open)} aria-expanded={open}>
         {f.rule === 'observation.age' ? <AgeBadge f={f} /> : <span className={`badge ${f.attention}`}>{f.attention}</span>}
-        <span className="basis">{f.basis}</span>
+        <span className="basis">
+          {where && <b>{f.waypoint} </b>}
+          {f.basis}
+        </span>
         <span className="summary">{f.summary}</span>
       </button>
       {open && (
@@ -102,7 +112,12 @@ function Gaps({ stored }: { stored: StoredBriefing }) {
     leg.gaps.filter((g) => g.startsWith('no upper wind forecast')).map((g) => `${leg.from} → ${leg.to}: ${g}`),
   );
 
-  const items = [...missing, ...noWind, ...fetchErrors, ...notamNotes];
+  // A long leg with nothing reporting near it has had only its ends read.
+  const unread = alongTheWay(stored)
+    .filter((leg) => leg.stations.length === 0 && leg.distanceNm > QUIET_LEG_NM)
+    .map((leg) => `${leg.from} → ${leg.to}: nothing reports within ${CORRIDOR_NM} nm of the track, so the weather between the two ends was not read`);
+
+  const items = [...missing, ...unread, ...noWind, ...fetchErrors, ...notamNotes];
   if (items.length === 0) return null;
   return (
     <div className="gaps" role="note">
@@ -121,14 +136,14 @@ function Gaps({ stored }: { stored: StoredBriefing }) {
  * report it was read from. Shared with the aerodrome page so a field looked
  * up on its own reads exactly as it does inside a briefing.
  */
-export function FindingList({ findings }: { findings: readonly Finding[] }) {
+export function FindingList({ findings, where = false }: { findings: readonly Finding[]; where?: boolean }) {
   const order: Record<string, number> = { alert: 0, caution: 1, note: 2, routine: 3 };
   const sorted = [...findings].sort((a, b) => (order[a.attention] ?? 9) - (order[b.attention] ?? 9));
   if (sorted.length === 0) return <p className="field-note">Nothing to report.</p>;
   return (
     <ul className="findings">
       {sorted.map((f, i) => (
-        <FindingRow key={`${f.rule}-${i}`} f={f} />
+        <FindingRow key={`${f.rule}-${i}`} f={f} where={where} />
       ))}
     </ul>
   );
@@ -197,8 +212,7 @@ function ConcernRow({ c }: { c: Concern }) {
       <button className="row" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className={`badge ${c.attention}`}>{c.attention}</span>
         <span className="concern-where">
-          {c.role === 'Alternate' ? 'Alternate ' : ''}
-          {c.waypoint} · {TOPIC_LABEL[c.topic]}
+          {c.role === 'Along the way' ? 'Along the way' : `${c.role === 'Alternate' ? 'Alternate ' : ''}${c.waypoint}`} · {TOPIC_LABEL[c.topic]}
         </span>
         <span className="concern-text">
           {c.headline}
@@ -207,10 +221,119 @@ function ConcernRow({ c }: { c: Concern }) {
       </button>
       {open && (
         <div className="concern-detail">
-          <FindingList findings={c.findings} />
+          <FindingList findings={c.findings} where={c.role === 'Along the way'} />
         </div>
       )}
     </li>
+  );
+}
+
+const timeOf = (iso: string): string => new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+
+/** Off the track, as a chart reads it: "18 nm left", or on it. */
+function offTrack(offsetNm: number): string {
+  const off = Math.round(Math.abs(offsetNm));
+  return off === 0 ? 'on the track' : `${off} nm ${offsetNm > 0 ? 'right' : 'left'}`;
+}
+
+/** One station beside the track: where it is, when you pass it, what it says then, and every check behind that. */
+function AlongRow({ s, name }: { s: AlongStation; name: string | null }) {
+  const r = s.review;
+  const category = (s.category ?? 'unknown').toLowerCase();
+  return (
+    <li className={`along-row${s.attention ? ` ${s.attention}` : ''}`}>
+      <details>
+        <summary>
+          <span className="along-nm">{Math.round(r.alongNm)} nm</span>
+          <span className={`category ${category}`} title={s.from === 'now' ? 'From the observation now: no forecast covers the time you pass' : 'Forecast for the time you pass'}>
+            {s.category ?? '—'}
+          </span>
+          <span className="along-what">
+            <b>{r.station}</b>
+            {name && <span className="along-name"> {name}</span>}
+            <span className="along-meta">
+              {offTrack(r.offsetNm)} · {timeOf(r.at)}
+              {s.from === 'now' && ' · observed now, no forecast'}
+              {r.night && ' · night'}
+            </span>
+            {s.crossed.length > 0 && (
+              <span className="along-crossed">
+                {s.attention === 'alert' ? 'Crosses your limits' : 'Worth a look'}: {s.crossed.join(', ')}
+              </span>
+            )}
+          </span>
+        </summary>
+        <div className="along-detail">
+          <FindingList findings={r.findings} />
+          <p className="field-source">
+            <a href={aerodromeHref(r.station)}>Everything about {r.station}</a>
+          </p>
+        </div>
+      </details>
+    </li>
+  );
+}
+
+/** "9 VFR, 2 MVFR": a quiet stretch of the route, said as the categories it is made of. */
+function categoryCounts(stations: readonly AlongStation[]): string {
+  const counts = new Map<string, number>();
+  for (const s of stations) counts.set(s.category ?? 'unclassified', (counts.get(s.category ?? 'unclassified') ?? 0) + 1);
+  return ['VFR', 'MVFR', 'IFR', 'LIFR', 'unclassified']
+    .filter((c) => counts.has(c))
+    .map((c) => `${counts.get(c)} ${c}`)
+    .join(', ');
+}
+
+/**
+ * The stations beside the track, in the order you pass them. The ones that
+ * cross a limit are listed; the rest are a tap away, said first as the
+ * categories they are, so a quiet stretch reads as quiet without hiding
+ * which stations made it so.
+ */
+function AlongTheWay({ legs, nameOf }: { legs: readonly AlongLeg[]; nameOf: ((id: string) => string | null) | undefined }) {
+  const shown = legs.filter((l) => l.stations.length > 0);
+  if (shown.length === 0) return null;
+  const total = shown.reduce((n, l) => n + l.stations.length, 0);
+  return (
+    <section className="along" aria-labelledby="along-title">
+      <h3 id="along-title">Along the way</h3>
+      <p className="explain">
+        {total} reporting station{total === 1 ? '' : 's'} within {CORRIDOR_NM} nm of the track, each read for the time you would pass it. More than{' '}
+        {ON_TRACK_NM} nm off the line, a station describes the weather beside the route, so a limit it crosses is a caution rather than an alert.
+      </p>
+      {shown.map((leg) => {
+        const asks = leg.stations.filter((s) => s.attention !== null);
+        const quiet = leg.stations.filter((s) => s.attention === null);
+        return (
+          <div className="along-leg" key={leg.leg}>
+            {legs.length > 1 && (
+              <h4 className="along-leg-title">
+                {leg.from} → {leg.to}
+              </h4>
+            )}
+            {asks.length > 0 && (
+              <ol className="along-list">
+                {asks.map((s) => (
+                  <AlongRow key={s.review.station} s={s} name={nameOf?.(s.review.station) ?? null} />
+                ))}
+              </ol>
+            )}
+            {quiet.length > 0 && (
+              <details className="along-more">
+                <summary>
+                  {quiet.length} {asks.length > 0 ? 'more ' : ''}within your limits: {categoryCounts(quiet)}
+                </summary>
+                <ol className="along-list">
+                  {quiet.map((s) => (
+                    <AlongRow key={s.review.station} s={s} name={nameOf?.(s.review.station) ?? null} />
+                  ))}
+                </ol>
+              </details>
+            )}
+          </div>
+        );
+      })}
+    </section>
   );
 }
 
@@ -257,6 +380,8 @@ export function BriefingView({ stored, nameOf, whenCanIGo }: { stored: StoredBri
           <FieldCardView key={`${c.role}-${c.point.waypoint}-${c.point.at}`} c={c} name={nameOf?.(c.point.waypoint) ?? null} />
         ))}
       </div>
+
+      <AlongTheWay legs={alongTheWay(stored)} nameOf={nameOf} />
 
       <Gaps stored={stored} />
       {stored.document.notams && <NotamPanel doc={stored.document.notams} />}

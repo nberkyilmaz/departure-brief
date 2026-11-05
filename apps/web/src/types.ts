@@ -53,6 +53,22 @@ export interface PointReview {
   findings: Finding[];
 }
 
+/** A reporting station near the track, at the time you would be abeam it. */
+export interface EnrouteReview {
+  station: string;
+  /** Which leg it is beside: 0 for the first. */
+  leg: number;
+  /** From the departure, along the track. */
+  alongNm: number;
+  /** Off the track, positive to the right. */
+  offsetNm: number;
+  at: string;
+  category: FlightCategory | null;
+  forecastCategory: FlightCategory | null;
+  night: boolean;
+  findings: Finding[];
+}
+
 export interface Briefing {
   rulesVersion: number;
   profile: { name: string; version: number };
@@ -60,6 +76,8 @@ export interface Briefing {
   asOf: string;
   points: PointReview[];
   alternate: PointReview | null;
+  /** The stations along the way, in the order they are passed. */
+  enroute: EnrouteReview[];
 }
 
 export interface FlightPlanInput {
@@ -154,10 +172,19 @@ export interface WindowPoint {
   findings: Finding[];
 }
 
+/** The stations along the way at one hour: the worst forecast among them, and every limit any crosses. */
+export interface WindowAlong {
+  covered: number;
+  category: FlightCategory | null;
+  station: string | null;
+  findings: Finding[];
+}
+
 export interface DepartureSlot {
   departAt: string;
   /** The departure, then the destination. */
   points: WindowPoint[];
+  along: WindowAlong;
 }
 
 export interface FindingChange {
@@ -182,6 +209,7 @@ export interface BriefingDiff {
   to: { sha256: string; asOf: string };
   points: PointDiff[];
   alternate: PointDiff | null;
+  enroute: PointDiff[];
   notams: { kind: 'new' | 'gone' | 'rank-changed'; id: string | null; sha256: string; from: string | null; to: string | null; summary: string; notable: boolean }[];
   reports: { added: { kind: string; station: string | null; sha256: string }[]; removed: { kind: string; station: string | null; sha256: string }[] };
   warnings: string[];
@@ -303,7 +331,7 @@ export interface StoredBriefing {
   asOf: string;
   createdAt: string;
   document: {
-    format: 3;
+    format: 4;
     plan: FlightPlanInput;
     asOf: string;
     notams: NotamDocument | null;
@@ -311,6 +339,7 @@ export interface StoredBriefing {
       points: PointInputs[];
       /** The alternate's inputs, kept apart from the route's. */
       alternate: PointInputs | null;
+      enroute: { station: string; leg: number; eta: string; cumulativeNm: number; offsetNm: number; forecast: string | null; metar: string | null }[];
       reports: { kind: string; station: string | null; sha256: string; issuedAt: string | null }[];
     };
     briefing: Briefing;

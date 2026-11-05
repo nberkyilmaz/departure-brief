@@ -342,7 +342,8 @@ describe('when can I go', () => {
     const s = await strip();
     // Recorded at 00:52Z: the next twelve whole hours.
     expect(hours(s).map((th) => th.getAttribute('title'))).toEqual(['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map((h) => `${h}:00Z`));
-    expect([...s.querySelectorAll('tbody th')].map((th) => th.textContent)).toEqual(['CYSN', 'CYKF']);
+    // Toronto Island and Pearson lie within the corridor and publish TAFs, so the way between has a row of its own.
+    expect([...s.querySelectorAll('tbody th')].map((th) => th.textContent)).toEqual(['CYSN', 'Along', 'CYKF']);
     for (const b of s.querySelectorAll('.window-cell')) expect(b.textContent).toMatch(/^[VMIL–]$/);
     expect(s.textContent).not.toMatch(/\bGO\b|NO-GO/);
   });
@@ -364,8 +365,9 @@ describe('when can I go', () => {
     fireEvent.click(departureCells(s)[0]!);
     const detail = s.querySelector('.window-detail')!;
     expect(detail.textContent).toMatch(/Leave .*· 01:00Z/);
-    // Both ends, each with its category and what it crosses, in words.
-    expect(detail.querySelectorAll('li')).toHaveLength(2);
+    // Both ends and the way between, in the order they are flown, each with its category and what it crosses, in words.
+    expect([...detail.querySelectorAll('li')].map((li) => li.querySelector('b')?.textContent)).toEqual(['CYSN', 'Along the way', 'CYKF']);
+    expect(detail.textContent).toMatch(/Along the way: (VFR|MVFR|IFR|LIFR) at worst, at CY[A-Z]{2} \(2 stations forecast the time you pass\)/);
     expect(detail.textContent).toMatch(/CYKF at .*: (VFR|MVFR|IFR|LIFR|No forecast)/);
 
     fireEvent.click(within(s).getByRole('button', { name: /Brief this time/i }));
@@ -375,6 +377,23 @@ describe('when can I go', () => {
     const after = await strip();
     expect(hours(after).findIndex((th) => th.classList.contains('window-current'))).toBe(0);
     expect(within(after).getByText(/This is the time this briefing is for/)).toBeTruthy();
+  });
+});
+
+describe('along the way', () => {
+  it('reads the stations beside the track, and keeps the quiet ones a tap away', async () => {
+    // The recorded flight at its recorded hour: an hour picked in the strip above is remembered, as it would be for a visitor.
+    window.localStorage.clear();
+    render(<App />);
+    await briefed();
+    const section = (await screen.findByRole('heading', { name: 'Along the way' }, {}, { timeout: 10_000 })).closest('section')!;
+    // Toronto Island and Pearson, each about twenty-two miles to the right of St. Catharines to Waterloo.
+    expect(section.textContent).toMatch(/2 reporting stations within 25 nm of the track/);
+    const quiet = section.querySelector('.along-more > summary')!;
+    expect(quiet.textContent).toBe('2 within your limits: 2 VFR');
+    const rows = [...section.querySelectorAll('.along-row')];
+    expect(rows.map((r) => r.querySelector('.along-what b')?.textContent)).toEqual(['CYTZ', 'CYYZ']);
+    expect(rows[0]!.textContent).toMatch(/22 nm right/);
   });
 });
 
