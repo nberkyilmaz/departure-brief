@@ -99,6 +99,43 @@ export interface WeatherSource {
   readonly problem: string | null;
   /** Live products that could not be had. The briefing says what each costs where it matters. */
   readonly missing: readonly string[];
+  /** Live products the relay has not refreshed for a while, each with its age: "TAFs, taken 3 h ago". */
+  readonly stale: readonly string[];
+}
+
+/**
+ * How often the relay takes each product from the services. A product three
+ * of these old has missed three refreshes in a row — the relay's timer has
+ * stopped, or the service has been failing — and the relay's own status
+ * page calls it stale at the same point.
+ */
+const REFRESH: readonly { readonly path: RegExp; readonly name: string; readonly everyMinutes: number }[] = [
+  { path: /metars\.cache/, name: 'METARs', everyMinutes: 5 },
+  { path: /tafs\.cache/, name: 'TAFs', everyMinutes: 15 },
+  { path: /sigmet/, name: 'hazard advisories', everyMinutes: 15 },
+  { path: /alpha=upperwind/, name: 'Canadian upper winds', everyMinutes: 60 },
+  { path: /windtemp/, name: 'US upper winds', everyMinutes: 60 },
+];
+
+function ageWords(minutes: number): string {
+  if (minutes < 120) return `${Math.round(minutes)} min`;
+  if (minutes < 48 * 60) return `${Math.round(minutes / 60)} h`;
+  return `${Math.round(minutes / 1440)} days`;
+}
+
+/**
+ * Which products are older than they should be, by the time the relay
+ * stamped on each. Old weather is not wrong weather — a TAF taken three
+ * hours ago may still be the one in force — but an amendment issued since
+ * would not be in it, and the pilot should know to look.
+ */
+export function staleProducts(fetchedAt: ReadonlyMap<string, string>, now: Date): string[] {
+  return REFRESH.flatMap((p) => {
+    const times = [...fetchedAt].filter(([url]) => p.path.test(url)).map(([, at]) => Date.parse(at));
+    if (times.length === 0) return [];
+    const minutes = (now.getTime() - Math.min(...times)) / 60_000;
+    return minutes > 3 * p.everyMinutes ? [`${p.name}, taken ${ageWords(minutes)} ago`] : [];
+  });
 }
 
 export interface Aerodrome {
@@ -198,6 +235,7 @@ interface Live {
   /** When the relay took the METARs from the service: the age the page shows. */
   readonly at: string;
   readonly missing: string[];
+  readonly stale: string[];
   /** NOTAMs through the relay, holding each batch so the reports page can list it. */
   readonly notams: NotamSource;
 }
@@ -285,6 +323,7 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
   return {
     at: fetchedAt.get(metars.value.request) ?? now.toISOString(),
     missing,
+    stale: staleProducts(fetchedAt, now),
     notams: {
       async notams(site) {
         await canadianOnly(store, site);
@@ -356,17 +395,17 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
       // Nothing recorded: no report, and no model answer about a NOTAM that may no longer exist.
       store = newStore();
       live = await fetchLive(store, relay.replace(/\/+$/, ''), hold);
-      weather = { mode: 'live', at: live.at, problem: null, missing: live.missing };
+      weather = { mode: 'live', at: live.at, problem: null, missing: live.missing, stale: live.stale };
     } catch (e) {
       // Anything else is a bug in this page, and should surface as one rather than be relabelled as weather.
       if (!(e instanceof LiveUnavailable)) throw e;
       live = null;
       store = await recorded();
-      weather = { mode: 'recorded', at: bundle.recordedAt, problem: e.message, missing: [] };
+      weather = { mode: 'recorded', at: bundle.recordedAt, problem: e.message, missing: [], stale: [] };
     }
   } else {
     store = await recorded();
-    weather = { mode: 'recorded', at: bundle.recordedAt, problem: null, missing: [] };
+    weather = { mode: 'recorded', at: bundle.recordedAt, problem: null, missing: [], stale: [] };
   }
 
   const recordedAsOf = new Date(bundle.asOf);

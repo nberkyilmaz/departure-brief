@@ -31,11 +31,18 @@ export function weatherPhrase(weather: WeatherSource): string {
 
 export function WeatherNote({ weather }: { weather: WeatherSource }) {
   if (weather.mode === 'live') {
+    const stale = weather.stale ?? [];
     // One line: where it comes from and how old it is. The rest is on the page that explains how this works.
     return (
-      <div className="frozen live" role="note">
+      <div className={`frozen live${stale.length > 0 ? ' stale' : ''}`} role="note">
         <b>Live weather</b> from {weatherAge(weather.at)}.
         {weather.missing.length > 0 && <> Not available just now: {weather.missing.join(' and ')}; the briefing says where that matters.</>}
+        {stale.length > 0 && (
+          <>
+            {' '}
+            <b>Not refreshed lately:</b> {stale.join('; ')}. An amendment issued since would not be here.
+          </>
+        )}
       </div>
     );
   }

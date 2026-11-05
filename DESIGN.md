@@ -31,6 +31,11 @@ wrote the decoders by hand rather than using a library, for two reasons:
   once.
 - **Totality.** A decoder never throws. Anything it doesn't understand comes
   back as an explicit "unparsed" span instead of being silently dropped.
+  Keeping it was only half the job: for a while the rules read only what
+  was decoded, so a TAF whose change group had a mistyped time
+  (`FM52000`) lost that group's weather without a word. Now any unread
+  text in a report's body becomes a caution in the briefing, quoted and
+  highlighted in the report, so the pilot reads it themselves.
 
 I drove it with a corpus of 8,000 real reports and a script that lists the
 unparsed tokens by frequency. Under 0.3 % remain, mostly rare remarks.

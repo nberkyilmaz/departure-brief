@@ -38,7 +38,7 @@ official briefing.
 | **When can I go?** | The flight judged again for each of the next twelve hours, by the same code as the briefing, the destination at the time you would arrive and the stations along the way when you would pass them; pick an hour and it is briefed. |
 | **Weight and balance** | Read out of a scanned handbook, every figure checked against the ink before it is used. |
 | **Forecast verification** | Did the TAF turn out to be right, and which way was it wrong. |
-| **Winds and temperatures aloft** | Canada's from NAV CANADA, the United States' from NOAA's FB bulletin, interpolated to the altitude flown; the temperature at cruise as the first question about icing. |
+| **Winds and temperatures aloft** | Canada's from NAV CANADA at all ninety-seven aerodromes it publishes them for, the United States' from NOAA's FB bulletin, interpolated to the altitude flown; the temperature at cruise as the first question about icing. |
 | **Daylight** | Last light on arrival and how much of it is left, from the same solar arithmetic the night rules use. |
 | **Nav log** | The wind triangle leg by leg, true and magnetic, with a blank and a reason wherever a number cannot be had. |
 | **Magnetic variation** | NOAA's World Magnetic Model, checked against all hundred of its published test values, so a Canadian field gets a magnetic heading as readily as an American one. |

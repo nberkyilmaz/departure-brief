@@ -63,7 +63,7 @@ function stored(points: PointReview[], legs: Partial<NavLogLeg>[] = [], enroute:
       asOf: '2026-10-29T19:54:00.000Z',
       notams: null,
       inputs: { points: [], alternate: null, enroute: [], reports: [] },
-      briefing: { rulesVersion: 9, profile: { name: 'default', version: 1 }, aircraft: 'C172', asOf: '2026-10-29T19:54:00.000Z', points, alternate: null, enroute },
+      briefing: { rulesVersion: 10, profile: { name: 'default', version: 1 }, aircraft: 'C172', asOf: '2026-10-29T19:54:00.000Z', points, alternate: null, enroute },
       navlog: { legs: legs as NavLogLeg[], alternate: null } as never,
       fuel: {} as never,
     },

@@ -21,7 +21,8 @@ const FETCHED_AT = '2026-10-20T04:55:00.000Z';
 
 const file = (...p: string[]) => readFileSync(join(...p), 'utf8');
 
-type Answer = { status: number; body: string } | 'unreachable';
+/** `at` is when the relay says it took the product from the service; most were taken five minutes ago. */
+type Answer = { status: number; body: string; at?: string } | 'unreachable';
 
 const windtemp = (region: string, forecast: string) => `/awc/windtemp?region=${region}&level=low&fcst=${forecast}`;
 const FB = ['us', 'alaska', 'hawaii'].flatMap((region) => ['06', '12', '24'].map((forecast) => windtemp(region, forecast)));
@@ -63,7 +64,7 @@ beforeAll(() => {
     // What a refused connection, or a relay that does not name this page, looks like from inside fetch.
     if (!answer || answer === 'unreachable') throw new TypeError('Failed to fetch');
     // A 204 may not carry a body, not even an empty one.
-    return new Response(answer.status === 204 ? null : answer.body, { status: answer.status, headers: { 'X-Fetched-At': FETCHED_AT } });
+    return new Response(answer.status === 204 ? null : answer.body, { status: answer.status, headers: { 'X-Fetched-At': answer.at ?? FETCHED_AT } });
   }) as typeof fetch;
 });
 
@@ -79,7 +80,7 @@ afterAll(() => {
 describe('live weather through the relay', () => {
   it('holds the live reports and none of the recorded ones', async () => {
     const engine = await loadEngine('/', RELAY);
-    expect(engine.weather).toEqual({ mode: 'live', at: FETCHED_AT, problem: null, missing: [] });
+    expect(engine.weather).toEqual({ mode: 'live', at: FETCHED_AT, problem: null, missing: [], stale: [] });
     const yyz = engine.reports.find((r) => r.kind === 'metar' && r.station === 'CYYZ');
     expect(yyz?.body).toBe('METAR CYYZ 200400Z 35010KT 15SM SKC 11/07 A3036 RMK SLP286');
     // Nothing from the recorded day of 2026-09-19 survives into a live store.
@@ -146,6 +147,14 @@ describe('live weather through the relay', () => {
     expect(engine.weather.missing).toEqual(['Canadian upper winds']);
   });
 
+  it('says which products the relay has not refreshed lately, and how old they are', async () => {
+    // The TAFs taken three hours ago and not since: three missed refreshes is a timer stopped or a service down, not a hiccup.
+    answers['/awc/cache/tafs.cache.xml.gz'] = { status: 200, body: file(FETCH, 'awc-cache-2026-10-20', 'tafs.cache.xml'), at: '2026-10-20T02:00:00.000Z' };
+    const engine = await loadEngine('/', RELAY);
+    expect(engine.weather.mode).toBe('live');
+    expect(engine.weather.stale).toEqual(['TAFs, taken 3 h ago']);
+  });
+
   it('says plainly when NOAA sends no US winds aloft, rather than calling it a fault', async () => {
     for (const path of FB) answers[path] = { status: 204, body: '' };
     const engine = await loadEngine('/', RELAY);
@@ -204,21 +213,27 @@ describe('falling back to the recorded weather', () => {
 
   it('and with no relay configured, it never asks one', async () => {
     const engine = await loadEngine('/');
-    expect(engine.weather).toEqual({ mode: 'recorded', at: '2026-09-19T00:52:00.000Z', problem: null, missing: [] });
+    expect(engine.weather).toEqual({ mode: 'recorded', at: '2026-09-19T00:52:00.000Z', problem: null, missing: [], stale: [] });
     expect(asked).toEqual([]);
   });
 });
 
 describe('what the page says about it', () => {
   it('names live weather and its age', () => {
-    render(<WeatherNote weather={{ mode: 'live', at: FETCHED_AT, problem: null, missing: ['upper winds'] }} />);
+    render(<WeatherNote weather={{ mode: 'live', at: FETCHED_AT, problem: null, missing: ['upper winds'], stale: [] }} />);
     // One line, with the age in it: the rest is on the page that explains how this works.
     expect(document.body.textContent).toMatch(/^Live weather from 04:55Z, 5 min ago\./);
     expect(document.body.textContent).toMatch(/Not available just now: upper winds/);
   });
 
+  it('says which products have not been refreshed, and why that matters', () => {
+    render(<WeatherNote weather={{ mode: 'live', at: FETCHED_AT, problem: null, missing: [], stale: ['TAFs, taken 3 h ago'] }} />);
+    expect(document.body.textContent).toMatch(/Not refreshed lately: TAFs, taken 3 h ago\. An amendment issued since would not be here\./);
+    expect(document.querySelector('.frozen.live.stale')).not.toBeNull();
+  });
+
   it('never lets a fallback pass for current weather', () => {
-    render(<WeatherNote weather={{ mode: 'recorded', at: '2026-09-19T00:52:00.000Z', problem: 'the live METARs could not be fetched: HTTP 503', missing: [] }} />);
+    render(<WeatherNote weather={{ mode: 'recorded', at: '2026-09-19T00:52:00.000Z', problem: 'the live METARs could not be fetched: HTTP 503', missing: [], stale: [] }} />);
     expect(document.body.textContent).toMatch(/The weather here is frozen/);
     expect(document.body.textContent).toMatch(/Live weather could not be had — the live METARs could not be fetched/);
     expect(document.body.textContent).toMatch(/19 Sep 2026 at 00:52Z/);

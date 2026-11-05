@@ -46,8 +46,16 @@ export const CFPS = 'https://plan.navcanada.ca/weather/api/alpha/';
  * here so the relay bundles nothing but itself.
  */
 export const UPPERWIND_SITES = [
-  'CYYZ', 'CYOW', 'CYUL', 'CYQB', 'CYHZ', 'CYWG', 'CYYC', 'CYEG', 'CYVR',
-  'CYXE', 'CYQR', 'CYQT', 'CYZF', 'CYXY', 'CYFB', 'CYYT', 'CYQX',
+  'CYAB', 'CYAH', 'CYAM', 'CYAY', 'CYBK', 'CYBR', 'CYCB', 'CYCO', 'CYDB', 'CYDL',
+  'CYEG', 'CYEU', 'CYEV', 'CYFB', 'CYFC', 'CYFS', 'CYGP', 'CYGR', 'CYGW', 'CYHO',
+  'CYHZ', 'CYIF', 'CYJA', 'CYKA', 'CYKL', 'CYLT', 'CYMA', 'CYMM', 'CYMO', 'CYMT',
+  'CYMW', 'CYNA', 'CYNC', 'CYNM', 'CYOC', 'CYOD', 'CYOJ', 'CYOW', 'CYPH', 'CYPU',
+  'CYQB', 'CYQD', 'CYQG', 'CYQH', 'CYQI', 'CYQL', 'CYQM', 'CYQR', 'CYQT', 'CYQX',
+  'CYQY', 'CYRB', 'CYRI', 'CYRL', 'CYRT', 'CYSC', 'CYSM', 'CYSY', 'CYTE', 'CYTF',
+  'CYTL', 'CYUL', 'CYUX', 'CYVC', 'CYVO', 'CYVP', 'CYVQ', 'CYVR', 'CYVV', 'CYWG',
+  'CYWK', 'CYXC', 'CYXE', 'CYXJ', 'CYXS', 'CYXY', 'CYYB', 'CYYC', 'CYYD', 'CYYE',
+  'CYYF', 'CYYH', 'CYYL', 'CYYQ', 'CYYR', 'CYYT', 'CYYU', 'CYYW', 'CYYY', 'CYYZ',
+  'CYZF', 'CYZG', 'CYZH', 'CYZP', 'CYZS', 'CYZT', 'CYZV',
 ] as const;
 
 /**
@@ -74,6 +82,40 @@ export interface Product {
   readonly emptyBody?: string;
   /** For a text product, what its text must contain to be the product and not an error page. JSON and gzip are recognised by their first bytes. */
   readonly textMatches?: RegExp;
+  /** For a JSON product, a refusal dressed as an answer: why it is not the product, or `null` when it is. */
+  readonly refusal?: (text: string) => Refusal | null;
+}
+
+export interface Refusal {
+  readonly error: string;
+  /** Sites the service says it does not know, which may be left out of the next request. */
+  readonly unknownSites: readonly string[];
+}
+
+/**
+ * How CFPS says no: still a 200, still JSON, with the reason in
+ * `meta.messages` and nothing in `data`. `alpha.geomInvalid` names the
+ * sites it does not recognise, and one of them is enough to empty the
+ * answer for all the others. An answer with no upper winds in it at all is
+ * not kept either: it would replace a country's winds with none.
+ */
+export function cfpsRefusal(text: string): Refusal | null {
+  let parsed: { meta?: { messages?: { type?: string; message?: string; details?: unknown }[] }; data?: unknown };
+  try {
+    parsed = JSON.parse(text) as typeof parsed;
+  } catch {
+    return { error: 'NAV CANADA did not send JSON', unknownSites: [] };
+  }
+  const errors = (parsed.meta?.messages ?? []).filter((m) => m.type === 'error');
+  if (errors.length > 0) {
+    const details = (m: { details?: unknown }) => (Array.isArray(m.details) ? m.details.map(String) : []);
+    return {
+      error: `NAV CANADA refused: ${errors.map((m) => `${m.message ?? 'an error'}${details(m).length > 0 ? ` (${details(m).join(', ')})` : ''}`).join('; ')}`,
+      unknownSites: errors.filter((m) => m.message === 'alpha.geomInvalid').flatMap(details),
+    };
+  }
+  if (!Array.isArray(parsed.data) || parsed.data.length === 0) return { error: 'NAV CANADA sent no upper winds', unknownSites: [] };
+  return null;
 }
 
 export const PRODUCTS: Readonly<Record<'metars' | 'tafs' | 'isigmet' | 'airsigmet' | 'upperwind', Product>> = {
@@ -91,6 +133,7 @@ export const PRODUCTS: Readonly<Record<'metars' | 'tafs' | 'isigmet' | 'airsigme
     everyMs: 60 * MIN,
     contentType: 'application/json',
     gzip: false,
+    refusal: cfpsRefusal,
   },
 };
 
@@ -132,6 +175,8 @@ export interface SnapshotMeta {
   /** When the relay received it from the service: the age a page shows. */
   readonly fetchedAt: string;
   readonly upstream: string;
+  /** Anything about this copy worth a look on the status page: sites the service no longer knows, say. */
+  readonly note?: string;
 }
 
 /** The part of Workers KV the relay uses, so a Map can stand in for it. */
@@ -284,27 +329,44 @@ export class Relay {
     return value && metadata ? { body: value, meta: metadata } : null;
   }
 
-  private async fetchProduct(product: Product): Promise<Snapshot | { error: string }> {
+  private async fetchProduct(product: Product, upstream: string = product.upstream, note: string | null = null): Promise<Snapshot | { error: string }> {
     let body: ArrayBuffer;
     let empty = false;
     try {
-      const res = await this.deps.fetch(product.upstream, {
+      const res = await this.deps.fetch(upstream, {
         headers: { 'User-Agent': this.userAgent, Accept: product.gzip ? '*/*' : product.textMatches ? 'text/plain' : 'application/json' },
         signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
       });
       if (res.status === 204 && product.emptyBody !== undefined) {
         body = new TextEncoder().encode(product.emptyBody).buffer as ArrayBuffer;
         empty = true;
-      } else if (!res.ok) return { error: `HTTP ${res.status} from ${product.upstream}` };
+      } else if (!res.ok) return { error: `HTTP ${res.status} from ${upstream}` };
       else body = await res.arrayBuffer();
     } catch (e) {
-      return { error: `${(e as Error).message} (${product.upstream})` };
+      return { error: `${(e as Error).message} (${upstream})` };
     }
     // Kept only if it is what it claims to be, so a maintenance page never replaces good weather.
     const expected = product.gzip ? 'a gzip file' : product.textMatches ? 'the bulletin' : 'JSON';
     const genuine = empty || (product.gzip ? isGzip(body) : product.textMatches ? product.textMatches.test(new TextDecoder().decode(body)) : looksLikeJson(body));
-    if (!genuine) return { error: `${product.upstream} did not send ${expected}` };
-    const meta: SnapshotMeta = { fetchedAt: new Date(this.deps.now()).toISOString(), upstream: product.upstream };
+    if (!genuine) return { error: `${upstream} did not send ${expected}` };
+    const refused = !empty && product.refusal ? product.refusal(new TextDecoder().decode(body)) : null;
+    if (refused) {
+      /*
+       * Once, and only without the sites the service named: a site NAV
+       * CANADA stops recognising costs that one site, not the country.
+       */
+      const url = new URL(upstream);
+      const asked = url.searchParams.getAll('site');
+      const kept = asked.filter((s) => !refused.unknownSites.includes(s));
+      if (note === null && kept.length > 0 && kept.length < asked.length) {
+        url.searchParams.delete('site');
+        const query = [...kept.map((s) => `site=${s}`), ...[...url.searchParams].map(([k, v]) => `${k}=${v}`)].join('&');
+        const dropped = asked.filter((s) => !kept.includes(s));
+        return this.fetchProduct(product, `${url.origin}${url.pathname}?${query}`, `NAV CANADA does not recognise ${dropped.join(', ')}; asked without ${dropped.length === 1 ? 'it' : 'them'}`);
+      }
+      return { error: `${refused.error} (${upstream})` };
+    }
+    const meta: SnapshotMeta = { fetchedAt: new Date(this.deps.now()).toISOString(), upstream, ...(note ? { note } : {}) };
     await this.env.SNAPSHOTS.put(product.key, body, { metadata: meta });
     return { body, meta };
   }
@@ -411,7 +473,7 @@ export class Relay {
       // Three missed windows means the timer has stopped, not that a service hiccuped.
       const stale = ageMinutes === null || ageMinutes * MIN > 3 * p.everyMs;
       if (stale) healthy = false;
-      products.push({ product: p.key, fetchedAt: snap?.meta.fetchedAt ?? null, ageMinutes, everyMinutes: p.everyMs / MIN, stale });
+      products.push({ product: p.key, fetchedAt: snap?.meta.fetchedAt ?? null, ageMinutes, everyMinutes: p.everyMs / MIN, stale, ...(snap?.meta.note ? { note: snap.meta.note } : {}) });
     }
     return json(healthy ? 200 : 503, { ok: healthy, products }, { ...cors, 'Cache-Control': 'no-store' });
   }
