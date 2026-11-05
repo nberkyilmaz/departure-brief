@@ -17,7 +17,8 @@ import type { LatLon } from '../domain/geo.js';
 import { UPPERWIND_RADIUS_NM } from '../resolve/wind.js';
 import { storeAndDecode, type IngestCounts } from '../store/decode.js';
 import type { AirportStore, ReportStore } from '../store/types.js';
-import { decideFetch, DEFAULT_FRESHNESS_MS, recordFetchAttempt, type FreshnessDecision, type FreshnessStore } from './freshness.js';
+import { fbStationFrom, type AwcClient } from './awc.js';
+import { decideFetch, DEFAULT_FRESHNESS_MS, recordFetchAttempt, shouldFetch, type FreshnessDecision, type FreshnessStore } from './freshness.js';
 import type { NavCanadaClient } from './navcanada.js';
 
 /** How many candidate sites to ask about. They go in one request, so this is not a request count. */
@@ -89,4 +90,31 @@ export async function ingestUpperWinds(
     counts = { fetched: counts.fetched, rawInserted: counts.rawInserted + c.rawInserted, decodedInserted: counts.decodedInserted + c.decodedInserted };
   }
   return { sites: wanted, counts, skipped };
+}
+
+/** What the US bulletins are recorded under in the fetch log: they cover the country, not one site. */
+export const US_WINDS_STATION = 'FBUS';
+
+/**
+ * Fetch and store the US winds aloft, unless they were fetched within the
+ * hour. Unlike NAV CANADA's, the American bulletin is not asked for by
+ * site: each one covers the whole country, so it is one decision for all of
+ * it, and the resolver picks the site nearest each point afterwards.
+ */
+export async function ingestUsWindsAloft(
+  deps: { store: ReportStore & AirportStore & FreshnessStore; awc: AwcClient; now?: () => Date },
+  maxAgeMs: number = DEFAULT_FRESHNESS_MS.upperwind,
+): Promise<{ readonly fetched: boolean; readonly counts: IngestCounts }> {
+  const now = (deps.now ?? (() => new Date()))();
+  if (!(await shouldFetch(deps.store, US_WINDS_STATION, 'upperwind', now, maxAgeMs))) {
+    return { fetched: false, counts: { fetched: 0, rawInserted: 0, decodedInserted: 0 } };
+  }
+  const fetched = await deps.awc.windsAloft(async (site) => {
+    const airport = await deps.store.getAirport(site);
+    return fbStationFrom(site, airport ? [airport] : []);
+  }, now);
+  // Recorded as asked even when no bulletin came back, so an empty answer is not asked for again on every briefing.
+  await recordFetchAttempt(deps.store, US_WINDS_STATION, 'upperwind', now, fetched.request);
+  const counts = await storeAndDecode(deps.store, fetched.reports, fetched.request, now);
+  return { fetched: true, counts };
 }

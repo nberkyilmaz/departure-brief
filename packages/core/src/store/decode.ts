@@ -15,11 +15,12 @@ export interface IngestCounts {
 }
 
 /** The decoders this pipeline knows how to run, by report kind. */
-const DECODERS: Partial<Record<ReportKind, { version: number; decode: (raw: string) => unknown }>> = {
+const DECODERS: Partial<Record<ReportKind, { version: number; decode: (raw: string, report: RawReport) => unknown }>> = {
   metar: { version: METAR_DECODER_VERSION, decode: decodeMetar },
   taf: { version: TAF_DECODER_VERSION, decode: decodeTaf },
   notam: { version: NOTAM_DECODER_VERSION, decode: decodeNotam },
-  upperwind: { version: UPPERWIND_DECODER_VERSION, decode: decodeUpperWind },
+  // A US bulletin's times carry no month or year; the report's issue time dates them.
+  upperwind: { version: UPPERWIND_DECODER_VERSION, decode: (raw, report) => decodeUpperWind(raw, report.issuedAt) },
   sigmet: { version: SIGMET_DECODER_VERSION, decode: decodeSigmet },
 };
 
@@ -48,7 +49,7 @@ export async function storeAndDecode(
       sha256: report.sha256,
       kind: report.kind,
       decoderVersion: decoder.version,
-      decoded: decoder.decode(report.body),
+      decoded: decoder.decode(report.body, report),
       decodedAt: now,
     });
     if (res.inserted) decodedInserted++;

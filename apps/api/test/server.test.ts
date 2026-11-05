@@ -46,6 +46,9 @@ for (const id of ['KTEB', 'N07', 'KHPN', 'KJFK']) {
 // Hazard advisories: nothing in force, which is what the service says most days.
 routes[`${AWC_BASE_URL}/isigmet?format=json`] = { status: 204 };
 routes[`${AWC_BASE_URL}/airsigmet?format=json`] = { status: 204 };
+// The US winds aloft: no bulletin, which is what NOAA has said since 3 November 2026.
+const WINDTEMP = ['us', 'alaska', 'hawaii'].flatMap((region) => ['06', '12', '24'].map((f) => `${AWC_BASE_URL}/windtemp?region=${region}&level=low&fcst=${f}`));
+for (const url of WINDTEMP) routes[url] = { status: 204 };
 /*
  * The area around N07, which has no identifier of its own and so no reports
  * to ask for — the one field in this plan that has to borrow. Recorded from
@@ -154,7 +157,8 @@ describe('POST /api/briefings', () => {
      * to stand in for them.
      *
      * Then the two hazard feeds, which are not per station: they are the
-     * whole world, once, however many aerodromes the plan names.
+     * whole world, once, however many aerodromes the plan names. And the
+     * US winds aloft, which are the whole country in each bulletin.
      */
     expect(calls).toEqual([
       `${AWC_BASE_URL}/metar?ids=KTEB&format=json`,
@@ -162,9 +166,20 @@ describe('POST /api/briefings', () => {
       `${AWC_BASE_URL}/metar?bbox=39,-76.35,42,-72.65&format=json`,
       `${AWC_BASE_URL}/isigmet?format=json`,
       `${AWC_BASE_URL}/airsigmet?format=json`,
+      ...WINDTEMP,
     ]);
     // Never by name: there are no reports filed under N07 to ask for.
     expect(calls.some((u) => u.includes('ids=N07'))).toBe(false);
+  });
+
+  it('asks for the US winds aloft once an hour, not once per briefing, even when NOAA has none', async () => {
+    const { app, calls } = await makeCountingApp();
+    const payload = { plan, profile, asOf: '2026-09-07T12:30:00Z' };
+    await app.inject({ method: 'POST', url: '/api/briefings', payload });
+    const first = calls.filter((u) => u.includes('/windtemp')).length;
+    expect(first).toBe(WINDTEMP.length);
+    await app.inject({ method: 'POST', url: '/api/briefings', payload });
+    expect(calls.filter((u) => u.includes('/windtemp')).length).toBe(first);
   });
 
   it('asks for the hazard feeds once, not once per briefing', async () => {

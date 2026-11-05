@@ -76,8 +76,8 @@ export { storeAndDecode } from './store/decode.js';
  */
 export { expectOk, HttpError } from './fetch/response.js';
 export type { HttpClient, HttpRequestInit, HttpResponse } from './fetch/response.js';
-export { AWC_BASE_URL, AwcClient, AwcError } from './fetch/awc.js';
-export type { AwcFetch } from './fetch/awc.js';
+export { AWC_BASE_URL, AwcClient, AwcError, FB_FORECASTS, FB_REGIONS, fbStationFrom } from './fetch/awc.js';
+export type { AwcFetch, FbForecast, FbRegion, FbStationOf } from './fetch/awc.js';
 export { AWC_CACHE_BASE_URL, AwcCacheClient, METAR_CACHE_FILE, parseMetarCache, parseTafCache, TAF_CACHE_FILE } from './fetch/awcCache.js';
 export { CANADIAN_UPPERWIND_SITES, NAVCANADA_CFPS_BASE_URL, NavCanadaClient, NavCanadaError } from './fetch/navcanada.js';
 export type { CfpsFetch } from './fetch/navcanada.js';

@@ -37,7 +37,7 @@ function decodedOf(report: RawReport, stored: unknown): DecodedUpperWind {
   // Revived, not cast: a stored record's dates crossed JSON on the way in
   // and come back as strings, and the use-window comparison below calls
   // getTime on them.
-  return stored ? reviveUpperWind(stored) : decodeUpperWind(report.body);
+  return stored ? reviveUpperWind(stored) : decodeUpperWind(report.body, report.issuedAt);
 }
 
 /**

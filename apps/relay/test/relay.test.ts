@@ -5,14 +5,37 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { gunzipSync, gzipSync } from 'node:zlib';
-import { AwcCacheClient, AwcClient, CANADIAN_UPPERWIND_SITES, NavCanadaClient, type HttpClient } from '@depbrief/core/judge';
+import {
+  AwcCacheClient,
+  AwcClient,
+  CANADIAN_UPPERWIND_SITES,
+  FB_FORECASTS as CORE_FB_FORECASTS,
+  FB_REGIONS as CORE_FB_REGIONS,
+  NavCanadaClient,
+  type HttpClient,
+} from '@depbrief/core/judge';
 import { describe, expect, it } from 'vitest';
 import { MemoryKv } from '../src/memoryKv.js';
-import { AWC_API, CFPS, NOTAM_FETCHES_PER_MINUTE, PRODUCTS, Relay, UPPERWIND_SITES, type RelayResponse } from '../src/relay.js';
+import {
+  AWC_API,
+  CFPS,
+  FB_FORECASTS,
+  FB_PRODUCTS,
+  FB_REGIONS,
+  NOTAM_FETCHES_PER_MINUTE,
+  PRODUCTS,
+  Relay,
+  UPPERWIND_SITES,
+  type RelayResponse,
+} from '../src/relay.js';
 
 const FIXTURES = join(__dirname, '..', '..', '..', 'packages', 'core', 'test', 'fixtures', 'fetch');
 const metarCsv = readFileSync(join(FIXTURES, 'awc-cache-2026-10-20', 'metars.cache.csv'), 'utf8');
 const tafXml = readFileSync(join(FIXTURES, 'awc-cache-2026-10-20', 'tafs.cache.xml'), 'utf8');
+/** The last US bulletin NOAA issued, before the NAM was retired. */
+const fbus31 = readFileSync(join(FIXTURES, 'awc', 'windtemp', 'fbus31.kwno.fd1.us1.txt'), 'utf8');
+const FB_US_06 = `${AWC_API}/windtemp?region=us&level=low&fcst=06`;
+const FB_KEYS = FB_PRODUCTS.map((p) => p.key);
 
 const PAGE = 'https://nberkyilmaz.github.io';
 const T0 = Date.parse('2026-10-20T05:00:00Z');
@@ -30,6 +53,9 @@ function upstream(overrides: Record<string, Answer> = {}) {
     [PRODUCTS.airsigmet.upstream]: () => new Response(null, { status: 204 }),
     [PRODUCTS.upperwind.upstream]: () => new Response('{"meta":{},"data":[]}'),
     [`${CFPS}?site=CYSN&alpha=notam`]: () => new Response('{"meta":{},"data":[{"type":"notam"}]}'),
+    // One US bulletin as it was, and the rest as NOAA has answered since 3 November: nothing.
+    ...Object.fromEntries(FB_PRODUCTS.map((p) => [p.upstream, () => new Response(null, { status: 204 })])),
+    [FB_US_06]: () => new Response(fbus31, { headers: { 'Content-Type': 'text/plain' } }),
     ...overrides,
   };
   return {
@@ -64,7 +90,14 @@ describe('the timer', () => {
   it('fetches everything on the first tick and stores it with when it was fetched', async () => {
     const { relay, kv } = relayWith();
     const outcomes = await relay.refresh();
-    expect(outcomes.map((o) => `${o.key}:${o.state}`)).toEqual(['metars:refreshed', 'tafs:refreshed', 'isigmet:refreshed', 'airsigmet:refreshed', 'upperwind:refreshed']);
+    expect(outcomes.map((o) => `${o.key}:${o.state}`)).toEqual([
+      'metars:refreshed',
+      'tafs:refreshed',
+      'isigmet:refreshed',
+      'airsigmet:refreshed',
+      'upperwind:refreshed',
+      ...FB_KEYS.map((k) => `${k}:refreshed`),
+    ]);
     const { metadata } = await kv.getWithMetadata('metars');
     expect(metadata?.fetchedAt).toBe('2026-10-20T05:00:00.000Z');
   });
@@ -87,8 +120,9 @@ describe('the timer', () => {
       // A cron tick is not exactly on the minute.
       r.advance(5 * MIN + (tick % 2 === 0 ? 4_000 : -4_000));
     }
-    expect(r.kv.writes).toBeLessThanOrEqual(620);
-    expect(r.kv.writes).toBeGreaterThanOrEqual(580);
+    // 600 for the METARs, TAFs, hazard advisories and Canadian upper winds; nine US bulletins an hour on top.
+    expect(r.kv.writes).toBeLessThanOrEqual(840);
+    expect(r.kv.writes).toBeGreaterThanOrEqual(790);
   });
 
   it('keeps the last good copy when the service fails, and says it failed', async () => {
@@ -124,6 +158,27 @@ describe('the timer', () => {
     const r = relayWith();
     await r.relay.refresh();
     expect(text(await r.get('/awc/airsigmet?format=json'))).toBe('[]');
+  });
+
+  it('keeps a US winds bulletin as NOAA sent it, and an empty one when NOAA sends none', async () => {
+    const r = relayWith();
+    await r.relay.refresh();
+    const us = await r.get('/awc/windtemp?region=us&level=low&fcst=06');
+    expect(us.status).toBe(200);
+    expect(us.headers['Content-Type']).toMatch(/^text\/plain/);
+    expect(text(us)).toBe(fbus31);
+    // No bulletin is not a failure: it is held, aged, and served as nothing.
+    const alaska = await r.get('/awc/windtemp?region=alaska&level=low&fcst=24');
+    expect(alaska.status).toBe(200);
+    expect(text(alaska)).toBe('');
+    expect(alaska.headers['X-Fetched-At']).toBe('2026-10-20T05:00:00.000Z');
+  });
+
+  it('never replaces a winds bulletin with an error page', async () => {
+    const r = relayWith(upstream({ [FB_US_06]: () => new Response('<html>down for maintenance</html>') }));
+    const outcomes = await r.relay.refresh();
+    expect(outcomes.find((o) => o.key === 'fb-us-06')).toMatchObject({ state: 'failed', error: expect.stringContaining('the bulletin') });
+    expect((await r.kv.getWithMetadata('fb-us-06')).value).toBeNull();
   });
 });
 
@@ -187,6 +242,9 @@ describe('serving the page', () => {
   it('carries only what it carries', async () => {
     const r = relayWith();
     expect((await r.get('/awc/taf?ids=CYSN&format=json')).status).toBe(404);
+    // The low-level US bulletins only, for the regions it keeps.
+    expect((await r.get('/awc/windtemp?region=us&level=high&fcst=06')).status).toBe(404);
+    expect((await r.get('/awc/windtemp?region=other_pac&level=low&fcst=06')).status).toBe(404);
     expect((await r.relay.handle({ method: 'POST', url: 'https://relay.example/awc/isigmet', origin: PAGE })).status).toBe(405);
     const pre = await r.relay.handle({ method: 'OPTIONS', url: 'https://relay.example/awc/isigmet', origin: PAGE });
     expect(pre.status).toBe(204);
@@ -199,7 +257,7 @@ describe('serving the page', () => {
     await r.relay.refresh();
     const ok = await r.get('/status');
     expect(ok.status).toBe(200);
-    expect(JSON.parse(text(ok)).products).toHaveLength(5);
+    expect(JSON.parse(text(ok)).products).toHaveLength(5 + FB_PRODUCTS.length);
     r.advance(20 * MIN);
     expect((await r.get('/status')).status).toBe(503);
   });
@@ -334,5 +392,22 @@ describe('the clients in core, reading through the relay', () => {
 
   it('agree with core about which sites publish upper winds', () => {
     expect([...UPPERWIND_SITES]).toEqual([...CANADIAN_UPPERWIND_SITES]);
+    expect([...FB_REGIONS]).toEqual([...CORE_FB_REGIONS]);
+    expect([...FB_FORECASTS]).toEqual([...CORE_FB_FORECASTS]);
+  });
+
+  it('read the US winds aloft through it, one report per site, with nothing where NOAA sent nothing', async () => {
+    const r = relayWith();
+    await r.relay.refresh();
+    const http = browserThrough(r);
+    const fb = await new AwcClient(http, 'https://relay.example/awc').windsAloft((site) => (/^[A-Z]{3}$/.test(site) ? `K${site}` : null), new Date('2026-11-03T09:00:00Z'));
+    // Every request went to the relay, none to NOAA beyond the timer's.
+    expect(fb.request.split(' ')).toHaveLength(FB_PRODUCTS.length);
+    const boston = fb.reports.find((x) => x.station === 'KBOS')!;
+    expect(boston.kind).toBe('upperwind');
+    expect(boston.issuedAt?.toISOString()).toBe('2026-11-03T08:01:00.000Z');
+    expect(boston.body.split('\n').at(-1)).toBe('BOS 2710 2815+09 2916+02 2822-03 3038-12 3152-22 335439 335749 335861');
+    // Only the six-hour bulletin had anything in it.
+    expect(new Set(fb.reports.map((x) => (x.upstream as { forecast: string }).forecast))).toEqual(new Set(['06']));
   });
 });
