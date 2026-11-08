@@ -29,14 +29,16 @@ export function weatherPhrase(weather: WeatherSource): string {
   return weather.mode === 'live' ? `taken from the weather services at ${weatherAge(weather.at)}` : `recorded on ${recordedWhen(weather.at)}`;
 }
 
-export function WeatherNote({ weather }: { weather: WeatherSource }) {
+/** `usFlight`: whether the flight touches an American field, the only flights a note about American products is about. */
+export function WeatherNote({ weather, usFlight = false }: { weather: WeatherSource; usFlight?: boolean }) {
   if (weather.mode === 'live') {
     const stale = weather.stale ?? [];
+    const missing = [...weather.missing, ...(usFlight ? (weather.missingUS ?? []) : [])];
     // One line: where it comes from and how old it is. The rest is on the page that explains how this works.
     return (
       <div className={`frozen live${stale.length > 0 ? ' stale' : ''}`} role="note">
         <b>Live weather</b> from {weatherAge(weather.at)}.
-        {weather.missing.length > 0 && <> Not available just now: {weather.missing.join(' and ')}; the briefing says where that matters.</>}
+        {missing.length > 0 && <> Not available just now: {missing.join(' and ')}; the briefing says where that matters.</>}
         {stale.length > 0 && (
           <>
             {' '}

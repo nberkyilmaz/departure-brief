@@ -15,6 +15,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { App } from '../src/App.js';
+import { StartPage } from '../src/StartPage.js';
 
 const DEMO = join(__dirname, '..', 'public', 'demo');
 
@@ -231,12 +232,27 @@ describe('moving around it', () => {
     go(/^The reports$/i);
 
     expect(await screen.findByRole('heading', { level: 2, name: /The reports/i })).toBeTruthy();
-    // Every report the page holds, not only the ones the briefing cited.
-    expect(document.querySelectorAll('.held').length).toBeGreaterThan(50);
+    // It opens on the reports this briefing cited: what somebody arriving from a briefing came to check.
+    const cited = document.querySelectorAll('.held').length;
+    expect(cited).toBeGreaterThan(0);
+    expect(document.querySelector('.reports-page .explain')!.textContent).toMatch(/^The reports your briefing was judged on/);
 
-    // Opening one shows the report itself, not a summary of it.
+    // Opening one shows the report itself, not a summary of it, and the name the findings cite it by.
     fireEvent.click(document.querySelector('.held-row') as HTMLButtonElement);
     expect(document.querySelector('.held .raw')!.textContent!.length).toBeGreaterThan(10);
+    expect(document.querySelector('.held .held-hash code')!.textContent).toMatch(/^[0-9a-f]{12}$/);
+
+    // Everything else the page holds is one choice away, a page at a time rather than a phone-breaking list.
+    fireEvent.change(screen.getByLabelText(/^Show/), { target: { value: 'all' } });
+    expect(document.querySelectorAll('.held').length).toBeGreaterThan(cited);
+    expect(document.querySelectorAll('.held').length).toBeLessThanOrEqual(200);
+    expect(screen.getByRole('button', { name: /^Show 200 more/ })).toBeTruthy();
+
+    // And a station is found by typing it, not by scrolling a list of thousands.
+    fireEvent.change(screen.getByLabelText(/^Station/), { target: { value: 'cykf' } });
+    const rows = [...document.querySelectorAll('.held-station')].map((e) => e.textContent ?? '');
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((r) => r === 'CYKF' || r.includes('CYKF'))).toBe(true);
   });
 
   it('works the legs out, and says where a number is missing from', async () => {
@@ -266,8 +282,10 @@ describe('moving around it', () => {
     expect((parseInt(mc!, 10) - parseInt(tc!, 10) + 360) % 360).toBeLessThanOrEqual(11);
     expect(document.querySelector('.navlog-page')!.textContent).not.toMatch(/courses are true/);
 
-    // No burn rate has been given, so there is no fuel column and it says so.
-    expect(screen.getByText(/nothing here will invent a figure/i)).toBeTruthy();
+    // No burn rate has been given, so there are no fuel figures, it says so, and it says where to put one.
+    const note = screen.getByText(/No fuel figures yet/i);
+    expect(note.textContent).toMatch(/Nothing guesses one for you/);
+    expect(note.querySelector('a')!.getAttribute('href')).toBe('#/minimums');
   });
 
   it('carries what is waiting to be read from every page, as a count and not a verdict', async () => {
@@ -325,6 +343,16 @@ describe('moving around it', () => {
     // The recorded snapshot is a real night in September: most of the country was reporting VFR.
     expect(counts[0]).toBeGreaterThan(100);
     expect(document.querySelector('.wx-head')?.textContent).toMatch(/\d+ stations/);
+  });
+
+  it("does not tell a first-time visitor that somebody else's field is theirs", () => {
+    render(<StartPage engine={null} weather={null} home={null} />);
+    const card = [...document.querySelectorAll('.start-card')].find((c) => c.querySelector('b')?.textContent === 'CYSN')!;
+    expect(card.textContent).toMatch(/a field to look at first/);
+    expect(document.body.textContent).not.toMatch(/your home field/i);
+    cleanup();
+    render(<StartPage engine={null} weather={null} home="KBUF" />);
+    expect(document.body.textContent).toMatch(/KBUFwhere you last left from/);
   });
 });
 
@@ -388,7 +416,7 @@ describe('along the way', () => {
     await briefed();
     const section = (await screen.findByRole('heading', { name: 'Along the way' }, {}, { timeout: 10_000 })).closest('section')!;
     // Toronto Island and Pearson, each about twenty-two miles to the right of St. Catharines to Waterloo.
-    expect(section.textContent).toMatch(/2 reporting stations within 25 nm of the track/);
+    expect(section.textContent).toMatch(/2 reporting stations within 25 nm of your track/);
     const quiet = section.querySelector('.along-more > summary')!;
     expect(quiet.textContent).toBe('2 within your limits: 2 VFR');
     const rows = [...section.querySelectorAll('.along-row')];
@@ -504,6 +532,20 @@ describe('a field of its own', () => {
     // Either it is this field's own reading, or it names the field it came
     // from and how far away that is. Never an unattributed number.
     expect(/Computed from this field's own observation|Computed from .* nm away/s.test(page.replace(/’/g, "'"))).toBe(true);
+  });
+
+  it('folds the checks within your limits under one line, and says a line two products share once', async () => {
+    window.location.hash = '#/aerodrome/CYSN';
+    render(<App />);
+    await waitFor(() => expect(document.querySelector('.routine-checks')).not.toBeNull(), { timeout: 10_000 });
+    const folded = document.querySelector('.routine-checks')!;
+    expect(folded.tagName).toBe('DETAILS');
+    expect(folded.querySelector('summary')!.textContent).toMatch(/^\d+ checks? within your limits$/);
+    // Every one is still there, a tap away.
+    expect(folded.querySelectorAll('.finding.routine').length).toBeGreaterThan(0);
+    // Read from the forecast and again from the observation, "no airspace class given" is one line naming both.
+    const airspace = [...document.querySelectorAll('.aerodrome-page .finding .summary')].filter((s) => /airspace class for CYSN not given/.test(s.textContent ?? ''));
+    expect(airspace).toHaveLength(1);
   });
 
   it('offers the neighbours, with the age of each reading', async () => {

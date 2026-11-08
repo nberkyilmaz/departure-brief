@@ -7,7 +7,7 @@
  * relay's age header. The clock is held at the moment those files were
  * taken, so "now" is the morning they describe.
  */
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -80,7 +80,7 @@ afterAll(() => {
 describe('live weather through the relay', () => {
   it('holds the live reports and none of the recorded ones', async () => {
     const engine = await loadEngine('/', RELAY);
-    expect(engine.weather).toEqual({ mode: 'live', at: FETCHED_AT, problem: null, missing: [], stale: [] });
+    expect(engine.weather).toEqual({ mode: 'live', at: FETCHED_AT, problem: null, missing: [], missingUS: [], stale: [] });
     const yyz = engine.reports.find((r) => r.kind === 'metar' && r.station === 'CYYZ');
     expect(yyz?.body).toBe('METAR CYYZ 200400Z 35010KT 15SM SKC 11/07 A3036 RMK SLP286');
     // Nothing from the recorded day of 2026-09-19 survives into a live store.
@@ -159,7 +159,9 @@ describe('live weather through the relay', () => {
     for (const path of FB) answers[path] = { status: 204, body: '' };
     const engine = await loadEngine('/', RELAY);
     expect(engine.weather.mode).toBe('live');
-    expect(engine.weather.missing).toEqual(['US upper winds, because NOAA is not issuing its winds aloft bulletin']);
+    // Kept apart from the rest, so it is said to a flight that touches the United States and not to every visitor.
+    expect(engine.weather.missing).toEqual([]);
+    expect(engine.weather.missingUS).toEqual(['US upper winds, because NOAA is not issuing its winds aloft bulletin']);
   });
 
   it('gives a US leg its groundspeed and time from the US winds aloft', async () => {
@@ -213,27 +215,36 @@ describe('falling back to the recorded weather', () => {
 
   it('and with no relay configured, it never asks one', async () => {
     const engine = await loadEngine('/');
-    expect(engine.weather).toEqual({ mode: 'recorded', at: '2026-09-19T00:52:00.000Z', problem: null, missing: [], stale: [] });
+    expect(engine.weather).toEqual({ mode: 'recorded', at: '2026-09-19T00:52:00.000Z', problem: null, missing: [], missingUS: [], stale: [] });
     expect(asked).toEqual([]);
   });
 });
 
 describe('what the page says about it', () => {
   it('names live weather and its age', () => {
-    render(<WeatherNote weather={{ mode: 'live', at: FETCHED_AT, problem: null, missing: ['upper winds'], stale: [] }} />);
+    render(<WeatherNote weather={{ mode: 'live', at: FETCHED_AT, problem: null, missing: ['upper winds'], missingUS: [], stale: [] }} />);
     // One line, with the age in it: the rest is on the page that explains how this works.
     expect(document.body.textContent).toMatch(/^Live weather from 04:55Z, 5 min ago\./);
     expect(document.body.textContent).toMatch(/Not available just now: upper winds/);
   });
 
+  it('says what only American fields are missing to a flight that touches one, and to nobody else', () => {
+    const weather = { mode: 'live' as const, at: FETCHED_AT, problem: null, missing: [], missingUS: ['US upper winds, because NOAA is not issuing its winds aloft bulletin'], stale: [] };
+    render(<WeatherNote weather={weather} />);
+    expect(document.body.textContent).not.toMatch(/NOAA/);
+    cleanup();
+    render(<WeatherNote weather={weather} usFlight />);
+    expect(document.body.textContent).toMatch(/Not available just now: US upper winds, because NOAA is not issuing its winds aloft bulletin/);
+  });
+
   it('says which products have not been refreshed, and why that matters', () => {
-    render(<WeatherNote weather={{ mode: 'live', at: FETCHED_AT, problem: null, missing: [], stale: ['TAFs, taken 3 h ago'] }} />);
+    render(<WeatherNote weather={{ mode: 'live', at: FETCHED_AT, problem: null, missing: [], missingUS: [], stale: ['TAFs, taken 3 h ago'] }} />);
     expect(document.body.textContent).toMatch(/Not refreshed lately: TAFs, taken 3 h ago\. An amendment issued since would not be here\./);
     expect(document.querySelector('.frozen.live.stale')).not.toBeNull();
   });
 
   it('never lets a fallback pass for current weather', () => {
-    render(<WeatherNote weather={{ mode: 'recorded', at: '2026-09-19T00:52:00.000Z', problem: 'the live METARs could not be fetched: HTTP 503', missing: [], stale: [] }} />);
+    render(<WeatherNote weather={{ mode: 'recorded', at: '2026-09-19T00:52:00.000Z', problem: 'the live METARs could not be fetched: HTTP 503', missing: [], missingUS: [], stale: [] }} />);
     expect(document.body.textContent).toMatch(/The weather here is frozen/);
     expect(document.body.textContent).toMatch(/Live weather could not be had — the live METARs could not be fetched/);
     expect(document.body.textContent).toMatch(/19 Sep 2026 at 00:52Z/);

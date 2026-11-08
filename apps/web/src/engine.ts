@@ -99,6 +99,8 @@ export interface WeatherSource {
   readonly problem: string | null;
   /** Live products that could not be had. The briefing says what each costs where it matters. */
   readonly missing: readonly string[];
+  /** The same, for products that only American fields use: worth saying to a flight that touches one, and to nobody else. */
+  readonly missingUS: readonly string[];
   /** Live products the relay has not refreshed for a while, each with its age: "TAFs, taken 3 h ago". */
   readonly stale: readonly string[];
 }
@@ -235,6 +237,7 @@ interface Live {
   /** When the relay took the METARs from the service: the age the page shows. */
   readonly at: string;
   readonly missing: string[];
+  readonly missingUS: string[];
   readonly stale: string[];
   /** NOTAMs through the relay, holding each batch so the reports page can list it. */
   readonly notams: NotamSource;
@@ -296,6 +299,7 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
     hold(ours, null);
   }
   const missing: string[] = [];
+  const missingUS: string[] = [];
   if (hazards.status === 'fulfilled') {
     // Recorded under the same name the server uses for a product with no station of its own.
     await recordFetchAttempt(store, 'WORLD', 'sigmet', now, hazards.value.request);
@@ -317,12 +321,13 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
      * it has since the model they were built from was retired on 3 November
      * 2026. Said in the note, so a US leg with no time has its reason.
      */
-    if (usWinds.value.reports.length === 0) missing.push('US upper winds, because NOAA is not issuing its winds aloft bulletin');
-  } else missing.push('US upper winds');
+    if (usWinds.value.reports.length === 0) missingUS.push('US upper winds, because NOAA is not issuing its winds aloft bulletin');
+  } else missingUS.push('US upper winds');
 
   return {
     at: fetchedAt.get(metars.value.request) ?? now.toISOString(),
     missing,
+    missingUS,
     stale: staleProducts(fetchedAt, now),
     notams: {
       async notams(site) {
@@ -395,17 +400,17 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
       // Nothing recorded: no report, and no model answer about a NOTAM that may no longer exist.
       store = newStore();
       live = await fetchLive(store, relay.replace(/\/+$/, ''), hold);
-      weather = { mode: 'live', at: live.at, problem: null, missing: live.missing, stale: live.stale };
+      weather = { mode: 'live', at: live.at, problem: null, missing: live.missing, missingUS: live.missingUS, stale: live.stale };
     } catch (e) {
       // Anything else is a bug in this page, and should surface as one rather than be relabelled as weather.
       if (!(e instanceof LiveUnavailable)) throw e;
       live = null;
       store = await recorded();
-      weather = { mode: 'recorded', at: bundle.recordedAt, problem: e.message, missing: [], stale: [] };
+      weather = { mode: 'recorded', at: bundle.recordedAt, problem: e.message, missing: [], missingUS: [], stale: [] };
     }
   } else {
     store = await recorded();
-    weather = { mode: 'recorded', at: bundle.recordedAt, problem: null, missing: [], stale: [] };
+    weather = { mode: 'recorded', at: bundle.recordedAt, problem: null, missing: [], missingUS: [], stale: [] };
   }
 
   const recordedAsOf = new Date(bundle.asOf);

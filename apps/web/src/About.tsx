@@ -27,10 +27,9 @@ export function About({ weather, aerodromes }: { weather: WeatherSource | null; 
           <h3>What is on this page</h3>
           {live ? (
             <p>
-              A real flight — St. Catharines to Waterloo in a Cessna 172, alternate Hamilton — over the weather being reported right now: every METAR and TAF
-              in Canada and the United States, taken from the weather services at {weatherAge(weather!.at)}, and the NOTAMs for whichever Canadian
-              aerodromes you brief. Every report
-              came off NAV CANADA or the US weather service and is held here verbatim.
+              Whatever flight you brief, over the weather being reported right now: every METAR and TAF in Canada and the United States, taken from the
+              weather services at {weatherAge(weather!.at)}, and the NOTAMs for whichever Canadian aerodromes you brief. Every report is held here exactly as
+              NAV CANADA or the US weather service sent it.
             </p>
           ) : (
             <p>

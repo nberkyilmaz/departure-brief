@@ -1,3 +1,4 @@
+import { hrefFor } from './router.js';
 import type { FuelPlan, NavLog, NavLogLeg, StoredBriefing } from './types.js';
 
 /**
@@ -96,18 +97,19 @@ function Leg({ leg, label }: { leg: NavLogLeg; label?: string }) {
           {label && <span className="strip-label">{label} </span>}
           {leg.from} → {leg.to}
         </td>
-        <td>{leg.distanceNm}</td>
-        <td>{deg(leg.trueCourse)}</td>
-        <td>{variationText(leg.variation)}</td>
-        <td>{deg(leg.magneticCourse)}</td>
-        <td>{leg.wind ? `${String(leg.wind.directionTrue).padStart(3, '0')}°/${leg.wind.speedKt}` : '—'}</td>
-        <td>{leg.windCorrectionAngle === null ? '—' : `${leg.windCorrectionAngle > 0 ? '+' : ''}${leg.windCorrectionAngle}°`}</td>
-        <td>{deg(leg.trueHeading)}</td>
-        <td>{deg(leg.magneticHeading)}</td>
-        <td>{leg.groundspeedKt ?? '—'}</td>
-        <td>{minutes(leg.minutes)}</td>
-        <td>{minutes(leg.cumulativeMinutes)}</td>
-        <td>{leg.fuelGal ?? '—'}</td>
+        {/* Labelled, so on a phone each leg reads as a card of named numbers rather than thirteen columns off the edge. */}
+        <td data-label="Distance">{leg.distanceNm} nm</td>
+        <td data-label="True course">{deg(leg.trueCourse)}</td>
+        <td data-label="Variation">{variationText(leg.variation)}</td>
+        <td data-label="Magnetic course">{deg(leg.magneticCourse)}</td>
+        <td data-label="Wind">{leg.wind ? `${String(leg.wind.directionTrue).padStart(3, '0')}°/${leg.wind.speedKt}` : '—'}</td>
+        <td data-label="Correction">{leg.windCorrectionAngle === null ? '—' : `${leg.windCorrectionAngle > 0 ? '+' : ''}${leg.windCorrectionAngle}°`}</td>
+        <td data-label="True heading">{deg(leg.trueHeading)}</td>
+        <td data-label="Magnetic heading">{deg(leg.magneticHeading)}</td>
+        <td data-label="Groundspeed">{leg.groundspeedKt === null ? '—' : `${leg.groundspeedKt} kt`}</td>
+        <td data-label="Time">{minutes(leg.minutes)}</td>
+        <td data-label="Elapsed">{minutes(leg.cumulativeMinutes)}</td>
+        <td data-label="Fuel">{leg.fuelGal ?? '—'}</td>
       </tr>
       {leg.gaps.length > 0 && (
         <tr className="leg-gaps">
@@ -142,9 +144,8 @@ export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
     <section className="navlog-page">
       <h2>Nav log</h2>
       <p className="explain">
-        {log.tas} kt true at {log.altitudeFt.toLocaleString('en')} ft. The wind for a leg is the one forecast at the point it ends at — the usual
-        simplification, and the finer alternative would need a forecast at the midpoint, which nobody publishes. Magnetic is true less the variation where
-        the leg begins, from NOAA&apos;s World Magnetic Model for the day you fly: west is added, east is taken away.
+        {log.tas} kt true at {log.altitudeFt.toLocaleString('en')} ft. Each leg uses the wind forecast where it ends, and the variation where it begins,
+        from NOAA&apos;s World Magnetic Model for the day you fly.
       </p>
 
       <div className="table-scroll">
@@ -171,12 +172,12 @@ export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
               <Leg key={`${leg.from}-${leg.to}`} leg={leg} />
             ))}
             <tr className="total">
-              <td>Total</td>
-              <td>{log.totalDistanceNm}</td>
+              <td className="leg-name">Total</td>
+              <td data-label="Distance">{log.totalDistanceNm} nm</td>
               <td colSpan={8}></td>
-              <td>{minutes(log.totalMinutes)}</td>
+              <td data-label="Time">{minutes(log.totalMinutes)}</td>
               <td></td>
-              <td>{log.totalFuelGal ?? '—'}</td>
+              <td data-label="Fuel">{log.totalFuelGal ?? '—'}</td>
             </tr>
             {log.alternate && <Leg leg={log.alternate} label="alternate" />}
           </tbody>
@@ -185,8 +186,8 @@ export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
 
       {log.fuelGph === null && (
         <p className="field-note">
-          No fuel column: the handbook prints burn against power setting and altitude, and nothing here will invent a figure for it. Put your cruise burn in
-          the aircraft box on the briefing page and it will be filled in.
+          No fuel figures yet: add your cruise burn from the handbook under <a href={hrefFor({ name: 'minimums' })}>Your minimums</a> and they are worked
+          out here. Nothing guesses one for you.
         </p>
       )}
 

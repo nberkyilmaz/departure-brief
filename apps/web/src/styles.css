@@ -172,6 +172,12 @@ main { max-width: 62rem; margin: 0 auto; padding: var(--s5) var(--s4) var(--s6);
 .masthead h1 a { color: inherit; text-decoration: none; }
 .masthead h1 a:hover { color: var(--sign); }
 .tagline { margin: 0.3rem 0 0; color: #b9bfc5; font-size: 1rem; }
+/* On a phone the masthead gives way to the page: the name stays, the motto goes. */
+@media (max-width: 40rem) {
+  .masthead-inner { padding: var(--s3) var(--s4) var(--s2); }
+  .tagline { display: none; }
+  .sign { min-width: 2.5rem; height: 2.5rem; }
+}
 
 /*
  * The things this does. A row of tabs rather than a menu, because six is
@@ -222,7 +228,14 @@ main { max-width: 62rem; margin: 0 auto; padding: var(--s5) var(--s4) var(--s6);
 .badge.kind { background: var(--surface-sunk); color: var(--muted); border: 1px solid var(--line); }
 .held-station { font-weight: 600; }
 .held-time { color: var(--muted); font-size: 0.85rem; }
-.held .raw { margin: 0 0 var(--s3); }
+.held .raw { margin: 0 0 var(--s1); }
+.held-hash { margin: 0 0 var(--s3); }
+.held-search { width: 6.5rem; text-transform: uppercase; }
+.held-more { margin: var(--s3) 0; }
+
+/* The checks within your limits, folded under one line; and the nearby fields that do not report. */
+.routine-checks, .nearby-quiet { margin: var(--s2) 0; }
+.routine-checks > summary, .nearby-quiet > summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; padding: 0.3rem 0; }
 
 a { color: var(--advisory); text-decoration-thickness: 1px; text-underline-offset: 2px; }
 
@@ -532,6 +545,40 @@ summary:focus-visible,
 .navlog-table .leg-name { text-align: left; font-weight: 600; white-space: nowrap; }
 .navlog-table .leg-gaps td { text-align: left; padding-top: 0; border-bottom: 1px solid var(--line); }
 .navlog-table .total td { border-top: 2px solid var(--line-strong); }
+
+/*
+ * On a phone, a card per leg: thirteen columns do not fit, and the ones
+ * that matter most in the cockpit — heading, groundspeed, time — were the
+ * ones off the edge. Each cell carries its own label for this.
+ */
+@media (max-width: 40rem) {
+  .table-scroll:has(> .navlog-table) { overflow: visible; }
+  .navlog-table thead { display: none; }
+  .navlog-table, .navlog-table tbody { display: block; }
+  .navlog-table tr {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s2) var(--s3);
+    padding: var(--s3);
+    margin-bottom: var(--s2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .navlog-table td { display: block; padding: 0; border: 0 !important; text-align: left; }
+  .navlog-table td:empty { display: none; }
+  .navlog-table td.leg-name { grid-column: 1 / -1; font-size: 1rem; white-space: normal; }
+  .navlog-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .navlog-table tr.leg-gaps { display: block; margin-top: calc(var(--s2) * -1); border-top: 0; border-radius: 0 0 var(--radius) var(--radius); }
+  .navlog-table tr.total { border-color: var(--line-strong); }
+}
 
 /*
  * The flight category: the standard classification of ceiling and
