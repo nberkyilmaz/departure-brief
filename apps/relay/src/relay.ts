@@ -58,13 +58,6 @@ export const UPPERWIND_SITES = [
   'CYZF', 'CYZG', 'CYZH', 'CYZP', 'CYZS', 'CYZT', 'CYZV',
 ] as const;
 
-/**
- * The US winds aloft bulletin's regions and forecasts. The same lists as
- * `FB_REGIONS` and `FB_FORECASTS` in core — a test holds them together.
- */
-export const FB_REGIONS = ['us', 'alaska', 'hawaii'] as const;
-export const FB_FORECASTS = ['06', '12', '24'] as const;
-
 export interface Product {
   /** The storage key, and the name the status page uses. */
   readonly key: string;
@@ -72,7 +65,7 @@ export interface Product {
   /**
    * How often it is worth asking. Set by how often the product changes and
    * by the free plan's thousand writes a day: all of them together come to
-   * about 820.
+   * about 600.
    */
   readonly everyMs: number;
   readonly contentType: string;
@@ -80,8 +73,6 @@ export interface Product {
   readonly gzip: boolean;
   /** What a `204 No Content` means for this product, when it means "nothing in force". */
   readonly emptyBody?: string;
-  /** For a text product, what its text must contain to be the product and not an error page. JSON and gzip are recognised by their first bytes. */
-  readonly textMatches?: RegExp;
   /** For a JSON product, a refusal dressed as an answer: why it is not the product, or `null` when it is. */
   readonly refusal?: (text: string) => Refusal | null;
 }
@@ -138,27 +129,12 @@ export const PRODUCTS: Readonly<Record<'metars' | 'tafs' | 'isigmet' | 'airsigme
 };
 
 /*
- * The US winds aloft: nine bulletins, one per region and forecast. Issued
- * four times a day, so hourly is as often as is worth asking. A 204 is how
- * the service says it has no bulletin — which it has said since NOAA
- * retired the model the bulletin was built from on 3 November 2026 — and it
- * is kept as an empty one, so the page can say so rather than call it a
- * failure.
+ * The US winds aloft bulletins were carried here too, until NOAA
+ * discontinued them: the model they were built from was retired on
+ * 3 November 2026, and the bulletins went with it (SCN 26-47, updated
+ * 5 November). The AWC now answers a request for one with a 400 saying so.
  */
-export const FB_PRODUCTS: readonly Product[] = FB_REGIONS.flatMap((region) =>
-  FB_FORECASTS.map((forecast) => ({
-    key: `fb-${region}-${forecast}`,
-    upstream: `${AWC_API}/windtemp?region=${region}&level=low&fcst=${forecast}`,
-    everyMs: 60 * MIN,
-    contentType: 'text/plain; charset=utf-8',
-    gzip: false,
-    emptyBody: '',
-    // The wire puts a record separator before most lines, the altitude row's included.
-    textMatches: /\bFB[A-Z]{2}\d{2}\b[\s\S]*\n[\x00-\x1f]*FT\s/,
-  })),
-);
-
-const ALL_PRODUCTS: readonly Product[] = [...Object.values(PRODUCTS), ...FB_PRODUCTS];
+const ALL_PRODUCTS: readonly Product[] = Object.values(PRODUCTS);
 
 /** A cron tick lands a few seconds either side of the minute; without slack a 15-minute product would wait 20. */
 const SLACK_MS = 1 * MIN;
@@ -237,9 +213,6 @@ function productFor(url: URL): Product | null {
       // Whichever sites were asked about, the answer is all of them: the
       // client keeps every site the service answers for.
       return url.searchParams.get('alpha') === 'upperwind' ? PRODUCTS.upperwind : null;
-    case '/awc/windtemp':
-      if (url.searchParams.get('level') !== 'low') return null;
-      return FB_PRODUCTS.find((p) => p.key === `fb-${url.searchParams.get('region')}-${url.searchParams.get('fcst')}`) ?? null;
     default:
       return null;
   }
@@ -294,7 +267,7 @@ export class Relay {
       if (product) res = await this.serveSnapshot(product, cors);
       else if ((url.pathname === '/cfps/' || url.pathname === '/cfps') && url.searchParams.get('alpha') === 'notam') res = await this.serveNotams(url, cors);
       else if (url.pathname === '/awc/metar') res = await this.serveStationMetar(url, cors);
-      else res = json(404, { error: 'not something this relay carries', carries: ['/awc/cache/metars.cache.csv.gz', '/awc/cache/tafs.cache.xml.gz', '/awc/isigmet', '/awc/airsigmet', '/awc/metar?ids=<id>&format=json', '/awc/windtemp?region=<us|alaska|hawaii>&level=low&fcst=<06|12|24>', '/cfps/?alpha=upperwind', '/cfps/?site=<id>&alpha=notam', '/status'] }, cors);
+      else res = json(404, { error: 'not something this relay carries', carries: ['/awc/cache/metars.cache.csv.gz', '/awc/cache/tafs.cache.xml.gz', '/awc/isigmet', '/awc/airsigmet', '/awc/metar?ids=<id>&format=json', '/cfps/?alpha=upperwind', '/cfps/?site=<id>&alpha=notam', '/status'] }, cors);
     }
     return req.method === 'HEAD' ? { ...res, body: null } : res;
   }
@@ -334,7 +307,7 @@ export class Relay {
     let empty = false;
     try {
       const res = await this.deps.fetch(upstream, {
-        headers: { 'User-Agent': this.userAgent, Accept: product.gzip ? '*/*' : product.textMatches ? 'text/plain' : 'application/json' },
+        headers: { 'User-Agent': this.userAgent, Accept: product.gzip ? '*/*' : 'application/json' },
         signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
       });
       if (res.status === 204 && product.emptyBody !== undefined) {
@@ -346,8 +319,8 @@ export class Relay {
       return { error: `${(e as Error).message} (${upstream})` };
     }
     // Kept only if it is what it claims to be, so a maintenance page never replaces good weather.
-    const expected = product.gzip ? 'a gzip file' : product.textMatches ? 'the bulletin' : 'JSON';
-    const genuine = empty || (product.gzip ? isGzip(body) : product.textMatches ? product.textMatches.test(new TextDecoder().decode(body)) : looksLikeJson(body));
+    const expected = product.gzip ? 'a gzip file' : 'JSON';
+    const genuine = empty || (product.gzip ? isGzip(body) : looksLikeJson(body));
     if (!genuine) return { error: `${upstream} did not send ${expected}` };
     const refused = !empty && product.refusal ? product.refusal(new TextDecoder().decode(body)) : null;
     if (refused) {

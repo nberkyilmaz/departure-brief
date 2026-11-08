@@ -156,7 +156,7 @@ OCR · Ollama for the optional local models.
 
 All public, with no redistribution restrictions:
 
-- [aviationweather.gov](https://aviationweather.gov/) (NOAA/AWC) — METAR, TAF, SIGMET/AIRMET, and the US winds aloft (the FB bulletin)
+- [aviationweather.gov](https://aviationweather.gov/) (NOAA/AWC) — METAR, TAF and SIGMET/AIRMET. Its US winds aloft (the FB bulletin) were read too, until NOAA discontinued them on 3 November 2026
 - NAV CANADA CFPS — Canadian NOTAMs and upper winds (the endpoint behind plan.navcanada.ca; unofficial, so the client fails loudly if its shape changes)
 - FAA NASR — US airports, runways, magnetic variation
 - OurAirports — airports and runways; the public site's whole set of Canadian and American fields (public domain)

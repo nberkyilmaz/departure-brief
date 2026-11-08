@@ -29,7 +29,6 @@ import {
   decodeMetar,
   departureWindow,
   diffBriefings,
-  fbStationFrom,
   flightCategory,
   loadBundle,
   NavCanadaClient,
@@ -99,6 +98,8 @@ export interface WeatherSource {
   readonly problem: string | null;
   /** Live products that could not be had. The briefing says what each costs where it matters. */
   readonly missing: readonly string[];
+  /** The same, for products that only American fields use: worth saying to a flight that touches one, and to nobody else. */
+  readonly missingUS: readonly string[];
   /** Live products the relay has not refreshed for a while, each with its age: "TAFs, taken 3 h ago". */
   readonly stale: readonly string[];
 }
@@ -114,7 +115,6 @@ const REFRESH: readonly { readonly path: RegExp; readonly name: string; readonly
   { path: /tafs\.cache/, name: 'TAFs', everyMinutes: 15 },
   { path: /sigmet/, name: 'hazard advisories', everyMinutes: 15 },
   { path: /alpha=upperwind/, name: 'Canadian upper winds', everyMinutes: 60 },
-  { path: /windtemp/, name: 'US upper winds', everyMinutes: 60 },
 ];
 
 function ageWords(minutes: number): string {
@@ -211,6 +211,9 @@ export interface LocalEngine {
   airport(id: string): Promise<{ icaoId: string | null; faaId: string | null; name: string; city: string | null; country: string | null; runways: { id: string }[] } | null>;
 }
 
+/** What a US flight is told about upper winds. */
+export const US_WINDS_GONE = 'US upper winds, because NOAA discontinued its winds aloft bulletin on 3 November 2026';
+
 /** The products a live briefing cannot do without are missing. Upper winds and hazards it can, and says so. */
 class LiveUnavailable extends Error {}
 
@@ -235,6 +238,7 @@ interface Live {
   /** When the relay took the METARs from the service: the age the page shows. */
   readonly at: string;
   readonly missing: string[];
+  readonly missingUS: string[];
   readonly stale: string[];
   /** NOTAMs through the relay, holding each batch so the reports page can list it. */
   readonly notams: NotamSource;
@@ -272,15 +276,7 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
   const awc = new AwcClient(http, `${relay}/awc`);
   const cfps = new NavCanadaClient(http, `${relay}/cfps/`);
 
-  // A US bulletin names its sites by FAA identifier; the index says which aerodrome each one is, without loading any.
-  const usStation = (site: string) => fbStationFrom(site, store.indexed(site).map(([icaoId, faaId]) => ({ icaoId: icaoId || null, faaId })));
-  const [metars, tafs, hazards, winds, usWinds] = await Promise.allSettled([
-    cache.metars(),
-    cache.tafs(),
-    awc.sigmets(),
-    cfps.upperWinds([...CANADIAN_UPPERWIND_SITES]),
-    awc.windsAloft(usStation, new Date()),
-  ]);
+  const [metars, tafs, hazards, winds] = await Promise.allSettled([cache.metars(), cache.tafs(), awc.sigmets(), cfps.upperWinds([...CANADIAN_UPPERWIND_SITES])]);
   /*
    * Observations and forecasts are the briefing. Without either there is no
    * live briefing to give, and the recorded one, labelled as recorded, is
@@ -296,6 +292,13 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
     hold(ours, null);
   }
   const missing: string[] = [];
+  /*
+   * There are no US upper winds to fetch. NOAA built its winds aloft
+   * bulletin from the NAM model, retired the model on 3 November 2026, and
+   * discontinued the bulletin with it; nothing official has replaced it.
+   * Said in the note, so a US leg with no time has its reason.
+   */
+  const missingUS = [US_WINDS_GONE];
   if (hazards.status === 'fulfilled') {
     // Recorded under the same name the server uses for a product with no station of its own.
     await recordFetchAttempt(store, 'WORLD', 'sigmet', now, hazards.value.request);
@@ -309,20 +312,11 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
       hold(mine, site);
     }
   } else missing.push('Canadian upper winds');
-  if (usWinds.status === 'fulfilled') {
-    await storeAndDecode(store, usWinds.value.reports, usWinds.value.request, now);
-    hold(usWinds.value.reports, null);
-    /*
-     * Every bulletin empty is not a fault here: it is NOAA sending none, as
-     * it has since the model they were built from was retired on 3 November
-     * 2026. Said in the note, so a US leg with no time has its reason.
-     */
-    if (usWinds.value.reports.length === 0) missing.push('US upper winds, because NOAA is not issuing its winds aloft bulletin');
-  } else missing.push('US upper winds');
 
   return {
     at: fetchedAt.get(metars.value.request) ?? now.toISOString(),
     missing,
+    missingUS,
     stale: staleProducts(fetchedAt, now),
     notams: {
       async notams(site) {
@@ -395,17 +389,17 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
       // Nothing recorded: no report, and no model answer about a NOTAM that may no longer exist.
       store = newStore();
       live = await fetchLive(store, relay.replace(/\/+$/, ''), hold);
-      weather = { mode: 'live', at: live.at, problem: null, missing: live.missing, stale: live.stale };
+      weather = { mode: 'live', at: live.at, problem: null, missing: live.missing, missingUS: live.missingUS, stale: live.stale };
     } catch (e) {
       // Anything else is a bug in this page, and should surface as one rather than be relabelled as weather.
       if (!(e instanceof LiveUnavailable)) throw e;
       live = null;
       store = await recorded();
-      weather = { mode: 'recorded', at: bundle.recordedAt, problem: e.message, missing: [], stale: [] };
+      weather = { mode: 'recorded', at: bundle.recordedAt, problem: e.message, missing: [], missingUS: [], stale: [] };
     }
   } else {
     store = await recorded();
-    weather = { mode: 'recorded', at: bundle.recordedAt, problem: null, missing: [], stale: [] };
+    weather = { mode: 'recorded', at: bundle.recordedAt, problem: null, missing: [], missingUS: [], stale: [] };
   }
 
   const recordedAsOf = new Date(bundle.asOf);
