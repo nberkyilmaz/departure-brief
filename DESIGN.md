@@ -94,11 +94,12 @@ Instead, a Cloudflare Worker on the free plan acts as a relay:
 
 - **It fetches on a timer, not per visitor.** Every five minutes it
   refreshes whatever is due — METARs every 5 minutes, TAFs and SIGMETs every
-  15, Canadian upper winds and the nine US winds aloft bulletins hourly — and
-  stores the latest copy in KV. Visitors read the copy, so traffic never
-  multiplies requests to the weather services. That comes to about 820 KV
-  writes a day, against a free limit of 1,000, and a test simulates the day
-  to check it.
+  15, Canadian upper winds hourly — and stores the latest copy in KV.
+  Visitors read the copy, so traffic never multiplies requests to the
+  weather services. That comes to about 600 KV writes a day, against a free
+  limit of 1,000, and a test simulates the day to check it. (It was 820
+  while the relay also carried NOAA's US winds aloft bulletins, which NOAA
+  discontinued in November 2026.)
 - **It holds no weather logic.** It moves bytes and timestamps them. The
   browser parses them with the same client classes the server uses, so the
   relay can't drift from the pipeline. It also fits in the free plan's

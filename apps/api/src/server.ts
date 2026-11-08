@@ -8,7 +8,6 @@ import {
   ingestNeighbourhood,
   ingestStation,
   ingestUpperWinds,
-  ingestUsWindsAloft,
   recordFetchAttempt,
   shouldFetch,
   storeAndDecode,
@@ -381,18 +380,7 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
       } catch (e) {
         req.log.warn({ err: e }, 'hazard advisories could not be fetched');
       }
-      /*
-       * The US winds aloft come as whole bulletins for the country, not per
-       * site, so they are fetched like the hazard advisories: once an hour,
-       * however many people are briefing, and the resolver finds the site
-       * nearest each point.
-       */
-      try {
-        const us = await ingestUsWindsAloft({ store, awc });
-        if (us.fetched) req.log.info(`${us.counts.fetched} US upper wind sites`);
-      } catch (e) {
-        req.log.warn({ err: e }, 'US upper winds could not be fetched');
-      }
+      // No US upper winds to fetch: NOAA discontinued its winds aloft bulletin on 3 November 2026.
     }
     // The route is already known good, so this cannot raise UnknownWaypoint.
     const resolved = await resolveFlight(store, plan, asOf);

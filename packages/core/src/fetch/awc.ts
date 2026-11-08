@@ -1,5 +1,3 @@
-import { splitFbBulletin } from '../decode/upperwind/fb.js';
-import { resolveDayTime } from '../domain/time.js';
 import { rawReport, type RawReport } from '../store/types.js';
 import { expectOk, type HttpClient } from './response.js';
 
@@ -40,20 +38,6 @@ export interface AwcTafRecord {
   readonly validTimeTo: number;
   readonly [key: string]: unknown;
 }
-
-/**
- * The regions the US winds aloft bulletin is issued for that have
- * aerodromes on this page: the lower 48, Alaska and Hawaii.
- */
-export const FB_REGIONS = ['us', 'alaska', 'hawaii'] as const;
-export type FbRegion = (typeof FB_REGIONS)[number];
-
-/** The day's three bulletins, for use around six, twelve and twenty-four hours ahead. */
-export const FB_FORECASTS = ['06', '12', '24'] as const;
-export type FbForecast = (typeof FB_FORECASTS)[number];
-
-/** The bulletin's site, as the identifier a flight plan would name; `null` for one with no aerodrome. */
-export type FbStationOf = (site: string) => string | null | Promise<string | null>;
 
 export interface AwcFetch {
   /** The URL requested, for the fetch log. */
@@ -219,60 +203,4 @@ export class AwcClient {
     }
     return { request: requests.join(' '), reports };
   }
-
-  /**
-   * Winds and temperatures aloft for the United States: the FB bulletin,
-   * for every region and all three forecasts, cut into one report per site.
-   *
-   * A bulletin names its sites by three-letter FAA identifier and an
-   * aerodrome is found by its ICAO one, so `stationOf` turns BOS into KBOS
-   * and FAI into PAFA. A site it has no aerodrome for — a navaid such as
-   * Crazy Woman, a point out in the Gulf — is left out: a forecast that
-   * cannot be placed at an aerodrome cannot be found by a briefing either.
-   *
-   * The header gives its times as a day of the month, so `receivedAt` dates
-   * the issue time, and the issue time dates the rest.
-   *
-   * A forecast with no bulletin answers 204, which is not a failure: it is
-   * how the service says it has none, as it has since 3 November 2026.
-   */
-  async windsAloft(stationOf: FbStationOf, receivedAt: Date, regions: readonly FbRegion[] = FB_REGIONS): Promise<AwcFetch> {
-    const reports: RawReport[] = [];
-    const requests: string[] = [];
-    for (const region of regions) {
-      for (const forecast of FB_FORECASTS) {
-        const url = `${this.baseUrl}/windtemp?region=${region}&level=low&fcst=${forecast}`;
-        requests.push(url);
-        const res = await this.http.get(url, { headers: { Accept: 'text/plain' } });
-        if (res.status === 204) continue;
-        expectOk(url, res);
-        for (const excerpt of splitFbBulletin(res.body)) {
-          const station = await stationOf(excerpt.id);
-          if (!station) continue;
-          reports.push(
-            rawReport({
-              kind: 'upperwind',
-              source: 'awc',
-              station,
-              body: excerpt.body,
-              issuedAt: excerpt.issued ? resolveDayTime(excerpt.issued, receivedAt) : null,
-              upstream: { site: excerpt.id, region, forecast },
-            }),
-          );
-        }
-      }
-    }
-    return { request: requests.join(' '), reports };
-  }
-}
-
-/**
- * The aerodrome a US bulletin site stands for, from a list of the fields
- * filed under that identifier. Only an American one counts — ICAO K for the
- * lower 48, P for Alaska and the Pacific — so a three-letter Canadian code
- * that happens to match is never mistaken for it.
- */
-export function fbStationFrom(site: string, fields: readonly { readonly icaoId: string | null; readonly faaId: string | null }[]): string | null {
-  const matches = fields.filter((f) => f.faaId === site && f.icaoId !== null && /^[KP][A-Z0-9]{3}$/.test(f.icaoId));
-  return matches.length === 1 ? matches[0]!.icaoId : null;
 }

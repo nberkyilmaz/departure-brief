@@ -1,7 +1,7 @@
 export { createHttpClient, expectOk, HttpError } from './http.js';
 export type { HttpClient, HttpClientOptions, HttpRequestInit, HttpResponse } from './http.js';
-export { AWC_BASE_URL, AwcClient, AwcError, FB_FORECASTS, FB_REGIONS, fbStationFrom } from './awc.js';
-export type { AwcFetch, AwcMetarRecord, AwcTafRecord, FbForecast, FbRegion, FbStationOf, LatLonBox } from './awc.js';
+export { AWC_BASE_URL, AwcClient, AwcError } from './awc.js';
+export type { AwcFetch, AwcMetarRecord, AwcTafRecord, LatLonBox } from './awc.js';
 export { AWC_CACHE_BASE_URL, AwcCacheClient, METAR_CACHE_FILE, parseMetarCache, parseTafCache, TAF_CACHE_FILE } from './awcCache.js';
 export { FAA_NOTAM_BASE_URL, FaaNotamClient, NotamError } from './notam.js';
 export type { NotamCredentials, NotamFetch } from './notam.js';
@@ -13,7 +13,7 @@ export type { CfpsFetch, CfpsNotamRecord } from './navcanada.js';
 export type { OurAirportsOptions } from './ourairports.js';
 export { parseCsv } from './csv.js';
 export type { IngestDeps, IngestResult } from './ingest.js';
-export { ingestUpperWinds, ingestUsWindsAloft, upperWindCandidates, MAX_UPPERWIND_SITES, US_WINDS_STATION } from './winds.js';
+export { ingestUpperWinds, upperWindCandidates, MAX_UPPERWIND_SITES } from './winds.js';
 export type { UpperWindIngest } from './winds.js';
 export { decideFetch, recordFetchAttempt, shouldFetch, DEFAULT_FRESHNESS_MS } from './freshness.js';
 export type { FreshnessDecision, FreshnessStore } from './freshness.js';

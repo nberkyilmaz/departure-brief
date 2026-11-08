@@ -11,7 +11,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { loadEngine } from '../src/engine.js';
+import { loadEngine, US_WINDS_GONE } from '../src/engine.js';
 import { WeatherNote } from '../src/WeatherNote.js';
 
 const DEMO = join(__dirname, '..', 'public', 'demo');
@@ -24,8 +24,6 @@ const file = (...p: string[]) => readFileSync(join(...p), 'utf8');
 /** `at` is when the relay says it took the product from the service; most were taken five minutes ago. */
 type Answer = { status: number; body: string; at?: string } | 'unreachable';
 
-const windtemp = (region: string, forecast: string) => `/awc/windtemp?region=${region}&level=low&fcst=${forecast}`;
-const FB = ['us', 'alaska', 'hawaii'].flatMap((region) => ['06', '12', '24'].map((forecast) => windtemp(region, forecast)));
 
 /** The relay's answers by path, as a browser would see them. */
 function relayAnswers(): Record<string, Answer> {
@@ -36,9 +34,6 @@ function relayAnswers(): Record<string, Answer> {
     '/awc/airsigmet?format=json': { status: 200, body: '[]' },
     upperwind: { status: 200, body: file(FETCH, 'canada-2026-09-18', 'upperwind.json') },
     ...Object.fromEntries(['CYSN', 'CYKF', 'CYHM'].map((s) => [`/cfps/?site=${s}&alpha=notam`, { status: 200, body: file(FETCH, 'canada-2026-09-18', 'notam', `${s}.json`) }])),
-    // The US winds aloft: the last six-hour bulletin NOAA issued, and nothing for the rest, as NOAA has answered since.
-    ...Object.fromEntries(FB.map((path) => [path, { status: 204, body: '' }])),
-    [windtemp('us', '06')]: { status: 200, body: file(FETCH, 'awc', 'windtemp', 'fbus31.kwno.fd1.us1.txt') },
   };
 }
 
@@ -80,7 +75,7 @@ afterAll(() => {
 describe('live weather through the relay', () => {
   it('holds the live reports and none of the recorded ones', async () => {
     const engine = await loadEngine('/', RELAY);
-    expect(engine.weather).toEqual({ mode: 'live', at: FETCHED_AT, problem: null, missing: [], missingUS: [], stale: [] });
+    expect(engine.weather).toEqual({ mode: 'live', at: FETCHED_AT, problem: null, missing: [], missingUS: [US_WINDS_GONE], stale: [] });
     const yyz = engine.reports.find((r) => r.kind === 'metar' && r.station === 'CYYZ');
     expect(yyz?.body).toBe('METAR CYYZ 200400Z 35010KT 15SM SKC 11/07 A3036 RMK SLP286');
     // Nothing from the recorded day of 2026-09-19 survives into a live store.
@@ -155,34 +150,18 @@ describe('live weather through the relay', () => {
     expect(engine.weather.stale).toEqual(['TAFs, taken 3 h ago']);
   });
 
-  it('says plainly when NOAA sends no US winds aloft, rather than calling it a fault', async () => {
-    for (const path of FB) answers[path] = { status: 204, body: '' };
+  it('no longer asks for the US winds aloft NOAA discontinued, and tells a US flight why it has none', async () => {
     const engine = await loadEngine('/', RELAY);
-    expect(engine.weather.mode).toBe('live');
+    expect(asked.some((u) => u.includes('/windtemp'))).toBe(false);
     // Kept apart from the rest, so it is said to a flight that touches the United States and not to every visitor.
     expect(engine.weather.missing).toEqual([]);
-    expect(engine.weather.missingUS).toEqual(['US upper winds, because NOAA is not issuing its winds aloft bulletin']);
-  });
-
-  it('gives a US leg its groundspeed and time from the US winds aloft', async () => {
-    // The morning the last bulletin was issued, inside its 08Z to 15Z window.
-    vi.setSystemTime(new Date('2026-11-03T09:00:00Z'));
-    try {
-      const engine = await loadEngine('/', RELAY);
-      const boston = engine.reports.find((r) => r.kind === 'upperwind' && r.station === 'KBOS');
-      expect(boston?.body.split('\n').at(-1)).toBe('BOS 2710 2815+09 2916+02 2822-03 3038-12 3152-22 335439 335749 335861');
-      const plan = { ...engine.plan, departure: 'KBOS', destination: 'KJFK', alternate: null, route: [], departureTime: '2026-11-03T10:00:00Z' };
-      const leg = (await engine.brief(plan, engine.profile, engine.aircraft)).briefing.document.navlog.legs[0]!;
-      // Kennedy's own column, at the cruise altitude: 3,000 ft 2516 and 6,000 ft 2413+09 between them.
-      expect(leg.wind).toMatchObject({ station: 'KJFK', distanceNm: 0 });
-      expect(leg.wind!.directionTrue).toBeGreaterThanOrEqual(240);
-      expect(leg.wind!.directionTrue).toBeLessThanOrEqual(250);
-      expect(leg.groundspeedKt).not.toBeNull();
-      expect(leg.minutes).toBe(Math.round((leg.distanceNm / leg.groundspeedKt!) * 60));
-      expect(leg.gaps).toEqual([]);
-    } finally {
-      vi.setSystemTime(new Date('2026-10-20T05:00:00Z'));
-    }
+    expect(engine.weather.missingUS).toEqual([US_WINDS_GONE]);
+    expect(US_WINDS_GONE).toMatch(/NOAA discontinued its winds aloft bulletin on 3 November 2026/);
+    const plan = { ...engine.plan, departure: 'KBOS', destination: 'KJFK', alternate: null, route: [], departureTime: '2026-10-20T12:00:00Z' };
+    const leg = (await engine.brief(plan, engine.profile, engine.aircraft)).briefing.document.navlog.legs[0]!;
+    // A blank and its reason, never a number from somewhere else.
+    expect(leg.groundspeedKt).toBeNull();
+    expect(leg.gaps.some((g) => g.startsWith('no upper wind forecast'))).toBe(true);
   });
 });
 
@@ -229,12 +208,12 @@ describe('what the page says about it', () => {
   });
 
   it('says what only American fields are missing to a flight that touches one, and to nobody else', () => {
-    const weather = { mode: 'live' as const, at: FETCHED_AT, problem: null, missing: [], missingUS: ['US upper winds, because NOAA is not issuing its winds aloft bulletin'], stale: [] };
+    const weather = { mode: 'live' as const, at: FETCHED_AT, problem: null, missing: [], missingUS: [US_WINDS_GONE], stale: [] };
     render(<WeatherNote weather={weather} />);
     expect(document.body.textContent).not.toMatch(/NOAA/);
     cleanup();
     render(<WeatherNote weather={weather} usFlight />);
-    expect(document.body.textContent).toMatch(/Not available just now: US upper winds, because NOAA is not issuing its winds aloft bulletin/);
+    expect(document.body.textContent).toMatch(/Not available just now: US upper winds, because NOAA discontinued its winds aloft bulletin on 3 November 2026/);
   });
 
   it('says which products have not been refreshed, and why that matters', () => {
