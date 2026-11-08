@@ -97,7 +97,17 @@ and says why — it never passes recorded weather off as current.
   are fetched when a flight is briefed, kept half an hour per aerodrome, and
   throttled to twenty upstream requests a minute per instance.
 - **Never replaces good weather with an error page.** A product that fails
-  keeps its last good copy, which carries its own age.
+  keeps its last good copy, which carries its own age. That includes an
+  error dressed as an answer: CFPS refuses a request with a 200 and an
+  empty list, and the relay does not keep it. When the refusal names sites
+  NAV CANADA no longer recognises, it asks once more without them and says
+  so on the status page.
+- **Is watched.** The Watch workflow asks `/status` every hour and fails
+  when any product has missed three refreshes, which is how GitHub emails
+  the owner. The page says the same thing to a visitor: a product three
+  refreshes old is named in the note at the top, with its age. GitHub
+  pauses scheduled workflows after sixty days without activity in the
+  repository; turn it back on from the Actions tab.
 - **Answers only the pages named** in `ALLOWED_ORIGINS` in `wrangler.toml`.
   Add the custom domain there if one is ever attached.
 

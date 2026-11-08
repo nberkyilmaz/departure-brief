@@ -259,10 +259,10 @@ export function alongTheWay(stored: StoredBriefing): AlongLeg[] {
 
 /* ----------------------------------------------------------- worth a look */
 
-export type Topic = 'wind' | 'cloud' | 'visibility' | 'weather' | 'hazard' | 'daylight' | 'cruise' | 'observation' | 'fuel' | 'other';
+export type Topic = 'wind' | 'cloud' | 'visibility' | 'weather' | 'unread' | 'hazard' | 'daylight' | 'cruise' | 'observation' | 'fuel' | 'other';
 
 /** The order lines are read in, among those that ask for the same attention at the same field. */
-const TOPICS: readonly Topic[] = ['weather', 'wind', 'cloud', 'visibility', 'hazard', 'daylight', 'cruise', 'observation', 'fuel', 'other'];
+const TOPICS: readonly Topic[] = ['weather', 'unread', 'wind', 'cloud', 'visibility', 'hazard', 'daylight', 'cruise', 'observation', 'fuel', 'other'];
 
 const TOPIC_OF: Readonly<Record<string, Topic>> = {
   'wind.surface': 'wind',
@@ -275,6 +275,7 @@ const TOPIC_OF: Readonly<Record<string, Topic>> = {
   'personal.visibility': 'visibility',
   'vfr.visibility': 'visibility',
   'weather.present': 'weather',
+  'report.unread': 'unread',
   'daylight.margin': 'daylight',
   'personal.night': 'daylight',
   'wind.aloft': 'cruise',
@@ -290,6 +291,7 @@ export const TOPIC_LABEL: Readonly<Record<Topic, string>> = {
   cloud: 'Cloud',
   visibility: 'Visibility',
   weather: 'Weather',
+  unread: 'Unread text',
   hazard: 'Hazard',
   daylight: 'Daylight',
   cruise: 'At cruise',

@@ -748,6 +748,11 @@ summary:focus-visible,
   border-color: var(--advisory);
   background: color-mix(in srgb, var(--advisory) 8%, var(--surface));
 }
+/* Something has not been refreshed: the same note, in the colour of a caution. */
+.frozen.live.stale {
+  border-color: var(--marginal);
+  background: color-mix(in srgb, var(--marginal) 8%, var(--surface));
+}
 
 /* --- The flight, in one bar above its briefing ----------------------------
    The facts in a line, the limits they are judged against in another, and

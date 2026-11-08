@@ -1,0 +1,52 @@
+# Watch the live site: is the relay still taking the weather, and does the
+# page still load?
+#
+# The relay keeps the last good copy when a service fails, and says how old
+# it is, so nothing on the page breaks when a feed stops — it just gets
+# older. That is the right thing for a visitor and the wrong thing for
+# whoever runs it: NOAA stopped the US winds aloft bulletin on 3 November
+# 2026 and it was noticed by chance. So once an hour this asks the relay
+# for its own account of every product and fails if any has missed three
+# refreshes in a row. A failed scheduled run is how GitHub tells the
+# repository's owner: it emails whoever last changed this schedule.
+#
+# GitHub pauses scheduled workflows in a repository with no activity for
+# sixty days; re-enable it from the Actions tab if that happens.
+
+name: Watch
+
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: The relay's account of every product
+        env:
+          RELAY: ${{ vars.RELAY_URL }}
+        run: |
+          test -n "$RELAY" || { echo "::error::The repository variable RELAY_URL is not set"; exit 1; }
+          code=$(curl -sS --max-time 60 -o status.json -w '%{http_code}' "$RELAY/status") || { echo "::error::The relay could not be reached at $RELAY"; exit 1; }
+          echo "HTTP $code from $RELAY/status"
+          node -e '
+            const { ok, products } = JSON.parse(require("fs").readFileSync("status.json", "utf8"));
+            for (const p of products) {
+              console.log(`${p.stale ? "STALE" : "ok   "}  ${p.product.padEnd(14)} ${p.ageMinutes === null ? "never fetched" : `${p.ageMinutes} min old`}, every ${p.everyMinutes} min`);
+              if (p.note) console.log(`::warning::${p.product}: ${p.note}`);
+            }
+            const stale = products.filter((p) => p.stale);
+            for (const p of stale) console.log(`::error::${p.product} has not been refreshed for ${p.ageMinutes ?? "ever"} min (every ${p.everyMinutes} min)`);
+            if (!ok || stale.length > 0) process.exit(1);
+          '
+
+      - name: The page itself
+        run: |
+          curl -sSf --max-time 60 -o /dev/null https://nberkyilmaz.com/departure-brief/ || { echo "::error::nberkyilmaz.com/departure-brief did not load"; exit 1; }
+          curl -sSf --max-time 60 -o /dev/null https://nberkyilmaz.com/departure-brief/demo/airports/index.json || { echo "::error::The aerodrome index did not load"; exit 1; }
+          echo "The page and its aerodrome index load."

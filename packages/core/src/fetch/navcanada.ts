@@ -17,14 +17,25 @@ import { expectOk, type HttpClient } from './response.js';
 export const NAVCANADA_CFPS_BASE_URL = 'https://plan.navcanada.ca/weather/api/alpha/';
 
 /**
- * Every Canadian site CFPS published upper winds for when the country was
- * recorded on 2026-09-18 — seventeen, coast to coast. A flight anywhere in
- * the country finds one within reach, and one request for all of them is
- * how the relay keeps the whole set current without asking per route.
+ * Every Canadian aerodrome CFPS publishes upper winds for: the airports in
+ * NAV CANADA's own winds aloft bulletins, ninety-seven of them, checked
+ * against the service on 2026-11-05. The first list held only the
+ * seventeen largest airports, which left most of the country more than
+ * 150 nm from any wind; seven Canadian flights in nine had no groundspeed.
+ * Bulletin points that are not aerodromes are left out, because CFPS
+ * refuses a whole request over one site it does not know.
  */
 export const CANADIAN_UPPERWIND_SITES = [
-  'CYYZ', 'CYOW', 'CYUL', 'CYQB', 'CYHZ', 'CYWG', 'CYYC', 'CYEG', 'CYVR',
-  'CYXE', 'CYQR', 'CYQT', 'CYZF', 'CYXY', 'CYFB', 'CYYT', 'CYQX',
+  'CYAB', 'CYAH', 'CYAM', 'CYAY', 'CYBK', 'CYBR', 'CYCB', 'CYCO', 'CYDB', 'CYDL',
+  'CYEG', 'CYEU', 'CYEV', 'CYFB', 'CYFC', 'CYFS', 'CYGP', 'CYGR', 'CYGW', 'CYHO',
+  'CYHZ', 'CYIF', 'CYJA', 'CYKA', 'CYKL', 'CYLT', 'CYMA', 'CYMM', 'CYMO', 'CYMT',
+  'CYMW', 'CYNA', 'CYNC', 'CYNM', 'CYOC', 'CYOD', 'CYOJ', 'CYOW', 'CYPH', 'CYPU',
+  'CYQB', 'CYQD', 'CYQG', 'CYQH', 'CYQI', 'CYQL', 'CYQM', 'CYQR', 'CYQT', 'CYQX',
+  'CYQY', 'CYRB', 'CYRI', 'CYRL', 'CYRT', 'CYSC', 'CYSM', 'CYSY', 'CYTE', 'CYTF',
+  'CYTL', 'CYUL', 'CYUX', 'CYVC', 'CYVO', 'CYVP', 'CYVQ', 'CYVR', 'CYVV', 'CYWG',
+  'CYWK', 'CYXC', 'CYXE', 'CYXJ', 'CYXS', 'CYXY', 'CYYB', 'CYYC', 'CYYD', 'CYYE',
+  'CYYF', 'CYYH', 'CYYL', 'CYYQ', 'CYYR', 'CYYT', 'CYYU', 'CYYW', 'CYYY', 'CYYZ',
+  'CYZF', 'CYZG', 'CYZH', 'CYZP', 'CYZS', 'CYZT', 'CYZV',
 ] as const;
 
 export interface CfpsNotamRecord {
@@ -149,6 +160,18 @@ export class NavCanadaClient {
       parsed = JSON.parse(res.body) as { data?: unknown };
     } catch {
       throw new NavCanadaError('response is not JSON', url);
+    }
+    /*
+     * A refusal arrives as a 200 with the reason in `meta.messages`. One
+     * site the service does not know is enough to empty the answer for all
+     * of them, so the request is made once more without the sites it named.
+     */
+    const refused = ((parsed as { meta?: { messages?: { type?: string; message?: string; details?: unknown }[] } }).meta?.messages ?? []).filter((m) => m.type === 'error');
+    if (refused.length > 0) {
+      const unknown = refused.filter((m) => m.message === 'alpha.geomInvalid').flatMap((m) => (Array.isArray(m.details) ? m.details.map(String) : []));
+      const kept = ids.filter((id) => !unknown.includes(id));
+      if (unknown.length > 0 && kept.length > 0 && kept.length < ids.length) return this.upperWinds(kept);
+      throw new NavCanadaError(`the service refused: ${refused.map((m) => m.message ?? 'an error').join('; ')}`, url);
     }
     if (!Array.isArray(parsed.data)) throw new NavCanadaError('response has no data array', url);
     const reports: RawReport[] = [];

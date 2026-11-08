@@ -10,6 +10,7 @@ import { checkCeiling, checkConditions, checkNight, checkVisibility, checkWeathe
 import { checkDaylight } from './daylight.js';
 import { checkHazards } from './hazards.js';
 import { ageText, checkObservation } from './observation.js';
+import { checkUnread } from './unread.js';
 import { checkWindAloft } from './windAloft.js';
 import { RULES_VERSION, type Briefing, type EnrouteReview, type Finding, type PointReview } from './types.js';
 
@@ -94,6 +95,7 @@ function evaluatePoint(
         citations: [{ kind: 'taf', station: p.forecast.station, raw: f.raw, span: null, text: null, sha256: p.forecast.report.sha256 }],
       });
     }
+    findings.push(...checkUnread({ waypoint: w.id, at, basis: 'forecast', basisKind: 'forecast', source }, p.forecast.taf.unparsed));
     if (p.forecast.source === 'nearby') {
       findings.push({
         rule: 'forecast.borrowed',
@@ -141,6 +143,7 @@ function evaluatePoint(
       source: { kind: 'metar', station: p.metar.decoded.station?.value ?? null, raw: p.metar.report.body, sha256: p.metar.report.sha256 },
     };
     findings.push(...checkConditions(ctx, metarConditions(p.metar.decoded)));
+    findings.push(...checkUnread(ctx, p.metar.decoded.unparsed));
   }
 
   findings.push(...checkWindAloft({ waypoint: w.id, at, cruiseAltitude: flight.plan.cruise.altitude }, p.wind));
@@ -221,21 +224,18 @@ function evaluateEnroute(s: EnrouteStation, flight: ResolvedFlight, profile: Pil
     for (const o of f.overlays) {
       findings.push(...checkAlongTheWay({ ...base, basis: overlayLabel(o), basisKind: 'overlay', violation: 'caution', source }, o.conditions));
     }
+    findings.push(...checkUnread({ waypoint: s.station, at, basis: 'forecast', basisKind: 'forecast', source }, s.forecast.taf.unparsed));
   }
   if (s.metar?.report.issuedAt) {
     const age = at.getTime() - s.metar.report.issuedAt.getTime();
-    findings.push(
-      ...checkAlongTheWay(
-        {
-          ...base,
-          basis: `observed ${hhmm(s.metar.report.issuedAt)}${s.metar.ageMinutes > 60 ? `, ${ageText(s.metar.ageMinutes)}` : ''}`,
-          basisKind: 'observed',
-          violation: onTrack && Math.abs(age) <= OBSERVATION_WINDOW_MS ? 'alert' : 'caution',
-          source: { kind: 'metar', station: s.station, raw: s.metar.report.body, sha256: s.metar.report.sha256 },
-        },
-        metarConditions(s.metar.decoded),
-      ),
-    );
+    const ctx: CheckContext = {
+      ...base,
+      basis: `observed ${hhmm(s.metar.report.issuedAt)}${s.metar.ageMinutes > 60 ? `, ${ageText(s.metar.ageMinutes)}` : ''}`,
+      basisKind: 'observed',
+      violation: onTrack && Math.abs(age) <= OBSERVATION_WINDOW_MS ? 'alert' : 'caution',
+      source: { kind: 'metar', station: s.station, raw: s.metar.report.body, sha256: s.metar.report.sha256 },
+    };
+    findings.push(...checkAlongTheWay(ctx, metarConditions(s.metar.decoded)), ...checkUnread(ctx, s.metar.decoded.unparsed));
   }
   return {
     station: s.station,
