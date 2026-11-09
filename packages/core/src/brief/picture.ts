@@ -38,6 +38,9 @@ import { fmtVis } from '../rules/checks.js';
 import { metarConditions, OBSERVATION_WINDOW_MS } from '../rules/evaluate.js';
 import { HAZARD_TEXT } from '../rules/hazards.js';
 import type { Store } from '../store/types.js';
+import { pirepsAlong, type PicturePirep } from './pireps.js';
+
+export type { PicturePirep };
 
 export interface PictureLayer {
   readonly kind: 'layer' | 'vertical-visibility';
@@ -160,6 +163,10 @@ export interface RoutePicture {
   /** In force during the flight, with an area that cannot be tested against a route. */
   readonly hazardsUntestable: number;
   readonly freezing: readonly PictureFreezing[];
+  /** What pilots have reported beside the route in the last ninety minutes, first passed first. */
+  readonly pireps: readonly PicturePirep[];
+  /** How many reports were held for anywhere. None means there are none to go by, not that the sky is empty. */
+  readonly pirepsHeld: number;
 }
 
 function layersOf(sky: readonly Sourced<SkyCondition>[], elevation: number | null): PictureLayer[] {
@@ -425,6 +432,7 @@ export async function routePicture(store: Store, flight: ResolvedFlight): Promis
   const last = flight.points.length - 1;
   const fields = await Promise.all(flight.points.map((p, i) => fieldColumn(store, p, i, last)));
   const along = await Promise.all(flight.enroute.map((s) => alongColumn(store, s)));
+  const { pireps, held } = await pirepsAlong(store, flight);
   return {
     line: flight.route.legs.flatMap((leg, i) => (i === 0 ? pathOf(leg) : pathOf(leg).slice(1))),
     corridor: flight.route.legs.map(stripOf),
@@ -434,5 +442,7 @@ export async function routePicture(store: Store, flight: ResolvedFlight): Promis
     stations: [...fields, ...along].sort((a, b) => a.nm - b.nm),
     ...hazardsOf(flight),
     freezing: await freezingOf(store, flight),
+    pireps,
+    pirepsHeld: held,
   };
 }

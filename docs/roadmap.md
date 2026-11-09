@@ -36,7 +36,7 @@ official briefing.
 | **Evaluation harness** | A reviewed labelled set and a gate that fails the build, not a claim in a README. |
 | **Briefing diff** | What changed since last time, measured against the verdict rather than the text. |
 | **Route map** | Where the flight goes and the 25 nm either side of it that is searched, every station with its category for the time you would pass it, and the advisories you would be inside while they are in force. |
-| **Side view** | The route from the side: the ground at each station, the cloud bases forecast for when you pass it put on the altitude scale, SIGMET bands where you would be inside them while they are in force, the freezing level where there are upper-air temperatures. The terrain under the line is shaded from a published elevation model. It says what it does not know: no tops, and that spot heights on the centre line are not a clearance. |
+| **Side view** | The route from the side: the ground at each station, the cloud bases forecast for when you pass it put on the altitude scale, SIGMET bands where you would be inside them while they are in force, the freezing level where there are upper-air temperatures, and what pilots have reported along the way. The terrain under the line is shaded from a published elevation model. It says what it does not know: no tops, and that spot heights on the centre line are not a clearance. |
 | **When can I go?** | The flight judged again for each of the next twelve hours, by the same code as the briefing, the destination at the time you would arrive and the stations along the way when you would pass them; pick an hour and it is briefed. |
 | **Weight and balance** | Read out of a scanned handbook, every figure checked against the ink before it is used. |
 | **Forecast verification** | Did the TAF turn out to be right, and which way was it wrong. |
@@ -116,8 +116,11 @@ verbatim, feed the rules — so they get cheaper as they go.
   your route — all three, or it is not mentioned. An area the geometry
   cannot answer for is reported as needing to be checked by eye. American
   AIRMETs come from the G-AIRMET, which covers the lower 48.
-- **PIREPs.** What somebody up there actually found, which is often the
-  only honest answer about icing and turbulence.
+- ~~**PIREPs.**~~ Done. What somebody up there actually found, which is
+  often the only honest answer about icing and turbulence, drawn on the map
+  and the side view from the last ninety minutes and within 50 nm of the
+  route. They are shown and not judged: no report becomes a finding, and
+  no report at all says nothing about the air.
 - **Graphical area forecast.** Images rather than text, so a different kind
   of work: show it, do not pretend to reason about it.
 

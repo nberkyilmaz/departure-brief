@@ -117,6 +117,7 @@ const REFRESH: readonly { readonly path: RegExp; readonly name: string; readonly
   { path: /tafs\.cache/, name: 'TAFs', everyMinutes: 15 },
   { path: /sigmet/, name: 'hazard advisories', everyMinutes: 15 },
   { path: /gairmets\.cache/, name: 'US AIRMETs', everyMinutes: 60 },
+  { path: /aircraftreports\.cache/, name: 'pilot reports', everyMinutes: 20 },
   { path: /alpha=upperwind/, name: 'Canadian upper winds', everyMinutes: 60 },
   { path: /noaa\/soundings/, name: 'US balloon soundings', everyMinutes: 20 },
 ];
@@ -280,11 +281,12 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
   const cfps = new NavCanadaClient(http, `${relay}/cfps/`);
   const balloons = new SoundingClient(http, `${relay}/noaa/soundings`);
 
-  const [metars, tafs, hazards, gairmets, winds, soundings] = await Promise.allSettled([
+  const [metars, tafs, hazards, gairmets, pireps, winds, soundings] = await Promise.allSettled([
     cache.metars(),
     cache.tafs(),
     awc.sigmets(),
     cache.gairmets(),
+    cache.aircraftReports(),
     cfps.upperWinds([...CANADIAN_UPPERWIND_SITES]),
     balloons.relayed(),
   ]);
@@ -314,6 +316,10 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
     await storeAndDecode(store, gairmets.value.reports, gairmets.value.request, now, 'WORLD');
     hold(gairmets.value.reports, null);
   } else missingUS.push('US AIRMETs');
+  if (pireps.status === 'fulfilled') {
+    await storeAndDecode(store, pireps.value.reports, pireps.value.request, now, 'WORLD');
+    hold(pireps.value.reports, null);
+  } else missing.push('pilot reports');
   if (winds.status === 'fulfilled') {
     for (const site of CANADIAN_UPPERWIND_SITES) {
       const mine = winds.value.reports.filter((r) => r.station === site);

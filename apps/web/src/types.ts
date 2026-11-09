@@ -424,6 +424,29 @@ export interface PictureFreezing {
   measuredAt?: string;
 }
 
+export interface PicturePirep {
+  station: string | null;
+  /** The report as filed. */
+  text: string;
+  at: string;
+  lat: number;
+  lon: number;
+  nm: number;
+  /** Off the route, positive to the right of it. */
+  offsetNm: number;
+  passAt: string;
+  /** Made within ninety minutes of when you would pass it. */
+  speaksForThen: boolean;
+  altitudeFt: number | null;
+  phase: 'climbing' | 'descending' | null;
+  aircraft: string | null;
+  urgent: boolean;
+  tempC: number | null;
+  clouds: { cover: string | null; baseFt: number | null; topFt: number | null }[];
+  turbulence: { intensity: string | null; type: string | null; frequency: string | null; baseFt: number | null; topFt: number | null }[];
+  icing: { intensity: string | null; type: string | null; baseFt: number | null; topFt: number | null }[];
+}
+
 /** The flight laid out along the route for drawing. Beside the briefing, not part of its hash. */
 export interface RoutePicture {
   line: { lat: number; lon: number }[];
@@ -437,6 +460,9 @@ export interface RoutePicture {
   hazardsMissed: PictureHazardMissed[];
   hazardsUntestable: number;
   freezing: PictureFreezing[];
+  pireps: PicturePirep[];
+  /** How many reports were held for anywhere. None means there are none to go by, not that the sky is empty. */
+  pirepsHeld: number;
 }
 
 /** Spot heights along the centre line, from an elevation model. */

@@ -31,6 +31,7 @@ export const AWC_CACHE_BASE_URL = 'https://aviationweather.gov/data/cache';
 export const METAR_CACHE_FILE = 'metars.cache.csv.gz';
 export const TAF_CACHE_FILE = 'tafs.cache.xml.gz';
 export const GAIRMET_CACHE_FILE = 'gairmets.cache.xml.gz';
+export const AIRCRAFT_REPORT_CACHE_FILE = 'aircraftreports.cache.xml.gz';
 
 function refuseCompressed(text: string, url: string): void {
   // 0x1f 0x8b is the gzip magic; decoded as text the first byte survives.
@@ -118,6 +119,24 @@ export function parseGairmetCache(text: string, url: string): RawReport[] {
   return reports;
 }
 
+/**
+ * Every pilot report in the file, each the record as sent. Nearly all of
+ * the file is airliners' automatic position reports, wind and temperature
+ * at cruise and most of it over the oceans, which are left behind.
+ */
+export function parseAircraftReportCache(text: string, url: string): RawReport[] {
+  refuseCompressed(text, url);
+  if (!/<data\b/.test(text)) throw new AwcError('aircraft report cache file has no data element', url);
+  const reports: RawReport[] = [];
+  for (const m of text.matchAll(/<AircraftReport>[\s\S]*?<\/AircraftReport>/g)) {
+    const body = m[0];
+    if (!/PIREP/.test(element(body, 'report_type') ?? '')) continue;
+    const station = /^\s*(\S+)\s+UU?A\b/.exec(element(body, 'raw_text') ?? '')?.[1] ?? null;
+    reports.push(rawReport({ kind: 'pirep', source: 'awc', station, body, issuedAt: instant(element(body, 'observation_time')), upstream: null }));
+  }
+  return reports;
+}
+
 export class AwcCacheClient {
   constructor(
     private readonly http: HttpClient,
@@ -143,5 +162,12 @@ export class AwcCacheClient {
     const url = `${this.baseUrl}/${GAIRMET_CACHE_FILE}`;
     const res = expectOk(url, await this.http.get(url));
     return { request: url, reports: parseGairmetCache(res.body, url) };
+  }
+
+  /** Every pilot report of the last ninety minutes, anywhere. */
+  async aircraftReports(): Promise<AwcFetch> {
+    const url = `${this.baseUrl}/${AIRCRAFT_REPORT_CACHE_FILE}`;
+    const res = expectOk(url, await this.http.get(url));
+    return { request: url, reports: parseAircraftReportCache(res.body, url) };
   }
 }

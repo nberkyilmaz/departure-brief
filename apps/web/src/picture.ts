@@ -7,7 +7,7 @@
 import { alongTheWay, fieldCards } from './summary.js';
 import { clock24, hhmmZ } from './time.js';
 import type { TerrainState } from './terrain.js';
-import type { FlightCategory, PictureFreezing, PictureHazard, PictureHazardBase, PictureHazardMissed, PictureLayer, PictureStation, RoutePicture, RouteTerrain, StoredBriefing } from './types.js';
+import type { FlightCategory, PictureFreezing, PictureHazard, PictureHazardBase, PictureHazardMissed, PictureLayer, PicturePirep, PictureStation, RoutePicture, RouteTerrain, StoredBriefing } from './types.js';
 
 export interface Column {
   readonly station: PictureStation;
@@ -208,10 +208,96 @@ export function notesOf(picture: RoutePicture, columns: readonly Column[], sprea
       ? `Freezing level, ${measured ? 'measured, not forecast for the time you pass' : 'forecast for the time you pass'}: ${freezing.map(freezingText).join('; ')}. Between those points it is not known.${bound ? ' "Below" is as far as that forecast goes: it has no temperature under that height.' : ''}`
       : 'No upper-air temperatures reach this route, so no freezing level is drawn.',
     `Times are at your planned ${picture.tasKt} kt with no wind, as in Along the way, by this device's clock.`,
+    ...(picture.pirepsHeld > 0 ? [pirepNote(picture)] : []),
     ...(spreadApart ? ['Stations close together are spread apart so each can be read: go by the miles printed, not the gaps.'] : []),
     ...picture.hazardsMissed.map(missedText),
     ...(untestable > 0 ? [`${untestable} ${untestable === 1 ? 'advisory' : 'advisories'} in force during the flight ${untestable === 1 ? 'gives an area' : 'give areas'} that cannot be tested against a route, so ${untestable === 1 ? 'it is' : 'they are'} not drawn.`] : []),
   ];
+}
+
+/** Pilot reports are all there is for tops, icing and turbulence, and there are few of them: said either way. */
+function pirepNote(picture: RoutePicture): string {
+  if (picture.pireps.length === 0) return 'No pilot has reported within 50 nm of your route in the last 90 minutes. That says nothing about the air: it only means nobody said anything.';
+  return `Pilot reports are from the last 90 minutes and within 50 nm of your route: what somebody found, in the aircraft they were flying, and the only source of tops, icing and turbulence here. A filled number was made within 90 minutes of when you would pass it; a hollow one will be older than that by the time you get there. Where nobody has reported, the chart shows nothing, which does not mean nothing is there.`;
+}
+
+const INTENSITY_WORDS: Readonly<Record<string, string>> = {
+  NEG: 'no',
+  NEGclr: 'no',
+  TRC: 'trace',
+  TRACE: 'trace',
+  'TRC-LGT': 'trace to light',
+  LGT: 'light',
+  'LGT-MOD': 'light to moderate',
+  MOD: 'moderate',
+  'MOD-SEV': 'moderate to severe',
+  SEV: 'severe',
+  HVY: 'heavy',
+  EXTRM: 'extreme',
+};
+
+const intensityWord = (intensity: string | null): string => (intensity === null ? '' : `${INTENSITY_WORDS[intensity] ?? intensity.toLowerCase()} `);
+
+function heightsWords(baseFt: number | null, topFt: number | null): string {
+  if (baseFt === null && topFt === null) return '';
+  if (baseFt === null) return ` up to ${feet(topFt!)} ft`;
+  return topFt === null || topFt === baseFt ? ` at ${feet(baseFt)} ft` : ` from ${feet(baseFt)} to ${feet(topFt)} ft`;
+}
+
+function conditionWords(p: PicturePirep): string[] {
+  const icing = p.icing.map((c) => `${intensityWord(c.intensity)}${c.type ? `${c.type.toLowerCase()} ` : ''}icing${heightsWords(c.baseFt, c.topFt)}`);
+  const turbulence = p.turbulence.map((c) => (c.type === 'LLWS' ? 'low-level wind shear' : `${intensityWord(c.intensity)}${c.type === 'CHOP' ? 'chop' : 'turbulence'}${heightsWords(c.baseFt, c.topFt)}`));
+  const clouds = p.clouds.map((c) => [c.cover, c.baseFt !== null ? `cloud base ${feet(c.baseFt)} ft` : null, c.topFt !== null ? `tops ${feet(c.topFt)} ft` : null].filter(Boolean).join(' '));
+  return [...icing, ...turbulence, ...clouds];
+}
+
+const ofHeight = (p: PicturePirep): string => (p.altitudeFt !== null ? `at ${feet(p.altitudeFt)} ft` : p.phase ? `${p.phase}, height not given` : 'height not given');
+
+/** One report in words, the same on the map and under the side view. */
+export function pirepWords(p: PicturePirep, now: number = Date.now()): string {
+  const said = conditionWords(p).join(', ');
+  const found = said === '' ? 'As filed' : `${said[0]!.toUpperCase()}${said.slice(1)}`;
+  const minutes = Math.max(0, Math.round((now - Date.parse(p.at)) / 60_000));
+  const off = Math.abs(p.offsetNm) < 1 ? '' : `, ${Math.round(Math.abs(p.offsetNm))} nm ${p.offsetNm > 0 ? 'right' : 'left'} of it`;
+  const details = [ofHeight(p), ...(p.tempC !== null ? [`${p.tempC} °C`] : []), ...(p.aircraft ? [p.aircraft] : []), `${minutes} min ago`];
+  return `${p.urgent ? 'Urgent. ' : ''}${found}, ${details.join(', ')}. ${Math.round(p.nm)} nm along your route${off}.`;
+}
+
+const shortIntensity = (intensity: string | null): string => (intensity === null ? '' : `${intensity.replace(/clr$/, '')} `);
+
+/** A few letters beside the mark on the chart; the list under it says the rest. */
+export function pirepTag(p: PicturePirep): string {
+  const parts = [
+    ...p.icing.map((c) => `${shortIntensity(c.intensity)}ICE`),
+    ...p.turbulence.map((c) => (c.type === 'LLWS' ? 'LLWS' : `${shortIntensity(c.intensity)}${c.type === 'CHOP' ? 'CHOP' : 'TB'}`)),
+    ...p.clouds.flatMap((c) => (c.topFt !== null ? [`TOP ${feet(c.topFt)}`] : c.baseFt !== null ? [`BASE ${feet(c.baseFt)}`] : [])),
+  ];
+  return parts.slice(0, 2).join(' ');
+}
+
+/** Near enough on the chart that two marks and their words would land on each other. */
+const PIREP_APART_X = 60;
+const PIREP_APART_Y = 18;
+
+export interface PlacedPirep {
+  readonly p: PicturePirep;
+  /** Its number, the same on the map and under the chart. */
+  readonly n: number;
+  readonly x: number;
+  readonly y: number;
+}
+
+/** Where each report with a height on this chart goes. Crowded ones step down so all can be read; the list says exactly where each was. */
+export function placePireps(pireps: readonly PicturePirep[], top: number, xAt: (nm: number) => number, yOf: (ft: number) => number): PlacedPirep[] {
+  const placed: PlacedPirep[] = [];
+  pireps.forEach((p, i) => {
+    if (p.altitudeFt === null || p.altitudeFt > top) return;
+    const x = xAt(p.nm);
+    let y = yOf(p.altitudeFt);
+    while (placed.some((o) => Math.abs(o.x - x) < PIREP_APART_X && Math.abs(o.y - y) < PIREP_APART_Y)) y += PIREP_APART_Y;
+    placed.push({ p, n: i + 1, x, y });
+  });
+  return placed;
 }
 
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';

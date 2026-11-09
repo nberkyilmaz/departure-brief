@@ -1,6 +1,7 @@
 import { decodeMetar, METAR_DECODER_VERSION } from '../decode/metar/index.js';
 import { decodeTaf, TAF_DECODER_VERSION } from '../decode/taf/index.js';
 import { decodeNotam, NOTAM_DECODER_VERSION } from '../notam/decode.js';
+import { decodePirep, PIREP_DECODER_VERSION } from '../decode/pirep/decode.js';
 import { decodeSigmet, SIGMET_DECODER_VERSION } from '../decode/sigmet/decode.js';
 import { decodeUpperWind, UPPERWIND_DECODER_VERSION } from '../decode/upperwind/decode.js';
 import type { RawReport, ReportKind, ReportStore } from './types.js';
@@ -22,6 +23,7 @@ const DECODERS: Partial<Record<ReportKind, { version: number; decode: (raw: stri
   // A US bulletin's times carry no month or year; the report's issue time dates them.
   upperwind: { version: UPPERWIND_DECODER_VERSION, decode: (raw, report) => decodeUpperWind(raw, report.issuedAt) },
   sigmet: { version: SIGMET_DECODER_VERSION, decode: decodeSigmet },
+  pirep: { version: PIREP_DECODER_VERSION, decode: decodePirep },
 };
 
 /**
