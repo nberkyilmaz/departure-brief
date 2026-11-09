@@ -114,8 +114,11 @@ verbatim, feed the rules — so they get cheaper as they go.
   levels between them left for a later version.
 - ~~**SIGMET and AIRMET.**~~ Done. In force, at your altitude, and across
   your route — all three, or it is not mentioned. An area the geometry
-  cannot answer for is reported as needing to be checked by eye. American
-  AIRMETs come from the G-AIRMET, which covers the lower 48.
+  cannot answer for is reported as needing to be checked by eye. One on the
+  route that would be over before you could reach it, even leaving half an
+  hour early with 40 kt behind you, or not begin until you could be past
+  it, is a note rather than an alert. American AIRMETs come from the
+  G-AIRMET, which covers the lower 48.
 - ~~**PIREPs.**~~ Done. What somebody up there actually found, which is
   often the only honest answer about icing and turbulence, drawn on the map
   and the side view from the last ninety minutes and within 50 nm of the

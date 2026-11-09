@@ -1,5 +1,5 @@
 {
-  "sha256": "f31b55c96d48a111366a557f5610b1b0e40ca640e9d461a5eb55da751fa766a7",
+  "sha256": "3fe5dd6211e403a2fb0c53303eae7269996844a1792bfc2cf7592cca242d4894",
   "flightKey": "2c8115094cbf5965b4acc3bb0482ba82f940c10935f36d80648410ed0541d0a8",
   "asOf": "2026-09-19T00:52:00.000Z",
   "createdAt": "2026-09-19T00:52:00.000Z",
@@ -48,7 +48,7 @@
     },
     "asOf": "2026-09-19T00:52:00.000Z",
     "versions": {
-      "rules": 11,
+      "rules": 12,
       "metarDecoder": 2,
       "tafDecoder": 1,
       "notamDecoder": 1,
@@ -1466,7 +1466,7 @@
       ]
     },
     "briefing": {
-      "rulesVersion": 11,
+      "rulesVersion": 12,
       "profile": {
         "name": "default",
         "version": 1

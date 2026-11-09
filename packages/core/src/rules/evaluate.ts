@@ -8,7 +8,7 @@ import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
 import type { Overlay, ResolvedForecast } from '../resolve/taf.js';
 import { checkCeiling, checkConditions, checkNight, checkVisibility, checkWeather, type CheckContext } from './checks.js';
 import { checkDaylight } from './daylight.js';
-import { checkHazards } from './hazards.js';
+import { checkHazards, type TripLeg } from './hazards.js';
 import { ageText, checkObservation } from './observation.js';
 import { checkUnread } from './unread.js';
 import { checkWindAloft } from './windAloft.js';
@@ -49,6 +49,13 @@ function flightWindow(flight: ResolvedFlight): { from: Date; to: Date } {
   const points = [...flight.points, ...(flight.alternate ? [flight.alternate] : [])];
   const times = points.map((p) => p.point.eta.getTime());
   return { from: new Date(Math.min(...times)), to: new Date(Math.max(...times)) };
+}
+
+/** The trip leg by leg, the way to the alternate included. */
+function tripLegs(flight: ResolvedFlight): TripLeg[] {
+  const { legs, points, total, alternate } = flight.route;
+  const trip = legs.map((l, i) => ({ from: l.from.position, to: l.to.position, startNm: points[i]!.cumulative, distanceNm: l.distance }));
+  return alternate ? [...trip, { from: alternate.leg.from.position, to: alternate.leg.to.position, startNm: total, distanceNm: alternate.leg.distance }] : trip;
 }
 
 function evaluatePoint(
@@ -167,6 +174,8 @@ function evaluatePoint(
         route: arriving,
         window: flightWindow(flight),
         leg: { from: previous?.point.eta ?? at, to: at },
+        trip: tripLegs(flight),
+        tasKt: flight.plan.cruise.tas,
         cruiseAltitudeFt: flight.plan.cruise.altitude,
       },
       flight.hazards,
