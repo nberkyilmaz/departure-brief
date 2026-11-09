@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { alongRowId, altitudeTicks, chartTop, COLUMN_PX, columnsOf, emptyStretches, hazardKey, heightText, layersToLabel, layerText, notesOf, spread, xOfNm, type Column } from './picture.js';
-import { aerodromeHref } from './router.js';
+import { altitudeTicks, chartTop, COLUMN_PX, columnLabel, columnsOf, emptyStretches, hazardKey, hazardLetter, heightText, labelOf, layersToLabel, layerText, notesOf, spread, xOfNm, type Column } from './picture.js';
+import { openColumn, opens } from './stationLink.js';
 import { CATEGORY_LETTER } from './summary.js';
 import { clock24, zoneOf } from './time.js';
 import type { PictureHazard, PictureLayer, RoutePicture, StoredBriefing } from './types.js';
@@ -32,36 +32,6 @@ const GROUND_PX = 22;
 const FADE_PX = 16;
 /** The narrowest empty stretch that has room for words. */
 const EMPTY_WORDS_PX = 124;
-
-const isPosition = (id: string): boolean => id.includes(',');
-const labelOf = (id: string): string => (isPosition(id) ? 'WPT' : id);
-
-/** A station's row in the list, opened out of the folds it may be in, and scrolled to. */
-function showAlong(station: string): void {
-  const row = document.getElementById(alongRowId(station));
-  if (!row) return;
-  for (let el = row.parentElement; el; el = el.parentElement) if (el instanceof HTMLDetailsElement) el.open = true;
-  const own = row.querySelector('details');
-  if (own) own.open = true;
-  row.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
-  row.classList.remove('along-found');
-  // Forces the highlight to play again when the same row is asked for twice.
-  void row.offsetWidth;
-  row.classList.add('along-found');
-}
-
-function open(c: Column): void {
-  if (c.station.role === 'along') showAlong(c.station.id);
-  else if (!isPosition(c.station.id)) window.location.hash = aerodromeHref(c.station.id);
-}
-
-const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-function columnLabel(c: Column): string {
-  const s = c.station;
-  const what = c.category ? `${c.category}, ${c.from === 'now' ? 'observed now, no forecast for your time' : 'forecast for your time'}` : 'no category';
-  return `${labelOf(s.id)}, ${Math.round(s.nm)} nm along, passing ${clock24(s.at)}, ${what}`;
-}
 
 function Cloud({ layer, x, y, observed, label }: { layer: PictureLayer; x: number; y: number; observed: boolean; label: boolean }) {
   const w = barWidth(layer);
@@ -232,7 +202,7 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
   const key = (e: KeyboardEvent, c: Column) => {
     if (e.key !== 'Enter' && e.key !== ' ') return;
     e.preventDefault();
-    open(c);
+    openColumn(c);
   };
 
   return (
@@ -279,7 +249,7 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
 
             {picture.hazards.map((h, i) =>
               h.stretches.map((s, j) => (
-                <Band key={`${i}-${j}`} h={h} tag={LETTERS[i] ?? '?'} stack={picture.hazards.slice(0, i).filter((o) => o.stretches.some((other) => other.fromNm < s.toNm && other.toNm > s.fromNm)).length} x0={xAt(s.fromNm)} x1={xAt(s.toNm)} top={top} yOf={yOf} plotTop={HEAD_PX} />
+                <Band key={`${i}-${j}`} h={h} tag={hazardLetter(i)} stack={picture.hazards.slice(0, i).filter((o) => o.stretches.some((other) => other.fromNm < s.toNm && other.toNm > s.fromNm)).length} x0={xAt(s.fromNm)} x1={xAt(s.toNm)} top={top} yOf={yOf} plotTop={HEAD_PX} />
               )),
             )}
 
@@ -369,10 +339,9 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
             ))}
 
             {columns.map((c, i) => {
-              const tappable = c.station.role === 'along' || !isPosition(c.station.id);
               const w = Math.min(COLUMN_PX, (xs[i + 1] ?? Infinity) - xs[i]!, xs[i]! * 2);
-              return tappable ? (
-                <rect key={i} className="sv-hit" x={xs[i]! - w / 2} y={0} width={w} height={height} tabIndex={0} role="link" aria-label={columnLabel(c)} onClick={() => open(c)} onKeyDown={(e) => key(e, c)}>
+              return opens(c) ? (
+                <rect key={i} className="sv-hit" x={xs[i]! - w / 2} y={0} width={w} height={height} tabIndex={0} role="link" aria-label={columnLabel(c)} onClick={() => openColumn(c)} onKeyDown={(e) => key(e, c)}>
                   <title>{columnLabel(c)}</title>
                 </rect>
               ) : null;
@@ -384,7 +353,7 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
         <ul className="side-hazards">
           {picture.hazards.map((h, i) => (
             <li key={i}>
-              <span className={`side-hazard-tag ${h.kind}`}>{LETTERS[i] ?? '?'}</span> {hazardKey(h)}
+              <span className={`side-hazard-tag ${h.kind}`}>{hazardLetter(i)}</span> {hazardKey(h)}
             </li>
           ))}
         </ul>

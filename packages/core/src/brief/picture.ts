@@ -27,10 +27,11 @@ import type { CloudAmount, CloudType, SkyCondition } from '../decode/groups/sky.
 import { sliceSpan, type Sourced } from '../decode/span.js';
 import { freezingLevel, type FreezingLevel } from '../decode/upperwind/interpolate.js';
 import type { Airport } from '../domain/airport.js';
-import type { LatLon } from '../domain/geo.js';
+import { initialCourse, pointAlong, pointOnCourse, type LatLon } from '../domain/geo.js';
 import { areaIsTestable, legInsideArea } from '../domain/polygon.js';
+import { CORRIDOR_NM, type EnrouteStation } from '../resolve/enroute.js';
 import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
-import type { EnrouteStation } from '../resolve/enroute.js';
+import type { Leg } from '../resolve/route.js';
 import type { Overlay } from '../resolve/taf.js';
 import { upperWindFor } from '../resolve/wind.js';
 import { fmtVis } from '../rules/checks.js';
@@ -100,6 +101,8 @@ export interface PictureStretch {
   readonly startsInside: boolean;
   /** Likewise where it ends. */
   readonly endsInside: boolean;
+  /** Half way along the stretch: where a map puts the advisory's letter. */
+  readonly middle: LatLon;
 }
 
 interface PictureHazardBase {
@@ -138,6 +141,10 @@ export interface PictureFreezing extends FreezingLevel {
 }
 
 export interface RoutePicture {
+  /** The track as a map draws it: the great circle of each leg, close enough together to follow it. */
+  readonly line: readonly LatLon[];
+  /** One outline per leg, the strip searched for stations either side of the track. */
+  readonly corridor: readonly (readonly LatLon[])[];
   readonly totalNm: number;
   readonly cruiseFt: number;
   readonly tasKt: number;
@@ -258,6 +265,13 @@ function stretchesInside(flight: ResolvedFlight, area: readonly LatLon[]): { fro
   return out;
 }
 
+/** Where the route is, some distance along it. */
+function positionAt(flight: ResolvedFlight, nm: number): LatLon {
+  const at = Math.max(0, flight.route.legs.findIndex((_, n) => nm <= flight.route.points[n + 1]!.cumulative));
+  const leg = flight.route.legs[at]!;
+  return pointAlong(leg.from.position, leg.to.position, nm - flight.route.points[at]!.cumulative);
+}
+
 function hazardsOf(flight: ResolvedFlight): Pick<RoutePicture, 'hazards' | 'hazardsMissed' | 'hazardsUntestable'> {
   const departs = flight.route.points[0]!.eta.getTime();
   const tas = flight.plan.cruise.tas;
@@ -295,7 +309,7 @@ function hazardsOf(flight: ResolvedFlight): Pick<RoutePicture, 'hazards' | 'haza
       const from = Math.max(reach, validFrom);
       const to = Math.min(leave, validTo);
       if (from > to) return [];
-      return [{ fromNm: milesAt(from), toNm: milesAt(to), fromAt: iso(from), toAt: iso(to), startsInside: from > reach, endsInside: to < leave }];
+      return [{ fromNm: milesAt(from), toNm: milesAt(to), fromAt: iso(from), toAt: iso(to), startsInside: from > reach, endsInside: to < leave, middle: positionAt(flight, milesAt((from + to) / 2)) }];
     });
     if (stretches.length > 0) {
       hazards.push({ ...base, area: d.area, stretches });
@@ -334,11 +348,33 @@ async function freezingOf(store: Store, flight: ResolvedFlight): Promise<Picture
   return out.sort((a, b) => a.nm - b.nm);
 }
 
+/** Near enough together that a line drawn straight between them follows the great circle at any zoom the map allows. */
+const LINE_STEP_NM = 25;
+
+function pathOf(leg: Leg): LatLon[] {
+  const steps = Math.max(1, Math.ceil(leg.distance / LINE_STEP_NM));
+  return Array.from({ length: steps + 1 }, (_, i) => (i === 0 ? leg.from.position : i === steps ? leg.to.position : pointAlong(leg.from.position, leg.to.position, (leg.distance * i) / steps)));
+}
+
+/**
+ * The strip beside a leg that stations are read from: out to either side,
+ * square to the track, and ending at the ends of the leg, because only what
+ * lies between them counts as on the way.
+ */
+function stripOf(leg: Leg): LatLon[] {
+  const path = pathOf(leg);
+  const courseAt = (i: number): number => (i < path.length - 1 ? initialCourse(path[i]!, path[i + 1]!) : initialCourse(path[i]!, path[i - 1]!) + 180);
+  const side = (turn: number) => path.map((p, i) => pointOnCourse(p, courseAt(i) + turn, CORRIDOR_NM));
+  return [...side(90), ...side(-90).reverse()];
+}
+
 export async function routePicture(store: Store, flight: ResolvedFlight): Promise<RoutePicture> {
   const last = flight.points.length - 1;
   const fields = await Promise.all(flight.points.map((p, i) => fieldColumn(store, p, i, last)));
   const along = await Promise.all(flight.enroute.map((s) => alongColumn(store, s)));
   return {
+    line: flight.route.legs.flatMap((leg, i) => (i === 0 ? pathOf(leg) : pathOf(leg).slice(1))),
+    corridor: flight.route.legs.map(stripOf),
     totalNm: flight.route.total,
     cruiseFt: flight.plan.cruise.altitude,
     tasKt: flight.plan.cruise.tas,

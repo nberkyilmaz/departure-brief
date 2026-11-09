@@ -54,6 +54,8 @@ and shows its working.
   hours you might leave, the destination at the time you would arrive and
   the stations along the way when you would pass them, so an earlier or
   later departure can be compared at a glance and briefed with a tap.
+- **Puts the route on a map**, with every station along it at the time you
+  would pass it and the advisories you would be inside.
 - **Draws the route from the side**: the ground at each station, the cloud
   bases forecast for when you pass it, SIGMETs where you would be inside
   them, and the freezing level, with what it cannot know said on the chart.

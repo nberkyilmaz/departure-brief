@@ -1025,6 +1025,33 @@ summary:focus-visible,
 .concern-when { display: block; color: var(--muted); font-size: 0.8rem; }
 .concern-detail { padding: 0 var(--s3) var(--s2); }
 
+/* The route map: the start page's map, drawn around one flight. */
+.route-map { margin: 0 0 var(--s4); }
+.route-map h3 { font-size: 0.95rem; margin: 0 0 0.2rem; }
+.route-map .explain { margin: 0 0 var(--s2); }
+.wx-map.route-map-canvas { height: clamp(17rem, 46vh, 27rem); border: 1px solid var(--line); border-radius: var(--radius); }
+.route-map-hint { margin: var(--s1) 0 0; font-size: 0.8rem; color: var(--muted); }
+/* Through the map's class, because Leaflet's own stylesheet arrives later and sets its markers to block. */
+.wx-map .rm-dot, .wx-map .rm-tag { display: grid; place-items: center; }
+.rm-dot { box-sizing: border-box; border-radius: 50%; border: 2px solid var(--surface); background: var(--unknown); color: #fff; font-size: 11px; font-weight: 700; line-height: 1; box-shadow: 0 1px 2px rgb(0 0 0 / 35%); cursor: pointer; }
+.rm-dot.named { font-size: 13px; }
+.rm-dot.crowded { font-size: 9px; border-width: 1.5px; }
+.rm-dot.vfr { background: var(--vfr); }
+.rm-dot.mvfr { background: var(--mvfr); }
+.rm-dot.ifr { background: var(--ifr); }
+.rm-dot.lifr { background: var(--lifr); }
+.rm-dot.hollow { background: var(--surface); color: var(--fg); border-color: var(--unknown); }
+.rm-dot.hollow.vfr { border-color: var(--vfr); }
+.rm-dot.hollow.mvfr { border-color: var(--mvfr); }
+.rm-dot.hollow.ifr { border-color: var(--ifr); }
+.rm-dot.hollow.lifr { border-color: var(--lifr); }
+.rm-tag { box-sizing: border-box; border-radius: 3px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--fg); font-size: 11px; font-weight: 700; line-height: 1; cursor: pointer; }
+.rm-tag.sigmet { border-color: var(--nogo); }
+.rm-tag.airmet { border-color: var(--marginal); }
+.wx-map .leaflet-tooltip.rm-label { background: var(--surface); color: var(--fg); border-color: var(--line-strong); font-weight: 600; padding: 0 0.3rem; box-shadow: none; }
+.wx-map .leaflet-popup-content-wrapper, .wx-map .leaflet-popup-tip { background: var(--surface); color: var(--fg); }
+.wx-map .leaflet-popup-content { font-size: 0.85rem; margin: 0.6rem 0.8rem; }
+
 /* The side view. Axis stays put while the stations scroll past it; every mark takes its colour from the same variables as the rest of the page. */
 .side { margin: 0 0 var(--s4); }
 .side h3 { font-size: 0.95rem; margin: 0 0 0.2rem; }

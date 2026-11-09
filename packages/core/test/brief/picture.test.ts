@@ -10,12 +10,14 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { routePicture, type PictureStation } from '../../src/brief/picture.js';
 import { parseFlightPlan } from '../../src/domain/flight.js';
+import { distanceNm, trackPosition } from '../../src/domain/geo.js';
 import { pointInArea } from '../../src/domain/polygon.js';
 import { AwcCacheClient } from '../../src/fetch/awcCache.js';
 import { AwcClient } from '../../src/fetch/awc.js';
 import { NavCanadaClient } from '../../src/fetch/navcanada.js';
 import { readOurAirportsDirectory } from '../../src/fetch/ourairports.js';
 import type { HttpClient } from '../../src/fetch/response.js';
+import { CORRIDOR_NM } from '../../src/resolve/enroute.js';
 import { resolveFlight } from '../../src/resolve/flight.js';
 import { storeAndDecode } from '../../src/store/decode.js';
 import { MemoryStore } from '../../src/store/memory.js';
@@ -195,6 +197,54 @@ describe('the advisories on the picture', () => {
   it('counts the advisories whose area cannot be drawn, without placing them', async () => {
     const { picture: p } = await picture('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
     expect(p.hazardsUntestable).toBe(2);
+  });
+});
+
+describe('the route on a map', () => {
+  it('follows the great circle from one end to the other, in steps a map can draw', async () => {
+    const { picture: p, flight } = await picture('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const [a, b] = [flight.route.points[0]!.waypoint.position, flight.route.points[1]!.waypoint.position];
+    expect(p.line[0]).toEqual(a);
+    expect(p.line[p.line.length - 1]).toEqual(b);
+    p.line.forEach((point, i) => {
+      expect(Math.abs(trackPosition(a, b, point).offsetNm)).toBeLessThan(0.01);
+      if (i > 0) expect(distanceNm(p.line[i - 1]!, point)).toBeLessThanOrEqual(25.01);
+    });
+  });
+
+  it('goes through a waypoint, with a strip for each leg', async () => {
+    const store = await seeded();
+    const via = parseFlightPlan({ departure: 'CYVR', destination: 'CYYC', alternate: null, route: ['CYLW'], departureTime: '2026-11-09T03:00:00Z', cruise: { tas: 110, altitude: 11500 }, airspace: null });
+    const flight = await resolveFlight(store, via, RECORDED);
+    const p = await routePicture(store, flight);
+    expect(p.line).toContainEqual(flight.route.points[1]!.waypoint.position);
+    expect(p.corridor).toHaveLength(2);
+    expect(new Set(p.line.map((q) => `${q.lat},${q.lon}`)).size).toBe(p.line.length);
+  });
+
+  it('draws the strip the stations were searched in, square to the track and no further than its ends', async () => {
+    const { picture: p, flight } = await picture('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const leg = flight.route.legs[0]!;
+    expect(p.corridor).toHaveLength(1);
+    for (const corner of p.corridor[0]!) {
+      const { alongNm, offsetNm } = trackPosition(leg.from.position, leg.to.position, corner);
+      expect(Math.abs(Math.abs(offsetNm) - CORRIDOR_NM)).toBeLessThan(0.05);
+      expect(alongNm).toBeGreaterThan(-0.5);
+      expect(alongNm).toBeLessThan(leg.distance + 0.5);
+    }
+  });
+
+  it('has every station found along the way inside that strip', async () => {
+    const { picture: p } = await picture('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const along = p.stations.filter((s) => s.role === 'along');
+    expect(along).toHaveLength(5);
+    for (const s of along) expect(pointInArea(s, p.corridor[0]!)).toBe(true);
+  });
+
+  it('puts an advisory\'s letter on the route, inside its area', async () => {
+    const { picture: p } = await picture('CYYC', 'CYLW', '2026-11-09T01:30:00Z');
+    expect(p.hazards.length).toBeGreaterThan(0);
+    for (const h of p.hazards) for (const s of h.stretches) expect(pointInArea(s.middle, h.area)).toBe(true);
   });
 });
 

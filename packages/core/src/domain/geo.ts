@@ -28,14 +28,19 @@ export function initialCourse(a: LatLon, b: LatLon): DegreesTrue {
   return degTrue((deg(Math.atan2(y, x)) + 360) % 360);
 }
 
-/** The position `distance` nm from `a` along the great circle towards `b`. */
-export function pointAlong(a: LatLon, b: LatLon, distance: number): LatLon {
+/** The position `distance` nm from `a`, setting out on `course` degrees true. */
+export function pointOnCourse(a: LatLon, course: number, distance: number): LatLon {
   const δ = distance / EARTH_RADIUS_NM;
-  const θ = rad(initialCourse(a, b));
+  const θ = rad(course);
   const φ1 = rad(a.lat);
   const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(θ));
   const λ2 = rad(a.lon) + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2));
   return { lat: deg(φ2), lon: ((deg(λ2) + 540) % 360) - 180 };
+}
+
+/** The position `distance` nm from `a` along the great circle towards `b`. */
+export function pointAlong(a: LatLon, b: LatLon, distance: number): LatLon {
+  return pointOnCourse(a, initialCourse(a, b), distance);
 }
 
 /**
