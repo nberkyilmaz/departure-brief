@@ -433,6 +433,13 @@ export interface RoutePicture {
   freezing: PictureFreezing[];
 }
 
+/** Spot heights along the centre line, from an elevation model. */
+export interface RouteTerrain {
+  readonly spacingNm: number;
+  readonly samples: readonly { readonly nm: number; readonly ft: number }[];
+  readonly highest: { readonly nm: number; readonly ft: number };
+}
+
 export interface DocumentCitation {
   documentSha256: string;
   filename: string;

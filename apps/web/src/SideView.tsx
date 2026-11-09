@@ -1,7 +1,8 @@
 import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { altitudeTicks, chartTop, COLUMN_PX, columnLabel, columnsOf, emptyStretches, hazardKey, hazardLetter, heightText, labelOf, layersToLabel, layerText, notesOf, spread, xOfNm, type Column } from './picture.js';
+import { altitudeTicks, chartTop, COLUMN_PX, columnLabel, columnsOf, emptyStretches, hazardKey, hazardLetter, heightText, labelOf, layersToLabel, layerText, notesOf, spread, terrainPath, xOfNm, type Column } from './picture.js';
 import { openColumn, opens } from './stationLink.js';
 import { CATEGORY_LETTER } from './summary.js';
+import { useTerrain } from './terrain.js';
 import { clock24, zoneOf } from './time.js';
 import type { PictureHazard, PictureLayer, RoutePicture, StoredBriefing } from './types.js';
 
@@ -78,7 +79,7 @@ function Band({ h, tag, stack, x0, x1, top, yOf, plotTop }: { h: PictureHazard; 
 }
 
 /** The marks the chart uses, each drawn the way it is drawn on the chart. */
-function Key() {
+function Key({ terrain }: { terrain: boolean }) {
   const swatch = (children: ReactNode) => (
     <svg className="side-key-mark" width={30} height={18} aria-hidden="true">
       {children}
@@ -90,6 +91,7 @@ function Key() {
     ['base', swatch(<><rect x={3} y={0} width={24} height={13} fill="url(#sv-fade)" /><rect className="sv-cloud-base" x={3} y={12} width={24} height={3} rx={1.5} /></>), 'cloud base, wider is more cover; it fades because the top is unknown'],
     ['outline', swatch(<rect className="sv-cloud-outline" x={3} y={8} width={24} height={5} rx={1.5} />), 'cloud in that observation'],
     ['overlay', swatch(<line className="sv-overlay" x1={3} y1={10} x2={27} y2={10} />), 'cloud in a TEMPO, PROB or BECMG'],
+    ...(terrain ? ([['terrain', swatch(<path className="sv-terrain" d="M2 18L2 12L9 6L15 11L21 3L28 13L28 18Z" />), 'the terrain under your line']] as const) : []),
     ['ground', swatch(<rect className="sv-ground" x={8} y={4} width={14} height={14} />), 'the ground at that station'],
     ['freezing', swatch(<line className="sv-freezing" x1={3} y1={9} x2={27} y2={9} />), 'freezing level, 0 °C'],
   ];
@@ -184,7 +186,9 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
 
   const miles = columns.map((c) => c.station.nm);
   const { xs, width, spreadApart } = spread(miles, plotPx);
-  const top = chartTop(picture);
+  const terrain = useTerrain(picture);
+  const ground = terrain === 'loading' || terrain === 'failed' ? null : terrain;
+  const top = chartTop(picture, ground);
   const plotBottom = HEAD_PX + PLOT_PX;
   const yOf = (ft: number) => plotBottom - (ft / top) * PLOT_PX;
   const xAt = (nm: number) => xOfNm(nm, miles, xs);
@@ -247,6 +251,8 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
               <line key={ft} className="sv-grid" x1={0} x2={width} y1={yOf(ft)} y2={yOf(ft)} />
             ))}
 
+            {ground && <path className="sv-terrain" d={terrainPath(ground, xAt, yOf)} />}
+
             {picture.hazards.map((h, i) =>
               h.stretches.map((s, j) => (
                 <Band key={`${i}-${j}`} h={h} tag={hazardLetter(i)} stack={picture.hazards.slice(0, i).filter((o) => o.stretches.some((other) => other.fromNm < s.toNm && other.toNm > s.fromNm)).length} x0={xAt(s.fromNm)} x1={xAt(s.toNm)} top={top} yOf={yOf} plotTop={HEAD_PX} />
@@ -256,7 +262,7 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
             {emptyStretches(columns)
               .filter((g) => xs[g.index + 1]! - xs[g.index]! >= EMPTY_WORDS_PX)
               .map((g) => (
-                <text key={g.index} className="sv-empty" x={(xs[g.index]! + xs[g.index + 1]!) / 2} y={plotBottom - 8} textAnchor="middle">
+                <text key={g.index} className="sv-empty sv-halo" x={(xs[g.index]! + xs[g.index + 1]!) / 2} y={plotBottom - 8} textAnchor="middle">
                   {Math.round(g.nm)} nm, nothing reporting
                 </text>
               ))}
@@ -358,11 +364,16 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
           ))}
         </ul>
       )}
-      <Key />
+      <Key terrain={ground !== null} />
       <ul className="side-notes">
-        {notesOf(picture, columns, spreadApart).map((n) => (
+        {notesOf(picture, columns, spreadApart, terrain).map((n) => (
           <li key={n}>{n}</li>
         ))}
+        {ground && (
+          <li>
+            Terrain from the <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM GLO-90</a> of the European Union's Copernicus programme, through <a href="https://open-meteo.com/">Open-Meteo</a>.
+          </li>
+        )}
       </ul>
     </section>
   );

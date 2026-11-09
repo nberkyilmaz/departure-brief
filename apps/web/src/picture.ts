@@ -6,7 +6,8 @@
  */
 import { alongTheWay, fieldCards } from './summary.js';
 import { clock24, hhmmZ } from './time.js';
-import type { FlightCategory, PictureFreezing, PictureHazard, PictureHazardBase, PictureHazardMissed, PictureLayer, PictureStation, RoutePicture, StoredBriefing } from './types.js';
+import type { TerrainState } from './terrain.js';
+import type { FlightCategory, PictureFreezing, PictureHazard, PictureHazardBase, PictureHazardMissed, PictureLayer, PictureStation, RoutePicture, RouteTerrain, StoredBriefing } from './types.js';
 
 export interface Column {
   readonly station: PictureStation;
@@ -71,8 +72,8 @@ export function xOfNm(nm: number, miles: readonly number[], xs: readonly number[
 const MIN_CHART_TOP_FT = 8_000;
 
 /** How high the chart reaches: three thousand feet over the cruise or the highest ground. Anything above is written at the top, not drawn. */
-export function chartTop(picture: RoutePicture): number {
-  const highest = Math.max(picture.cruiseFt, ...picture.stations.map((s) => s.elevationFt ?? 0));
+export function chartTop(picture: RoutePicture, terrain: RouteTerrain | null = null): number {
+  const highest = Math.max(picture.cruiseFt, terrain?.highest.ft ?? 0, ...picture.stations.map((s) => s.elevationFt ?? 0));
   return Math.max(MIN_CHART_TOP_FT, Math.ceil((highest + 3_000) / 1_000) * 1_000);
 }
 
@@ -84,6 +85,15 @@ export function altitudeTicks(top: number): number[] {
 }
 
 const feet = (ft: number): string => ft.toLocaleString('en');
+
+/** The ground as one SVG path, down to the baseline at each end. */
+export function terrainPath(terrain: RouteTerrain, xAt: (nm: number) => number, yOf: (ft: number) => number): string {
+  const px = (n: number) => n.toFixed(1);
+  const first = terrain.samples[0]!;
+  const last = terrain.samples[terrain.samples.length - 1]!;
+  const base = px(yOf(0));
+  return `M${px(xAt(first.nm))} ${base}${terrain.samples.map((s) => `L${px(xAt(s.nm))} ${px(yOf(Math.max(0, s.ft)))}`).join('')}L${px(xAt(last.nm))} ${base}Z`;
+}
 
 /**
  * What a layer is called on the chart: its type when it has one, since CB
@@ -167,15 +177,31 @@ function freezingText(f: PictureFreezing): string {
   return `${heights.join(', ')} at ${f.station}${away}`;
 }
 
+/** How the highest ground compares with the cruise, in feet either way: a fact to read, not a verdict. */
+function againstCruise(highestFt: number, cruiseFt: number): string {
+  const gap = Math.abs(cruiseFt - highestFt);
+  if (gap < 50) return 'level with your cruise';
+  return `${feet(Math.round(gap / 100) * 100)} ft ${highestFt > cruiseFt ? 'above' : 'below'} your cruise`;
+}
+
+/** What the ground on the chart is, once there is any, and how far to trust it. */
+function groundNote(picture: RoutePicture, terrain: TerrainState, empty: readonly string[]): string {
+  const stations = `Ground is known only at the stations, at each one's own elevation. Between them the chart shows nothing, which does not mean flat.${empty.join('')}`;
+  if (terrain === 'loading') return stations;
+  if (terrain === 'failed') return `${stations} The terrain along your line could not be fetched just now.`;
+  const { ft, nm } = terrain.highest;
+  return `The shaded ground is the terrain under your line, every ${terrain.spacingNm < 3 ? Math.round(terrain.spacingNm) : terrain.spacingNm.toFixed(1)} nm. Its highest point is ${feet(ft)} ft at ${Math.round(nm)} nm, ${againstCruise(ft, picture.cruiseFt)}. These are spot heights on the centre line, so a peak between them or beside the line is not on it: this is not a clearance.${empty.join('')}`;
+}
+
 /** Everything the chart cannot show and will not pretend to, in the order a pilot would want to be told. */
-export function notesOf(picture: RoutePicture, columns: readonly Column[], spreadApart: boolean): string[] {
+export function notesOf(picture: RoutePicture, columns: readonly Column[], spreadApart: boolean, terrain: TerrainState = 'loading'): string[] {
   const empty = emptyStretches(columns).map((g) => ` Nothing reports for ${Math.round(g.nm)} nm between ${g.from} and ${g.to}.`);
   const freezing = picture.freezing;
   const bound = freezing.some((f) => f.belowFt !== null);
   const untestable = picture.hazardsUntestable;
   return [
     'Cloud bases only: METARs and TAFs do not give tops, so each cloud fades out above its base.',
-    `Ground is known only at the stations, at each one's own elevation. Between them the chart shows nothing, which does not mean flat.${empty.join('')}`,
+    groundNote(picture, terrain, empty),
     freezing.length > 0
       ? `Freezing level, forecast for the time you pass: ${freezing.map(freezingText).join('; ')}. Between those points it is not known.${bound ? ' "Below" is as far as that forecast goes: it has no temperature under that height.' : ''}`
       : 'No upper-air temperatures reach this route, so no freezing level is drawn.',

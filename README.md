@@ -164,6 +164,7 @@ All public, with no redistribution restrictions:
 - [aviationweather.gov](https://aviationweather.gov/) (NOAA/AWC) — METAR, TAF and SIGMET/AIRMET. Its US winds aloft (the FB bulletin) were read too, until NOAA discontinued them on 3 November 2026
 - NAV CANADA CFPS — Canadian NOTAMs and upper winds (the endpoint behind plan.navcanada.ca; unofficial, so the client fails loudly if its shape changes)
 - FAA NASR — US airports, runways, magnetic variation
+- Copernicus DEM GLO-90, through Open-Meteo — the terrain under a route on the side view (CC BY 4.0)
 - OurAirports — airports and runways; the public site's whole set of Canadian and American fields (public domain)
 - NOAA/NCEI World Magnetic Model (WMM2025) — magnetic variation anywhere, for the date flown (public domain)
 

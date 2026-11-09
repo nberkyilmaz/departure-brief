@@ -1071,7 +1071,8 @@ summary:focus-visible,
 .sv-grid { stroke: var(--line); stroke-width: 1; }
 .sv-cruise { stroke: var(--fg); stroke-width: 2; }
 .side svg .sv-cruise-label { font-size: 10.5px; font-weight: 600; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
-.sv-ground { fill: var(--line-strong); }
+.sv-ground { fill: var(--muted); fill-opacity: 0.55; }
+.sv-terrain { fill: var(--line-strong); fill-opacity: 0.6; }
 .sv-fade-from { stop-color: var(--muted); stop-opacity: 0.55; }
 .sv-fade-to { stop-color: var(--muted); stop-opacity: 0; }
 .sv-cloud-base { fill: var(--muted); }
