@@ -51,6 +51,8 @@ const ctx = (route: LatLon[], over = {}) => ({
   route,
   window: inside,
   leg: inside,
+  trip: [],
+  tasKt: 110,
   cruiseAltitudeFt: altitude,
   ...over,
 });
@@ -127,6 +129,8 @@ describe('checkHazards on G-AIRMETs', () => {
     route: [ALBANY, PITTSBURGH],
     window: { from: z('05:30'), to: z('08:20') },
     leg: { from: z(from), to: z(to) },
+    trip: [],
+    tasKt: 110,
     cruiseAltitudeFt: 6500,
     ...over,
   });
@@ -162,7 +166,7 @@ describe('checkHazards on G-AIRMETs', () => {
       ),
     )[0]!;
     const at = { from: new Date(pair.outside.decoded.validFrom!), to: new Date(pair.inside.decoded.validTo!) };
-    const ctx = { waypoint: 'X', at: at.from, route: [pair.corner], window: at, leg: { from: new Date(Math.min(at.from.getTime(), pair.inside.decoded.validFrom!.getTime())), to: new Date(Math.max(at.to.getTime(), pair.outside.decoded.validTo!.getTime()) - 1) }, cruiseAltitudeFt: pair.inside.decoded.baseFt ?? 0 };
+    const ctx = { waypoint: 'X', at: at.from, route: [pair.corner], window: at, leg: { from: new Date(Math.min(at.from.getTime(), pair.inside.decoded.validFrom!.getTime())), to: new Date(Math.max(at.to.getTime(), pair.outside.decoded.validTo!.getTime()) - 1) }, trip: [], tasKt: 110, cruiseAltitudeFt: pair.inside.decoded.baseFt ?? 0 };
     const earlierFirst = checkHazards(ctx, [pair.outside, pair.inside]);
     const laterFirst = checkHazards(ctx, [pair.inside, pair.outside]);
     for (const found of [earlierFirst, laterFirst]) {
