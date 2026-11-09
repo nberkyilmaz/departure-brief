@@ -115,6 +115,31 @@ describe('the timer', () => {
     expect(r.kv.writes).toBeGreaterThanOrEqual(590);
   });
 
+  it('stores every product inside what KV allows, the upper winds of all ninety-seven sites included', async () => {
+    // Over the limit by itself, which is what stopped the upper winds refreshing the day this went live.
+    expect(PRODUCTS.upperwind.upstream.length).toBeGreaterThan(1024);
+    const { relay, kv } = relayWith();
+    const outcomes = await relay.refresh();
+    expect(outcomes.every((o) => o.state === 'refreshed')).toBe(true);
+    for (const key of Object.keys(PRODUCTS)) {
+      const { metadata } = await kv.getWithMetadata(key);
+      expect(new TextEncoder().encode(JSON.stringify(metadata)).length).toBeLessThanOrEqual(1024);
+    }
+    expect((await kv.getWithMetadata('upperwind')).metadata?.upstream).toBe(CFPS);
+  });
+
+  it('goes on to the next product when one cannot be stored, and says which', async () => {
+    const r = relayWith();
+    const put = r.kv.put.bind(r.kv);
+    r.kv.put = async (key, value, options) => {
+      if (key === 'tafs') throw new Error('KV PUT failed: 500 Internal Server Error');
+      return put(key, value, options);
+    };
+    const outcomes = await r.relay.refresh();
+    expect(outcomes.map((o) => `${o.key}:${o.state}`)).toEqual(['metars:refreshed', 'tafs:failed', 'isigmet:refreshed', 'airsigmet:refreshed', 'upperwind:refreshed']);
+    expect(outcomes[1]).toMatchObject({ error: 'could not store tafs: KV PUT failed: 500 Internal Server Error' });
+  });
+
   it('keeps the last good copy when the service fails, and says it failed', async () => {
     let down = false;
     const up = upstream({

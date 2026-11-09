@@ -139,6 +139,8 @@ const ALL_PRODUCTS: readonly Product[] = Object.values(PRODUCTS);
 /** A cron tick lands a few seconds either side of the minute; without slack a 15-minute product would wait 20. */
 const SLACK_MS = 1 * MIN;
 const UPSTREAM_TIMEOUT_MS = 20_000;
+/** A note names sites, and has to leave room in the metadata for everything else. */
+const NOTE_MAX_CHARS = 400;
 /** The same half hour the server waits before asking CFPS about a site again. */
 export const NOTAM_FRESH_MS = 30 * MIN;
 /** The same five minutes the country's METARs are kept for. */
@@ -339,8 +341,18 @@ export class Relay {
       }
       return { error: `${refused.error} (${upstream})` };
     }
-    const meta: SnapshotMeta = { fetchedAt: new Date(this.deps.now()).toISOString(), upstream, ...(note ? { note } : {}) };
-    await this.env.SNAPSHOTS.put(product.key, body, { metadata: meta });
+    /*
+     * KV refuses a whole write when its metadata is over 1,024 bytes, so this
+     * says which service it came from and not the whole request: the upper
+     * wind request's ninety-seven sites alone come to 1,030 characters.
+     */
+    const meta: SnapshotMeta = { fetchedAt: new Date(this.deps.now()).toISOString(), upstream: upstream.split('?')[0]!, ...(note ? { note: note.slice(0, NOTE_MAX_CHARS) } : {}) };
+    try {
+      await this.env.SNAPSHOTS.put(product.key, body, { metadata: meta });
+    } catch (e) {
+      // One product that cannot be stored is that product's failure, not the end of the tick.
+      return { error: `could not store ${product.key}: ${(e as Error).message}` };
+    }
     return { body, meta };
   }
 
