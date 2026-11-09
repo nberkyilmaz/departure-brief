@@ -1,0 +1,14 @@
+{
+    "@context": {
+        "@version": "1.1",
+        "@vocab": "https://api.weather.gov/ontology#"
+    },
+    "@id": "https://api.weather.gov/products/2c7e6056-8024-4af3-af9f-8e2724d3564c",
+    "id": "2c7e6056-8024-4af3-af9f-8e2724d3564c",
+    "wmoCollectiveId": "UMAK19",
+    "issuingOffice": "PAOT",
+    "issuanceTime": "2026-11-09T11:31:00+00:00",
+    "productCode": "SGL",
+    "productName": "Rawinsonde Observation Significant Levels",
+    "productText": "\n000\nUMAK19 PAOT 091131\nSGLOTZ\n\n70133 TTBB 5912/ 70133 51515 10159=\n"
+}

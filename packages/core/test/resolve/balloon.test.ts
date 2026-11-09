@@ -91,6 +91,23 @@ describe('a US field', () => {
   });
 });
 
+describe('a flight whose significant levels came later', () => {
+  const DAY = join(FIXTURES, 'noaa', 'significant-2026-11-09');
+  const AFTER = new Date('2026-11-09T21:30:00Z');
+  const CHARLESTON = { lat: 32.895, lon: -80.0275 };
+  const file = readFileSync(join(DAY, 'usus42.kchs.man.chs.txt'), 'latin1');
+  const significant = (JSON.parse(readFileSync(join(DAY, 'CHS.sgl.json'), 'utf8')) as { productText: string }).productText;
+
+  it('reads the fuller report of the two, whichever was stored first', async () => {
+    const store = await seeded(['kchs']);
+    await storeAndDecode(store, [soundingReport(file, AFTER)!], 'recorded', AFTER);
+    await storeAndDecode(store, [soundingReport(file, AFTER, significant)!], 'recorded', AFTER);
+    const w = (await balloonWindAt(store, CHARLESTON, 6500, AFTER, AFTER))!;
+    expect(w.report.body).toContain('PPBB');
+    expect(w.wind).toMatchObject({ directionTrue: 290, speedKt: 11, tempC: 12 });
+  });
+});
+
 describe('an Alaskan field', () => {
   it('reads an Alaskan balloon, from the API that carries them', async () => {
     const store = await seeded();

@@ -12,7 +12,7 @@
  * the forecast says nothing; above the highest it is simply unforecast.
  * Both are reported as what they are.
  */
-import type { UpperWindLevel } from './types.js';
+import type { TemperatureLevel, UpperWindLevel } from './types.js';
 
 export type WindBasis =
   /** The altitude is a forecast level, used as it stands. */
@@ -49,11 +49,28 @@ export function interpolateDegrees(a: number, b: number, fraction: number): numb
 
 const between = (a: number, b: number, f: number) => a + (b - a) * f;
 
+/** A balloon's temperature at an altitude: in a straight line between the two around it, the nearest beyond them. */
+function temperatureAt(levels: readonly TemperatureLevel[], altitudeFt: number): number | null {
+  const above = levels.findIndex((l) => l.altitudeFt >= altitudeFt);
+  if (above === -1) return levels[levels.length - 1]?.tempC ?? null;
+  const upper = levels[above]!;
+  const lower = levels[above - 1];
+  if (!lower || upper.altitudeFt === altitudeFt) return upper.tempC;
+  return Math.round(between(lower.tempC, upper.tempC, (altitudeFt - lower.altitudeFt) / (upper.altitudeFt - lower.altitudeFt)));
+}
+
 /**
  * The forecast wind at `altitudeFt`, or `null` when there are no levels at
  * all. Levels must be sorted lowest first, which the decoder guarantees.
+ * `temperatures` is a balloon's own list of them, where its winds and its
+ * temperatures were not reported at the same heights.
  */
-export function windAtAltitude(levels: readonly UpperWindLevel[], altitudeFt: number): WindAloft | null {
+export function windAtAltitude(levels: readonly UpperWindLevel[], altitudeFt: number, temperatures?: readonly TemperatureLevel[]): WindAloft | null {
+  const wind = readLevels(levels, altitudeFt);
+  return wind && temperatures ? { ...wind, tempC: temperatureAt(temperatures, altitudeFt) } : wind;
+}
+
+function readLevels(levels: readonly UpperWindLevel[], altitudeFt: number): WindAloft | null {
   if (levels.length === 0) return null;
   const lowest = levels[0]!;
   const highest = levels[levels.length - 1]!;
@@ -120,18 +137,19 @@ export interface FreezingLevel {
  * the nearest hundred feet, which is more than whole degrees thousands of
  * feet apart can claim. `null` when no level carries a temperature.
  */
-export function freezingLevel(levels: readonly UpperWindLevel[]): FreezingLevel | null {
-  const known = levels.filter((l): l is UpperWindLevel & { tempC: number } => l.tempC !== null);
+export function freezingLevel(levels: readonly Pick<UpperWindLevel, 'altitudeFt' | 'tempC'>[]): FreezingLevel | null {
+  const known = levels.filter((l): l is TemperatureLevel => l.tempC !== null);
   const lowest = known[0];
   const highest = known[known.length - 1];
   if (!lowest || !highest) return null;
   const crossingsFt: number[] = [];
+  const toHundred = (ft: number) => Math.round(ft / 100) * 100;
   known.forEach((level, i) => {
     const next = known[i + 1];
-    if (level.tempC === 0) crossingsFt.push(level.altitudeFt);
+    if (level.tempC === 0) crossingsFt.push(toHundred(level.altitudeFt));
     else if (next && level.tempC * next.tempC < 0) {
       const fraction = level.tempC / (level.tempC - next.tempC);
-      crossingsFt.push(Math.round((level.altitudeFt + (next.altitudeFt - level.altitudeFt) * fraction) / 100) * 100);
+      crossingsFt.push(toHundred(level.altitudeFt + (next.altitudeFt - level.altitudeFt) * fraction));
     }
   });
   return { crossingsFt, belowFt: lowest.tempC < 0 ? lowest.altitudeFt : null, aboveFt: highest.tempC > 0 ? highest.altitudeFt : null };
