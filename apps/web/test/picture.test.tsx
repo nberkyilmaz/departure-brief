@@ -25,6 +25,9 @@ const DEMO = join(__dirname, '..', 'public', 'demo');
 const SNAPSHOT = join(__dirname, '..', '..', '..', 'packages', 'core', 'test', 'fixtures', 'fetch', 'rockies-2026-11-08');
 const RELAY = 'https://relay.example';
 const NOW = '2026-11-09T01:26:00Z';
+const ELEVATION = join(SNAPSHOT, '..', 'open-meteo', 'elevation-2026-11-09', 'CYVR-CYYC.json');
+const heights = JSON.parse(readFileSync(ELEVATION, 'utf8')) as { url: string; status: number; body: string }[];
+let heightsAsked = 0;
 
 const answers: Record<string, string> = {
   '/awc/cache/metars.cache.csv.gz': 'metars.cache.csv',
@@ -38,6 +41,12 @@ beforeAll(() => {
   vi.setSystemTime(new Date(NOW));
   globalThis.fetch = (async (input: RequestInfo | URL) => {
     const url = String(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
+    if (url.startsWith('https://api.open-meteo.com')) {
+      heightsAsked++;
+      const found = heights.find((h) => h.url === url);
+      // Only Vancouver to Calgary was recorded; any other flight meets a service that is not answering.
+      return found ? new Response(found.body, { status: found.status }) : new Response('unavailable', { status: 503 });
+    }
     if (!url.startsWith(RELAY)) {
       try {
         return new Response(readFileSync(join(DEMO, url.slice(url.indexOf('demo/') + 'demo/'.length)), 'utf8'), { status: 200 });
@@ -301,5 +310,61 @@ describe('the route map', () => {
     const onDesktop = render(<RouteMap stored={r.briefing} picture={r.picture} />);
     expect(onDesktop.container.querySelector('.wx-map')?.classList.contains('leaflet-grab')).toBe(true);
     expect(onDesktop.container.textContent).not.toContain('One finger scrolls the page');
+  });
+});
+
+describe('the terrain under the line', () => {
+  it('shades it once it arrives, and says what it is and is not', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const { container } = render(<SideView stored={r.briefing} picture={r.picture} />);
+    const note = await screen.findByText(/The shaded ground is the terrain under your line/);
+    expect(note.textContent).toContain('every 2 nm');
+    expect(note.textContent).toContain('Its highest point is 9,278 ft at 257 nm, 2,200 ft below your cruise.');
+    expect(note.textContent).toContain('this is not a clearance');
+    expect(note.textContent).toContain('Nothing reports for 203 nm between CYLW and CYBW.');
+    expect(container.querySelector('.side-plot .sv-terrain')?.getAttribute('d')).toMatch(/^M/);
+    expect(container.querySelector('.side-key')?.textContent).toContain('the terrain under your line');
+    expect(container.querySelector('a[href="https://open-meteo.com/"]')).not.toBeNull();
+    expect(container.querySelector('.side-notes')?.textContent).toContain('Copernicus');
+  });
+
+  it('asks once for a route, however many times the flight is redrawn', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const first = render(<SideView stored={r.briefing} picture={r.picture} />);
+    await screen.findByText(/The shaded ground/);
+    first.unmount();
+    const before = heightsAsked;
+    const later = await briefed('CYVR', 'CYYC', '2026-11-09T04:00:00Z');
+    render(<SideView stored={later.briefing} picture={later.picture} />);
+    await screen.findByText(/The shaded ground/);
+    expect(heightsAsked).toBe(before);
+  });
+
+  it('makes room when the ground is higher than the cruise, and gives the number', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const low = { ...r.picture, cruiseFt: 6500 };
+    const { container } = render(<SideView stored={r.briefing} picture={low} />);
+    const note = await screen.findByText(/The shaded ground/);
+    expect(note.textContent).toContain('2,800 ft above your cruise');
+    await waitFor(() => expect(container.querySelector('.side-axis')?.textContent).toContain('12,000'));
+  });
+
+  it('runs the ground down to the baseline at each end', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const { container } = render(<SideView stored={r.briefing} picture={r.picture} />);
+    await screen.findByText(/The shaded ground/);
+    const d = container.querySelector('.side-plot .sv-terrain')!.getAttribute('d')!;
+    const points = [...d.matchAll(/[ML]([\d.]+) ([\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2])] as const);
+    expect(points[0]![1]).toBe(points[points.length - 1]![1]);
+    expect(points[0]![1]).toBe(Math.max(...points.map((p) => p[1])));
+  });
+
+  it('goes on without it when the service does not answer, and says so', async () => {
+    const r = await briefed('CYYC', 'CYLW', '2026-11-09T01:30:00Z');
+    const { container } = render(<SideView stored={r.briefing} picture={r.picture} />);
+    await screen.findByText(/could not be fetched just now/);
+    expect(container.querySelector('.sv-terrain')).toBeNull();
+    expect(container.querySelector('.side-notes')?.textContent).toContain('Ground is known only at the stations');
+    expect(container.querySelector('a[href="https://open-meteo.com/"]')).toBeNull();
   });
 });

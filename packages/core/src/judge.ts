@@ -81,6 +81,7 @@ export type { AwcFetch } from './fetch/awc.js';
 export { AWC_CACHE_BASE_URL, AwcCacheClient, METAR_CACHE_FILE, parseMetarCache, parseTafCache, TAF_CACHE_FILE } from './fetch/awcCache.js';
 export { CANADIAN_UPPERWIND_SITES, NAVCANADA_CFPS_BASE_URL, NavCanadaClient, NavCanadaError } from './fetch/navcanada.js';
 export type { CfpsFetch } from './fetch/navcanada.js';
+export { ELEVATION_BATCH, ElevationClient, ElevationError, OPEN_METEO_ELEVATION_URL } from './fetch/elevation.js';
 export { recordFetchAttempt } from './fetch/freshness.js';
 // Carrying a store's contents somewhere with no database and no network.
 export { BundleIntegrityError, loadBundle } from './demo/bundle.js';

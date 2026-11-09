@@ -6,5 +6,7 @@ export type { BriefingDiff, FindingChange, FindingChangeKind, NotamChange, Point
 export { diffText } from './describeDiff.js';
 export { departureWindow, WINDOW_HOURS } from './window.js';
 export type { DepartureSlot, WindowPoint } from './window.js';
+export { routeTerrain, samplesAlong } from './terrain.js';
+export type { RouteTerrain, TerrainSample } from './terrain.js';
 export { routePicture } from './picture.js';
 export type { PictureFreezing, PictureHazard, PictureHazardMissed, PictureLayer, PictureOverlay, PictureReading, PictureSky, PictureStation, PictureStretch, RoutePicture } from './picture.js';
