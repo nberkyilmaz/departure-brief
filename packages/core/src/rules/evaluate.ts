@@ -164,6 +164,7 @@ function evaluatePoint(
         at,
         route: arriving,
         window: flightWindow(flight),
+        leg: { from: previous?.point.eta ?? at, to: at },
         cruiseAltitudeFt: flight.plan.cruise.altitude,
       },
       flight.hazards,

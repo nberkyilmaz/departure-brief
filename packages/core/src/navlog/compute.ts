@@ -29,6 +29,8 @@ export interface NavLogWind {
   readonly distanceNm: number;
   readonly altitudeFt: number;
   readonly sha256: string;
+  /** Present when a balloon measured it: where it went up, and when. */
+  readonly measured?: { readonly by: string; readonly at: string };
 }
 
 export interface NavLogLeg {
@@ -124,6 +126,7 @@ function windOf(w: WaypointWind | null): NavLogWind | null {
     distanceNm: w.distance,
     altitudeFt: w.wind.altitudeFt,
     sha256: w.report.sha256,
+    ...(w.measured ? { measured: { by: w.measured.by, at: w.measured.at.toISOString() } } : {}),
   };
 }
 
@@ -143,7 +146,7 @@ function computeLeg(leg: LegInput, tas: number, fuelGph: number | null): Omit<Na
     gaps.push(
       leg.wind
         ? `the wind at ${leg.to} is light and variable, so there is no correction to apply`
-        : `no upper wind forecast covers ${leg.to} at this altitude and time, so there is no groundspeed`,
+        : `no upper wind forecast or balloon sounding covers ${leg.to} at this altitude and time, so there is no groundspeed`,
     );
   }
   const magneticCourse = leg.variation === null ? null : toMagnetic(leg.trueCourse as never, leg.variation);

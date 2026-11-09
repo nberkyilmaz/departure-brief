@@ -36,5 +36,21 @@ export async function hazardsKnownBy(store: Store, asOf: Date, until: Date): Pro
     if (decoded.validTo && decoded.validTo.getTime() < asOf.getTime() && decoded.validTo.getTime() < until.getTime()) continue;
     out.push({ report, decoded });
   }
-  return out;
+  return out.filter(isCurrentIssue(out));
+}
+
+/**
+ * A new G-AIRMET replaces the last one of its product whole, including the
+ * hours ahead it had also forecast. Where a store has kept both, only the
+ * latest of each product speaks.
+ */
+function isCurrentIssue(all: readonly HazardAdvisory[]): (h: HazardAdvisory) => boolean {
+  const productOf = (h: HazardAdvisory) => h.decoded.series?.split(' ')[0] ?? '';
+  const latest = new Map<string, number>();
+  for (const h of all) {
+    if (!h.decoded.snapshotAt) continue;
+    const issued = h.report.issuedAt?.getTime() ?? 0;
+    latest.set(productOf(h), Math.max(latest.get(productOf(h)) ?? 0, issued));
+  }
+  return (h) => !h.decoded.snapshotAt || (h.report.issuedAt?.getTime() ?? 0) === latest.get(productOf(h));
 }

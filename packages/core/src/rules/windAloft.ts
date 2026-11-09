@@ -54,8 +54,13 @@ export function checkWindAloft(ctx: WindAloftContext, w: WaypointWind | null): F
   const findings: Finding[] = [];
   const citations = citationsFor(w);
   const altitude = `${w.wind.altitudeFt.toLocaleString('en')} ft`;
-  const borrowed = w.source === 'nearby' ? `, from ${w.station} ${Math.round(w.distance)} nm away` : '';
-  const basis = w.forecast.bulletin?.value ? `${w.forecast.bulletin.value} upper wind` : 'upper wind';
+  const away = w.distance >= 1 ? `, ${Math.round(w.distance)} nm away` : '';
+  const borrowed = w.measured
+    ? `, measured by the ${w.measured.by} balloon at ${String(w.measured.at.getUTCHours()).padStart(2, '0')}Z${away}`
+    : w.source === 'nearby'
+      ? `, from ${w.station} ${Math.round(w.distance)} nm away`
+      : '';
+  const basis = w.measured ? 'measured upper wind' : w.forecast.bulletin?.value ? `${w.forecast.bulletin.value} upper wind` : 'upper wind';
 
   /*
    * Below the lowest forecast level the answer is the 3,000 ft wind, not
@@ -85,6 +90,7 @@ export function checkWindAloft(ctx: WindAloftContext, w: WaypointWind | null): F
       station: w.station,
       distanceNm: w.distance,
       basis: w.wind.basis,
+      ...(w.measured ? { measuredBy: w.measured.by, measuredAt: w.measured.at.toISOString() } : {}),
     },
     citations,
   });

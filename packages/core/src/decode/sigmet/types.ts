@@ -11,7 +11,8 @@ export type SigmetHazard =
   | 'tropical-cyclone'
   | 'ifr'
   | 'mountain-obscuration'
-  | 'low-level-wind-shear';
+  | 'low-level-wind-shear'
+  | 'surface-wind';
 
 /**
  * A hazard advisory over an area, for a stretch of time, between two
@@ -35,6 +36,14 @@ export interface DecodedSigmet {
   readonly series: string | null;
   /** The bulletin as a pilot would be handed it. */
   readonly bulletin: Sourced<string> | null;
+  /**
+   * A G-AIRMET is a forecast picture at one instant, three hours from the
+   * next, and this is the instant. `validFrom` and `validTo` are the part of
+   * the day it speaks for. Null for every other kind of advisory.
+   */
+  readonly snapshotAt?: Date | null;
+  /** The ceiling and visibility behind an IFR or mountain obscuration area, as the forecaster put it. */
+  readonly dueTo?: string | null;
   /** The area it covers, in order. Empty when the service gave no geometry. */
   readonly area: readonly LatLon[];
   readonly unparsed: readonly string[];

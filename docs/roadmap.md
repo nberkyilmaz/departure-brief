@@ -40,11 +40,11 @@ official briefing.
 | **When can I go?** | The flight judged again for each of the next twelve hours, by the same code as the briefing, the destination at the time you would arrive and the stations along the way when you would pass them; pick an hour and it is briefed. |
 | **Weight and balance** | Read out of a scanned handbook, every figure checked against the ink before it is used. |
 | **Forecast verification** | Did the TAF turn out to be right, and which way was it wrong. |
-| **Winds and temperatures aloft** | Canada's from NAV CANADA at all ninety-seven aerodromes it publishes them for, interpolated to the altitude flown; the temperature at cruise as the first question about icing. The United States has had no official winds aloft forecast since NOAA discontinued its FB bulletin on 3 November 2026. |
+| **Winds and temperatures aloft** | Canada's from NAV CANADA at all ninety-seven aerodromes it publishes them for, interpolated to the altitude flown; the temperature at cruise as the first question about icing. The United States has had no official winds aloft forecast since NOAA discontinued its FB bulletin on 3 November 2026, so a US field reads the nearest balloon within 200 nm instead, labelled as measured with the station and its age. The lower 48 and Hawaii; Alaska's soundings are not published a station at a time on the same server. |
 | **Daylight** | Last light on arrival and how much of it is left, from the same solar arithmetic the night rules use. |
 | **Nav log** | The wind triangle leg by leg, true and magnetic, with a blank and a reason wherever a number cannot be had. |
 | **Magnetic variation** | NOAA's World Magnetic Model, checked against all hundred of its published test values, so a Canadian field gets a magnetic heading as readily as an American one. |
-| **Hazard advisories** | SIGMETs and AIRMETs that are in force, at your altitude, and across your route. |
+| **Hazard advisories** | SIGMETs and AIRMETs that are in force, at your altitude, and across your route, with the American AIRMETs from the G-AIRMET and each hazard's three-hourly pictures taken as one. |
 | **The site** | Five pages, running the whole pipeline in the browser over reports it carries. |
 
 ### Blocked, and on what
@@ -108,13 +108,14 @@ verbatim, feed the rules — so they get cheaper as they go.
   bulletin, column by column, since a high site leaves its lowest levels
   blank — until NOAA retired the NAM model it was built from on 3 November
   2026 and discontinued the bulletin with it (SCN 26-47, updated 5
-  November). There is no official replacement, so a US leg says it has no
-  wind rather than borrowing one. The decoder stays, tested against the
-  last bulletins issued; whether to take US winds from model output
-  instead is a decision still to make.
+  November). There is no official replacement. The decoder stays, tested
+  against the last bulletins issued; US legs now read what the balloons
+  measured, TTAA mandatory levels only for now, with the significant
+  levels between them left for a later version.
 - ~~**SIGMET and AIRMET.**~~ Done. In force, at your altitude, and across
   your route — all three, or it is not mentioned. An area the geometry
-  cannot answer for is reported as needing to be checked by eye.
+  cannot answer for is reported as needing to be checked by eye. American
+  AIRMETs come from the G-AIRMET, which covers the lower 48.
 - **PIREPs.** What somebody up there actually found, which is often the
   only honest answer about icing and turbulence.
 - **Graphical area forecast.** Images rather than text, so a different kind

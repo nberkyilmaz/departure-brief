@@ -9,8 +9,8 @@
  *
  * So the relay fetches on a timer, not on demand. Every few minutes it
  * takes the products that cover the whole country — every METAR, every TAF,
- * the hazard advisories, the Canadian and US upper winds — and keeps the
- * latest copy. A
+ * the hazard advisories, the Canadian upper winds, the American balloon
+ * soundings — and keeps the latest copy. A
  * visitor reads that copy. However many visitors there are, the services
  * see one request per product per window, which is the same promise the
  * server's freshness windows make.
@@ -39,6 +39,7 @@ const MIN = 60_000;
 export const AWC_CACHE = 'https://aviationweather.gov/data/cache';
 export const AWC_API = 'https://aviationweather.gov/api/data';
 export const CFPS = 'https://plan.navcanada.ca/weather/api/alpha/';
+export const NOAA_RAW_US = 'https://tgftp.nws.noaa.gov/data/raw/us';
 
 /**
  * Every Canadian upper wind site, asked for in one request. The same list
@@ -58,6 +59,44 @@ export const UPPERWIND_SITES = [
   'CYZF', 'CYZG', 'CYZH', 'CYZP', 'CYZS', 'CYZT', 'CYZV',
 ] as const;
 
+/**
+ * Every American balloon's file at NOAA. The same list as
+ * `SOUNDING_STATIONS` in core — a test holds them together.
+ */
+export const SOUNDING_FILES = [
+  'ushw40.phli.man.lih', 'ushw40.phto.man.ito', 'usus41.kaly.man.aly',
+  'usus41.kbuf.man.buf', 'usus41.kcar.man.car', 'usus41.kgyx.man.gyx',
+  'usus41.kiln.man.iln', 'usus41.klwx.man.iad', 'usus41.kokx.man.okx',
+  'usus41.kpbz.man.pbz', 'usus41.krnk.man.rnk', 'usus42.kchs.man.chs',
+  'usus42.kffc.man.ffc', 'usus42.kjax.man.jax', 'usus42.kkey.man.key',
+  'usus42.kmfl.man.mfl', 'usus42.kmhx.man.mhx', 'usus42.krah.man.gso',
+  'usus42.ktbw.man.tbw', 'usus43.kabr.man.abr', 'usus43.kapx.man.apx',
+  'usus43.kbis.man.bis', 'usus43.kddc.man.ddc', 'usus43.kdlh.man.inl',
+  'usus43.kdtx.man.dtx', 'usus43.kdvn.man.dvn', 'usus43.kgrb.man.grb',
+  'usus43.kilx.man.ilx', 'usus43.klbf.man.lbf', 'usus43.kmpx.man.mpx',
+  'usus43.koax.man.oax', 'usus43.ksgf.man.sgf', 'usus43.ktop.man.top',
+  'usus43.kunr.man.unr', 'usus44.kama.man.ama', 'usus44.kbmx.man.bmx',
+  'usus44.kbro.man.bro', 'usus44.kcrp.man.crp', 'usus44.kepz.man.epz',
+  'usus44.kewx.man.drt', 'usus44.kfwd.man.fwd', 'usus44.kjan.man.jan',
+  'usus44.klch.man.lch', 'usus44.klix.man.lix', 'usus44.klzk.man.lzk',
+  'usus44.kmaf.man.maf', 'usus44.kohx.man.ohx', 'usus44.koun.man.oun',
+  'usus44.kshv.man.shv', 'usus45.kabq.man.abq', 'usus45.kboi.man.boi',
+  'usus45.kfgz.man.fgz', 'usus45.kggw.man.ggw', 'usus45.kgjt.man.gjt',
+  'usus45.klkn.man.lkn', 'usus45.kpsr.man.psr', 'usus45.krev.man.rev',
+  'usus45.kriw.man.riw', 'usus45.kslc.man.slc', 'usus45.ktfx.man.tfx',
+  'usus45.ktwc.man.twc', 'usus45.kvef.man.vef', 'usus46.kmfr.man.mfr',
+  'usus46.kmtr.man.oak', 'usus46.kotx.man.otx', 'usus46.kpqr.man.sle',
+  'usus46.ksew.man.uil', 'usus46.ksgx.man.nkx',
+] as const;
+
+/**
+ * NOAA has a file per balloon and the free plan allows fifty requests a
+ * run, with the other products to fetch in the same one. So a run asks for
+ * a third of them, the ones asked about longest ago, and three runs an hour
+ * ask every balloon once.
+ */
+const SOUNDINGS_PER_RUN = 23;
+
 export interface Product {
   /** The storage key, and the name the status page uses. */
   readonly key: string;
@@ -75,6 +114,15 @@ export interface Product {
   readonly emptyBody?: string;
   /** For a JSON product, a refusal dressed as an answer: why it is not the product, or `null` when it is. */
   readonly refusal?: (text: string) => Refusal | null;
+  /** Many small files rather than one: kept together in one copy, and asked for a few at a time. */
+  readonly rotating?: { readonly base: string; readonly files: readonly string[]; readonly perRun: number };
+}
+
+/** One file of a rotating product, as the copy holds it. */
+interface RotatingFile {
+  readonly askedAt: string;
+  readonly modified: string | null;
+  readonly text: string;
 }
 
 export interface Refusal {
@@ -109,14 +157,15 @@ export function cfpsRefusal(text: string): Refusal | null {
   return null;
 }
 
-export const PRODUCTS: Readonly<Record<'metars' | 'tafs' | 'isigmet' | 'airsigmet' | 'upperwind', Product>> = {
+export const PRODUCTS: Readonly<Record<'metars' | 'tafs' | 'sigmet' | 'gairmet' | 'upperwind' | 'soundings', Product>> = {
   // Every station on earth, rebuilt by the service each minute. Hourly reports and specials between them.
   metars: { key: 'metars', upstream: `${AWC_CACHE}/metars.cache.csv.gz`, everyMs: 5 * MIN, contentType: 'text/csv; charset=utf-8', gzip: true },
   // Issued four times a day, amended when they are wrong.
   tafs: { key: 'tafs', upstream: `${AWC_CACHE}/tafs.cache.xml.gz`, everyMs: 15 * MIN, contentType: 'application/xml; charset=utf-8', gzip: true },
   // A hazard advisory can be issued at any moment; a quarter of an hour is the server's window too.
-  isigmet: { key: 'isigmet', upstream: `${AWC_API}/isigmet?format=json`, everyMs: 15 * MIN, contentType: 'application/json', gzip: false, emptyBody: '[]' },
-  airsigmet: { key: 'airsigmet', upstream: `${AWC_API}/airsigmet?format=json`, everyMs: 15 * MIN, contentType: 'application/json', gzip: false, emptyBody: '[]' },
+  sigmet: { key: 'sigmet', upstream: `${AWC_API}/sigmet?format=json`, everyMs: 15 * MIN, contentType: 'application/json', gzip: false, emptyBody: '[]' },
+  // Issued every six hours and amended when they are wrong, each with its forecast hours in the one file.
+  gairmet: { key: 'gairmet', upstream: `${AWC_CACHE}/gairmets.cache.xml.gz`, everyMs: 60 * MIN, contentType: 'application/xml; charset=utf-8', gzip: true },
   // Three bulletins a day; asking more than hourly buys nothing.
   upperwind: {
     key: 'upperwind',
@@ -126,6 +175,15 @@ export const PRODUCTS: Readonly<Record<'metars' | 'tafs' | 'isigmet' | 'airsigme
     gzip: false,
     refusal: cfpsRefusal,
   },
+  // Twice a day from each balloon, over an hour and a half; a run is a third of them.
+  soundings: {
+    key: 'soundings',
+    upstream: NOAA_RAW_US,
+    everyMs: 20 * MIN,
+    contentType: 'application/json',
+    gzip: false,
+    rotating: { base: NOAA_RAW_US, files: SOUNDING_FILES, perRun: SOUNDINGS_PER_RUN },
+  },
 };
 
 /*
@@ -133,6 +191,7 @@ export const PRODUCTS: Readonly<Record<'metars' | 'tafs' | 'isigmet' | 'airsigme
  * discontinued them: the model they were built from was retired on
  * 3 November 2026, and the bulletins went with it (SCN 26-47, updated
  * 5 November). The AWC now answers a request for one with a 400 saying so.
+ * The balloon soundings are what replaced them.
  */
 const ALL_PRODUCTS: readonly Product[] = Object.values(PRODUCTS);
 
@@ -206,10 +265,12 @@ function productFor(url: URL): Product | null {
       return PRODUCTS.metars;
     case '/awc/cache/tafs.cache.xml.gz':
       return PRODUCTS.tafs;
-    case '/awc/isigmet':
-      return PRODUCTS.isigmet;
-    case '/awc/airsigmet':
-      return PRODUCTS.airsigmet;
+    case '/awc/sigmet':
+      return PRODUCTS.sigmet;
+    case '/awc/cache/gairmets.cache.xml.gz':
+      return PRODUCTS.gairmet;
+    case '/noaa/soundings':
+      return PRODUCTS.soundings;
     case '/cfps/':
     case '/cfps':
       // Whichever sites were asked about, the answer is all of them: the
@@ -269,7 +330,7 @@ export class Relay {
       if (product) res = await this.serveSnapshot(product, cors);
       else if ((url.pathname === '/cfps/' || url.pathname === '/cfps') && url.searchParams.get('alpha') === 'notam') res = await this.serveNotams(url, cors);
       else if (url.pathname === '/awc/metar') res = await this.serveStationMetar(url, cors);
-      else res = json(404, { error: 'not something this relay carries', carries: ['/awc/cache/metars.cache.csv.gz', '/awc/cache/tafs.cache.xml.gz', '/awc/isigmet', '/awc/airsigmet', '/awc/metar?ids=<id>&format=json', '/cfps/?alpha=upperwind', '/cfps/?site=<id>&alpha=notam', '/status'] }, cors);
+      else res = json(404, { error: 'not something this relay carries', carries: ['/awc/cache/metars.cache.csv.gz', '/awc/cache/tafs.cache.xml.gz', '/awc/cache/gairmets.cache.xml.gz', '/awc/sigmet', '/awc/metar?ids=<id>&format=json', '/noaa/soundings', '/cfps/?alpha=upperwind', '/cfps/?site=<id>&alpha=notam', '/status'] }, cors);
     }
     return req.method === 'HEAD' ? { ...res, body: null } : res;
   }
@@ -288,7 +349,7 @@ export class Relay {
         out.push({ key: product.key, state: 'fresh', ageMs });
         continue;
       }
-      const result = await this.fetchProduct(product);
+      const result = product.rotating ? await this.fetchRotating(product, held) : await this.fetchProduct(product);
       out.push('error' in result ? { key: product.key, state: 'failed', error: result.error } : { key: product.key, state: 'refreshed', bytes: result.body.byteLength });
     }
     return out;
@@ -341,6 +402,56 @@ export class Relay {
       }
       return { error: `${refused.error} (${upstream})` };
     }
+    return this.keep(product, body, upstream, note);
+  }
+
+  /**
+   * Refreshes a third of a product made of many files, leaving the rest of
+   * the copy as it was. A file that does not answer keeps what it had: a
+   * balloon's last sounding carries its own time, so it is shown as old
+   * rather than gone. The ones just asked go to the back of the queue either
+   * way, or a file NOAA has removed would be first in it for ever.
+   */
+  private async fetchRotating(product: Product, held: Snapshot | null): Promise<Snapshot | { error: string }> {
+    const { base, files, perRun } = product.rotating!;
+    let copy: Record<string, RotatingFile> = {};
+    if (held) {
+      try {
+        copy = JSON.parse(new TextDecoder().decode(held.body)) as Record<string, RotatingFile>;
+      } catch {
+        // Nothing in it can be used, and the runs ahead will fill it again.
+      }
+    }
+    const askedAt = new Date(this.deps.now()).toISOString();
+    const turn = [...files].sort((a, b) => (copy[a]?.askedAt ?? '').localeCompare(copy[b]?.askedAt ?? '')).slice(0, perRun);
+    const failed: string[] = [];
+    await Promise.all(
+      turn.map(async (file) => {
+        let text: string | null = null;
+        let modified: string | null = null;
+        try {
+          const res = await this.deps.fetch(`${base}/${file}.txt`, { headers: { 'User-Agent': this.userAgent, Accept: 'text/plain' }, signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });
+          if (res.ok) {
+            text = await res.text();
+            const stamp = res.headers.get('last-modified');
+            modified = stamp ? new Date(stamp).toISOString() : null;
+          }
+        } catch {
+          // Counted below, with the ones that answered with something else.
+        }
+        // Kept only if it is a sounding, so an error page never replaces one.
+        if (text === null || !text.includes('TTAA')) {
+          failed.push(file);
+          copy[file] = { askedAt, modified: copy[file]?.modified ?? null, text: copy[file]?.text ?? '' };
+        } else copy[file] = { askedAt, modified, text };
+      }),
+    );
+    if (failed.length === turn.length) return { error: `none of the ${turn.length} files asked for answered (${base})` };
+    const body = new TextEncoder().encode(JSON.stringify(copy)).buffer as ArrayBuffer;
+    return this.keep(product, body, base, failed.length > 0 ? `no answer for ${failed.join(', ')}` : null);
+  }
+
+  private async keep(product: Product, body: ArrayBuffer, upstream: string, note: string | null): Promise<Snapshot | { error: string }> {
     /*
      * KV refuses a whole write when its metadata is over 1,024 bytes, so this
      * says which service it came from and not the whole request: the upper
@@ -360,7 +471,7 @@ export class Relay {
     let snap = await this.read(product);
     if (!snap) {
       // Only before the first tick has run, on a fresh deployment.
-      const fetched = await this.fetchProduct(product);
+      const fetched = product.rotating ? await this.fetchRotating(product, null) : await this.fetchProduct(product);
       if ('error' in fetched) return json(503, { error: `no ${product.key} held yet, and the service could not be reached: ${fetched.error}` }, cors);
       snap = fetched;
     }

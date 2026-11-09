@@ -11,8 +11,12 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { decodeSigmet } from '../../src/decode/sigmet/decode.js';
 import type { LatLon } from '../../src/domain/geo.js';
-import { areaIsTestable } from '../../src/domain/polygon.js';
+import { areaIsTestable, routeDistanceToAreaNm } from '../../src/domain/polygon.js';
+import { parseGairmetCache } from '../../src/fetch/awcCache.js';
+import { hazardsKnownBy } from '../../src/resolve/hazards.js';
 import { checkHazards, NEAR_HAZARD_NM, type HazardAdvisory } from '../../src/rules/hazards.js';
+import { storeAndDecode } from '../../src/store/decode.js';
+import { MemoryStore } from '../../src/store/memory.js';
 import { rawReport } from '../../src/store/types.js';
 
 const DIR = join(__dirname, '..', 'fixtures', 'fetch', 'awc', 'sigmet-2026-09-14');
@@ -46,6 +50,7 @@ const ctx = (route: LatLon[], over = {}) => ({
   at: inside.from,
   route,
   window: inside,
+  leg: inside,
   cruiseAltitudeFt: altitude,
   ...over,
 });
@@ -106,5 +111,78 @@ describe('checkHazards', () => {
       }
     }
     expect(findings.some((f) => f.rule === 'hazard.onRoute')).toBe(true);
+  });
+});
+
+/** The AWC's G-AIRMET file of 04:53Z on 9 November 2026, and Albany to Pittsburgh underneath it. */
+describe('checkHazards on G-AIRMETs', () => {
+  const xml = readFileSync(join(__dirname, '..', 'fixtures', 'fetch', 'northeast-2026-11-09', 'gairmets.cache.xml'), 'utf8');
+  const pictures: HazardAdvisory[] = parseGairmetCache(xml, 'recorded').map((report) => ({ report, decoded: decodeSigmet(report.body) }));
+  const ALBANY = { lat: 42.748, lon: -73.802 };
+  const PITTSBURGH = { lat: 40.492, lon: -80.233 };
+  const z = (hhmm: string) => new Date(`2026-11-09T${hhmm}:00Z`);
+  const flying = (from: string, to: string, over = {}) => ({
+    waypoint: 'KPIT',
+    at: z(to),
+    route: [ALBANY, PITTSBURGH],
+    window: { from: z('05:30'), to: z('08:20') },
+    leg: { from: z(from), to: z(to) },
+    cruiseAltitudeFt: 6500,
+    ...over,
+  });
+  const about = (series: string, findings: ReturnType<typeof checkHazards>) => findings.filter((f) => f.summary.startsWith(`AIRMET ${series}:`));
+
+  it('says one hazard once, however many of its pictures the leg touches', () => {
+    expect(pictures.filter((p) => p.decoded.series === 'TANGO 3W' && p.decoded.hazard === 'turbulence').length).toBeGreaterThan(1);
+    const found = about('TANGO 3W', checkHazards(flying('05:30', '08:20'), pictures));
+    expect(found).toHaveLength(1);
+    expect(found[0]).toMatchObject({ rule: 'hazard.onRoute', attention: 'caution', summary: 'AIRMET TANGO 3W: mod turbulence between 0 and 8,000 ft — your route goes through it' });
+  });
+
+  it('keeps what is above the cruise out of it', () => {
+    expect(about('TANGO 4W', checkHazards(flying('05:30', '08:20'), pictures))).toEqual([]);
+  });
+
+  it('goes by the hours the leg is flown, not the whole flight', () => {
+    const picturesCited = (from: string, to: string) => about('ZULU 4C', checkHazards(flying(from, to), pictures)).map((f) => /<valid_time>[^T]+T(\d\d)/.exec(f.citations[0]!.raw!)![1]);
+    expect(picturesCited('05:30', '07:00')).toEqual(['06']);
+    // The moment between two pictures belongs to the later one.
+    expect(picturesCited('07:30', '08:20')).toEqual(['09']);
+  });
+
+  it('counts on-route over near, when one picture has the route inside it and another only beside it', () => {
+    const grouped = new Map<string, HazardAdvisory[]>();
+    for (const p of pictures) grouped.set(`${p.decoded.series}|${p.decoded.hazard}`, [...(grouped.get(`${p.decoded.series}|${p.decoded.hazard}`) ?? []), p]);
+    const pair = [...grouped.values()].flatMap((group) =>
+      group.flatMap((inside) =>
+        group.flatMap((outside) => inside.decoded.area.filter((corner) => {
+          const away = routeDistanceToAreaNm([corner], outside.decoded.area);
+          return away > 1 && away <= NEAR_HAZARD_NM;
+        }).map((corner) => ({ inside, outside, corner }))),
+      ),
+    )[0]!;
+    const at = { from: new Date(pair.outside.decoded.validFrom!), to: new Date(pair.inside.decoded.validTo!) };
+    const ctx = { waypoint: 'X', at: at.from, route: [pair.corner], window: at, leg: { from: new Date(Math.min(at.from.getTime(), pair.inside.decoded.validFrom!.getTime())), to: new Date(Math.max(at.to.getTime(), pair.outside.decoded.validTo!.getTime()) - 1) }, cruiseAltitudeFt: pair.inside.decoded.baseFt ?? 0 };
+    const earlierFirst = checkHazards(ctx, [pair.outside, pair.inside]);
+    const laterFirst = checkHazards(ctx, [pair.inside, pair.outside]);
+    for (const found of [earlierFirst, laterFirst]) {
+      expect(found.map((f) => f.rule)).toEqual(['hazard.onRoute']);
+    }
+  });
+});
+
+describe('hazardsKnownBy on G-AIRMETs', () => {
+  const xml = readFileSync(join(__dirname, '..', 'fixtures', 'fetch', 'northeast-2026-11-09', 'gairmets.cache.xml'), 'utf8');
+  const AT = new Date('2026-11-09T05:00:00Z');
+
+  it('lets only the latest issue of a product speak', async () => {
+    const store = new MemoryStore();
+    const sierra = parseGairmetCache(xml, 'recorded').filter((r) => r.body.includes('<product>SIERRA</product>'));
+    // The same products as issued, one of them filed as the issue before this one.
+    const superseded = rawReport({ ...sierra[0]!, issuedAt: new Date(sierra[0]!.issuedAt!.getTime() - 6 * 3_600_000) });
+    const current = sierra.slice(1, 3);
+    await storeAndDecode(store, [superseded, ...current], 'recorded', AT, 'WORLD');
+    const known = await hazardsKnownBy(store, AT, new Date('2026-11-09T09:00:00Z'));
+    expect(known.map((h) => h.report.sha256).sort()).toEqual(current.map((r) => r.sha256).sort());
   });
 });

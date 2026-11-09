@@ -139,6 +139,7 @@ export function emptyStretches(columns: readonly Column[]): { index: number; fro
 }
 
 const both = (iso: string): string => `${clock24(iso)} (${hhmmZ(iso)})`;
+const hhZ = (iso: string): string => `${iso.slice(11, 13)}Z`;
 
 function nameOf(h: PictureHazardBase): string {
   return `${h.kind === 'airmet' ? 'AIRMET' : 'SIGMET'}${h.region ? ` ${h.region}` : ''}, ${h.qualifier ? `${h.qualifier} ` : ''}${h.what}`;
@@ -170,11 +171,11 @@ function missedText(h: PictureHazardMissed): string {
 function freezingText(f: PictureFreezing): string {
   const away = f.distanceNm >= 1 ? `, ${Math.round(f.distanceNm)} nm away` : '';
   const heights = [
-    ...(f.belowFt !== null ? [`below ${feet(f.belowFt)} ft`] : []),
+    ...(f.belowFt !== null ? [f.measuredAt ? 'freezing at the ground' : `below ${feet(f.belowFt)} ft`] : []),
     ...(f.crossingsFt.length > 0 ? [`${f.belowFt !== null ? 'again at ' : ''}${f.crossingsFt.map((ft) => `${feet(ft)} ft`).join(' and ')}`] : []),
     ...(f.aboveFt !== null && f.crossingsFt.length === 0 && f.belowFt === null ? [`above ${feet(f.aboveFt)} ft`] : []),
   ];
-  return `${heights.join(', ')} at ${f.station}${away}`;
+  return f.measuredAt ? `${heights.join(', ')} by the ${f.station} balloon at ${hhZ(f.measuredAt)}${away}` : `${heights.join(', ')} at ${f.station}${away}`;
 }
 
 /** How the highest ground compares with the cruise, in feet either way: a fact to read, not a verdict. */
@@ -197,13 +198,14 @@ function groundNote(picture: RoutePicture, terrain: TerrainState, empty: readonl
 export function notesOf(picture: RoutePicture, columns: readonly Column[], spreadApart: boolean, terrain: TerrainState = 'loading'): string[] {
   const empty = emptyStretches(columns).map((g) => ` Nothing reports for ${Math.round(g.nm)} nm between ${g.from} and ${g.to}.`);
   const freezing = picture.freezing;
-  const bound = freezing.some((f) => f.belowFt !== null);
+  const bound = freezing.some((f) => f.belowFt !== null && !f.measuredAt);
+  const measured = freezing.some((f) => f.measuredAt);
   const untestable = picture.hazardsUntestable;
   return [
     'Cloud bases only: METARs and TAFs do not give tops, so each cloud fades out above its base.',
     groundNote(picture, terrain, empty),
     freezing.length > 0
-      ? `Freezing level, forecast for the time you pass: ${freezing.map(freezingText).join('; ')}. Between those points it is not known.${bound ? ' "Below" is as far as that forecast goes: it has no temperature under that height.' : ''}`
+      ? `Freezing level, ${measured ? 'measured, not forecast for the time you pass' : 'forecast for the time you pass'}: ${freezing.map(freezingText).join('; ')}. Between those points it is not known.${bound ? ' "Below" is as far as that forecast goes: it has no temperature under that height.' : ''}`
       : 'No upper-air temperatures reach this route, so no freezing level is drawn.',
     `Times are at your planned ${picture.tasKt} kt with no wind, as in Along the way, by this device's clock.`,
     ...(spreadApart ? ['Stations close together are spread apart so each can be read: go by the miles printed, not the gaps.'] : []),

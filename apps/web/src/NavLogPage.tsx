@@ -1,4 +1,5 @@
 import { hrefFor } from './router.js';
+import { measuredWords } from './summary.js';
 import type { FuelPlan, NavLog, NavLogLeg, StoredBriefing } from './types.js';
 
 /**
@@ -90,6 +91,7 @@ function Fuel({ plan }: { plan: FuelPlan | undefined }) {
 }
 
 function Leg({ leg, label }: { leg: NavLogLeg; label?: string }) {
+  const notes = [...leg.gaps, ...(leg.wind?.measured ? [measuredWords(leg.wind.measured.by, leg.wind.measured.at, leg.wind.distanceNm)] : [])];
   return (
     <>
       <tr>
@@ -111,13 +113,13 @@ function Leg({ leg, label }: { leg: NavLogLeg; label?: string }) {
         <td data-label="Elapsed">{minutes(leg.cumulativeMinutes)}</td>
         <td data-label="Fuel">{leg.fuelGal ?? '—'}</td>
       </tr>
-      {leg.gaps.length > 0 && (
+      {notes.length > 0 && (
         <tr className="leg-gaps">
           <td colSpan={13}>
-            {leg.gaps.map((g, i) => (
+            {notes.map((g, i) => (
               <span key={i} className="field-note">
                 {g}
-                {i < leg.gaps.length - 1 ? ' · ' : ''}
+                {i < notes.length - 1 ? ' · ' : ''}
               </span>
             ))}
           </td>
@@ -144,7 +146,7 @@ export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
     <section className="navlog-page">
       <h2>Nav log</h2>
       <p className="explain">
-        {log.tas} kt true at {log.altitudeFt.toLocaleString('en')} ft. Each leg uses the wind forecast where it ends, and the variation where it begins,
+        {log.tas} kt true at {log.altitudeFt.toLocaleString('en')} ft. Each leg uses the wind where it ends, forecast in Canada and measured by the nearest balloon in the US, and the variation where it begins,
         from NOAA&apos;s World Magnetic Model for the day you fly.
       </p>
 

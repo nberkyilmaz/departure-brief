@@ -10,9 +10,13 @@
  *
  * Two shapes come out of the same service: international SIGMETs and the
  * American domestic ones, which name their fields differently. Both are
- * read here into one shape, because a hazard is a hazard.
+ * read here into one shape, because a hazard is a hazard. Since October 2026
+ * the service sends both from one endpoint in the international shape, and
+ * the older shape stays readable for reports already stored. A G-AIRMET is
+ * a different product again, and `gairmet.ts` reads it into the same shape.
  */
 import { sourced, type Sourced } from '../span.js';
+import { decodeGairmet } from './gairmet.js';
 import type { DecodedSigmet, SigmetHazard } from './types.js';
 
 export const SIGMET_DECODER_VERSION = 1;
@@ -20,6 +24,7 @@ export const SIGMET_DECODER_VERSION = 1;
 /** The hazards these products carry, normalised across the two shapes. */
 const HAZARDS: Readonly<Record<string, SigmetHazard>> = {
   TS: 'thunderstorm',
+  CONV: 'thunderstorm',
   CONVECTIVE: 'thunderstorm',
   TURB: 'turbulence',
   ICE: 'icing',
@@ -77,6 +82,7 @@ interface Record_ {
  * which is what the store holds and what the spans index into.
  */
 export function decodeSigmet(raw: string): DecodedSigmet {
+  if (raw.startsWith('<GAIRMET>')) return decodeGairmet(raw);
   const empty: DecodedSigmet = {
     kind: null,
     hazard: null,

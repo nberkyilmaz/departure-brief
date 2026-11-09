@@ -161,7 +161,8 @@ OCR · Ollama for the optional local models.
 
 All public, with no redistribution restrictions:
 
-- [aviationweather.gov](https://aviationweather.gov/) (NOAA/AWC) — METAR, TAF and SIGMET/AIRMET. Its US winds aloft (the FB bulletin) were read too, until NOAA discontinued them on 3 November 2026
+- [aviationweather.gov](https://aviationweather.gov/) (NOAA/AWC) — METAR, TAF, SIGMET and G-AIRMET. Its US winds aloft (the FB bulletin) were read too, until NOAA discontinued them on 3 November 2026
+- NOAA upper-air bulletins ([tgftp.nws.noaa.gov/data/raw/us](https://tgftp.nws.noaa.gov/data/raw/us/)) — US upper winds and freezing levels as the balloons measured them, with NCEI's IGRA station list for where each one goes up (public domain)
 - NAV CANADA CFPS — Canadian NOTAMs and upper winds (the endpoint behind plan.navcanada.ca; unofficial, so the client fails loudly if its shape changes)
 - FAA NASR — US airports, runways, magnetic variation
 - Copernicus DEM GLO-90, through Open-Meteo — the terrain under a route on the side view (CC BY 4.0)
