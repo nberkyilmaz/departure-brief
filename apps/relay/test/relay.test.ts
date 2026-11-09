@@ -12,6 +12,7 @@ import {
   NavCanadaClient,
   SOUNDING_STATIONS,
   SoundingClient,
+  soundingLocation,
   type HttpClient,
 } from '@depbrief/core/judge';
 import { describe, expect, it, vi } from 'vitest';
@@ -47,7 +48,14 @@ const modified = JSON.parse(readFileSync(join(SOUNDINGS, 'last-modified.json'), 
 const alaskaProduct = (location: string) => readFileSync(join(FIXTURES, 'noaa', 'alaska-2026-11-09', `${location}.json`), 'utf8');
 const alaskaUrl = (location: string) => `${NWS_API}/products/types/MAN/locations/${location}/latest`;
 const ALL_SOUNDINGS = SOUNDING_FILES.length + ALASKA_SOUNDINGS.length;
-const isBalloon = (url: string) => url.startsWith(NOAA_RAW_US) || url.startsWith(NWS_API);
+const isSignificant = (url: string) => url.includes('/products/types/SGL/');
+const isBalloon = (url: string) => (url.startsWith(NOAA_RAW_US) || url.startsWith(NWS_API)) && !isSignificant(url);
+/** The 12Z flight from the same day: Albany's mandatory file and its significant levels as the NWS API answered. */
+const SIGNIFICANT = join(FIXTURES, 'noaa', 'significant-2026-11-09');
+const ALBANY = 'usus41.kaly.man.aly';
+const albany12z = readFileSync(join(SIGNIFICANT, `${ALBANY}.txt`), 'latin1');
+const albanySignificant = readFileSync(join(SIGNIFICANT, 'ALY.sgl.json'), 'utf8');
+const albanySignificantUrl = `${NWS_API}/products/types/SGL/locations/ALY/latest`;
 
 const PAGE = 'https://nberkyilmaz.github.io';
 const T0 = Date.parse('2026-10-20T05:00:00Z');
@@ -239,8 +247,9 @@ describe('the balloons, which are many small files', () => {
     const r = relayWith();
     await r.relay.refresh();
     // Everything due at once, on the first tick: the limit is fifty, and CFPS can take two.
-    expect(r.up.calls.length).toBeLessThanOrEqual(49);
+    expect(r.up.calls.length).toBeLessThanOrEqual(46);
     expect(r.up.calls.filter(isBalloon)).toHaveLength(27);
+    expect(r.up.calls.filter(isSignificant)).toHaveLength(12);
   });
 
   it('has every balloon in core in its list, and asks each one within three runs', async () => {
@@ -329,6 +338,92 @@ describe('the balloons, which are many small files', () => {
     expect(held['ANC']!.text).toBe('');
     expect(held['FAI']!.text).toContain('70261 TTAA');
     expect(held['FAI']!.modified).toBe('2026-11-09T00:02:00.000Z');
+  });
+
+  describe('significant levels', () => {
+    const flying12z = () => upstream({ [`${NOAA_RAW_US}/${ALBANY}.txt`]: () => new Response(albany12z, { headers: { 'Last-Modified': 'Mon, 09 Nov 2026 12:36:59 GMT' } }), [albanySignificantUrl]: () => new Response(albanySignificant) });
+    const heldCopy = async (r: ReturnType<typeof relayWith>) => JSON.parse(text(await r.get('/noaa/soundings'))) as Record<string, { text: string; significant?: { askedAt: string; text: string } }>;
+
+    it('holds them beside the sounding of the same flight, and the page gets both in one report', async () => {
+      const r = relayWith(flying12z());
+      await r.relay.refresh();
+      expect((await heldCopy(r))[ALBANY]!.significant!.text).toContain('PPBB');
+      const http: HttpClient = { get: async (url) => ({ status: 200, body: text(await r.get(url.replace('https://relay.example', ''))), headers: {} }) };
+      const { reports } = await new SoundingClient(http, 'https://relay.example/noaa/soundings').relayed();
+      const albany = reports.find((x) => x.station === '72518')!;
+      expect(albany.body.startsWith(albany12z.trim())).toBe(true);
+      expect(albany.body).toContain('TTBB');
+    });
+
+    it('stops asking once it has them, and asks again when the next flight arrives', async () => {
+      let flight = albany12z;
+      const up = upstream({ [`${NOAA_RAW_US}/${ALBANY}.txt`]: () => new Response(flight), [albanySignificantUrl]: () => new Response(albanySignificant) });
+      const r = relayWith(up);
+      const asked = () => up.calls.filter((u) => u === albanySignificantUrl).length;
+      // Long enough for every balloon to have been asked, so Albany is not waiting behind any that have not.
+      for (let run = 0; run < 7; run++) {
+        await r.relay.refresh();
+        r.advance(20 * MIN);
+      }
+      expect(asked()).toBe(1);
+      flight = soundingFile(ALBANY);
+      for (let run = 0; run < 3; run++) {
+        await r.relay.refresh();
+        r.advance(20 * MIN);
+      }
+      expect(asked()).toBe(2);
+    });
+
+    it('writes the copy once a run, however many it asked for', async () => {
+      const r = relayWith(flying12z());
+      const put = vi.spyOn(r.kv, 'put');
+      await r.relay.refresh();
+      expect(put.mock.calls.filter(([key]) => key === 'soundings')).toHaveLength(1);
+    });
+
+    it('never asks for more than its share, and sends the ones that do not appear to the back', async () => {
+      const r = relayWith();
+      await r.relay.refresh();
+      expect(r.up.calls.filter(isSignificant)).toHaveLength(12);
+      r.advance(20 * MIN);
+      await r.relay.refresh();
+      const calls = r.up.calls.filter(isSignificant);
+      expect(calls).toHaveLength(24);
+      // The first dozen did not answer, and the next dozen are ones not yet asked.
+      expect(new Set(calls).size).toBe(24);
+    });
+
+    it('keeps what it had when the answer is not a bulletin', async () => {
+      let answer = albanySignificant;
+      let flight = albany12z;
+      const up = upstream({ [`${NOAA_RAW_US}/${ALBANY}.txt`]: () => new Response(flight), [albanySignificantUrl]: () => new Response(answer) });
+      const r = relayWith(up);
+      for (let run = 0; run < 7; run++) {
+        await r.relay.refresh();
+        r.advance(20 * MIN);
+      }
+      const before = (await heldCopy(r))[ALBANY]!.significant!;
+      answer = '{"title":"Not Found"}';
+      flight = soundingFile(ALBANY);
+      for (let run = 0; run < 3; run++) {
+        await r.relay.refresh();
+        r.advance(20 * MIN);
+      }
+      const after = (await heldCopy(r))[ALBANY]!.significant!;
+      // It was asked, and got nothing it could keep.
+      expect(after.askedAt > before.askedAt).toBe(true);
+      expect(after.text).toBe(before.text);
+    });
+
+    it('asks the API for each balloon in core, by the three letters ending its file', async () => {
+      const r = relayWith();
+      for (let run = 0; run < 14; run++) {
+        await r.relay.refresh();
+        r.advance(20 * MIN);
+      }
+      const wanted = SOUNDING_STATIONS.map((s) => `${NWS_API}/products/types/SGL/locations/${soundingLocation(s)}/latest`).sort();
+      expect([...new Set(r.up.calls.filter(isSignificant))].sort()).toEqual(wanted);
+    });
   });
 
   it('sorts them without localeCompare, which costs a free plan run its whole allowance the first time', async () => {

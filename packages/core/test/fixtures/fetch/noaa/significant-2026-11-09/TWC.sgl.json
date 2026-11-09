@@ -1,0 +1,14 @@
+{
+    "@context": {
+        "@version": "1.1",
+        "@vocab": "https://api.weather.gov/ontology#"
+    },
+    "@id": "https://api.weather.gov/products/1432e65a-93b3-4f34-a8bd-fc1a1ab45aaa",
+    "id": "1432e65a-93b3-4f34-a8bd-fc1a1ab45aaa",
+    "wmoCollectiveId": "UMUS45",
+    "issuingOffice": "KTWC",
+    "issuanceTime": "2026-11-09T18:00:00+00:00",
+    "productCode": "SGL",
+    "productName": "Rawinsonde Observation Significant Levels",
+    "productText": "\n000\nUMUS45 KTWC 091800\nSGLTWC\n72274 TTBB 59188 72274 51515 10159=\n"
+}

@@ -105,6 +105,13 @@ export const ALASKA_SOUNDINGS = ['ADQ', 'AKN', 'ANC', 'ANN', 'BET', 'BRW', 'CDB'
  */
 const SOUNDINGS_PER_RUN = 27;
 
+/**
+ * Significant levels are one more request per balloon, but only after its
+ * mandatory levels have changed, which is twice a day. This many a run keeps
+ * the worst run, with everything due and CFPS taking two, at 46 of the fifty.
+ */
+const SIGNIFICANT_PER_RUN = 12;
+
 /** One of the small files a rotating product is made of. */
 interface RotatingSource {
   /** What it is held under in the copy. */
@@ -112,12 +119,19 @@ interface RotatingSource {
   readonly url: string;
   /** A plain file, or a product of the NWS API with the text and its date inside. */
   readonly shape: 'file' | 'nws-product';
+  /** The NWS product holding the same flight's significant levels. */
+  readonly significantUrl?: string;
 }
 
+const significantUrl = (location: string) => `${NWS_API}/products/types/SGL/locations/${location}/latest`;
+
 const SOUNDING_SOURCES: readonly RotatingSource[] = [
-  ...SOUNDING_FILES.map((key) => ({ key, url: `${NOAA_RAW_US}/${key}.txt`, shape: 'file' as const })),
-  ...ALASKA_SOUNDINGS.map((key) => ({ key, url: `${NWS_API}/products/types/MAN/locations/${key}/latest`, shape: 'nws-product' as const })),
+  ...SOUNDING_FILES.map((key) => ({ key, url: `${NOAA_RAW_US}/${key}.txt`, shape: 'file' as const, significantUrl: significantUrl(key.slice(key.lastIndexOf('.') + 1).toUpperCase()) })),
+  ...ALASKA_SOUNDINGS.map((key) => ({ key, url: `${NWS_API}/products/types/MAN/locations/${key}/latest`, shape: 'nws-product' as const, significantUrl: significantUrl(key) })),
 ];
+
+/** Which flight a bulletin is from: the day and hour in its time group. */
+const flightOf = (text: string): string | null => /\bTT(?:AA|BB)\s+(\d{4})/.exec(text)?.[1] ?? null;
 
 export interface Product {
   /** The storage key, and the name the status page uses. */
@@ -145,6 +159,8 @@ interface RotatingFile {
   readonly askedAt: string;
   readonly modified: string | null;
   readonly text: string;
+  /** A balloon's significant levels, held beside its mandatory ones so they cost no write of their own. */
+  readonly significant?: { readonly askedAt: string; readonly text: string };
 }
 
 export interface Refusal {
@@ -450,37 +466,63 @@ export class Relay {
     }
     const askedAt = new Date(this.deps.now()).toISOString();
     // Compared as they are: `localeCompare` takes ten milliseconds the first time an isolate uses it, which is the whole of the free plan's allowance.
-    const askedOf = (s: RotatingSource) => copy[s.key]?.askedAt ?? '';
-    const turn = [...sources].sort((a, b) => (askedOf(a) < askedOf(b) ? -1 : askedOf(a) > askedOf(b) ? 1 : 0)).slice(0, perRun);
+    const oldestFirst = (askedOf: (s: RotatingSource) => string) => (a: RotatingSource, b: RotatingSource) => (askedOf(a) < askedOf(b) ? -1 : askedOf(a) > askedOf(b) ? 1 : 0);
+    const turn = [...sources].sort(oldestFirst((s) => copy[s.key]?.askedAt ?? '')).slice(0, perRun);
     const failed: string[] = [];
     await Promise.all(
       turn.map(async ({ key, url, shape }) => {
-        let text: string | null = null;
-        let modified: string | null = null;
-        try {
-          const res = await this.deps.fetch(url, { headers: { 'User-Agent': this.userAgent, Accept: shape === 'file' ? 'text/plain' : 'application/ld+json' }, signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });
-          if (res.ok && shape === 'file') {
-            text = await res.text();
-            const stamp = res.headers.get('last-modified');
-            modified = stamp ? new Date(stamp).toISOString() : null;
-          } else if (res.ok) {
-            const product = (await res.json()) as { productText?: unknown; issuanceTime?: unknown };
-            text = typeof product.productText === 'string' ? product.productText : null;
-            modified = typeof product.issuanceTime === 'string' ? new Date(product.issuanceTime).toISOString() : null;
-          }
-        } catch {
-          // Counted below, with the ones that answered with something else.
-        }
+        const { text, modified } = await this.readSource(url, shape);
+        const had = copy[key];
         // Kept only if it is a sounding, so an error page never replaces one.
         if (text === null || !text.includes('TTAA')) {
           failed.push(key);
-          copy[key] = { askedAt, modified: copy[key]?.modified ?? null, text: copy[key]?.text ?? '' };
-        } else copy[key] = { askedAt, modified, text };
+          copy[key] = { ...had, askedAt, modified: had?.modified ?? null, text: had?.text ?? '' };
+        } else copy[key] = { ...had, askedAt, modified, text };
       }),
     );
     if (failed.length === turn.length) return { error: `none of the ${turn.length} files asked for answered (${product.upstream})` };
+
+    /*
+     * Nothing says when a balloon's file changes, so those are asked for
+     * every hour. The significant levels are only worth asking for once one
+     * has, so these are the balloons whose two parts are from different
+     * flights. One that never appears goes to the back like any other.
+     */
+    const behind = sources.filter((s) => {
+      const held = copy[s.key];
+      return s.significantUrl && held && flightOf(held.text) !== null && flightOf(held.text) !== flightOf(held.significant?.text ?? '');
+    });
+    await Promise.all(
+      behind
+        .sort(oldestFirst((s) => copy[s.key]?.significant?.askedAt ?? ''))
+        .slice(0, SIGNIFICANT_PER_RUN)
+        .map(async ({ key, significantUrl: url }) => {
+          const { text } = await this.readSource(url!, 'nws-product');
+          const had = copy[key]!;
+          copy[key] = { ...had, significant: { askedAt, text: text !== null && text.includes('TTBB') ? text : (had.significant?.text ?? '') } };
+        }),
+    );
+
     const body = new TextEncoder().encode(JSON.stringify(copy)).buffer as ArrayBuffer;
     return this.keep(product, body, product.upstream, failed.length > 0 ? `no answer for ${failed.join(', ')}` : null);
+  }
+
+  /** One small file's text and when it was written. Both `null` when it did not answer with any. */
+  private async readSource(url: string, shape: RotatingSource['shape']): Promise<{ text: string | null; modified: string | null }> {
+    try {
+      const res = await this.deps.fetch(url, { headers: { 'User-Agent': this.userAgent, Accept: shape === 'file' ? 'text/plain' : 'application/ld+json' }, signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });
+      if (res.ok && shape === 'file') {
+        const stamp = res.headers.get('last-modified');
+        return { text: await res.text(), modified: stamp ? new Date(stamp).toISOString() : null };
+      }
+      if (res.ok) {
+        const product = (await res.json()) as { productText?: unknown; issuanceTime?: unknown };
+        return { text: typeof product.productText === 'string' ? product.productText : null, modified: typeof product.issuanceTime === 'string' ? new Date(product.issuanceTime).toISOString() : null };
+      }
+    } catch {
+      // Counted by the caller, with the ones that answered with something else.
+    }
+    return { text: null, modified: null };
   }
 
   private async keep(product: Product, body: ArrayBuffer, upstream: string, note: string | null): Promise<Snapshot | { error: string }> {

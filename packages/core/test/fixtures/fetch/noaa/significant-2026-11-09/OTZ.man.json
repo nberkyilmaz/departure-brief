@@ -1,0 +1,14 @@
+{
+    "@context": {
+        "@version": "1.1",
+        "@vocab": "https://api.weather.gov/ontology#"
+    },
+    "@id": "https://api.weather.gov/products/37f839d1-ace1-42fc-8b34-eb14baf2158f",
+    "id": "37f839d1-ace1-42fc-8b34-eb14baf2158f",
+    "wmoCollectiveId": "USAK19",
+    "issuingOffice": "PAOT",
+    "issuanceTime": "2026-11-09T11:30:00+00:00",
+    "productCode": "MAN",
+    "productName": "Rawinsonde Observation Mandatory Levels",
+    "productText": "\n000\nUSAK19 PAOT 091130\nMANOTZ\n\n70133 TTAA 5912/ 70133 51515 10159=\n"
+}

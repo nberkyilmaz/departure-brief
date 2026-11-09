@@ -28,6 +28,11 @@ export interface SoundingStation {
   readonly elevationFt: number;
 }
 
+/** Where the NWS product API holds a station's bulletins: for one with a file, the three letters that end its name. */
+export function soundingLocation(station: SoundingStation): string {
+  return station.nwsLocation ?? station.file!.slice(station.file!.lastIndexOf('.') + 1).toUpperCase();
+}
+
 export const SOUNDING_STATIONS: readonly SoundingStation[] = [
   { id: '91165', name: 'Lihue', file: 'ushw40.phli.man.lih', lat: 21.9933, lon: -159.347, elevationFt: 106 },
   { id: '91285', name: 'Hilo', file: 'ushw40.phto.man.ito', lat: 19.7183, lon: -155.058, elevationFt: 36 },

@@ -24,7 +24,7 @@ import { decodeFbWinds } from './fb.js';
 import { decodeTtaa } from './ttaa.js';
 import type { DecodedUpperWind, UpperWindLevel } from './types.js';
 
-export const UPPERWIND_DECODER_VERSION = 2;
+export const UPPERWIND_DECODER_VERSION = 3;
 
 /** Where in the array each field lives. Named, so nothing reads by number twice. */
 const BULLETIN = 0;

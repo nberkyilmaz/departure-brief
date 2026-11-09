@@ -110,8 +110,10 @@ verbatim, feed the rules — so they get cheaper as they go.
   2026 and discontinued the bulletin with it (SCN 26-47, updated 5
   November). There is no official replacement. The decoder stays, tested
   against the last bulletins issued; US legs now read what the balloons
-  measured, TTAA mandatory levels only for now, with the significant
-  levels between them left for a later version.
+  measured: the mandatory levels, and between them the same flight's
+  significant levels once they have arrived, which give a wind about every
+  thousand feet at a light aircraft's heights and the temperature wherever
+  it changed course.
 - ~~**SIGMET and AIRMET.**~~ Done. In force, at your altitude, and across
   your route — all three, or it is not mentioned. An area the geometry
   cannot answer for is reported as needing to be checked by eye. One on the

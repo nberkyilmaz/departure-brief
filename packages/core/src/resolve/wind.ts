@@ -84,6 +84,8 @@ export async function upperWindFor(
     candidates.push({ report, forecast });
   }
   if (candidates.length === 0) return null;
+  // A balloon's significant levels can arrive after its mandatory ones, which leaves two reports of one flight. The fuller one is the one wanted.
+  candidates.sort((a, b) => (b.report.issuedAt?.getTime() ?? 0) - (a.report.issuedAt?.getTime() ?? 0) || b.forecast.levels.length - a.forecast.levels.length);
 
   // The bulletin whose levels actually bracket the altitude, if there is one.
   const covering = candidates.find(
@@ -96,7 +98,7 @@ export async function upperWindFor(
     covering ??
     [...candidates].sort((a, b) => Math.abs(a.forecast.levels[0]!.altitudeFt - altitudeFt) - Math.abs(b.forecast.levels[0]!.altitudeFt - altitudeFt))[0]!;
 
-  const wind = windAtAltitude(chosen.forecast.levels, altitudeFt);
+  const wind = windAtAltitude(chosen.forecast.levels, altitudeFt, chosen.forecast.temperatures);
   return wind ? { report: chosen.report, forecast: chosen.forecast, wind } : null;
 }
 

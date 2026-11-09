@@ -16,9 +16,20 @@ export interface UpperWindLevel {
    */
   readonly directionTrue: number | null;
   readonly speedKt: number;
-  /** Not forecast at the lowest levels, where it would be near the surface temperature. */
+  /**
+   * Not forecast at the lowest levels, where it would be near the surface
+   * temperature, and not given with a balloon's significant winds, whose
+   * temperatures are in `temperatures` at heights of their own.
+   */
   readonly tempC: number | null;
   /** The span of this level's numbers in the record. */
+  readonly span: Sourced<null>['span'];
+}
+
+/** A temperature a balloon measured, which need not be at a height it gave a wind for. */
+export interface TemperatureLevel {
+  readonly altitudeFt: number;
+  readonly tempC: number;
   readonly span: Sourced<null>['span'];
 }
 
@@ -45,6 +56,8 @@ export interface DecodedUpperWind {
   readonly useTo: Sourced<Date> | null;
   /** Lowest first. The service sends them unordered. */
   readonly levels: readonly UpperWindLevel[];
+  /** Lowest first. A balloon's temperatures, when it sent significant levels, which turn at different heights from its winds. */
+  readonly temperatures?: readonly TemperatureLevel[];
   /** Parts of the record this decoder did not account for, never silently dropped. */
   readonly unparsed: readonly string[];
 }

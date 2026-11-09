@@ -13,8 +13,12 @@
  *
  * Alaska's stations have no files, so theirs come from the NWS product API:
  * the same bulletin, as JSON, with the time it was issued.
+ *
+ * The same API holds every station's significant levels, which go into the
+ * same report, after the mandatory ones and only when they are from the same
+ * flight.
  */
-import { soundingStationsNear, type SoundingStation } from '../domain/soundings.js';
+import { soundingLocation, soundingStationsNear, type SoundingStation } from '../domain/soundings.js';
 import type { LatLon } from '../domain/geo.js';
 import { resolveDayTime } from '../domain/time.js';
 import { storeAndDecode, type IngestCounts } from '../store/decode.js';
@@ -28,7 +32,7 @@ export const NWS_API_URL = 'https://api.weather.gov';
 /** Marks a report as measured rather than forecast. */
 export const SOUNDING_SOURCE = 'noaa-sounding';
 
-/** How many stations to ask about for a route, nearest its points first. One request each. */
+/** How many stations to ask about for a route, nearest its points first. Two requests each, for its two bulletins. */
 export const MAX_SOUNDING_SITES = 6;
 /** How many of the nearest stations each point asks for, so one that did not fly has a neighbour. */
 const SOUNDINGS_PER_POINT = 2;
@@ -53,15 +57,23 @@ export interface HeldSounding {
   /** When NOAA wrote it; null if NOAA did not say. */
   readonly modified: string | null;
   readonly text: string;
+  /** The same balloon's significant levels, once the relay has asked for them. */
+  readonly significant?: { readonly text: string };
 }
 
-/** A file as one report, or `null` when it has no sounding in it. */
-export function soundingReport(text: string, modified: Date): RawReport | null {
-  const body = text.trim();
-  const m = /\bTTAA\s+(\d{2})(\d{2})[\d/]\s+(\d{5})\b/.exec(body);
+/**
+ * A file as one report, or `null` when it has no sounding in it. Until a
+ * flight's significant levels arrive, the ones to hand are twelve hours
+ * older than it, so they go in only if they say they are the same flight.
+ */
+export function soundingReport(text: string, modified: Date, significant?: string | null): RawReport | null {
+  const mandatory = text.trim();
+  const m = /\bTTAA\s+(\d{2})(\d{2})[\d/]\s+(\d{5})\b/.exec(mandatory);
   if (!m) return null;
   const coded = Number(m[1]);
   const issuedAt = resolveDayTime({ day: coded > 50 ? coded - 50 : coded, hour: Number(m[2]), minute: 0 }, modified);
+  const sameFlight = significant && new RegExp(`\\bTTBB\\s+${m[1]}${m[2]}[\\d/]\\s+${m[3]}\\b`).test(significant);
+  const body = sameFlight ? `${mandatory}\n\n${significant.trim()}` : mandatory;
   return rawReport({ kind: 'upperwind', source: SOUNDING_SOURCE, station: m[3]!, body, issuedAt, upstream: null });
 }
 
@@ -86,23 +98,23 @@ export class SoundingClient {
     const reports: RawReport[] = [];
     for (const held of Object.values(parsed as Record<string, Partial<HeldSounding>>)) {
       if (typeof held?.text !== 'string') continue;
-      const report = soundingReport(held.text, held.modified ? new Date(held.modified) : now);
+      const report = soundingReport(held.text, held.modified ? new Date(held.modified) : now, held.significant?.text);
       if (report) reports.push(report);
     }
     return { request: url, reports };
   }
 
   /** One station's file, straight from NOAA. */
-  async file(name: string, now: Date = new Date()): Promise<SoundingFetch> {
+  async file(name: string, now: Date = new Date(), significant?: string | null): Promise<SoundingFetch> {
     const url = `${this.baseUrl}/${name}.txt`;
     const res = expectOk(url, await this.http.get(url, { headers: { Accept: 'text/plain' } }));
     const modified = res.headers['last-modified'];
-    const report = soundingReport(res.body, modified ? new Date(modified) : now);
+    const report = soundingReport(res.body, modified ? new Date(modified) : now, significant);
     return { request: url, reports: report ? [report] : [] };
   }
 
   /** One Alaskan station's latest bulletin, from the NWS product API. */
-  async latestProduct(location: string, now: Date = new Date()): Promise<SoundingFetch> {
+  async latestProduct(location: string, now: Date = new Date(), significant?: string | null): Promise<SoundingFetch> {
     const url = `${this.nwsUrl}/products/types/MAN/locations/${location}/latest`;
     const res = expectOk(url, await this.http.get(url, { headers: { Accept: 'application/ld+json' } }));
     let product: { productText?: unknown; issuanceTime?: unknown };
@@ -112,13 +124,27 @@ export class SoundingClient {
       throw new SoundingError('the NWS API did not send JSON', url);
     }
     if (typeof product.productText !== 'string') throw new SoundingError('the NWS API sent no bulletin', url);
-    const report = soundingReport(product.productText, typeof product.issuanceTime === 'string' ? new Date(product.issuanceTime) : now);
+    const report = soundingReport(product.productText, typeof product.issuanceTime === 'string' ? new Date(product.issuanceTime) : now, significant);
     return { request: url, reports: report ? [report] : [] };
   }
 
-  /** A station's sounding from wherever NOAA publishes it. */
+  /** One station's significant levels, or `null`: a sounding is still a sounding without them. */
+  async significantLevels(location: string): Promise<string | null> {
+    const url = `${this.nwsUrl}/products/types/SGL/locations/${location}/latest`;
+    try {
+      const res = await this.http.get(url, { headers: { Accept: 'application/ld+json' } });
+      if (res.status !== 200) return null;
+      const { productText } = JSON.parse(res.body) as { productText?: unknown };
+      return typeof productText === 'string' ? productText : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** A station's sounding from wherever NOAA publishes it, with its significant levels if they are there yet. */
   async station(station: SoundingStation, now: Date = new Date()): Promise<SoundingFetch> {
-    return station.file ? this.file(station.file, now) : this.latestProduct(station.nwsLocation!, now);
+    const significant = await this.significantLevels(soundingLocation(station));
+    return station.file ? this.file(station.file, now, significant) : this.latestProduct(station.nwsLocation!, now, significant);
   }
 }
 

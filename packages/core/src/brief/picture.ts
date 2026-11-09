@@ -378,13 +378,13 @@ async function freezingOf(store: Store, flight: ResolvedFlight): Promise<Picture
   const alongside = new Set<string>();
   for (const s of flight.enroute) {
     const found = await upperWindFor(store, s.station, cruise, s.eta, flight.asOf);
-    const level = found && freezingLevel(found.forecast.levels);
+    const level = found && freezingLevel(found.forecast.temperatures ?? found.forecast.levels);
     if (!level) continue;
     alongside.add(s.station);
     out.push({ ...level, station: s.station, nm: s.cumulative, at: s.eta.toISOString(), distanceNm: Math.abs(s.offset) });
   }
   for (const p of flight.points) {
-    const level = p.wind && freezingLevel(p.wind.forecast.levels);
+    const level = p.wind && freezingLevel(p.wind.forecast.temperatures ?? p.wind.forecast.levels);
     if (!p.wind || !level || alongside.has(p.wind.station) || p.wind.measured) continue;
     out.push({ ...level, station: p.wind.station, nm: p.point.cumulative, at: p.point.eta.toISOString(), distanceNm: p.wind.distance });
   }
@@ -396,7 +396,7 @@ async function freezingOf(store: Store, flight: ResolvedFlight): Promise<Picture
     const at = new Date(departs + (nm / flight.plan.cruise.tas) * 3_600_000);
     const position = positionAt(flight, nm);
     const wind = (await isAmerican(store, position, null)) ? await balloonWindAt(store, position, cruise, at, flight.asOf) : null;
-    const level = wind?.measured ? freezingLevel(wind.forecast.levels) : null;
+    const level = wind?.measured ? freezingLevel(wind.forecast.temperatures ?? wind.forecast.levels) : null;
     if (wind?.measured && level && (nearest.get(wind.station)?.distanceNm ?? Infinity) > wind.distance) {
       nearest.set(wind.station, { ...level, station: wind.measured.by, nm, at: at.toISOString(), distanceNm: wind.distance, measuredAt: wind.measured.at.toISOString() });
     }
