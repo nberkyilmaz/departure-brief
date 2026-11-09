@@ -17,6 +17,8 @@ export interface WaypointForecast {
   readonly report: RawReport;
   readonly taf: DecodedTaf;
   readonly resolved: ResolvedForecast;
+  /** When borrowed, the ground under the station it is from, which its cloud heights are above. */
+  readonly stationElevation?: number | null;
 }
 
 /** The newest TAF for a station issued at or before `asOf`, decoded. */
@@ -81,6 +83,7 @@ export async function forecastAt(
       report: found.report,
       taf: found.taf,
       resolved: resolveTaf(found.taf, found.report.issuedAt, t),
+      stationElevation: airport.elevation,
     };
     if (candidate.resolved.prevailing) return candidate;
     // Nearest first, so the first one that does not cover `t` is the best

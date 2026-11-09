@@ -77,10 +77,11 @@ function evaluatePoint(
     const f = p.forecast.resolved;
     const source = { kind: 'taf' as const, station: p.forecast.station, raw: f.raw, sha256: p.forecast.report.sha256 };
     const borrowed = p.forecast.source === 'nearby' ? ` (TAF ${p.forecast.station}, ${Math.round(p.forecast.distance)} nm away)` : '';
+    const reportElevation = p.forecast.source === 'nearby' ? (p.forecast.stationElevation ?? null) : null;
     if (f.prevailing) {
-      findings.push(...checkConditions({ ...base, basis: `prevailing${borrowed}`, basisKind: 'prevailing', violation: 'alert', source }, f.prevailing.conditions));
+      findings.push(...checkConditions({ ...base, basis: `prevailing${borrowed}`, basisKind: 'prevailing', violation: 'alert', source, reportElevation }, f.prevailing.conditions));
       for (const o of f.overlays) {
-        findings.push(...checkConditions({ ...base, basis: `${overlayLabel(o)}${borrowed}`, basisKind: 'overlay', violation: 'caution', source }, o.conditions));
+        findings.push(...checkConditions({ ...base, basis: `${overlayLabel(o)}${borrowed}`, basisKind: 'overlay', violation: 'caution', source, reportElevation }, o.conditions));
       }
     } else {
       findings.push({
@@ -141,6 +142,7 @@ function evaluatePoint(
       // A current observation is hard evidence at departure; hours before an ETA it is context.
       violation: Math.abs(age) <= OBSERVATION_WINDOW_MS ? 'alert' : 'caution',
       source: { kind: 'metar', station: p.metar.decoded.station?.value ?? null, raw: p.metar.report.body, sha256: p.metar.report.sha256 },
+      reportElevation: p.metar.source === 'nearby' ? (p.metar.stationElevation ?? null) : null,
     };
     findings.push(...checkConditions(ctx, metarConditions(p.metar.decoded)));
     findings.push(...checkUnread(ctx, p.metar.decoded.unparsed));
