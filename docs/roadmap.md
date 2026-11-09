@@ -49,9 +49,10 @@ official briefing.
 
 ### Blocked, and on what
 
-- **Airspace transit** needs Canadian airspace geometry, which NAV CANADA
-  does not publish. The FAA's layer is queryable, so the US half is
-  buildable whenever it is wanted.
+- **Airspace in Canada** needs Canadian airspace geometry, which NAV CANADA
+  sells rather than publishes. The US half is done: Class B, C and D and
+  special use areas your line goes through are drawn on the map and the
+  side view from the FAA's layers, as a picture and not as a check.
 - **US NOTAMs** need FAA API credentials. Canadian ones need no key. The
   site already carries every American field and its weather; until the
   credentials arrive, a briefing that touches one says plainly that its
@@ -175,7 +176,7 @@ date and a citation, never a silent pass.
 
 ### 7. Then the blocked ones
 
-Airspace transit when geometry can be found; US NOTAMs when credentials
+Canadian airspace when geometry can be found; US NOTAMs when credentials
 arrive.
 
 ---

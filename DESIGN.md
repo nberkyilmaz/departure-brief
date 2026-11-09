@@ -145,8 +145,9 @@ truncating each other's tables mid-test. Each run now gets its own database.
 
 ## What I'd do next
 
-- **Airspace transit.** Canadian airspace geometry isn't published in a
-  usable form; the US half is buildable from the FAA's layer.
+- **Airspace transit.** The US half is drawn from the FAA's layers, as a
+  picture only. Canadian airspace geometry isn't published in a usable
+  form.
 - **PIREPs**, which are often the only honest answer about icing.
 - **Memory across visits.** Briefing history and continuous forecast
   verification need the API's database; the relay deliberately has none.

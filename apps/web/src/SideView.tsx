@@ -1,10 +1,11 @@
 import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { altitudeTicks, chartTop, COLUMN_PX, columnLabel, columnsOf, emptyStretches, hazardKey, hazardLetter, heightText, labelOf, layersToLabel, layerText, notesOf, pirepTag, pirepWords, placePireps, spread, terrainPath, xOfNm, type Column } from './picture.js';
+import { useAirspace } from './airspace.js';
+import { AIRSPACE_STYLE, airspaceBlocks, airspaceLines, altitudeTicks, chartTop, COLUMN_PX, columnLabel, columnsOf, emptyStretches, hazardKey, hazardLetter, heightText, labelOf, layersToLabel, layerText, notesOf, pirepTag, pirepWords, placePireps, spread, terrainPath, xOfNm, type Column } from './picture.js';
 import { openColumn, opens } from './stationLink.js';
 import { CATEGORY_LETTER } from './summary.js';
 import { useTerrain } from './terrain.js';
 import { clock24, zoneOf } from './time.js';
-import type { PictureHazard, PictureLayer, RoutePicture, StoredBriefing } from './types.js';
+import type { AirspaceKind, PictureHazard, PictureLayer, RoutePicture, StoredBriefing } from './types.js';
 
 /**
  * The route from the side: distance across, altitude up, and the clock time
@@ -78,8 +79,10 @@ function Band({ h, tag, stack, x0, x1, top, yOf, plotTop }: { h: PictureHazard; 
   );
 }
 
+const airClass = (kind: AirspaceKind): string => `sv-air ${AIRSPACE_STYLE[kind].hue} ${AIRSPACE_STYLE[kind].line}`;
+
 /** The marks the chart uses, each drawn the way it is drawn on the chart. */
-function Key({ terrain, pireps }: { terrain: boolean; pireps: boolean }) {
+function Key({ terrain, pireps, air }: { terrain: boolean; pireps: boolean; air: readonly AirspaceKind[] }) {
   const swatch = (children: ReactNode) => (
     <svg className="side-key-mark" width={30} height={18} aria-hidden="true">
       {children}
@@ -95,6 +98,7 @@ function Key({ terrain, pireps }: { terrain: boolean; pireps: boolean }) {
     ['ground', swatch(<rect className="sv-ground" x={8} y={4} width={14} height={14} />), 'the ground at that station'],
     ['freezing', swatch(<line className="sv-freezing" x1={3} y1={9} x2={27} y2={9} />), 'freezing level, 0 °C'],
     ...(pireps ? ([['pirep', swatch(<PirepMark x={15} y={9} n={1} hollow={false} />), 'a pilot report, listed below']] as const) : []),
+    ...air.map((kind) => [`air-${kind}`, swatch(<rect className={airClass(kind)} x={3} y={3} width={24} height={12} />), AIRSPACE_STYLE[kind].name] as const),
   ];
   return (
     <ul className="side-key">
@@ -200,10 +204,14 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
   const { xs, width, spreadApart } = spread(miles, plotPx);
   const terrain = useTerrain(picture);
   const ground = terrain === 'loading' || terrain === 'failed' ? null : terrain;
+  const airspace = useAirspace(picture);
+  const areas = typeof airspace === 'object' ? airspace.areas : [];
+  const airspaceWords = airspaceLines(areas);
   const top = chartTop(picture, ground);
   const plotBottom = HEAD_PX + PLOT_PX;
   const yOf = (ft: number) => plotBottom - (ft / top) * PLOT_PX;
   const xAt = (nm: number) => xOfNm(nm, miles, xs);
+  const blocks = airspaceBlocks(areas, top, ground, xAt, yOf);
   const rows = rowsOf(columns);
   const height = plotBottom + 8 + rows.reduce((h, r) => h + r.lines * ROW_PX, 0) + 6;
   let rowY = plotBottom + 8;
@@ -263,7 +271,20 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
               <line key={ft} className="sv-grid" x1={0} x2={width} y1={yOf(ft)} y2={yOf(ft)} />
             ))}
 
+            {/* Before the ground, so what lies under the terrain is hidden by it. */}
+            {blocks.map((b) => (
+              <path key={b.key} className={airClass(b.kind)} d={b.path} />
+            ))}
+
             {ground && <path className="sv-terrain" d={terrainPath(ground, xAt, yOf)} />}
+
+            {blocks.flatMap((b) =>
+              b.label ? (
+                <text key={b.key} className="sv-label sv-halo" x={b.label.x} y={b.label.y}>
+                  {b.label.text}
+                </text>
+              ) : [],
+            )}
 
             {picture.hazards.map((h, i) =>
               h.stretches.map((s, j) => (
@@ -411,11 +432,25 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
           ))}
         </ul>
       )}
-      <Key terrain={ground !== null} pireps={picture.pireps.length > 0} />
+      {airspaceWords.length > 0 && (
+        <ul className="side-hazards side-airspace">
+          {airspaceWords.map((line) => (
+            <li key={`${line.kind}${line.name}`}>
+              <span className={`side-air-tag ${AIRSPACE_STYLE[line.kind].hue}`}>{AIRSPACE_STYLE[line.kind].tag}</span> {line.name}: {line.words}
+            </li>
+          ))}
+        </ul>
+      )}
+      <Key terrain={ground !== null} pireps={picture.pireps.length > 0} air={[...new Set(areas.map((a) => a.kind))]} />
       <ul className="side-notes">
-        {notesOf(picture, columns, spreadApart, terrain).map((n) => (
+        {notesOf(picture, columns, spreadApart, terrain, airspace).map((n) => (
           <li key={n}>{n}</li>
         ))}
+        {areas.length > 0 && (
+          <li>
+            Airspace from the <a href="https://adds-faa.opendata.arcgis.com/">FAA's Aeronautical Data Delivery Service</a>.
+          </li>
+        )}
         {ground && (
           <li>
             Terrain from the <a href="https://doi.org/10.5270/ESA-c5d3d65">Copernicus DEM GLO-90</a> of the European Union's Copernicus programme, through <a href="https://open-meteo.com/">Open-Meteo</a>.

@@ -167,6 +167,8 @@ export interface RoutePicture {
   readonly pireps: readonly PicturePirep[];
   /** How many reports were held for anywhere. None means there are none to go by, not that the sky is empty. */
   readonly pirepsHeld: number;
+  /** How much of the line is over the United States, which is as far as the FAA's airspace shapes speak for. */
+  readonly overUS: 'all' | 'part' | 'none';
 }
 
 function layersOf(sky: readonly Sourced<SkyCondition>[], elevation: number | null): PictureLayer[] {
@@ -433,8 +435,11 @@ export async function routePicture(store: Store, flight: ResolvedFlight): Promis
   const fields = await Promise.all(flight.points.map((p, i) => fieldColumn(store, p, i, last)));
   const along = await Promise.all(flight.enroute.map((s) => alongColumn(store, s)));
   const { pireps, held } = await pirepsAlong(store, flight);
+  const line = flight.route.legs.flatMap((leg, i) => (i === 0 ? pathOf(leg) : pathOf(leg).slice(1)));
+  const american = await Promise.all(line.map((p) => isAmerican(store, p, null)));
   return {
-    line: flight.route.legs.flatMap((leg, i) => (i === 0 ? pathOf(leg) : pathOf(leg).slice(1))),
+    line,
+    overUS: american.every(Boolean) ? 'all' : american.some(Boolean) ? 'part' : 'none',
     corridor: flight.route.legs.map(stripOf),
     totalNm: flight.route.total,
     cruiseFt: flight.plan.cruise.altitude,

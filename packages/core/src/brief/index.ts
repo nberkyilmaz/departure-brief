@@ -6,6 +6,8 @@ export type { BriefingDiff, FindingChange, FindingChangeKind, NotamChange, Point
 export { diffText } from './describeDiff.js';
 export { departureWindow, WINDOW_HOURS } from './window.js';
 export type { DepartureSlot, WindowPoint } from './window.js';
+export { routeAirspace } from './airspace.js';
+export type { AirspaceArea, AirspaceKind, AirspaceLimit, AirspaceStretch, RouteAirspace } from './airspace.js';
 export { routeTerrain, samplesAlong } from './terrain.js';
 export type { RouteTerrain, TerrainSample } from './terrain.js';
 export { routePicture } from './picture.js';

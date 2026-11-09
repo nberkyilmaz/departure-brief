@@ -14,11 +14,12 @@
  */
 import L from 'leaflet';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useAirspace } from './airspace.js';
 import { baseMap, isTouch } from './mapBase.js';
-import { columnLabel, columnsOf, hazardKey, hazardLetter, labelOf, pirepWords, type Column } from './picture.js';
+import { AIRSPACE_STYLE, airspaceLines, columnLabel, columnsOf, hazardKey, hazardLetter, labelOf, pirepWords, type Column } from './picture.js';
 import { openColumn, opens } from './stationLink.js';
 import { CATEGORY_LETTER } from './summary.js';
-import type { RoutePicture, StoredBriefing } from './types.js';
+import type { AirspaceArea, RoutePicture, StoredBriefing } from './types.js';
 
 /** Drawn on top of one another in this order, so a red dot is never hidden under a green one. */
 const DRAW_ORDER: Readonly<Record<string, number>> = { unknown: 0, vfr: 1, mvfr: 2, ifr: 3, lifr: 4 };
@@ -104,29 +105,60 @@ function draw(container: HTMLElement, columns: readonly Column[], picture: Route
   return map;
 }
 
+const AIRSPACE_DASH: Readonly<Record<'solid' | 'dashed' | 'dotted', string | undefined>> = { solid: undefined, dashed: '7 5', dotted: '2 5' };
+
+/** Under the advisories and the route, which are what the map is for, in a layer of its own because it arrives after them. */
+function drawAirspace(map: L.Map, areas: readonly AirspaceArea[]): L.LayerGroup {
+  const pane = map.getPane('airspace') ?? map.createPane('airspace');
+  pane.style.zIndex = '350';
+  const css = getComputedStyle(document.documentElement);
+  const group = L.layerGroup();
+  for (const line of airspaceLines(areas)) {
+    const style = AIRSPACE_STYLE[line.kind];
+    const colour = css.getPropertyValue(`--air-${style.hue}`).trim() || '#1d63c7';
+    const words = `<b>${style.tag}</b> ${escapeHtml(line.name)}<br>${escapeHtml(line.words)}`;
+    for (const area of line.areas) {
+      L.polygon(area.rings.map((ring) => ring.map(latLng)), { pane: 'airspace', color: colour, weight: 1.5, dashArray: AIRSPACE_DASH[style.line], fillColor: colour, fillOpacity: 0.07 }).bindPopup(words).addTo(group);
+    }
+  }
+  return group.addTo(map);
+}
+
 export default function RouteMap({ stored, picture }: { stored: StoredBriefing; picture: RoutePicture }) {
   const el = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);
+  const [map, setMap] = useState<L.Map | null>(null);
   const columns = useMemo(() => columnsOf(stored, picture), [stored, picture]);
+  const airspace = useAirspace(picture);
 
   useEffect(() => {
     if (!el.current) return;
-    let map: L.Map | null = null;
+    let drawn: L.Map | null = null;
     try {
       setFailed(false);
-      map = draw(el.current, columns, picture);
+      drawn = draw(el.current, columns, picture);
+      setMap(drawn);
     } catch {
       // A map that cannot be drawn is a missing picture, not a broken page.
       setFailed(true);
     }
     return () => {
+      setMap(null);
       try {
-        map?.remove();
+        drawn?.remove();
       } catch {
         // Already gone with its container.
       }
     };
   }, [columns, picture]);
+
+  useEffect(() => {
+    if (!map || typeof airspace !== 'object' || airspace.areas.length === 0) return;
+    const layer = drawAirspace(map, airspace.areas);
+    return () => {
+      layer.remove();
+    };
+  }, [map, airspace]);
 
   return (
     <>
