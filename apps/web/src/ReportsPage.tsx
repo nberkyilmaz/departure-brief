@@ -18,6 +18,7 @@ const KINDS: Readonly<Record<string, string>> = {
   taf: 'TAF',
   notam: 'NOTAM',
   upperwind: 'Upper wind',
+  pirep: 'Pilot report',
 };
 
 /** The reports a briefing cited, for builds where the page did not fetch them itself. */

@@ -179,7 +179,7 @@ export function cfpsRefusal(text: string): Refusal | null {
   return null;
 }
 
-export const PRODUCTS: Readonly<Record<'metars' | 'tafs' | 'sigmet' | 'gairmet' | 'upperwind' | 'soundings', Product>> = {
+export const PRODUCTS: Readonly<Record<'metars' | 'tafs' | 'sigmet' | 'gairmet' | 'aircraftreports' | 'upperwind' | 'soundings', Product>> = {
   // Every station on earth, rebuilt by the service each minute. Hourly reports and specials between them.
   metars: { key: 'metars', upstream: `${AWC_CACHE}/metars.cache.csv.gz`, everyMs: 5 * MIN, contentType: 'text/csv; charset=utf-8', gzip: true },
   // Issued four times a day, amended when they are wrong.
@@ -188,6 +188,8 @@ export const PRODUCTS: Readonly<Record<'metars' | 'tafs' | 'sigmet' | 'gairmet' 
   sigmet: { key: 'sigmet', upstream: `${AWC_API}/sigmet?format=json`, everyMs: 15 * MIN, contentType: 'application/json', gzip: false, emptyBody: '[]' },
   // Issued every six hours and amended when they are wrong, each with its forecast hours in the one file.
   gairmet: { key: 'gairmet', upstream: `${AWC_CACHE}/gairmets.cache.xml.gz`, everyMs: 60 * MIN, contentType: 'application/xml; charset=utf-8', gzip: true },
+  // Pilot reports, the last ninety minutes of them, rebuilt by the service each minute.
+  aircraftreports: { key: 'aircraftreports', upstream: `${AWC_CACHE}/aircraftreports.cache.xml.gz`, everyMs: 20 * MIN, contentType: 'application/xml; charset=utf-8', gzip: true },
   // Three bulletins a day; asking more than hourly buys nothing.
   upperwind: {
     key: 'upperwind',
@@ -291,6 +293,8 @@ function productFor(url: URL): Product | null {
       return PRODUCTS.sigmet;
     case '/awc/cache/gairmets.cache.xml.gz':
       return PRODUCTS.gairmet;
+    case '/awc/cache/aircraftreports.cache.xml.gz':
+      return PRODUCTS.aircraftreports;
     case '/noaa/soundings':
       return PRODUCTS.soundings;
     case '/cfps/':
@@ -352,7 +356,7 @@ export class Relay {
       if (product) res = await this.serveSnapshot(product, cors);
       else if ((url.pathname === '/cfps/' || url.pathname === '/cfps') && url.searchParams.get('alpha') === 'notam') res = await this.serveNotams(url, cors);
       else if (url.pathname === '/awc/metar') res = await this.serveStationMetar(url, cors);
-      else res = json(404, { error: 'not something this relay carries', carries: ['/awc/cache/metars.cache.csv.gz', '/awc/cache/tafs.cache.xml.gz', '/awc/cache/gairmets.cache.xml.gz', '/awc/sigmet', '/awc/metar?ids=<id>&format=json', '/noaa/soundings', '/cfps/?alpha=upperwind', '/cfps/?site=<id>&alpha=notam', '/status'] }, cors);
+      else res = json(404, { error: 'not something this relay carries', carries: ['/awc/cache/metars.cache.csv.gz', '/awc/cache/tafs.cache.xml.gz', '/awc/cache/gairmets.cache.xml.gz', '/awc/cache/aircraftreports.cache.xml.gz', '/awc/sigmet', '/awc/metar?ids=<id>&format=json', '/noaa/soundings', '/cfps/?alpha=upperwind', '/cfps/?site=<id>&alpha=notam', '/status'] }, cors);
     }
     return req.method === 'HEAD' ? { ...res, body: null } : res;
   }
@@ -445,7 +449,9 @@ export class Relay {
       }
     }
     const askedAt = new Date(this.deps.now()).toISOString();
-    const turn = [...sources].sort((a, b) => (copy[a.key]?.askedAt ?? '').localeCompare(copy[b.key]?.askedAt ?? '')).slice(0, perRun);
+    // Compared as they are: `localeCompare` takes ten milliseconds the first time an isolate uses it, which is the whole of the free plan's allowance.
+    const askedOf = (s: RotatingSource) => copy[s.key]?.askedAt ?? '';
+    const turn = [...sources].sort((a, b) => (askedOf(a) < askedOf(b) ? -1 : askedOf(a) > askedOf(b) ? 1 : 0)).slice(0, perRun);
     const failed: string[] = [];
     await Promise.all(
       turn.map(async ({ key, url, shape }) => {

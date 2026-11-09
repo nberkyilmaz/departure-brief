@@ -2,7 +2,7 @@ export { createHttpClient, expectOk, HttpError } from './http.js';
 export type { HttpClient, HttpClientOptions, HttpRequestInit, HttpResponse } from './http.js';
 export { AWC_BASE_URL, AwcClient, AwcError } from './awc.js';
 export type { AwcFetch, AwcMetarRecord, AwcTafRecord, LatLonBox } from './awc.js';
-export { AWC_CACHE_BASE_URL, AwcCacheClient, GAIRMET_CACHE_FILE, METAR_CACHE_FILE, parseGairmetCache, parseMetarCache, parseTafCache, TAF_CACHE_FILE } from './awcCache.js';
+export { AWC_CACHE_BASE_URL, AIRCRAFT_REPORT_CACHE_FILE, AwcCacheClient, GAIRMET_CACHE_FILE, METAR_CACHE_FILE, parseAircraftReportCache, parseGairmetCache, parseMetarCache, parseTafCache, TAF_CACHE_FILE } from './awcCache.js';
 export { FAA_NOTAM_BASE_URL, FaaNotamClient, NotamError } from './notam.js';
 export type { NotamCredentials, NotamFetch } from './notam.js';
 export { ingestStation } from './ingest.js';

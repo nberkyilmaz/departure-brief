@@ -24,6 +24,8 @@ export const DEFAULT_FRESHNESS_MS: Readonly<Record<ReportKind, number>> = {
   // A hazard advisory can be issued at any moment, and is the one product
   // where being a quarter of an hour behind actually matters.
   sigmet: 15 * 60_000,
+  // Good for ninety minutes at the most, and filed at any moment.
+  pirep: 15 * 60_000,
 };
 
 export interface FreshnessStore {

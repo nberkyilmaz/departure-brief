@@ -22,3 +22,4 @@ export * from './metar/index.js';
 export * from './taf/index.js';
 export * from './upperwind/index.js';
 export * from './sigmet/index.js';
+export * from './pirep/index.js';

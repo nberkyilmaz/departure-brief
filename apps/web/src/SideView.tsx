@@ -1,5 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
-import { altitudeTicks, chartTop, COLUMN_PX, columnLabel, columnsOf, emptyStretches, hazardKey, hazardLetter, heightText, labelOf, layersToLabel, layerText, notesOf, spread, terrainPath, xOfNm, type Column } from './picture.js';
+import { altitudeTicks, chartTop, COLUMN_PX, columnLabel, columnsOf, emptyStretches, hazardKey, hazardLetter, heightText, labelOf, layersToLabel, layerText, notesOf, pirepTag, pirepWords, placePireps, spread, terrainPath, xOfNm, type Column } from './picture.js';
 import { openColumn, opens } from './stationLink.js';
 import { CATEGORY_LETTER } from './summary.js';
 import { useTerrain } from './terrain.js';
@@ -79,7 +79,7 @@ function Band({ h, tag, stack, x0, x1, top, yOf, plotTop }: { h: PictureHazard; 
 }
 
 /** The marks the chart uses, each drawn the way it is drawn on the chart. */
-function Key({ terrain }: { terrain: boolean }) {
+function Key({ terrain, pireps }: { terrain: boolean; pireps: boolean }) {
   const swatch = (children: ReactNode) => (
     <svg className="side-key-mark" width={30} height={18} aria-hidden="true">
       {children}
@@ -94,6 +94,7 @@ function Key({ terrain }: { terrain: boolean }) {
     ...(terrain ? ([['terrain', swatch(<path className="sv-terrain" d="M2 18L2 12L9 6L15 11L21 3L28 13L28 18Z" />), 'the terrain under your line']] as const) : []),
     ['ground', swatch(<rect className="sv-ground" x={8} y={4} width={14} height={14} />), 'the ground at that station'],
     ['freezing', swatch(<line className="sv-freezing" x1={3} y1={9} x2={27} y2={9} />), 'freezing level, 0 °C'],
+    ...(pireps ? ([['pirep', swatch(<PirepMark x={15} y={9} n={1} hollow={false} />), 'a pilot report, listed below']] as const) : []),
   ];
   return (
     <ul className="side-key">
@@ -104,6 +105,17 @@ function Key({ terrain }: { terrain: boolean }) {
       ))}
       <li className="side-key-letters">V VFR · M MVFR · I IFR · L LIFR</li>
     </ul>
+  );
+}
+
+function PirepMark({ x, y, n, hollow }: { x: number; y: number; n: number; hollow: boolean }) {
+  return (
+    <g className={`sv-pirep${hollow ? ' hollow' : ''}`}>
+      <circle cx={x} cy={y} r={8} />
+      <text x={x} y={y + 3.5} textAnchor="middle">
+        {n}
+      </text>
+    </g>
   );
 }
 
@@ -279,8 +291,6 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
               const x = xs[i]!;
               const observed = reading.from === 'observed';
               const inChart = sky.layers.filter((l) => l.baseMsl !== null && l.baseMsl <= top);
-              const above = sky.layers.filter((l) => l.baseMsl !== null && l.baseMsl > top).sort((a, b) => a.baseMsl! - b.baseMsl!);
-              const unknown = sky.layers.some((l) => l.baseMsl === null);
               const worded = layersToLabel(inChart, yOf, LABEL_GAP_PX);
               const seen = new Set(sky.layers.map((l) => `${l.amount}${l.baseMsl}`));
               const extra = reading.overlays.flatMap((o) => o.sky.layers).filter((l) => l.baseMsl !== null && l.baseMsl <= top && !seen.has(`${l.amount}${l.baseMsl}`));
@@ -292,16 +302,6 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
                   {inChart.map((l, j) => (
                     <Cloud key={j} layer={l} x={x} y={yOf(l.baseMsl!)} observed={observed} label={worded.has(l)} />
                   ))}
-                  {above[0] && (
-                    <text className="sv-label" x={x} y={HEAD_PX + 11} textAnchor="middle">
-                      <title>{layerText(above[0])} ft, above this chart</title>↑{heightText(above[0])}
-                    </text>
-                  )}
-                  {unknown && (
-                    <text className="sv-label" x={x} y={HEAD_PX + (above[0] ? 23 : 11)} textAnchor="middle">
-                      <title>Cloud reported, but its height or its station's elevation is not known</title>?
-                    </text>
-                  )}
                 </g>
               );
             })}
@@ -324,6 +324,43 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
                       </text>
                     </g>
                   ))}
+                </g>
+              );
+            })}
+
+            {/* After the freezing level, and haloed, so a level near the top of the chart does not run through them. */}
+            {columns.map((c, i) => {
+              const layers = c.station.reading?.sky?.layers ?? [];
+              const above = layers.filter((l) => l.baseMsl !== null && l.baseMsl > top).sort((a, b) => a.baseMsl! - b.baseMsl!);
+              const unknown = layers.some((l) => l.baseMsl === null);
+              return (
+                <g key={i}>
+                  {above[0] && (
+                    <text className="sv-label sv-halo" x={xs[i]!} y={HEAD_PX + 11} textAnchor="middle">
+                      <title>{layerText(above[0])} ft, above this chart</title>↑{heightText(above[0])}
+                    </text>
+                  )}
+                  {unknown && (
+                    <text className="sv-label sv-halo" x={xs[i]!} y={HEAD_PX + (above[0] ? 23 : 11)} textAnchor="middle">
+                      <title>Cloud reported, but its height or its station's elevation is not known</title>?
+                    </text>
+                  )}
+                </g>
+              );
+            })}
+
+            {placePireps(picture.pireps, top, xAt, yOf).map(({ p, n, x, y }) => {
+              const words = pirepTag(p);
+              const onTheLeft = x + 14 + words.length * 6 > width;
+              return (
+                <g key={n}>
+                  <title>{pirepWords(p)}</title>
+                  <PirepMark x={x} y={y} n={n} hollow={!p.speaksForThen} />
+                  {words && (
+                    <text className="sv-label sv-halo" x={onTheLeft ? x - 11 : x + 11} y={y + 3.5} textAnchor={onTheLeft ? 'end' : 'start'}>
+                      {words}
+                    </text>
+                  )}
                 </g>
               );
             })}
@@ -364,7 +401,17 @@ export function SideView({ stored, picture }: { stored: StoredBriefing; picture:
           ))}
         </ul>
       )}
-      <Key terrain={ground !== null} />
+      {picture.pireps.length > 0 && (
+        <ul className="side-hazards side-pireps">
+          {picture.pireps.map((p, i) => (
+            <li key={i}>
+              <span className={`side-pirep-tag${p.speaksForThen ? '' : ' hollow'}`}>{i + 1}</span> {pirepWords(p)}
+              <span className="side-pirep-text">{p.text}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <Key terrain={ground !== null} pireps={picture.pireps.length > 0} />
       <ul className="side-notes">
         {notesOf(picture, columns, spreadApart, terrain).map((n) => (
           <li key={n}>{n}</li>

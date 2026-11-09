@@ -14,7 +14,7 @@ import {
   SoundingClient,
   type HttpClient,
 } from '@depbrief/core/judge';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { MemoryKv } from '../src/memoryKv.js';
 import {
   ALASKA_SOUNDINGS,
@@ -39,6 +39,7 @@ const refusedCyei = readFileSync(join(FIXTURES, 'navcanada', 'upperwind', '2026-
 /** The combined SIGMET answer, the G-AIRMET cache file and every balloon's file, as recorded on 9 November 2026. */
 const sigmets = readFileSync(join(FIXTURES, 'northeast-2026-11-09', 'sigmet.json'), 'utf8');
 const gairmetXml = readFileSync(join(FIXTURES, 'northeast-2026-11-09', 'gairmets.cache.xml'), 'utf8');
+const aircraftReportXml = readFileSync(join(FIXTURES, 'pireps-2026-11-09', 'aircraftreports.cache.xml'), 'utf8');
 const SOUNDINGS = join(FIXTURES, 'noaa', 'soundings-2026-11-09');
 const soundingFile = (name: string) => readFileSync(join(SOUNDINGS, `${name}.txt`), 'latin1');
 const modified = JSON.parse(readFileSync(join(SOUNDINGS, 'last-modified.json'), 'utf8')) as Record<string, string>;
@@ -62,6 +63,7 @@ function upstream(overrides: Record<string, Answer> = {}) {
     [PRODUCTS.tafs.upstream]: () => new Response(gzipSync(tafXml), { headers: { 'Content-Type': 'application/octet-stream' } }),
     [PRODUCTS.sigmet.upstream]: () => new Response(sigmets),
     [PRODUCTS.gairmet.upstream]: () => new Response(gzipSync(gairmetXml), { headers: { 'Content-Type': 'application/octet-stream' } }),
+    [PRODUCTS.aircraftreports.upstream]: () => new Response(gzipSync(aircraftReportXml), { headers: { 'Content-Type': 'application/octet-stream' } }),
     [PRODUCTS.upperwind.upstream]: () => new Response(upperwinds),
     ...Object.fromEntries(SOUNDING_FILES.map((f) => [`${NOAA_RAW_US}/${f}.txt`, () => new Response(soundingFile(f), { headers: { 'Last-Modified': new Date(modified[`${f}.txt`]!).toUTCString() } })])),
     ...Object.fromEntries(ALASKA_SOUNDINGS.map((l) => [alaskaUrl(l), () => new Response(alaskaProduct(l), { headers: { 'Content-Type': 'application/ld+json' } })])),
@@ -105,6 +107,7 @@ describe('the timer', () => {
       'tafs:refreshed',
       'sigmet:refreshed',
       'gairmet:refreshed',
+      'aircraftreports:refreshed',
       'upperwind:refreshed',
       'soundings:refreshed',
     ]);
@@ -130,9 +133,9 @@ describe('the timer', () => {
       // A cron tick is not exactly on the minute.
       r.advance(5 * MIN + (tick % 2 === 0 ? 4_000 : -4_000));
     }
-    // 288 for the METARs, 96 each for the TAFs and the SIGMETs, 24 each for the G-AIRMETs and the Canadian upper winds, 72 for the balloons.
-    expect(r.kv.writes).toBeLessThanOrEqual(620);
-    expect(r.kv.writes).toBeGreaterThanOrEqual(590);
+    // 288 for the METARs, 96 each for the TAFs and the SIGMETs, 24 each for the G-AIRMETs and the Canadian upper winds, 72 each for the balloons and the pilot reports.
+    expect(r.kv.writes).toBeLessThanOrEqual(690);
+    expect(r.kv.writes).toBeGreaterThanOrEqual(660);
   });
 
   it('stores every product inside what KV allows, the upper winds of all ninety-seven sites included', async () => {
@@ -156,7 +159,7 @@ describe('the timer', () => {
       return put(key, value, options);
     };
     const outcomes = await r.relay.refresh();
-    expect(outcomes.map((o) => `${o.key}:${o.state}`)).toEqual(['metars:refreshed', 'tafs:failed', 'sigmet:refreshed', 'gairmet:refreshed', 'upperwind:refreshed', 'soundings:refreshed']);
+    expect(outcomes.map((o) => `${o.key}:${o.state}`)).toEqual(['metars:refreshed', 'tafs:failed', 'sigmet:refreshed', 'gairmet:refreshed', 'aircraftreports:refreshed', 'upperwind:refreshed', 'soundings:refreshed']);
     expect(outcomes[1]).toMatchObject({ error: 'could not store tafs: KV PUT failed: 500 Internal Server Error' });
   });
 
@@ -328,6 +331,24 @@ describe('the balloons, which are many small files', () => {
     expect(held['FAI']!.modified).toBe('2026-11-09T00:02:00.000Z');
   });
 
+  it('sorts them without localeCompare, which costs a free plan run its whole allowance the first time', async () => {
+    const compare = vi.spyOn(String.prototype, 'localeCompare');
+    const r = relayWith();
+    await r.relay.refresh();
+    r.advance(20 * MIN);
+    await r.relay.refresh();
+    expect(compare).not.toHaveBeenCalled();
+    compare.mockRestore();
+  });
+
+  it('serves the pilot reports compressed and labelled, for a browser to undo', async () => {
+    const r = relayWith();
+    await r.relay.refresh();
+    const res = await r.get('/awc/cache/aircraftreports.cache.xml.gz');
+    expect(res.headers['Content-Encoding']).toBe('gzip');
+    expect(gunzipSync(Buffer.from(res.body as ArrayBuffer)).toString('utf8')).toBe(aircraftReportXml);
+  });
+
   it('serves the G-AIRMET file compressed and labelled, for a browser to undo', async () => {
     const r = relayWith();
     await r.relay.refresh();
@@ -409,7 +430,7 @@ describe('serving the page', () => {
     await r.relay.refresh();
     const ok = await r.get('/status');
     expect(ok.status).toBe(200);
-    expect(JSON.parse(text(ok)).products.map((p: { product: string }) => p.product)).toEqual(['metars', 'tafs', 'sigmet', 'gairmet', 'upperwind', 'soundings']);
+    expect(JSON.parse(text(ok)).products.map((p: { product: string }) => p.product)).toEqual(['metars', 'tafs', 'sigmet', 'gairmet', 'aircraftreports', 'upperwind', 'soundings']);
     r.advance(20 * MIN);
     expect((await r.get('/status')).status).toBe(503);
   });

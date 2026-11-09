@@ -32,6 +32,7 @@ function relayAnswers(): Record<string, Answer> {
     '/awc/cache/tafs.cache.xml.gz': { status: 200, body: file(FETCH, 'awc-cache-2026-10-20', 'tafs.cache.xml') },
     '/awc/sigmet?format=json': { status: 200, body: '[]' },
     '/awc/cache/gairmets.cache.xml.gz': { status: 200, body: file(FETCH, 'northeast-2026-11-09', 'gairmets.cache.xml') },
+    '/awc/cache/aircraftreports.cache.xml.gz': { status: 200, body: file(FETCH, 'pireps-2026-11-09', 'aircraftreports.cache.xml') },
     '/noaa/soundings': { status: 200, body: '{}' },
     upperwind: { status: 200, body: file(FETCH, 'canada-2026-09-18', 'upperwind.json') },
     ...Object.fromEntries(['CYSN', 'CYKF', 'CYHM'].map((s) => [`/cfps/?site=${s}&alpha=notam`, { status: 200, body: file(FETCH, 'canada-2026-09-18', 'notam', `${s}.json`) }])),

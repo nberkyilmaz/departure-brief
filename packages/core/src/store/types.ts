@@ -5,7 +5,7 @@ import type { AssessmentStore } from '../notam/assess.js';
 
 export type { AssessmentStore };
 
-export type ReportKind = 'metar' | 'taf' | 'notam' | 'upperwind' | 'sigmet';
+export type ReportKind = 'metar' | 'taf' | 'notam' | 'upperwind' | 'sigmet' | 'pirep';
 
 /**
  * One upstream report, stored verbatim. Content-addressed: `sha256` is the

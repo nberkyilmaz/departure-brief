@@ -393,6 +393,18 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
       } catch (e) {
         req.log.warn({ err: e }, 'hazard advisories could not be fetched');
       }
+      if (deps.awcCache) {
+        try {
+          const now = new Date();
+          if (await shouldFetch(store, HAZARD_STATION, 'pirep', now)) {
+            const fetched = await deps.awcCache.aircraftReports();
+            await recordFetchAttempt(store, HAZARD_STATION, 'pirep', now, fetched.request);
+            await storeAndDecode(store, fetched.reports, fetched.request, now, HAZARD_STATION);
+          }
+        } catch (e) {
+          req.log.warn({ err: e }, 'pilot reports could not be fetched');
+        }
+      }
       /*
        * NOAA stopped issuing US winds aloft on 3 November 2026. What is left
        * is what its balloons measured, fetched for the route like the rest.

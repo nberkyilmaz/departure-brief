@@ -15,7 +15,7 @@
 import L from 'leaflet';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { baseMap, isTouch } from './mapBase.js';
-import { columnLabel, columnsOf, hazardKey, hazardLetter, labelOf, type Column } from './picture.js';
+import { columnLabel, columnsOf, hazardKey, hazardLetter, labelOf, pirepWords, type Column } from './picture.js';
 import { openColumn, opens } from './stationLink.js';
 import { CATEGORY_LETTER } from './summary.js';
 import type { RoutePicture, StoredBriefing } from './types.js';
@@ -28,6 +28,7 @@ const STATION_PX = 22;
 const CROWDED_AT = 16;
 const CROWDED_PX = 16;
 const TAG_PX = 18;
+const PIREP_PX = 20;
 
 const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const latLng = (p: { lat: number; lon: number }): L.LatLngTuple => [p.lat, p.lon];
@@ -88,7 +89,18 @@ function draw(container: HTMLElement, columns: readonly Column[], picture: Route
 
   for (const c of columns) dot(c, columns.length > CROWDED_AT).addTo(map);
 
-  map.fitBounds(L.latLngBounds(picture.corridor.flatMap((strip) => strip.map(latLng))), { padding: [10, 10], maxZoom: 9 });
+  picture.pireps.forEach((p, i) => {
+    L.marker(latLng(p), {
+      icon: L.divIcon({ className: `rm-pirep${p.speaksForThen ? '' : ' hollow'}`, html: String(i + 1), iconSize: [PIREP_PX, PIREP_PX] }),
+      title: pirepWords(p),
+      zIndexOffset: 3000,
+    })
+      .bindPopup(`<b>${i + 1}</b> ${escapeHtml(pirepWords(p))}<br><code>${escapeHtml(p.text)}</code>`)
+      .addTo(map);
+  });
+
+  // Reports reach further from the line than the stations do, and one off the edge of the map might as well not be there.
+  map.fitBounds(L.latLngBounds([...picture.corridor.flatMap((strip) => strip.map(latLng)), ...picture.pireps.map(latLng)]), { padding: [10, 10], maxZoom: 9 });
   return map;
 }
 
