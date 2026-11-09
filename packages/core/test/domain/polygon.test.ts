@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { LatLon } from '../../src/domain/geo.js';
-import { areaIsTestable, pointInArea, routeCrossesArea, routeDistanceToAreaNm, segmentsCross } from '../../src/domain/polygon.js';
+import { areaIsTestable, legInsideArea, pointInArea, routeCrossesArea, routeDistanceToAreaNm, segmentsCross } from '../../src/domain/polygon.js';
 
 /** A square degree over southern Ontario, near enough to home to picture. */
 const SQUARE: LatLon[] = [
@@ -149,5 +149,32 @@ describe('segmentsCross', () => {
     const d = { lat: 1, lon: 0 };
     expect(segmentsCross(a, b, c, d)).toBe(true);
     expect(segmentsCross(a, c, b, d)).toBe(false);
+  });
+});
+
+describe('how much of a leg is inside an area', () => {
+  it('is the part between where it goes in and where it comes out', () => {
+    const inside = legInsideArea({ lat: 43.5, lon: -81 }, { lat: 43.5, lon: -78 }, SQUARE);
+    expect(inside).toHaveLength(1);
+    expect(inside[0]!.from).toBeCloseTo(1 / 3, 10);
+    expect(inside[0]!.to).toBeCloseTo(2 / 3, 10);
+  });
+
+  it('starts at the beginning of a leg that begins inside, and stops at the end of one that ends inside', () => {
+    expect(legInsideArea({ lat: 43.5, lon: -79.5 }, { lat: 43.5, lon: -78.5 }, SQUARE)[0]!.from).toBe(0);
+    expect(legInsideArea({ lat: 43.5, lon: -80.5 }, { lat: 43.5, lon: -79.5 }, SQUARE)[0]!.to).toBe(1);
+    expect(legInsideArea({ lat: 43.4, lon: -79.6 }, { lat: 43.6, lon: -79.4 }, SQUARE)).toEqual([{ from: 0, to: 1 }]);
+  });
+
+  it('is nothing for a leg that stays outside', () => {
+    expect(legInsideArea({ lat: 45, lon: -81 }, { lat: 45, lon: -78 }, SQUARE)).toEqual([]);
+  });
+
+  it('agrees with the crossing test on the polygons the service published', () => {
+    const a = { lat: 41, lon: -105 };
+    const b = { lat: 30, lon: -95 };
+    for (const r of JSON.parse(readFileSync(join(__dirname, '..', 'fixtures', 'fetch', 'awc', 'sigmet-2026-09-14', 'airsigmet.json'), 'utf8')) as SigmetRecord[]) {
+      expect(legInsideArea(a, b, r.coords).length > 0).toBe(routeCrossesArea([a, b], r.coords));
+    }
   });
 });

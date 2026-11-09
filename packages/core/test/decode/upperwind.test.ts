@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { decodeUpperWind } from '../../src/decode/upperwind/decode.js';
-import { interpolateDegrees, windAtAltitude, windComponents } from '../../src/decode/upperwind/interpolate.js';
+import { freezingLevel, interpolateDegrees, windAtAltitude, windComponents } from '../../src/decode/upperwind/interpolate.js';
 import { sliceSpan } from '../../src/decode/span.js';
 
 const DIR = join(__dirname, '..', 'fixtures', 'fetch', 'navcanada', 'upperwind', '2026-09-14');
@@ -175,5 +175,42 @@ describe('windComponents', () => {
 
   it('has nothing to say about a wind with no direction', () => {
     expect(windComponents(360, { directionTrue: null, speedKt: 0 })).toBeNull();
+  });
+});
+
+describe('the freezing level', () => {
+  /** The low-level forecasts for one site, in the order the day's three bulletins were issued, as served on one of two recorded days. */
+  const lowLevels = (file: string, site: string) =>
+    (JSON.parse(readFileSync(file, 'utf8')) as { data: (CfpsRecord & { position?: { pointReference?: string } })[] }).data
+      .filter((r) => (r.position?.pointReference ?? `C${r.location}`) === site)
+      .map((r) => decodeUpperWind(r.text).levels)
+      // 6,000 ft: a high field's 3,000 ft level comes back empty, and the high-altitude bulletins start far above either.
+      .filter((levels) => levels.some((l) => l.altitudeFt === 6000));
+  const NOVEMBER = join(__dirname, '..', 'fixtures', 'fetch', 'rockies-2026-11-08', 'upperwind.json');
+  const SEPTEMBER = join(DIR, 'CYOW.json');
+
+  it('falls between the two levels either side of zero, in a straight line', () => {
+    // Ottawa, 14 September: +4 at 6,000 ft and -2 at 9,000.
+    expect(freezingLevel(lowLevels(SEPTEMBER, 'CYOW')[0]!)).toEqual({ crossingsFt: [8000], belowFt: null, aboveFt: null });
+  });
+
+  it('is that level when a level is exactly zero', () => {
+    // The same day's evening bulletin: 0 at 12,000 ft. Edmonton's on 9 November is 0 at 6,000, its lowest temperature.
+    expect(freezingLevel(lowLevels(SEPTEMBER, 'CYOW')[2]!)).toEqual({ crossingsFt: [12000], belowFt: null, aboveFt: null });
+    expect(freezingLevel(lowLevels(NOVEMBER, 'CYEG')[2]!)).toEqual({ crossingsFt: [6000], belowFt: null, aboveFt: null });
+  });
+
+  it('is only a bound when the lowest level with a temperature is already below zero', () => {
+    // Vancouver: 3,000 ft carries no temperature and 6,000 ft is -2.
+    expect(freezingLevel(lowLevels(NOVEMBER, 'CYVR')[1]!)).toEqual({ crossingsFt: [], belowFt: 6000, aboveFt: null });
+  });
+
+  it('is only a bound the other way when every temperature it has is above zero', () => {
+    const levels = lowLevels(SEPTEMBER, 'CYOW')[0]!.filter((l) => l.altitudeFt <= 6000);
+    expect(freezingLevel(levels)).toEqual({ crossingsFt: [], belowFt: null, aboveFt: 6000 });
+  });
+
+  it('is nothing when no level carries a temperature', () => {
+    expect(freezingLevel(lowLevels(SEPTEMBER, 'CYOW')[0]!.filter((l) => l.altitudeFt === 3000))).toBeNull();
   });
 });

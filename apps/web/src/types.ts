@@ -348,6 +348,88 @@ export interface StoredBriefing {
   };
 }
 
+/** A cloud layer put on the altitude scale. */
+export interface PictureLayer {
+  kind: 'layer' | 'vertical-visibility';
+  amount: 'FEW' | 'SCT' | 'BKN' | 'OVC' | null;
+  type: 'CB' | 'TCU' | null;
+  /** Null when the report gave no height, or its station has no known elevation. */
+  baseMsl: number | null;
+}
+
+export interface PictureSky {
+  layers: PictureLayer[];
+  visibility: string | null;
+  weather: string[];
+}
+
+export interface PictureReading {
+  /** A forecast for the time you pass, or an observation from now. */
+  from: 'forecast' | 'observed';
+  station: string;
+  distanceNm: number;
+  issuedAt: string | null;
+  /** Null for an observation too far from the time you pass to say anything about it. */
+  sky: PictureSky | null;
+  overlays: { label: string; from: string; to: string; sky: PictureSky }[];
+}
+
+export interface PictureStation {
+  id: string;
+  role: 'departure' | 'via' | 'destination' | 'along';
+  lat: number;
+  lon: number;
+  nm: number;
+  offsetNm: number;
+  at: string;
+  elevationFt: number | null;
+  reading: PictureReading | null;
+}
+
+export interface PictureHazardBase {
+  kind: 'sigmet' | 'airmet';
+  what: string;
+  qualifier: string | null;
+  region: string | null;
+  baseFt: number | null;
+  topFt: number | null;
+  validFrom: string | null;
+  validTo: string | null;
+}
+
+export interface PictureHazard extends PictureHazardBase {
+  area: { lat: number; lon: number }[];
+  stretches: { fromNm: number; toNm: number; fromAt: string; toAt: string; startsInside: boolean; endsInside: boolean }[];
+}
+
+export interface PictureHazardMissed extends PictureHazardBase {
+  why: 'over-before-you-reach-it' | 'not-begun-when-you-leave-it';
+  nm: number;
+  at: string;
+}
+
+export interface PictureFreezing {
+  station: string;
+  nm: number;
+  at: string;
+  distanceNm: number;
+  crossingsFt: number[];
+  belowFt: number | null;
+  aboveFt: number | null;
+}
+
+/** The flight laid out along the route for drawing. Beside the briefing, not part of its hash. */
+export interface RoutePicture {
+  totalNm: number;
+  cruiseFt: number;
+  tasKt: number;
+  stations: PictureStation[];
+  hazards: PictureHazard[];
+  hazardsMissed: PictureHazardMissed[];
+  hazardsUntestable: number;
+  freezing: PictureFreezing[];
+}
+
 export interface DocumentCitation {
   documentSha256: string;
   filename: string;

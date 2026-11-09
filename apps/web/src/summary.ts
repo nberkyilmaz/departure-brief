@@ -38,6 +38,9 @@ export function labelledPoints(stored: StoredBriefing): LabelledPoint[] {
   return out;
 }
 
+/** A category in one letter, for wherever the word will not fit. */
+export const CATEGORY_LETTER: Readonly<Record<FlightCategory, string>> = { VFR: 'V', MVFR: 'M', IFR: 'I', LIFR: 'L' };
+
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 const str = (v: unknown): string | null => (typeof v === 'string' ? v : null);
 const capital = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
@@ -57,6 +60,8 @@ export interface CardLine {
 export interface FieldCard extends LabelledPoint {
   /** At the time you are there: the forecast's category, or the observation's when no forecast covers it. */
   readonly category: FlightCategory | null;
+  /** Which of the two the category is: the observation is now, not when you are there. */
+  readonly from: 'forecast' | 'now' | null;
   readonly lines: readonly CardLine[];
   /** Where the lines were read from, in words. Null when nothing covers this point. */
   readonly source: string | null;
@@ -193,6 +198,7 @@ function card(lp: LabelledPoint, cruiseFt: number | null): FieldCard {
   return {
     ...lp,
     category: prevailing.length > 0 ? point.forecastCategory : point.category,
+    from: prevailing.length > 0 ? 'forecast' : point.category ? 'now' : null,
     lines,
     source,
     now,

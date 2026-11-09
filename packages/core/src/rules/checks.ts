@@ -76,7 +76,7 @@ function finding(ctx: CheckContext, rule: string, attention: Attention, summary:
 }
 
 
-const fmtVis = (v: Visibility): string => {
+export const fmtVis = (v: Visibility): string => {
   switch (v.kind) {
     case 'statute':
       return `${v.qualifier === 'lessThan' ? '<' : v.qualifier === 'greaterThan' ? '>' : ''}${v.miles} SM`;

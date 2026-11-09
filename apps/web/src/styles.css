@@ -1025,6 +1025,69 @@ summary:focus-visible,
 .concern-when { display: block; color: var(--muted); font-size: 0.8rem; }
 .concern-detail { padding: 0 var(--s3) var(--s2); }
 
+/* The side view. Axis stays put while the stations scroll past it; every mark takes its colour from the same variables as the rest of the page. */
+.side { margin: 0 0 var(--s4); }
+.side h3 { font-size: 0.95rem; margin: 0 0 0.2rem; }
+.side .explain { margin: 0 0 var(--s2); }
+.side-chart { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+.side-scroll { display: flex; overflow-x: auto; overscroll-behavior-x: contain; }
+.side-axis { position: sticky; left: 0; z-index: 1; flex: none; background: var(--surface); border-right: 1px solid var(--line); }
+.side-plot { flex: none; display: block; }
+.side svg text { fill: var(--fg); font-variant-numeric: tabular-nums; }
+.sv-label { font-size: 10.5px; }
+.side svg .sv-label, .side svg .sv-row-label, .side svg .sv-empty { fill: var(--muted); }
+.side svg .sv-halo { paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+.sv-row-label { font-size: 10px; }
+.sv-id { font-size: 11px; font-weight: 600; }
+.sv-cell { font-size: 11px; }
+.sv-empty { font-size: 10.5px; font-style: italic; }
+.sv-grid { stroke: var(--line); stroke-width: 1; }
+.sv-cruise { stroke: var(--fg); stroke-width: 2; }
+.side svg .sv-cruise-label { font-size: 10.5px; font-weight: 600; paint-order: stroke; stroke: var(--surface); stroke-width: 3px; }
+.sv-ground { fill: var(--line-strong); }
+.sv-fade-from { stop-color: var(--muted); stop-opacity: 0.55; }
+.sv-fade-to { stop-color: var(--muted); stop-opacity: 0; }
+.sv-cloud-base { fill: var(--muted); }
+.sv-cloud-outline { fill: none; stroke: var(--muted); stroke-width: 1.25; }
+.sv-overlay { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 4 3; }
+.sv-freezing { stroke: var(--advisory); stroke-width: 2; }
+.sv-hatch { stroke-width: 1.5; stroke-opacity: 0.45; }
+.sv-hatch.sigmet, .sv-band.sigmet .sv-band-edge { stroke: var(--nogo); }
+.sv-hatch.airmet, .sv-band.airmet .sv-band-edge { stroke: var(--marginal); }
+.sv-band-edge { fill: none; stroke-width: 1; }
+.sv-tag-box { fill: var(--surface); stroke: var(--line-strong); }
+.side svg .sv-tag { font-size: 10.5px; font-weight: 600; }
+.sv-chip circle { stroke: var(--surface); stroke-width: 2; fill: var(--unknown); }
+.sv-chip.vfr circle { fill: var(--vfr); }
+.sv-chip.mvfr circle { fill: var(--mvfr); }
+.sv-chip.ifr circle { fill: var(--ifr); }
+.sv-chip.lifr circle { fill: var(--lifr); }
+.sv-chip.hollow circle { fill: var(--surface); stroke: var(--unknown); }
+.sv-chip.hollow.vfr circle { stroke: var(--vfr); }
+.sv-chip.hollow.mvfr circle { stroke: var(--mvfr); }
+.sv-chip.hollow.ifr circle { stroke: var(--ifr); }
+.sv-chip.hollow.lifr circle { stroke: var(--lifr); }
+.side svg .sv-chip text { font-size: 11px; font-weight: 700; fill: #fff; }
+.side svg .sv-chip.hollow text { fill: var(--fg); }
+.sv-hit { fill: transparent; cursor: pointer; outline: none; }
+.sv-hit:hover { fill: var(--fg); fill-opacity: 0.05; }
+.sv-hit:focus-visible { fill: var(--fg); fill-opacity: 0.08; stroke: var(--fg); stroke-width: 1; }
+.side-hazards, .side-notes, .side-key { list-style: none; margin: var(--s2) 0 0; padding: 0; font-size: 0.8rem; color: var(--muted); }
+.side-hazards { color: var(--fg); }
+.side-hazards li + li, .side-notes li + li { margin-top: var(--s1); }
+.side-hazard-tag { display: inline-block; min-width: 1.15rem; text-align: center; font-weight: 600; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--surface); }
+.side-hazard-tag.sigmet { border-color: var(--nogo); }
+.side-hazard-tag.airmet { border-color: var(--marginal); }
+.side-key { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); }
+.side-key li { display: inline-flex; align-items: center; gap: 0.3rem; }
+.side-key-mark { flex: none; }
+.side-key-letters { font-variant-numeric: tabular-nums; }
+.along-row.along-found { animation: along-found 1.8s ease-out; }
+@keyframes along-found { from { background: var(--surface-sunk); box-shadow: inset 0 0 0 2px var(--advisory); } to { background: transparent; box-shadow: inset 0 0 0 2px transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  .along-row.along-found { animation: none; box-shadow: inset 0 0 0 2px var(--advisory); }
+}
+
 /* Along the way: the stations beside the track in the order you pass them, read like the list above. */
 .along { margin: 0 0 var(--s4); }
 .along h3 { font-size: 0.95rem; margin: 0 0 0.2rem; }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { TOPIC_LABEL, topicOf, type Topic } from './summary.js';
-import { hhmmZ, localClock } from './time.js';
+import { CATEGORY_LETTER, TOPIC_LABEL, topicOf, type Topic } from './summary.js';
+import { hhmmZ, localClock, zoneOf } from './time.js';
 import type { DepartureSlot, Finding, FlightCategory, WindowAlong, WindowPoint } from './types.js';
 
 /**
@@ -16,14 +16,8 @@ import type { DepartureSlot, Finding, FlightCategory, WindowAlong, WindowPoint }
  * you pick.
  */
 
-const LETTER: Readonly<Record<FlightCategory, string>> = { VFR: 'V', MVFR: 'M', IFR: 'I', LIFR: 'L' };
-
 /** The hour as the clock on the wall reads it, on twenty-four hours so twelve of them fit across a phone. */
 const hourOf = (iso: string): string => new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', hourCycle: 'h23' });
-
-/** This device's zone at that instant, as a clock prints it: EDT, PST. */
-const zoneOf = (iso: string): string =>
-  new Intl.DateTimeFormat(undefined, { timeZoneName: 'short' }).formatToParts(new Date(iso)).find((p) => p.type === 'timeZoneName')?.value ?? '';
 
 /** Arrival time without the weekday when it is the same day as leaving. */
 const timeOf = (iso: string): string => new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
@@ -170,7 +164,7 @@ export function WhenCanIGo({ slots, departure, onPick }: { slots: readonly Depar
                         aria-label={cellLabel(s, r, c)}
                         onClick={() => setSelected(i)}
                       >
-                        {c.covered && c.category ? LETTER[c.category] : '–'}
+                        {c.covered && c.category ? CATEGORY_LETTER[c.category] : '–'}
                       </button>
                     </td>
                   );

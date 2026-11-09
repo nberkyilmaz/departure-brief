@@ -87,6 +87,40 @@ export function routeCrossesArea(route: readonly LatLon[], area: readonly LatLon
 }
 
 /**
+ * Which parts of a leg lie inside the area, as fractions of the leg from 0
+ * to 1. The same flat geometry as the tests above, so a leg they say goes
+ * through an area has its way through here.
+ */
+export function legInsideArea(from: LatLon, to: LatLon, area: readonly LatLon[]): { from: number; to: number }[] {
+  const dLon = to.lon - from.lon;
+  const dLat = to.lat - from.lat;
+  const cuts = [0, 1];
+  for (let j = 0, k = area.length - 1; j < area.length; k = j++) {
+    const a = area[j]!;
+    const b = area[k]!;
+    const eLon = b.lon - a.lon;
+    const eLat = b.lat - a.lat;
+    const across = dLon * eLat - dLat * eLon;
+    if (across === 0) continue;
+    const t = ((a.lon - from.lon) * eLat - (a.lat - from.lat) * eLon) / across;
+    const u = ((a.lon - from.lon) * dLat - (a.lat - from.lat) * dLon) / across;
+    if (t > 0 && t < 1 && u >= 0 && u <= 1) cuts.push(t);
+  }
+  cuts.sort((x, y) => x - y);
+  const inside: { from: number; to: number }[] = [];
+  for (let i = 1; i < cuts.length; i++) {
+    const start = cuts[i - 1]!;
+    const end = cuts[i]!;
+    const middle = (start + end) / 2;
+    if (end === start || !pointInArea({ lat: from.lat + dLat * middle, lon: from.lon + dLon * middle }, area)) continue;
+    const last = inside[inside.length - 1];
+    if (last && last.to === start) last.to = end;
+    else inside.push({ from: start, to: end });
+  }
+  return inside;
+}
+
+/**
  * The shortest distance from a point to the area's boundary, in degrees of
  * latitude — which is close enough to nautical miles at 60 to the degree
  * for judging "near". Zero inside.

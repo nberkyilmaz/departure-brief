@@ -22,6 +22,7 @@ import {
   parseFlightPlan,
   parsePilotProfile,
   resolveFlight,
+  routePicture,
   resolveRoute,
   UnknownWaypointError,
   type AwcClient,
@@ -401,7 +402,8 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
     await recordForecastChecks(store, resolved);
     const briefing = assembleBriefing(resolved, profile, aircraft, new Date(), notams);
     const { inserted } = await store.putBriefing(briefing);
-    return reply.code(inserted ? 201 : 200).send(briefing);
+    // The flight laid out for drawing travels beside the briefing, so it is no part of what the hash covers.
+    return reply.code(inserted ? 201 : 200).send({ ...briefing, picture: await routePicture(store, resolved) });
   });
 
   app.get<{ Params: { sha256: string } }>('/api/briefings/:sha256', async (req, reply) => {
