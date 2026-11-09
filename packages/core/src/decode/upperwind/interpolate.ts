@@ -101,6 +101,42 @@ export function windAtAltitude(levels: readonly UpperWindLevel[], altitudeFt: nu
   return { altitudeFt, directionTrue, speedKt, tempC, basis: 'interpolated', from: [below, above] };
 }
 
+/**
+ * Where the air reaches 0 °C, as far as a forecast's levels can say. The
+ * levels are thousands of feet apart and the lowest few carry no
+ * temperature, so on a cold day the honest answer is only a bound.
+ */
+export interface FreezingLevel {
+  /** Every height the temperature passes through zero going up, lowest first. More than one is an inversion. */
+  readonly crossingsFt: readonly number[];
+  /** Already below zero at this, the lowest level with a temperature: it freezes somewhere under it. */
+  readonly belowFt: number | null;
+  /** Still above zero at this, the highest level with a temperature. */
+  readonly aboveFt: number | null;
+}
+
+/**
+ * The freezing level between a forecast's levels, in a straight line and to
+ * the nearest hundred feet, which is more than whole degrees thousands of
+ * feet apart can claim. `null` when no level carries a temperature.
+ */
+export function freezingLevel(levels: readonly UpperWindLevel[]): FreezingLevel | null {
+  const known = levels.filter((l): l is UpperWindLevel & { tempC: number } => l.tempC !== null);
+  const lowest = known[0];
+  const highest = known[known.length - 1];
+  if (!lowest || !highest) return null;
+  const crossingsFt: number[] = [];
+  known.forEach((level, i) => {
+    const next = known[i + 1];
+    if (level.tempC === 0) crossingsFt.push(level.altitudeFt);
+    else if (next && level.tempC * next.tempC < 0) {
+      const fraction = level.tempC / (level.tempC - next.tempC);
+      crossingsFt.push(Math.round((level.altitudeFt + (next.altitudeFt - level.altitudeFt) * fraction) / 100) * 100);
+    }
+  });
+  return { crossingsFt, belowFt: lowest.tempC < 0 ? lowest.altitudeFt : null, aboveFt: highest.tempC > 0 ? highest.altitudeFt : null };
+}
+
 export interface WindComponents {
   /** Positive is a headwind, negative a tailwind. */
   readonly headwindKt: number;

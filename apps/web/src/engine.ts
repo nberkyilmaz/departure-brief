@@ -38,6 +38,7 @@ import {
   parsePilotProfile,
   recordFetchAttempt,
   resolveFlight,
+  routePicture,
   storeAndDecode,
   UnknownWaypointError,
   withHandbookLimits,
@@ -52,7 +53,7 @@ import {
   type RawReport,
   type WeightBalanceSpec as CoreWeightBalanceSpec,
 } from '@depbrief/core/judge';
-import type { AerodromeReport, AircraftInput, BriefingDiff, DepartureSlot, FlightPlanInput, ProfileInput, StoredBriefing, WeightBalanceSpec } from './types.js';
+import type { AerodromeReport, AircraftInput, BriefingDiff, DepartureSlot, FlightPlanInput, ProfileInput, RoutePicture, StoredBriefing, WeightBalanceSpec } from './types.js';
 
 export type { AerodromeReport };
 
@@ -162,6 +163,8 @@ export interface StationWeather {
 /** A briefing, and what changed since the one before it. */
 export interface LocalBriefing {
   readonly briefing: StoredBriefing;
+  /** The same flight laid out for drawing. */
+  readonly picture: RoutePicture;
   /** Null for the first briefing, or when nothing worth showing moved. */
   readonly diff: BriefingDiff | null;
 }
@@ -503,7 +506,7 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
       previous = briefing;
       await store.putBriefing(briefing);
       const diff = before ? diffBriefings(before, briefing) : null;
-      return { briefing: asJson<StoredBriefing>(briefing), diff: diff && !diff.quiet ? asJson<BriefingDiff>(diff) : null };
+      return { briefing: asJson<StoredBriefing>(briefing), picture: asJson<RoutePicture>(await routePicture(store, resolved)), diff: diff && !diff.quiet ? asJson<BriefingDiff>(diff) : null };
     },
     async window(planInput, profileInput, aircraftInput) {
       const plan = parseFlightPlan(planInput);

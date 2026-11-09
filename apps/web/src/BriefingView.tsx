@@ -1,9 +1,11 @@
 import { useState, type ReactNode } from 'react';
 import { NotamPanel } from './NotamPanel.js';
+import { alongRowId } from './picture.js';
 import { aerodromeHref } from './router.js';
+import { SideView } from './SideView.js';
 import { alongTheWay, concernsOf, fieldCards, TOPIC_LABEL, type AlongLeg, type AlongStation, type Concern, type FieldCard } from './summary.js';
 import { hhmmZ, local, localClock, zulu } from './time.js';
-import type { Citation, Finding, StoredBriefing } from './types.js';
+import type { Citation, Finding, RoutePicture, StoredBriefing } from './types.js';
 
 /** The time as a pilot says it; the date rides in the local time beside it, and the full stamp is a hover away. */
 function Zulu({ iso }: { iso: string }) {
@@ -276,7 +278,7 @@ function AlongRow({ s, name }: { s: AlongStation; name: string | null }) {
   const r = s.review;
   const category = (s.category ?? 'unknown').toLowerCase();
   return (
-    <li className={`along-row${s.attention ? ` ${s.attention}` : ''}`}>
+    <li id={alongRowId(r.station)} className={`along-row${s.attention ? ` ${s.attention}` : ''}`}>
       <details>
         <summary>
           <span className="along-nm">{Math.round(r.alongNm)} nm</span>
@@ -393,7 +395,7 @@ function WorthALook({ concerns }: { concerns: readonly Concern[] }) {
   );
 }
 
-export function BriefingView({ stored, nameOf, whenCanIGo }: { stored: StoredBriefing; nameOf?: (id: string) => string | null; whenCanIGo?: ReactNode }) {
+export function BriefingView({ stored, picture, nameOf, whenCanIGo }: { stored: StoredBriefing; picture?: RoutePicture | null; nameOf?: (id: string) => string | null; whenCanIGo?: ReactNode }) {
   const b = stored.document.briefing;
   const cards = fieldCards(stored);
   return (
@@ -416,6 +418,7 @@ export function BriefingView({ stored, nameOf, whenCanIGo }: { stored: StoredBri
         ))}
       </div>
 
+      {picture && <SideView stored={stored} picture={picture} />}
       <AlongTheWay legs={alongTheWay(stored)} nameOf={nameOf} />
 
       <Gaps stored={stored} />

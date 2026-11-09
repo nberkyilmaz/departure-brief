@@ -17,7 +17,7 @@ import { useStored } from './useStored.js';
 import { WbPanel } from './WbPanel.js';
 import { WeatherNote, weatherPhrase } from './WeatherNote.js';
 import { WhenCanIGo } from './WhenCanIGo.js';
-import type { AircraftInput, BriefingDiff, DepartureSlot, FlightPlanInput, ProfileInput, StoredBriefing } from './types.js';
+import type { AircraftInput, BriefingDiff, DepartureSlot, FlightPlanInput, ProfileInput, RoutePicture, StoredBriefing } from './types.js';
 
 /**
  * Two ways to brief, one form.
@@ -65,6 +65,7 @@ export function App() {
   const [busy, setBusy] = useState(DEMO);
   const [error, setError] = useState<string | null>(null);
   const [briefing, setBriefing] = useState<StoredBriefing | null>(null);
+  const [picture, setPicture] = useState<RoutePicture | null>(null);
   const [diff, setDiff] = useState<BriefingDiff | null>(null);
   /** Set once the visitor has changed something, so the page can stop calling it "recorded". */
   const [touched, setTouched] = useState(false);
@@ -135,6 +136,7 @@ export function App() {
           .then((r) => {
             if (!live) return;
             setBriefing(r.briefing);
+            setPicture(r.picture);
             setDiff(r.diff);
             setError(null);
           })
@@ -144,6 +146,7 @@ export function App() {
             setError(e.message);
             // The last flight's briefing under this flight's name would be worse than none.
             setBriefing(null);
+            setPicture(null);
             setDiff(null);
           })
           .finally(() => {
@@ -227,9 +230,10 @@ export function App() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ plan: flight, profile, aircraft, fetch: true }),
       });
-      const body = (await res.json()) as StoredBriefing | { error: string };
+      const body = (await res.json()) as (StoredBriefing & { picture?: RoutePicture }) | { error: string };
       if (!res.ok || 'error' in body) throw new Error('error' in body ? body.error : `HTTP ${res.status}`);
       setBriefing(body);
+      setPicture(body.picture ?? null);
       // A 404 here just means this is the first briefing of this flight.
       const d = await fetch(`/api/briefings/${body.sha256}/diff`);
       setDiff(d.ok ? ((await d.json()) as BriefingDiff) : null);
@@ -256,6 +260,7 @@ export function App() {
     setDraft(null);
     // The last flight's cards under this flight's name, even for the moment it takes to rebuild, would be the wrong flight.
     setBriefing(null);
+    setPicture(null);
     setDiff(null);
     setError(null);
     if (!DEMO) void briefRemotely(draft);
@@ -392,6 +397,7 @@ export function App() {
             {draft ? null : briefing ? (
               <BriefingView
                 stored={briefing}
+                picture={picture}
                 nameOf={nameOf}
                 whenCanIGo={slots.length > 0 ? <WhenCanIGo slots={slots} departure={plan.departureTime} onPick={pickHour} /> : null}
               />

@@ -35,6 +35,7 @@ official briefing.
 | **NOTAM relevance** | Decoded, filtered by time and geography, deduped; deterministic rules where there is one right answer, a local model for the rest. |
 | **Evaluation harness** | A reviewed labelled set and a gate that fails the build, not a claim in a README. |
 | **Briefing diff** | What changed since last time, measured against the verdict rather than the text. |
+| **Side view** | The route from the side: the ground at each station, the cloud bases forecast for when you pass it put on the altitude scale, SIGMET bands where you would be inside them while they are in force, the freezing level where there are upper-air temperatures. It says what it does not know: no tops, no terrain between stations. |
 | **When can I go?** | The flight judged again for each of the next twelve hours, by the same code as the briefing, the destination at the time you would arrive and the stations along the way when you would pass them; pick an hour and it is briefed. |
 | **Weight and balance** | Read out of a scanned handbook, every figure checked against the ink before it is used. |
 | **Forecast verification** | Did the TAF turn out to be right, and which way was it wrong. |
