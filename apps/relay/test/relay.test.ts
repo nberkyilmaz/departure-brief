@@ -10,6 +10,8 @@ import {
   AwcClient,
   CANADIAN_UPPERWIND_SITES,
   NavCanadaClient,
+  SOUNDING_STATIONS,
+  SoundingClient,
   type HttpClient,
 } from '@depbrief/core/judge';
 import { describe, expect, it } from 'vitest';
@@ -17,9 +19,11 @@ import { MemoryKv } from '../src/memoryKv.js';
 import {
   AWC_API,
   CFPS,
+  NOAA_RAW_US,
   NOTAM_FETCHES_PER_MINUTE,
   PRODUCTS,
   Relay,
+  SOUNDING_FILES,
   UPPERWIND_SITES,
   type RelayResponse,
 } from '../src/relay.js';
@@ -30,6 +34,12 @@ const tafXml = readFileSync(join(FIXTURES, 'awc-cache-2026-10-20', 'tafs.cache.x
 /** Toronto's and Val-d'Or's upper winds, and CFPS refusing a request over a site it does not know: both as recorded on 5 November 2026. */
 const upperwinds = readFileSync(join(FIXTURES, 'navcanada', 'upperwind', '2026-11-05', 'CYYZ-CYVO.json'), 'utf8');
 const refusedCyei = readFileSync(join(FIXTURES, 'navcanada', 'upperwind', '2026-11-05', 'refused-CYEI.json'), 'utf8');
+/** The combined SIGMET answer, the G-AIRMET cache file and every balloon's file, as recorded on 9 November 2026. */
+const sigmets = readFileSync(join(FIXTURES, 'northeast-2026-11-09', 'sigmet.json'), 'utf8');
+const gairmetXml = readFileSync(join(FIXTURES, 'northeast-2026-11-09', 'gairmets.cache.xml'), 'utf8');
+const SOUNDINGS = join(FIXTURES, 'noaa', 'soundings-2026-11-09');
+const soundingFile = (name: string) => readFileSync(join(SOUNDINGS, `${name}.txt`), 'latin1');
+const modified = JSON.parse(readFileSync(join(SOUNDINGS, 'last-modified.json'), 'utf8')) as Record<string, string>;
 
 const PAGE = 'https://nberkyilmaz.github.io';
 const T0 = Date.parse('2026-10-20T05:00:00Z');
@@ -43,9 +53,10 @@ function upstream(overrides: Record<string, Answer> = {}) {
   const table: Record<string, Answer> = {
     [PRODUCTS.metars.upstream]: () => new Response(gzipSync(metarCsv), { headers: { 'Content-Type': 'application/octet-stream' } }),
     [PRODUCTS.tafs.upstream]: () => new Response(gzipSync(tafXml), { headers: { 'Content-Type': 'application/octet-stream' } }),
-    [PRODUCTS.isigmet.upstream]: () => new Response('[{"firId":"CZYZ","rawSigmet":"..."}]'),
-    [PRODUCTS.airsigmet.upstream]: () => new Response(null, { status: 204 }),
+    [PRODUCTS.sigmet.upstream]: () => new Response(sigmets),
+    [PRODUCTS.gairmet.upstream]: () => new Response(gzipSync(gairmetXml), { headers: { 'Content-Type': 'application/octet-stream' } }),
     [PRODUCTS.upperwind.upstream]: () => new Response(upperwinds),
+    ...Object.fromEntries(SOUNDING_FILES.map((f) => [`${NOAA_RAW_US}/${f}.txt`, () => new Response(soundingFile(f), { headers: { 'Last-Modified': new Date(modified[`${f}.txt`]!).toUTCString() } })])),
     [`${CFPS}?site=CYSN&alpha=notam`]: () => new Response('{"meta":{},"data":[{"type":"notam"}]}'),
     ...overrides,
   };
@@ -84,9 +95,10 @@ describe('the timer', () => {
     expect(outcomes.map((o) => `${o.key}:${o.state}`)).toEqual([
       'metars:refreshed',
       'tafs:refreshed',
-      'isigmet:refreshed',
-      'airsigmet:refreshed',
+      'sigmet:refreshed',
+      'gairmet:refreshed',
       'upperwind:refreshed',
+      'soundings:refreshed',
     ]);
     const { metadata } = await kv.getWithMetadata('metars');
     expect(metadata?.fetchedAt).toBe('2026-10-20T05:00:00.000Z');
@@ -100,7 +112,7 @@ describe('the timer', () => {
     expect(second.filter((o) => o.state === 'refreshed').map((o) => o.key)).toEqual(['metars']);
     r.advance(10 * MIN);
     const fourth = await r.relay.refresh();
-    expect(fourth.filter((o) => o.state === 'refreshed').map((o) => o.key)).toEqual(['metars', 'tafs', 'isigmet', 'airsigmet']);
+    expect(fourth.filter((o) => o.state === 'refreshed').map((o) => o.key)).toEqual(['metars', 'tafs', 'sigmet']);
   });
 
   it('stays inside the free plan: a day of five-minute ticks is well under a thousand writes', async () => {
@@ -110,7 +122,7 @@ describe('the timer', () => {
       // A cron tick is not exactly on the minute.
       r.advance(5 * MIN + (tick % 2 === 0 ? 4_000 : -4_000));
     }
-    // 288 for the METARs, 96 each for the TAFs and the two kinds of hazard advisory, 24 for the Canadian upper winds.
+    // 288 for the METARs, 96 each for the TAFs and the SIGMETs, 24 each for the G-AIRMETs and the Canadian upper winds, 72 for the balloons.
     expect(r.kv.writes).toBeLessThanOrEqual(620);
     expect(r.kv.writes).toBeGreaterThanOrEqual(590);
   });
@@ -136,7 +148,7 @@ describe('the timer', () => {
       return put(key, value, options);
     };
     const outcomes = await r.relay.refresh();
-    expect(outcomes.map((o) => `${o.key}:${o.state}`)).toEqual(['metars:refreshed', 'tafs:failed', 'isigmet:refreshed', 'airsigmet:refreshed', 'upperwind:refreshed']);
+    expect(outcomes.map((o) => `${o.key}:${o.state}`)).toEqual(['metars:refreshed', 'tafs:failed', 'sigmet:refreshed', 'gairmet:refreshed', 'upperwind:refreshed', 'soundings:refreshed']);
     expect(outcomes[1]).toMatchObject({ error: 'could not store tafs: KV PUT failed: 500 Internal Server Error' });
   });
 
@@ -160,12 +172,12 @@ describe('the timer', () => {
   it('never replaces good weather with a maintenance page served as a 200', async () => {
     const up = upstream({
       [PRODUCTS.metars.upstream]: () => new Response('<html>down for maintenance</html>'),
-      [PRODUCTS.isigmet.upstream]: () => new Response('<html>down for maintenance</html>'),
+      [PRODUCTS.sigmet.upstream]: () => new Response('<html>down for maintenance</html>'),
     });
     const r = relayWith(up);
     const outcomes = await r.relay.refresh();
     expect(outcomes.find((o) => o.key === 'metars')).toMatchObject({ state: 'failed', error: expect.stringContaining('gzip') });
-    expect(outcomes.find((o) => o.key === 'isigmet')).toMatchObject({ state: 'failed', error: expect.stringContaining('JSON') });
+    expect(outcomes.find((o) => o.key === 'sigmet')).toMatchObject({ state: 'failed', error: expect.stringContaining('JSON') });
     expect((await r.kv.getWithMetadata('metars')).value).toBeNull();
   });
 
@@ -197,9 +209,9 @@ describe('the timer', () => {
   });
 
   it('stores "nothing in force" as an empty list, because that is what a 204 means here', async () => {
-    const r = relayWith();
+    const r = relayWith(upstream({ [PRODUCTS.sigmet.upstream]: () => new Response(null, { status: 204 }) }));
     await r.relay.refresh();
-    expect(text(await r.get('/awc/airsigmet?format=json'))).toBe('[]');
+    expect(text(await r.get('/awc/sigmet?format=json'))).toBe('[]');
   });
 
   it('no longer asks NOAA for the US winds aloft bulletins it discontinued', async () => {
@@ -208,6 +220,94 @@ describe('the timer', () => {
     // The table has no answer for them, so a request would have thrown; there is none to throw.
     expect(r.up.calls.some((u) => u.includes('/windtemp'))).toBe(false);
     expect((await r.get('/awc/windtemp?region=us&level=low&fcst=06')).status).toBe(404);
+  });
+});
+
+describe('the balloons, which are many small files', () => {
+  it('asks the free plan for no more than it allows in one run', async () => {
+    const r = relayWith();
+    await r.relay.refresh();
+    // Everything due at once, on the first tick: the limit is fifty, and CFPS can take two.
+    expect(r.up.calls.length).toBeLessThanOrEqual(49);
+    expect(r.up.calls.filter((u) => u.startsWith(NOAA_RAW_US))).toHaveLength(23);
+  });
+
+  it('has every balloon in core in its list, and asks each one within three runs', async () => {
+    expect([...SOUNDING_FILES].sort()).toEqual(SOUNDING_STATIONS.map((s) => s.file).sort());
+    const r = relayWith();
+    for (let run = 0; run < 3; run++) {
+      await r.relay.refresh();
+      r.advance(20 * MIN);
+    }
+    expect(new Set(r.up.calls.filter((u) => u.startsWith(NOAA_RAW_US))).size).toBe(SOUNDING_FILES.length);
+  });
+
+  it('gives the page every balloon the client can read, dated by NOAA', async () => {
+    const r = relayWith();
+    for (let run = 0; run < 3; run++) {
+      await r.relay.refresh();
+      r.advance(20 * MIN);
+    }
+    const http: HttpClient = { get: async (url) => ({ status: 200, body: text(await r.get(url.replace('https://relay.example', ''))), headers: {} }) };
+    const { reports } = await new SoundingClient(http, 'https://relay.example/noaa/soundings').relayed();
+    expect(reports).toHaveLength(SOUNDING_FILES.length);
+    const albany = reports.find((x) => x.station === '72518')!;
+    expect(albany.issuedAt).toEqual(new Date('2026-11-09T00:00:00Z'));
+    expect(albany.body).toBe(soundingFile('usus41.kaly.man.aly').trim());
+  });
+
+  it('keeps a balloon\'s last sounding when its file does not answer, and says which', async () => {
+    let answering = true;
+    const missing = SOUNDING_FILES[0];
+    const r = relayWith(upstream({ [`${NOAA_RAW_US}/${missing}.txt`]: () => (answering ? new Response(soundingFile(missing)) : new Response('gone', { status: 404 })) }));
+    await r.relay.refresh();
+    answering = false;
+    r.advance(60 * MIN);
+    await r.relay.refresh();
+    r.advance(20 * MIN);
+    // The third run, which comes back round to the first file.
+    const outcomes = await r.relay.refresh();
+    expect(outcomes.find((o) => o.key === 'soundings')).toMatchObject({ state: 'refreshed' });
+    const held = JSON.parse(text(await r.get('/noaa/soundings'))) as Record<string, { text: string }>;
+    expect(held[missing]!.text).toBe(soundingFile(missing));
+    const status = JSON.parse(text(await r.get('/status'))) as { products: { product: string; note?: string }[] };
+    expect(status.products.find((p) => p.product === 'soundings')?.note).toContain(missing);
+  });
+
+  it('never keeps an error page as a sounding', async () => {
+    const file = SOUNDING_FILES[0];
+    const r = relayWith(upstream({ [`${NOAA_RAW_US}/${file}.txt`]: () => new Response('<html>maintenance</html>') }));
+    await r.relay.refresh();
+    expect((JSON.parse(text(await r.get('/noaa/soundings'))) as Record<string, { text: string }>)[file]!.text).toBe('');
+  });
+
+  it('counts it a failure only when nothing answered, and then writes nothing', async () => {
+    const none = Object.fromEntries(SOUNDING_FILES.map((f) => [`${NOAA_RAW_US}/${f}.txt`, () => new Response('down', { status: 503 })]));
+    const r = relayWith(upstream(none));
+    const outcomes = await r.relay.refresh();
+    expect(outcomes.find((o) => o.key === 'soundings')).toMatchObject({ state: 'failed', error: expect.stringContaining('none of the 23') });
+    expect((await r.kv.getWithMetadata('soundings')).value).toBeNull();
+  });
+
+  it('keeps a file NOAA has removed from holding up the rest', async () => {
+    const gone = SOUNDING_FILES[0];
+    const r = relayWith(upstream({ [`${NOAA_RAW_US}/${gone}.txt`]: () => new Response('gone', { status: 404 }) }));
+    await r.relay.refresh();
+    r.advance(20 * MIN);
+    await r.relay.refresh();
+    // Having been asked once, it waits its turn behind the ones not asked yet.
+    expect(r.up.calls.filter((u) => u.includes(gone))).toHaveLength(1);
+    r.advance(20 * MIN);
+    await r.relay.refresh();
+    expect(new Set(r.up.calls.filter((u) => u.startsWith(NOAA_RAW_US))).size).toBe(SOUNDING_FILES.length);
+  });
+
+  it('serves the G-AIRMET file compressed and labelled, for a browser to undo', async () => {
+    const r = relayWith();
+    await r.relay.refresh();
+    const res = await r.get('/awc/cache/gairmets.cache.xml.gz');
+    expect(res.headers['Content-Encoding']).toBe('gzip');
+    expect(gunzipSync(Buffer.from(res.body as ArrayBuffer)).toString('utf8')).toBe(gairmetXml);
   });
 });
 
@@ -235,15 +335,15 @@ describe('serving the page', () => {
   it('lets the named page read the answer, and no other', async () => {
     const r = relayWith();
     await r.relay.refresh();
-    expect((await r.get('/awc/isigmet?format=json')).headers['Access-Control-Allow-Origin']).toBe(PAGE);
-    expect((await r.get('/awc/isigmet?format=json', 'https://elsewhere.example')).headers['Access-Control-Allow-Origin']).toBeUndefined();
-    expect((await r.get('/awc/isigmet?format=json')).headers['Vary']).toBe('Origin');
+    expect((await r.get('/awc/sigmet?format=json')).headers['Access-Control-Allow-Origin']).toBe(PAGE);
+    expect((await r.get('/awc/sigmet?format=json', 'https://elsewhere.example')).headers['Access-Control-Allow-Origin']).toBeUndefined();
+    expect((await r.get('/awc/sigmet?format=json')).headers['Vary']).toBe('Origin');
   });
 
   it('will not be configured to let everybody in', async () => {
     const r = relayWith(upstream(), '*');
     await r.relay.refresh();
-    expect((await r.get('/awc/isigmet?format=json', 'https://anyone.example')).headers['Access-Control-Allow-Origin']).toBeUndefined();
+    expect((await r.get('/awc/sigmet?format=json', 'https://anyone.example')).headers['Access-Control-Allow-Origin']).toBeUndefined();
   });
 
   it('answers upper winds for whichever sites were asked, with all of them', async () => {
@@ -271,8 +371,8 @@ describe('serving the page', () => {
   it('carries only what it carries', async () => {
     const r = relayWith();
     expect((await r.get('/awc/taf?ids=CYSN&format=json')).status).toBe(404);
-    expect((await r.relay.handle({ method: 'POST', url: 'https://relay.example/awc/isigmet', origin: PAGE })).status).toBe(405);
-    const pre = await r.relay.handle({ method: 'OPTIONS', url: 'https://relay.example/awc/isigmet', origin: PAGE });
+    expect((await r.relay.handle({ method: 'POST', url: 'https://relay.example/awc/sigmet', origin: PAGE })).status).toBe(405);
+    const pre = await r.relay.handle({ method: 'OPTIONS', url: 'https://relay.example/awc/sigmet', origin: PAGE });
     expect(pre.status).toBe(204);
     expect(pre.headers['Access-Control-Allow-Origin']).toBe(PAGE);
   });
@@ -283,7 +383,7 @@ describe('serving the page', () => {
     await r.relay.refresh();
     const ok = await r.get('/status');
     expect(ok.status).toBe(200);
-    expect(JSON.parse(text(ok)).products.map((p: { product: string }) => p.product)).toEqual(['metars', 'tafs', 'isigmet', 'airsigmet', 'upperwind']);
+    expect(JSON.parse(text(ok)).products.map((p: { product: string }) => p.product)).toEqual(['metars', 'tafs', 'sigmet', 'gairmet', 'upperwind', 'soundings']);
     r.advance(20 * MIN);
     expect((await r.get('/status')).status).toBe(503);
   });
@@ -410,7 +510,7 @@ describe('the clients in core, reading through the relay', () => {
     const notams = await new NavCanadaClient(http, `${base}/cfps/`).notams('CYSN').catch((e: Error) => e);
     expect(metars.reports.find((m) => m.station === 'CYYZ')?.body).toBe('METAR CYYZ 200400Z 35010KT 15SM SKC 11/07 A3036 RMK SLP286');
     expect(tafs.reports).toHaveLength(8);
-    expect(sigmets.reports).toHaveLength(1);
+    expect(sigmets.reports).toHaveLength(16);
     // The canned NOTAM record is deliberately incomplete; what matters is that the request arrived at the right place.
     expect(r.up.calls).toContain(`${CFPS}?site=CYSN&alpha=notam`);
     expect(notams).toBeDefined();

@@ -44,8 +44,7 @@ for (const id of ['KTEB', 'N07', 'KHPN', 'KJFK']) {
   routes[`${AWC_BASE_URL}/taf?ids=${id}&format=json`] = id === 'N07' ? { status: 204 } : threeTaf;
 }
 // Hazard advisories: nothing in force, which is what the service says most days.
-routes[`${AWC_BASE_URL}/isigmet?format=json`] = { status: 204 };
-routes[`${AWC_BASE_URL}/airsigmet?format=json`] = { status: 204 };
+routes[`${AWC_BASE_URL}/sigmet?format=json`] = { status: 204 };
 /*
  * The area around N07, which has no identifier of its own and so no reports
  * to ask for — the one field in this plan that has to borrow. Recorded from
@@ -161,8 +160,7 @@ describe('POST /api/briefings', () => {
       `${AWC_BASE_URL}/metar?ids=KTEB&format=json`,
       `${AWC_BASE_URL}/taf?ids=KTEB&format=json`,
       `${AWC_BASE_URL}/metar?bbox=39,-76.35,42,-72.65&format=json`,
-      `${AWC_BASE_URL}/isigmet?format=json`,
-      `${AWC_BASE_URL}/airsigmet?format=json`,
+      `${AWC_BASE_URL}/sigmet?format=json`,
     ]);
     // Never by name: there are no reports filed under N07 to ask for.
     expect(calls.some((u) => u.includes('ids=N07'))).toBe(false);
@@ -179,7 +177,7 @@ describe('POST /api/briefings', () => {
     const payload = { plan, profile, asOf: '2026-09-07T12:30:00Z' };
     await app.inject({ method: 'POST', url: '/api/briefings', payload });
     const first = calls.filter((u) => u.includes('sigmet')).length;
-    expect(first).toBe(2);
+    expect(first).toBe(1);
     await app.inject({ method: 'POST', url: '/api/briefings', payload });
     // A quarter of an hour is as often as anybody needs the world's worth
     // of advisories, however many people are briefing.

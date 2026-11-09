@@ -29,7 +29,7 @@ const RECORDED = new Date('2026-11-09T01:26:00Z');
 
 const http: HttpClient = {
   async get(url) {
-    const name = url.includes('metars') ? 'metars.cache.csv' : url.includes('tafs') ? 'tafs.cache.xml' : url.includes('isigmet') ? 'isigmet.json' : url.includes('airsigmet') ? 'airsigmet.json' : 'upperwind.json';
+    const name = url.includes('metars') ? 'metars.cache.csv' : url.includes('tafs') ? 'tafs.cache.xml' : url.includes('sigmet') ? 'isigmet.json' : 'upperwind.json';
     return { status: 200, body: file(name), headers: {} };
   },
 };

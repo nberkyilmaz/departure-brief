@@ -11,7 +11,7 @@
  * The windows are set by how often each product is actually issued. A METAR
  * comes hourly with specials in between, so ten minutes is generous. A TAF
  * is issued four times a day, a NOTAM changes when it changes, and upper
- * winds come three times a day.
+ * winds come three times a day, or twice from a balloon.
  */
 import type { FetchAttempt, ReportKind } from '../store/types.js';
 

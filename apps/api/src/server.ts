@@ -6,6 +6,7 @@ import {
   diffBriefings,
   IncompleteSpecError,
   ingestNeighbourhood,
+  ingestSoundings,
   ingestStation,
   ingestUpperWinds,
   recordFetchAttempt,
@@ -24,11 +25,14 @@ import {
   resolveFlight,
   routePicture,
   resolveRoute,
+  SOUNDING_RADIUS_NM,
   UnknownWaypointError,
+  type AwcCacheClient,
   type AwcClient,
   type ConfiguredLLM,
   type Loading,
   type NavCanadaClient,
+  type SoundingClient,
   type Store,
   type WeightBalanceSpec,
 } from '@depbrief/core';
@@ -51,6 +55,10 @@ const INSTANCE_KEY = 'instance';
 export interface ServerDeps {
   readonly store: Store;
   readonly awc: AwcClient;
+  /** The AWC's cache files, for G-AIRMETs; absent means American AIRMETs are not fetched. */
+  readonly awcCache?: AwcCacheClient | null;
+  /** American balloon soundings; absent means US legs have no upper wind. */
+  readonly soundings?: SoundingClient | null;
   /** Canadian NOTAMs; absent means NOTAMs are neither fetched nor shown. */
   readonly navcanada?: NavCanadaClient | null;
   /** The relevance model; absent means NOTAMs are classified but not ranked. Never called except during a briefing request's fetch step. */
@@ -377,11 +385,25 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
           // most of the time it is not.
           await recordFetchAttempt(store, HAZARD_STATION, 'sigmet', now, fetched.request);
           await storeAndDecode(store, fetched.reports, fetched.request, now, HAZARD_STATION);
+          if (deps.awcCache) {
+            const gairmets = await deps.awcCache.gairmets();
+            await storeAndDecode(store, gairmets.reports, gairmets.request, now, HAZARD_STATION);
+          }
         }
       } catch (e) {
         req.log.warn({ err: e }, 'hazard advisories could not be fetched');
       }
-      // No US upper winds to fetch: NOAA discontinued its winds aloft bulletin on 3 November 2026.
+      /*
+       * NOAA stopped issuing US winds aloft on 3 November 2026. What is left
+       * is what its balloons measured, fetched for the route like the rest.
+       */
+      if (deps.soundings) {
+        try {
+          await ingestSoundings({ store, soundings: deps.soundings }, points.map((p) => p.waypoint.position), SOUNDING_RADIUS_NM);
+        } catch (e) {
+          req.log.warn({ err: e }, 'balloon soundings could not be fetched');
+        }
+      }
     }
     // The route is already known good, so this cannot raise UnknownWaypoint.
     const resolved = await resolveFlight(store, plan, asOf);

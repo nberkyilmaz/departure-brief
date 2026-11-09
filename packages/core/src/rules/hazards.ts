@@ -34,6 +34,7 @@ export const HAZARD_TEXT: Readonly<Record<SigmetHazard, string>> = {
   ifr: 'IFR conditions',
   'mountain-obscuration': 'mountain obscuration',
   'low-level-wind-shear': 'low-level wind shear',
+  'surface-wind': 'surface winds over 30 kt',
 };
 
 export interface HazardContext {
@@ -44,6 +45,8 @@ export interface HazardContext {
   readonly route: readonly LatLon[];
   /** The flight's whole window, for deciding whether the advisory is in force. */
   readonly window: { readonly from: Date; readonly to: Date };
+  /** When this leg is flown. A G-AIRMET picture is only about these hours, and the next one will say where the hazard has gone by then. */
+  readonly leg: { readonly from: Date; readonly to: Date };
   readonly cruiseAltitudeFt: number;
 }
 
@@ -51,7 +54,8 @@ export interface HazardContext {
 function inForce(d: DecodedSigmet, window: { from: Date; to: Date }): boolean {
   const from = d.validFrom?.getTime() ?? -Infinity;
   const to = d.validTo?.getTime() ?? Infinity;
-  return from <= window.to.getTime() && to >= window.from.getTime();
+  // One G-AIRMET picture ends where the next begins, and the moment between them belongs to the next.
+  return from <= window.to.getTime() && (d.snapshotAt ? to > window.from.getTime() : to >= window.from.getTime());
 }
 
 /**
@@ -76,7 +80,7 @@ function citationFor(h: HazardAdvisory): Citation {
 }
 
 function describe(d: DecodedSigmet): string {
-  const what = d.hazard ? HAZARD_TEXT[d.hazard] : (d.hazardCode?.value ?? 'a hazard');
+  const what = `${d.hazard ? HAZARD_TEXT[d.hazard] : (d.hazardCode?.value ?? 'a hazard')}${d.dueTo ? ` (${d.dueTo})` : ''}`;
   const severity = d.qualifier?.value ? `${d.qualifier.value.toLowerCase()} ` : '';
   const band =
     d.baseFt === null && d.topFt === null
@@ -93,9 +97,30 @@ function describe(d: DecodedSigmet): string {
  */
 export function checkHazards(ctx: HazardContext, advisories: readonly HazardAdvisory[]): Finding[] {
   const findings: Finding[] = [];
+  /*
+   * The pictures of one G-AIRMET are one hazard, however many of them this
+   * leg's hours touch: said once, and on-route rather than near if any of
+   * them puts the route inside it.
+   */
+  const pictures = new Map<string, Finding>();
+  const put = (d: DecodedSigmet, finding: Finding) => {
+    if (!d.snapshotAt) {
+      findings.push(finding);
+      return;
+    }
+    const key = `${d.series}|${d.hazard}`;
+    const held = pictures.get(key);
+    if (!held) {
+      pictures.set(key, finding);
+      findings.push(finding);
+    } else if (held.rule !== 'hazard.onRoute' && finding.rule === 'hazard.onRoute') {
+      pictures.set(key, finding);
+      findings[findings.indexOf(held)] = finding;
+    }
+  };
   for (const advisory of advisories) {
     const d = advisory.decoded;
-    if (!inForce(d, ctx.window) || !reachesAltitude(d, ctx.cruiseAltitudeFt)) continue;
+    if (!inForce(d, d.snapshotAt ? ctx.leg : ctx.window) || !reachesAltitude(d, ctx.cruiseAltitudeFt)) continue;
 
     const problem = areaIsTestable(d.area);
     if (problem) {
@@ -105,7 +130,7 @@ export function checkHazards(ctx: HazardContext, advisories: readonly HazardAdvi
        * advisory is in force at this altitude and only the geometry is
        * beyond us.
        */
-      findings.push({
+      put(d, {
         rule: 'hazard.untestable',
         attention: 'note',
         summary: `${describe(d)} — ${problem.reason}, so whether your route goes through it has to be checked by eye`,
@@ -124,7 +149,7 @@ export function checkHazards(ctx: HazardContext, advisories: readonly HazardAdvi
 
     const crossing = distance === 0;
     const attention: Attention = !crossing ? 'note' : d.kind === 'airmet' ? 'caution' : 'alert';
-    findings.push({
+    put(d, {
       rule: crossing ? 'hazard.onRoute' : 'hazard.near',
       attention,
       summary: `${describe(d)} — ${crossing ? 'your route goes through it' : `your route passes ${Math.round(distance)} nm from it`}`,

@@ -233,6 +233,8 @@ export interface NavLogWind {
   distanceNm: number;
   altitudeFt: number;
   sha256: string;
+  /** Present when a balloon measured it: where it went up, and when. */
+  measured?: { by: string; at: string };
 }
 
 export interface NavLogLeg {
@@ -399,6 +401,8 @@ export interface PictureHazardBase {
 
 export interface PictureHazard extends PictureHazardBase {
   area: { lat: number; lon: number }[];
+  /** Where a G-AIRMET has moved to in the later pictures you are still under it for. */
+  laterAreas: { lat: number; lon: number }[][];
   stretches: { fromNm: number; toNm: number; fromAt: string; toAt: string; startsInside: boolean; endsInside: boolean; middle: { lat: number; lon: number } }[];
 }
 
@@ -416,6 +420,8 @@ export interface PictureFreezing {
   crossingsFt: number[];
   belowFt: number | null;
   aboveFt: number | null;
+  /** When a balloon measured it rather than a forecast giving it. */
+  measuredAt?: string;
 }
 
 /** The flight laid out along the route for drawing. Beside the briefing, not part of its hash. */

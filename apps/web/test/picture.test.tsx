@@ -32,8 +32,7 @@ let heightsAsked = 0;
 const answers: Record<string, string> = {
   '/awc/cache/metars.cache.csv.gz': 'metars.cache.csv',
   '/awc/cache/tafs.cache.xml.gz': 'tafs.cache.xml',
-  '/awc/isigmet?format=json': 'isigmet.json',
-  '/awc/airsigmet?format=json': 'airsigmet.json',
+  '/awc/sigmet?format=json': 'isigmet.json',
 };
 
 beforeAll(() => {

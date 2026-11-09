@@ -152,8 +152,8 @@ describe('a card per field', () => {
     expect(low.lines.find((l) => l.label === 'Ceiling')).toEqual({ label: 'Ceiling', text: '1,200 ft, below your 2,500 ft', over: true });
   });
 
-  it('says when no upper wind forecast reaches the field, rather than leaving the line off', () => {
-    expect(destination!.lines).toEqual([{ label: 'Wind aloft', text: 'No upper wind forecast within reach', over: false }]);
+  it('says when no upper wind reaches the field, rather than leaving the line off', () => {
+    expect(destination!.lines).toEqual([{ label: 'Wind aloft', text: 'No upper wind forecast or balloon sounding within reach', over: false }]);
   });
 
   it('falls back to the observation when no forecast covers the time, and says so', () => {

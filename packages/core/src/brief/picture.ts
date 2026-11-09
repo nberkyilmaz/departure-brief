@@ -33,7 +33,7 @@ import { CORRIDOR_NM, type EnrouteStation } from '../resolve/enroute.js';
 import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
 import type { Leg } from '../resolve/route.js';
 import type { Overlay } from '../resolve/taf.js';
-import { upperWindFor } from '../resolve/wind.js';
+import { balloonWindAt, isAmerican, upperWindFor } from '../resolve/wind.js';
 import { fmtVis } from '../rules/checks.js';
 import { metarConditions, OBSERVATION_WINDOW_MS } from '../rules/evaluate.js';
 import { HAZARD_TEXT } from '../rules/hazards.js';
@@ -120,6 +120,8 @@ interface PictureHazardBase {
 
 export interface PictureHazard extends PictureHazardBase {
   readonly area: readonly LatLon[];
+  /** Where a G-AIRMET has moved to in the later pictures you are still under it for. Empty for anything else. */
+  readonly laterAreas: readonly (readonly LatLon[])[];
   readonly stretches: readonly PictureStretch[];
 }
 
@@ -132,12 +134,14 @@ export interface PictureHazardMissed extends PictureHazardBase {
 }
 
 export interface PictureFreezing extends FreezingLevel {
-  /** The upper wind site the temperatures are from. */
+  /** The upper wind site the temperatures are from, or where the balloon went up. */
   readonly station: string;
   readonly nm: number;
   readonly at: string;
   /** How far the site is from this point on the route. */
   readonly distanceNm: number;
+  /** When a balloon measured it rather than a forecast giving it. */
+  readonly measuredAt?: string;
 }
 
 export interface RoutePicture {
@@ -272,6 +276,18 @@ function positionAt(flight: ResolvedFlight, nm: number): LatLon {
   return pointAlong(leg.from.position, leg.to.position, nm - flight.route.points[at]!.cumulative);
 }
 
+/** Stretches in order of distance, with any that meet made one: where one G-AIRMET picture hands over to the next while you stay under it. */
+function joinedStretches(flight: ResolvedFlight, stretches: readonly PictureStretch[]): PictureStretch[] {
+  const out: PictureStretch[] = [];
+  for (const s of [...stretches].sort((a, b) => a.fromNm - b.fromNm)) {
+    const last = out[out.length - 1];
+    if (last && Math.abs(last.toNm - s.fromNm) < 1e-6) {
+      out[out.length - 1] = { ...last, toNm: s.toNm, toAt: s.toAt, endsInside: s.endsInside, middle: positionAt(flight, (last.fromNm + s.toNm) / 2) };
+    } else out.push(s);
+  }
+  return out;
+}
+
 function hazardsOf(flight: ResolvedFlight): Pick<RoutePicture, 'hazards' | 'hazardsMissed' | 'hazardsUntestable'> {
   const departs = flight.route.points[0]!.eta.getTime();
   const tas = flight.plan.cruise.tas;
@@ -279,25 +295,30 @@ function hazardsOf(flight: ResolvedFlight): Pick<RoutePicture, 'hazards' | 'haza
   const milesAt = (t: number) => ((t - departs) / 3_600_000) * tas;
   const arrives = clock(flight.route.total);
   const iso = (t: number) => new Date(t).toISOString();
+  const joined = (stretches: readonly PictureStretch[]) => joinedStretches(flight, stretches);
 
   const hazards: PictureHazard[] = [];
   const hazardsMissed: PictureHazardMissed[] = [];
   let hazardsUntestable = 0;
-  for (const { decoded: d } of flight.hazards) {
+  // The pictures of one G-AIRMET are one hazard, with one letter, so long as it keeps the same heights.
+  const pictures = new Map<string, number>();
+  for (const { decoded: d } of [...flight.hazards].sort((a, b) => (a.decoded.snapshotAt?.getTime() ?? 0) - (b.decoded.snapshotAt?.getTime() ?? 0))) {
     const validFrom = d.validFrom?.getTime() ?? -Infinity;
     const validTo = d.validTo?.getTime() ?? Infinity;
     if (validFrom > arrives || validTo < departs) continue;
+    // Above the cruise it is not something this flight will meet, climbing or descending, and there are a lot of them in the flight levels.
+    if (d.snapshotAt && d.baseFt !== null && d.baseFt > flight.plan.cruise.altitude) continue;
     if (areaIsTestable(d.area)) {
-      hazardsUntestable++;
+      if (!d.snapshotAt) hazardsUntestable++;
       continue;
     }
     const inside = stretchesInside(flight, d.area);
     if (inside.length === 0) continue;
     const base: PictureHazardBase = {
       kind: d.kind ?? 'sigmet',
-      what: d.hazard ? HAZARD_TEXT[d.hazard] : (d.hazardCode?.value ?? 'a hazard'),
+      what: `${d.hazard ? HAZARD_TEXT[d.hazard] : (d.hazardCode?.value ?? 'a hazard')}${d.dueTo ? ` (${d.dueTo})` : ''}`,
       qualifier: d.qualifier?.value ?? null,
-      region: d.region,
+      region: d.region ?? d.series,
       baseFt: d.baseFt,
       topFt: d.topFt,
       validFrom: d.validFrom?.toISOString() ?? null,
@@ -308,13 +329,24 @@ function hazardsOf(flight: ResolvedFlight): Pick<RoutePicture, 'hazards' | 'haza
       const leave = clock(s.to);
       const from = Math.max(reach, validFrom);
       const to = Math.min(leave, validTo);
-      if (from > to) return [];
+      // A picture's hours touching the moment you take off is not a stretch of route.
+      if (from > to || (d.snapshotAt && from === to)) return [];
       return [{ fromNm: milesAt(from), toNm: milesAt(to), fromAt: iso(from), toAt: iso(to), startsInside: from > reach, endsInside: to < leave, middle: positionAt(flight, milesAt((from + to) / 2)) }];
     });
     if (stretches.length > 0) {
-      hazards.push({ ...base, area: d.area, stretches });
+      const key = d.snapshotAt ? `${d.series}|${d.hazard}|${d.baseFt}|${d.topFt}` : null;
+      const held = key === null ? undefined : pictures.get(key);
+      if (held === undefined) {
+        if (key !== null) pictures.set(key, hazards.length);
+        hazards.push({ ...base, area: d.area, laterAreas: [], stretches });
+      } else {
+        const earlier = hazards[held]!;
+        hazards[held] = { ...earlier, validTo: base.validTo, laterAreas: [...earlier.laterAreas, d.area], stretches: joined([...earlier.stretches, ...stretches]) };
+      }
       continue;
     }
+    // A picture of the hours you are somewhere else says nothing that needs excusing.
+    if (d.snapshotAt) continue;
     const first = inside[0]!;
     const last = inside[inside.length - 1]!;
     const over = validTo < clock(first.from);
@@ -328,6 +360,10 @@ function hazardsOf(flight: ResolvedFlight): Pick<RoutePicture, 'hazards' | 'haza
  * field the route names, from the site its wind came from, and at any
  * station beside the track that is itself an upper wind site. A field's
  * site is left to speak at its own place if it is along the way anyway.
+ *
+ * Balloons are not stations beside the track, so they are found by walking
+ * it: each balloon the route reads from speaks at the point of the route
+ * nearest to it, which on a long flight is one mark per balloon passed.
  */
 async function freezingOf(store: Store, flight: ResolvedFlight): Promise<PictureFreezing[]> {
   const out: PictureFreezing[] = [];
@@ -342,11 +378,28 @@ async function freezingOf(store: Store, flight: ResolvedFlight): Promise<Picture
   }
   for (const p of flight.points) {
     const level = p.wind && freezingLevel(p.wind.forecast.levels);
-    if (!p.wind || !level || alongside.has(p.wind.station)) continue;
+    if (!p.wind || !level || alongside.has(p.wind.station) || p.wind.measured) continue;
     out.push({ ...level, station: p.wind.station, nm: p.point.cumulative, at: p.point.eta.toISOString(), distanceNm: p.wind.distance });
   }
-  return out.sort((a, b) => a.nm - b.nm);
+
+  const departs = flight.route.points[0]!.eta.getTime();
+  const total = flight.route.total;
+  const nearest = new Map<string, PictureFreezing>();
+  for (let nm = 0; ; nm = Math.min(nm + BALLOON_STEP_NM, total)) {
+    const at = new Date(departs + (nm / flight.plan.cruise.tas) * 3_600_000);
+    const position = positionAt(flight, nm);
+    const wind = (await isAmerican(store, position, null)) ? await balloonWindAt(store, position, cruise, at, flight.asOf) : null;
+    const level = wind?.measured ? freezingLevel(wind.forecast.levels) : null;
+    if (wind?.measured && level && (nearest.get(wind.station)?.distanceNm ?? Infinity) > wind.distance) {
+      nearest.set(wind.station, { ...level, station: wind.measured.by, nm, at: at.toISOString(), distanceNm: wind.distance, measuredAt: wind.measured.at.toISOString() });
+    }
+    if (nm >= total) break;
+  }
+  return [...out, ...nearest.values()].sort((a, b) => a.nm - b.nm);
 }
+
+/** How often the route is checked for which balloon it reads from: a fraction of the distance between balloons. */
+const BALLOON_STEP_NM = 25;
 
 /** Near enough together that a line drawn straight between them follows the great circle at any zoom the map allows. */
 const LINE_STEP_NM = 25;

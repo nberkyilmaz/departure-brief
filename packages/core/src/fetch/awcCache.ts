@@ -30,6 +30,7 @@ import { expectOk, type HttpClient } from './response.js';
 export const AWC_CACHE_BASE_URL = 'https://aviationweather.gov/data/cache';
 export const METAR_CACHE_FILE = 'metars.cache.csv.gz';
 export const TAF_CACHE_FILE = 'tafs.cache.xml.gz';
+export const GAIRMET_CACHE_FILE = 'gairmets.cache.xml.gz';
 
 function refuseCompressed(text: string, url: string): void {
   // 0x1f 0x8b is the gzip magic; decoded as text the first byte survives.
@@ -97,6 +98,26 @@ export function parseTafCache(text: string, url: string): RawReport[] {
   return reports;
 }
 
+/**
+ * Every G-AIRMET in the file, one report per area per forecast hour, each
+ * the record as sent. Freezing level contours are left behind: they are
+ * lines on a chart and ranges of height, not an area of hazard to be in or
+ * out of, and the side view has measured temperatures for that.
+ */
+export function parseGairmetCache(text: string, url: string): RawReport[] {
+  refuseCompressed(text, url);
+  if (!/<data\b/.test(text)) throw new AwcError('G-AIRMET cache file has no data element', url);
+  const reports: RawReport[] = [];
+  for (const m of text.matchAll(/<GAIRMET>[\s\S]*?<\/GAIRMET>/g)) {
+    const body = m[0];
+    if (/<hazard type="M?_?FZLVL"/.test(body)) continue;
+    // Filed under its product and tag, which is what a pilot would ask for it by.
+    const station = [element(body, 'product'), element(body, 'tag')].filter(Boolean).join(' ') || null;
+    reports.push(rawReport({ kind: 'sigmet', source: 'awc-gairmet', station, body, issuedAt: instant(element(body, 'issue_time')), upstream: null }));
+  }
+  return reports;
+}
+
 export class AwcCacheClient {
   constructor(
     private readonly http: HttpClient,
@@ -115,5 +136,12 @@ export class AwcCacheClient {
     const url = `${this.baseUrl}/${TAF_CACHE_FILE}`;
     const res = expectOk(url, await this.http.get(url));
     return { request: url, reports: parseTafCache(res.body, url) };
+  }
+
+  /** Every American G-AIRMET in force, at each forecast hour. */
+  async gairmets(): Promise<AwcFetch> {
+    const url = `${this.baseUrl}/${GAIRMET_CACHE_FILE}`;
+    const res = expectOk(url, await this.http.get(url));
+    return { request: url, reports: parseGairmetCache(res.body, url) };
   }
 }

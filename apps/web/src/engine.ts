@@ -39,6 +39,7 @@ import {
   recordFetchAttempt,
   resolveFlight,
   routePicture,
+  SoundingClient,
   storeAndDecode,
   UnknownWaypointError,
   withHandbookLimits,
@@ -115,7 +116,9 @@ const REFRESH: readonly { readonly path: RegExp; readonly name: string; readonly
   { path: /metars\.cache/, name: 'METARs', everyMinutes: 5 },
   { path: /tafs\.cache/, name: 'TAFs', everyMinutes: 15 },
   { path: /sigmet/, name: 'hazard advisories', everyMinutes: 15 },
+  { path: /gairmets\.cache/, name: 'US AIRMETs', everyMinutes: 60 },
   { path: /alpha=upperwind/, name: 'Canadian upper winds', everyMinutes: 60 },
+  { path: /noaa\/soundings/, name: 'US balloon soundings', everyMinutes: 20 },
 ];
 
 function ageWords(minutes: number): string {
@@ -214,9 +217,6 @@ export interface LocalEngine {
   airport(id: string): Promise<{ icaoId: string | null; faaId: string | null; name: string; city: string | null; country: string | null; runways: { id: string }[] } | null>;
 }
 
-/** What a US flight is told about upper winds. */
-export const US_WINDS_GONE = 'US upper winds, because NOAA discontinued its winds aloft bulletin on 3 November 2026';
-
 /** The products a live briefing cannot do without are missing. Upper winds and hazards it can, and says so. */
 class LiveUnavailable extends Error {}
 
@@ -278,8 +278,16 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
   const cache = new AwcCacheClient(http, `${relay}/awc/cache`);
   const awc = new AwcClient(http, `${relay}/awc`);
   const cfps = new NavCanadaClient(http, `${relay}/cfps/`);
+  const balloons = new SoundingClient(http, `${relay}/noaa/soundings`);
 
-  const [metars, tafs, hazards, winds] = await Promise.allSettled([cache.metars(), cache.tafs(), awc.sigmets(), cfps.upperWinds([...CANADIAN_UPPERWIND_SITES])]);
+  const [metars, tafs, hazards, gairmets, winds, soundings] = await Promise.allSettled([
+    cache.metars(),
+    cache.tafs(),
+    awc.sigmets(),
+    cache.gairmets(),
+    cfps.upperWinds([...CANADIAN_UPPERWIND_SITES]),
+    balloons.relayed(),
+  ]);
   /*
    * Observations and forecasts are the briefing. Without either there is no
    * live briefing to give, and the recorded one, labelled as recorded, is
@@ -295,19 +303,17 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
     hold(ours, null);
   }
   const missing: string[] = [];
-  /*
-   * There are no US upper winds to fetch. NOAA built its winds aloft
-   * bulletin from the NAM model, retired the model on 3 November 2026, and
-   * discontinued the bulletin with it; nothing official has replaced it.
-   * Said in the note, so a US leg with no time has its reason.
-   */
-  const missingUS = [US_WINDS_GONE];
+  const missingUS: string[] = [];
   if (hazards.status === 'fulfilled') {
     // Recorded under the same name the server uses for a product with no station of its own.
     await recordFetchAttempt(store, 'WORLD', 'sigmet', now, hazards.value.request);
     await storeAndDecode(store, hazards.value.reports, hazards.value.request, now, 'WORLD');
     hold(hazards.value.reports, null);
   } else missing.push('hazard advisories');
+  if (gairmets.status === 'fulfilled') {
+    await storeAndDecode(store, gairmets.value.reports, gairmets.value.request, now, 'WORLD');
+    hold(gairmets.value.reports, null);
+  } else missingUS.push('US AIRMETs');
   if (winds.status === 'fulfilled') {
     for (const site of CANADIAN_UPPERWIND_SITES) {
       const mine = winds.value.reports.filter((r) => r.station === site);
@@ -315,6 +321,16 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
       hold(mine, site);
     }
   } else missing.push('Canadian upper winds');
+  /*
+   * NOAA built its winds aloft bulletin from the NAM model, retired the
+   * model on 3 November 2026, and discontinued the bulletin with it. What is
+   * left is what its balloons measure. Said in the note when they cannot be
+   * had, so a US leg with no time has its reason.
+   */
+  if (soundings.status === 'fulfilled') {
+    await storeAndDecode(store, soundings.value.reports, soundings.value.request, now);
+    hold(soundings.value.reports, null);
+  } else missingUS.push('US upper winds, because the balloon soundings could not be fetched');
 
   return {
     at: fetchedAt.get(metars.value.request) ?? now.toISOString(),

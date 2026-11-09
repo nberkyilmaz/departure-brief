@@ -13,13 +13,15 @@
  * beside the ones this tool derived from them.
  *
  * The US bulletin arrives as text instead, and is read by `fb.ts` into the
- * same shape, so everything downstream treats the two alike.
+ * same shape, so everything downstream treats the two alike. So does a
+ * balloon's sounding, read by `ttaa.ts`.
  *
  *   ["FBCN31","CWAO","2026-09-14T03:20:00+00:00", … ,[[9000,290,23,1,0], …]]
  *     0        1      2 issued    3 based on   4 valid  5 use from  6 use to
  */
 import { sourced, type Span, type Sourced } from '../span.js';
 import { decodeFbWinds } from './fb.js';
+import { decodeTtaa } from './ttaa.js';
 import type { DecodedUpperWind, UpperWindLevel } from './types.js';
 
 export const UPPERWIND_DECODER_VERSION = 2;
@@ -107,6 +109,7 @@ function decodeLevel(raw: string, entry: unknown, unparsed: string[]): UpperWind
  */
 export function decodeUpperWind(raw: string, reference: Date | null = null): DecodedUpperWind {
   if (!raw.trimStart().startsWith('[') && /\bFB[A-Z]{2}\d{2}\b/.test(raw)) return decodeFbWinds(raw, reference);
+  if (!raw.trimStart().startsWith('[') && /\bTTAA\b/.test(raw)) return decodeTtaa(raw, reference);
   const unparsed: string[] = [];
   let parsed: unknown;
   try {

@@ -69,7 +69,7 @@ function draw(container: HTMLElement, columns: readonly Column[], picture: Route
   picture.hazards.forEach((h, i) => {
     const colour = token(h.kind === 'airmet' ? '--marginal' : '--nogo', '#b3261e');
     const words = `<b>${hazardLetter(i)}</b> ${escapeHtml(hazardKey(h))}`;
-    L.polygon(h.area.map(latLng), { color: colour, weight: 1.5, dashArray: '5 4', fillColor: colour, fillOpacity: 0.16 }).bindPopup(words).addTo(map);
+    for (const area of [h.area, ...h.laterAreas]) L.polygon(area.map(latLng), { color: colour, weight: 1.5, dashArray: '5 4', fillColor: colour, fillOpacity: 0.16 }).bindPopup(words).addTo(map);
     for (const s of h.stretches) {
       L.marker(latLng(s.middle), {
         // Side by side, since two advisories on one stretch would otherwise put their letters in the same place.

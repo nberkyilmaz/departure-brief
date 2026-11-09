@@ -144,6 +144,13 @@ function visibilityLine(f: Finding | undefined): CardLine | null {
 /** "TSRA — a thunderstorm with rain" is read as "a thunderstorm with rain". */
 const weatherWords = (f: Finding): string => f.summary.replace(/^.*? — /, '');
 
+/** "Measured by the Albany balloon at 12Z, 5 h ago, 40 nm away": what it was, how old, and how far off. */
+export function measuredWords(by: string, at: string, distanceNm: number, now: number = Date.now()): string {
+  const minutes = Math.max(0, Math.round((now - Date.parse(at)) / 60_000));
+  const age = minutes < 90 ? `${minutes} min ago` : `${Math.round(minutes / 60)} h ago`;
+  return `Measured by the ${by} balloon at ${at.slice(11, 13)}Z, ${age}${distanceNm >= 1 ? `, ${Math.round(distanceNm)} nm away` : ''}`;
+}
+
 function aloftLine(f: Finding | undefined): CardLine | null {
   if (!f) return null;
   const altitude = num(f.values['altitudeFt']);
@@ -152,7 +159,10 @@ function aloftLine(f: Finding | undefined): CardLine | null {
   const temp = num(f.values['tempC']);
   if (altitude === null || speed === null) return null;
   const wind = speed === 0 || direction === null ? `light and variable` : `${degrees(direction)}T at ${speed} kt`;
-  return { label: `At ${feet(altitude)}`, text: `${wind}${temp !== null ? `, ${temp > 0 ? '+' : ''}${temp} °C` : ''}`, over: false };
+  const by = str(f.values['measuredBy']);
+  const at = str(f.values['measuredAt']);
+  const measured = by !== null && at !== null ? `. ${measuredWords(by, at, num(f.values['distanceNm']) ?? 0)}` : '';
+  return { label: `At ${feet(altitude)}`, text: `${wind}${temp !== null ? `, ${temp > 0 ? '+' : ''}${temp} °C` : ''}${measured}`, over: false };
 }
 
 function card(lp: LabelledPoint, cruiseFt: number | null): FieldCard {
@@ -173,7 +183,7 @@ function card(lp: LabelledPoint, cruiseFt: number | null): FieldCard {
     // A wind at cruise that no forecast reaches is said, rather than left off the card.
     aloftLine(point.findings.find((f) => f.rule === 'wind.aloft')) ?? {
       label: cruiseFt !== null ? `At ${feet(cruiseFt)}` : 'Wind aloft',
-      text: 'No upper wind forecast within reach',
+      text: 'No upper wind forecast or balloon sounding within reach',
       over: false,
     },
   ].filter((l): l is CardLine => l !== null);

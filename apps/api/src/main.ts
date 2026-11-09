@@ -7,7 +7,7 @@
  * it says whether it believes a proxy's headers, and it opens its port
  * before the slow parts of boot so a health check has something to talk to.
  */
-import { AwcClient, createHttpClient, ensureAirportData, llmFromEnv, NavCanadaClient, PostgresStore } from '@depbrief/core';
+import { AwcCacheClient, AwcClient, createHttpClient, ensureAirportData, llmFromEnv, NavCanadaClient, PostgresStore, SoundingClient } from '@depbrief/core';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -53,6 +53,8 @@ const origins = (process.env.DEPBRIEF_ALLOWED_ORIGINS ?? '')
 const app = buildServer({
   store,
   awc: new AwcClient(http),
+  awcCache: new AwcCacheClient(http),
+  soundings: new SoundingClient(http),
   navcanada: new NavCanadaClient(http),
   llm,
   staticDir: join(root, 'apps', 'web', 'dist'),

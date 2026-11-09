@@ -61,5 +61,5 @@ export function reviveUpperWind(decoded: unknown): DecodedUpperWind {
 /** A decoded hazard advisory as it was before it was stored. */
 export function reviveSigmet(decoded: unknown): DecodedSigmet {
   const d = decoded as DecodedSigmet;
-  return { ...d, validFrom: reviveDate(d.validFrom), validTo: reviveDate(d.validTo) };
+  return { ...d, validFrom: reviveDate(d.validFrom), validTo: reviveDate(d.validTo), snapshotAt: reviveDate(d.snapshotAt) };
 }

@@ -190,7 +190,7 @@ export function App() {
 
   /*
    * Whether the flight touches the United States, so a note about American
-   * products — NOAA's silent winds bulletin — is shown to the flights it
+   * products — NOAA's balloons, its AIRMETs — is shown to the flights it
    * concerns rather than to everyone.
    */
   const [usFlight, setUsFlight] = useState(false);

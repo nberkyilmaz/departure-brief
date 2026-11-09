@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { gunzipSync } from 'node:zlib';
 import type { HttpClient, HttpRequestInit, HttpResponse } from './response.js';
 
 // The transport-neutral half lives in response.ts so the clients can run in a browser.
@@ -94,6 +95,8 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
     res.headers.forEach((v, k) => {
       headers[k.toLowerCase()] = v;
     });
+    // The AWC's cache files are gzip with no header saying so: the relay adds the header for a browser, and here nothing would.
+    if (res.ok && /\.gz$/.test(url)) return { status: res.status, body: gunzipSync(Buffer.from(await res.arrayBuffer())).toString('utf8'), headers };
     return { status: res.status, body: await res.text(), headers };
   };
 
