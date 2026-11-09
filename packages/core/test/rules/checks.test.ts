@@ -186,6 +186,12 @@ describe('checkRegulatory', () => {
     // Said as below, never as a negative distance above.
     expect(fs[2]!.summary).toBe('BKN008 base 1121 ft MSL is 2379 ft below your 3500 ft cruise; CARs 602.114 (control zone) requires 500 ft below cloud');
   });
+  it('measures a borrowed report from the ground under the station that made it, when that is known', () => {
+    const { c, ctx: x } = cond('24010KT P6SM OVC020', { reportElevation: 1000 });
+    expect(checkRegulatory(x, c).find((f) => f.rule === 'vfr.cloudClearance')!.values['baseMsl']).toBe(3000);
+    const unknown = cond('24010KT P6SM OVC020', { reportElevation: null });
+    expect(checkRegulatory(unknown.ctx, unknown.c).find((f) => f.rule === 'vfr.cloudClearance')!.values['baseMsl']).toBe(2321);
+  });
   it('passes clear conditions', () => {
     const { c, ctx: x } = cond('24010KT P6SM FEW050 BKN100');
     const fs = checkRegulatory(x, c);

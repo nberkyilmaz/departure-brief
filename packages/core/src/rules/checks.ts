@@ -41,6 +41,8 @@ export interface CheckContext {
   readonly airspace: AirspaceClass | null;
   readonly cruiseAltitude: FeetMsl;
   readonly night: boolean;
+  /** Set when the report is a neighbour's: the ground its cloud heights are above. */
+  readonly reportElevation?: number | null;
 }
 
 function cite(ctx: CheckContext, span: Span | null): Citation {
@@ -260,7 +262,8 @@ export function checkRegulatory(ctx: CheckContext, c: Conditions): Finding[] {
     for (const layer of c.sky) {
       const v = layer.value;
       if (v.kind !== 'layer' || v.base === null || (v.amount !== 'BKN' && v.amount !== 'OVC')) continue;
-      const baseMsl = v.base + elevation;
+      // Above the station that reported it, which is not this field when the report is borrowed.
+      const baseMsl = v.base + (ctx.reportElevation ?? elevation);
       const clearance = baseMsl - ctx.cruiseAltitude;
       const ok = clearance >= minima.cloudClearance.below;
       // A base under the cruise altitude is said as "below", never as a negative distance above.

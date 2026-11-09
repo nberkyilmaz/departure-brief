@@ -1,5 +1,5 @@
 {
-  "sha256": "9ef1db52e502405632615909e1c15b3f179ab81c08357066a7993876eeb0a0cc",
+  "sha256": "f31b55c96d48a111366a557f5610b1b0e40ca640e9d461a5eb55da751fa766a7",
   "flightKey": "2c8115094cbf5965b4acc3bb0482ba82f940c10935f36d80648410ed0541d0a8",
   "asOf": "2026-09-19T00:52:00.000Z",
   "createdAt": "2026-09-19T00:52:00.000Z",
@@ -48,7 +48,7 @@
     },
     "asOf": "2026-09-19T00:52:00.000Z",
     "versions": {
-      "rules": 10,
+      "rules": 11,
       "metarDecoder": 2,
       "tafDecoder": 1,
       "notamDecoder": 1,
@@ -1466,7 +1466,7 @@
       ]
     },
     "briefing": {
-      "rulesVersion": 10,
+      "rulesVersion": 11,
       "profile": {
         "name": "default",
         "version": 1
@@ -1801,15 +1801,15 @@
             {
               "rule": "vfr.cloudClearance",
               "attention": "routine",
-              "summary": "BKN200 base 20321 ft MSL is 16821 ft above your 3500 ft cruise; CARs 602.114 (control zone) requires 500 ft below cloud",
+              "summary": "BKN200 base 20589 ft MSL is 17089 ft above your 3500 ft cruise; CARs 602.114 (control zone) requires 500 ft below cloud",
               "waypoint": "CYSN",
               "basis": "prevailing (TAF KIAG, 11 nm away)",
               "basisKind": "prevailing",
               "at": "2026-09-19T04:00:00.000Z",
               "values": {
-                "baseMsl": 20321,
+                "baseMsl": 20589,
                 "cruiseMsl": 3500,
-                "clearance": 16821,
+                "clearance": 17089,
                 "required": 500
               },
               "citations": [

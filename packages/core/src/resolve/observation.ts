@@ -50,6 +50,8 @@ export interface WaypointObservation {
    * equipment. The distinction matters to a pilot planning a night arrival.
    */
   readonly ownAsleep: boolean;
+  /** When borrowed, the ground under the station it is from, which its cloud heights are above. */
+  readonly stationElevation?: number | null;
 }
 
 /** The newest METAR from a station issued at or before `asOf`, decoded, however old. */
@@ -104,6 +106,7 @@ export async function observationAt(store: Store, position: LatLon, ownStation: 
       ageMinutes: age,
       // It has an observation of its own, just not a current one.
       ownAsleep: own !== null,
+      stationElevation: airport.elevation,
     };
   }
 
