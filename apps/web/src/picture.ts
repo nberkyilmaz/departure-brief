@@ -186,5 +186,21 @@ export function notesOf(picture: RoutePicture, columns: readonly Column[], sprea
   ];
 }
 
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+/** The letter an advisory goes by, the same on the map and the side view. */
+export const hazardLetter = (index: number): string => LETTERS[index] ?? '?';
+
+/** A waypoint typed as a position rather than an aerodrome. */
+export const isPosition = (id: string): boolean => id.includes(',');
+export const labelOf = (id: string): string => (isPosition(id) ? 'WPT' : id);
+
+/** One station, as a screen reader or a hover says it. */
+export function columnLabel(c: Column): string {
+  const s = c.station;
+  const what = c.category ? `${c.category}, ${c.from === 'now' ? 'observed now, no forecast for your time' : 'forecast for your time'}` : 'no category';
+  return `${labelOf(s.id)}, ${Math.round(s.nm)} nm along, passing ${clock24(s.at)}, ${what}`;
+}
+
 /** Where a station's row in "Along the way" can be found. */
 export const alongRowId = (station: string): string => `along-${station}`;

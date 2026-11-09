@@ -1,5 +1,6 @@
-import { Component, lazy, Suspense, useMemo, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import type { LocalEngine, WeatherSource } from './engine.js';
+import { MapBoundary } from './MapBoundary.js';
 import { aerodromeHref, hrefFor } from './router.js';
 import { aerodromeSearch } from './search.js';
 import { recordedWhen, weatherAge } from './WeatherNote.js';
@@ -8,17 +9,6 @@ import { recordedWhen, weatherAge } from './WeatherNote.js';
 const WeatherMap = lazy(() => import('./WeatherMap.js'));
 
 const CATEGORIES = ['VFR', 'MVFR', 'IFR', 'LIFR'] as const;
-
-/** If the map's code cannot be downloaded — offline, or a deploy mid-flight — the page carries on without it. */
-class MapBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  override state = { failed: false };
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-  override render() {
-    return this.state.failed ? <div className="wx-map wx-map-loading">The map could not be loaded. Every station is still one search away.</div> : this.props.children;
-  }
-}
 
 /**
  * What a visitor meets.
@@ -127,7 +117,7 @@ export function StartPage({ engine, weather, home }: { engine: LocalEngine | nul
           </ul>
         </div>
         {engine ? (
-          <MapBoundary>
+          <MapBoundary message="The map could not be loaded. Every station is still one search away.">
             <Suspense fallback={<div className="wx-map wx-map-loading">Loading the map…</div>}>
               <WeatherMap stations={stations} centre={centre} />
             </Suspense>

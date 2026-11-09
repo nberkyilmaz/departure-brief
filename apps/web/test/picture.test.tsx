@@ -1,19 +1,25 @@
 /**
- * The side view, drawn from the live products the relay held on the evening
+ * The side view and the route map, drawn from the live products the relay held on the evening
  * of 8 November 2026, through the same page engine a visitor gets: Vancouver
  * to Calgary over the Rockies, and a flight that starts inside two SIGMETs.
  * The clock is held at the moment those products were taken.
  */
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { BriefingView } from '../src/BriefingView.js';
 import { loadEngine, type LocalBriefing } from '../src/engine.js';
 import { alongRowId, altitudeTicks, chartTop, COLUMN_PX, columnsOf, emptyStretches, layersToLabel, notesOf, spread, xOfNm } from '../src/picture.js';
+import RouteMap from '../src/RouteMap.js';
 import { SideView } from '../src/SideView.js';
 import { alongTheWay, fieldCards } from '../src/summary.js';
 import type { FlightPlanInput } from '../src/types.js';
+
+// Leaflet decides whether it can draw shapes by asking for this, which the test browser does not have.
+vi.hoisted(() => {
+  window.SVGSVGElement.prototype.createSVGRect = () => ({}) as DOMRect;
+});
 
 const DEMO = join(__dirname, '..', 'public', 'demo');
 const SNAPSHOT = join(__dirname, '..', '..', '..', 'packages', 'core', 'test', 'fixtures', 'fetch', 'rockies-2026-11-08');
@@ -230,5 +236,70 @@ describe('fitting it on a phone', () => {
     // CYXX's three are thousands of feet apart and each has room.
     const roomy = r.picture.stations.find((s) => s.id === 'CYXX')!.reading!.sky!;
     expect([...layersToLabel(roomy.layers, yOf, 12)].map((l) => l.baseMsl).sort((a, b) => a! - b!)).toEqual([2195, 6195, 14195]);
+  });
+});
+
+describe('the route map', () => {
+  const touchscreen = (coarse: boolean) => {
+    window.matchMedia = ((query: string) => ({ matches: coarse && query.includes('coarse') })) as unknown as typeof window.matchMedia;
+  };
+  afterEach(() => touchscreen(false));
+
+  it('has every station, with the letter the list gives it, hollow where the list says observed', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const { container } = render(<RouteMap stored={r.briefing} picture={r.picture} />);
+    const columns = columnsOf(r.briefing, r.picture);
+    const dots = [...container.querySelectorAll('.rm-dot')];
+    expect(dots).toHaveLength(columns.length);
+    for (const c of columns) {
+      const dot = dots.find((d) => d.getAttribute('title')?.startsWith(`${c.station.id},`))!;
+      expect(dot.textContent).toBe(c.category ? c.category[0] : '–');
+      expect(dot.classList.contains('hollow')).toBe(c.from !== 'forecast');
+    }
+  });
+
+  it('names the fields the flight names', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const { container } = render(<RouteMap stored={r.briefing} picture={r.picture} />);
+    expect([...container.querySelectorAll('.rm-label')].map((l) => l.textContent)).toEqual(['CYVR', 'CYYC']);
+  });
+
+  it('draws the advisories you would be inside, with the letters the side view uses', async () => {
+    const r = await briefed('CYYC', 'CYLW', '2026-11-09T01:30:00Z');
+    const { container } = render(<RouteMap stored={r.briefing} picture={r.picture} />);
+    expect([...container.querySelectorAll('.rm-tag')].map((t) => t.textContent)).toEqual(['A', 'B']);
+  });
+
+  it('draws none that will be over before you reach them', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const { container } = render(<RouteMap stored={r.briefing} picture={r.picture} />);
+    expect(container.querySelectorAll('.rm-tag')).toHaveLength(0);
+  });
+
+  it('opens a station\'s line in Along the way when it is tapped', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const { container } = render(<BriefingView stored={r.briefing} picture={r.picture} />);
+    const dot = await waitFor(() => {
+      const found = [...container.querySelectorAll('.rm-dot')].find((d) => d.getAttribute('title')?.startsWith('CYHE,'));
+      expect(found).toBeDefined();
+      return found!;
+    });
+    const row = document.getElementById(alongRowId('CYHE'))!.querySelector('details')!;
+    expect(row.open).toBe(false);
+    fireEvent.click(dot);
+    expect(row.open).toBe(true);
+  });
+
+  it('leaves one finger to the page on a touch screen', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    touchscreen(true);
+    const onPhone = render(<RouteMap stored={r.briefing} picture={r.picture} />);
+    expect(onPhone.container.querySelector('.wx-map')?.classList.contains('leaflet-grab')).toBe(false);
+    expect(onPhone.container.textContent).toContain('One finger scrolls the page');
+    onPhone.unmount();
+    touchscreen(false);
+    const onDesktop = render(<RouteMap stored={r.briefing} picture={r.picture} />);
+    expect(onDesktop.container.querySelector('.wx-map')?.classList.contains('leaflet-grab')).toBe(true);
+    expect(onDesktop.container.textContent).not.toContain('One finger scrolls the page');
   });
 });

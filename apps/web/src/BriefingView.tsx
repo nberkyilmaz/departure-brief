@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react';
+import { lazy, Suspense, useState, type ReactNode } from 'react';
+import { MapBoundary } from './MapBoundary.js';
 import { NotamPanel } from './NotamPanel.js';
 import { alongRowId } from './picture.js';
 import { aerodromeHref } from './router.js';
@@ -6,6 +7,9 @@ import { SideView } from './SideView.js';
 import { alongTheWay, concernsOf, fieldCards, TOPIC_LABEL, type AlongLeg, type AlongStation, type Concern, type FieldCard } from './summary.js';
 import { hhmmZ, local, localClock, zulu } from './time.js';
 import type { Citation, Finding, RoutePicture, StoredBriefing } from './types.js';
+
+// The map library is only worth downloading once there is a flight to draw.
+const RouteMap = lazy(() => import('./RouteMap.js'));
 
 /** The time as a pilot says it; the date rides in the local time beside it, and the full stamp is a hover away. */
 function Zulu({ iso }: { iso: string }) {
@@ -418,6 +422,20 @@ export function BriefingView({ stored, picture, nameOf, whenCanIGo }: { stored: 
         ))}
       </div>
 
+      {picture && (
+        <section className="route-map" aria-labelledby="route-map-title">
+          <h3 id="route-map-title">Route map</h3>
+          <p className="explain">
+            Your route and the {CORRIDOR_NM} nm either side of it that is searched for reports. Each letter is a station at the time you would pass it: filled is
+            forecast for then, hollow is observed now. Tap one for its line in Along the way, or a field you named for its page.
+          </p>
+          <MapBoundary message="The map could not be loaded. The side view and the list below have every station.">
+            <Suspense fallback={<div className="wx-map wx-map-loading route-map-canvas">Loading the map…</div>}>
+              <RouteMap stored={stored} picture={picture} />
+            </Suspense>
+          </MapBoundary>
+        </section>
+      )}
       {picture && <SideView stored={stored} picture={picture} />}
       <AlongTheWay legs={alongTheWay(stored)} nameOf={nameOf} />
 

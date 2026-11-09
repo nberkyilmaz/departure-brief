@@ -399,7 +399,7 @@ export interface PictureHazardBase {
 
 export interface PictureHazard extends PictureHazardBase {
   area: { lat: number; lon: number }[];
-  stretches: { fromNm: number; toNm: number; fromAt: string; toAt: string; startsInside: boolean; endsInside: boolean }[];
+  stretches: { fromNm: number; toNm: number; fromAt: string; toAt: string; startsInside: boolean; endsInside: boolean; middle: { lat: number; lon: number } }[];
 }
 
 export interface PictureHazardMissed extends PictureHazardBase {
@@ -420,6 +420,9 @@ export interface PictureFreezing {
 
 /** The flight laid out along the route for drawing. Beside the briefing, not part of its hash. */
 export interface RoutePicture {
+  line: { lat: number; lon: number }[];
+  /** One outline per leg: the strip searched for stations either side of the track. */
+  corridor: { lat: number; lon: number }[][];
   totalNm: number;
   cruiseFt: number;
   tasKt: number;

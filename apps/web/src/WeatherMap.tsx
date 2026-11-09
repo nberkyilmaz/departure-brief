@@ -17,9 +17,9 @@
  * the overview never hides an IFR field under a VFR one beside it.
  */
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'react';
 import type { StationWeather } from './engine.js';
+import { baseMap, isTouch } from './mapBase.js';
 import { aerodromeHref } from './router.js';
 import { hhmmZ } from './time.js';
 
@@ -55,23 +55,11 @@ const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (c) => `&#${c.ch
 
 function draw(container: HTMLElement, stations: readonly StationWeather[], centre: { lat: number; lon: number } | null): L.Map {
   const dark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
-  // Scrolling the page past the map should scroll the page; the wheel zooms only once the map has been clicked.
-  const map = L.map(container, { scrollWheelZoom: false, minZoom: 3, maxZoom: 11, preferCanvas: true });
-  map.once('click', () => map.scrollWheelZoom.enable());
-  /*
-   * OpenStreetMap's own tiles: no key, attribution shown, and light use like
-   * this is within their policy. They come in one style only, so the dark
-   * scheme inverts them in CSS rather than asking a second provider.
-   */
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 11,
-  }).addTo(map);
+  const map = baseMap(container);
 
   const css = getComputedStyle(document.documentElement);
   const colour = (category: string | null) => css.getPropertyValue(`--${(category ?? 'unknown').toLowerCase()}`).trim() || '#888';
-  const touch = window.matchMedia?.('(pointer: coarse)').matches ?? false;
-  const radius = touch ? 7 : 6;
+  const radius = isTouch() ? 7 : 6;
   const layer = L.layerGroup().addTo(map);
   const plot = () => {
     layer.clearLayers();
