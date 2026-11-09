@@ -1,0 +1,14 @@
+{
+    "@context": {
+        "@version": "1.1",
+        "@vocab": "https://api.weather.gov/ontology#"
+    },
+    "@id": "https://api.weather.gov/products/58ef3bd4-db0f-4b5a-9a0e-13284dc1f382",
+    "id": "58ef3bd4-db0f-4b5a-9a0e-13284dc1f382",
+    "wmoCollectiveId": "USAK18",
+    "issuingOffice": "PABE",
+    "issuanceTime": "2026-11-09T00:00:00+00:00",
+    "productCode": "MAN",
+    "productName": "Rawinsonde Observation Mandatory Levels",
+    "productText": "\n000\nUSAK18 PABE 090000\nMANBET\n70219 TTAA 5900/ 70219 51515 10159=\n"
+}

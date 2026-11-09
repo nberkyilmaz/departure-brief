@@ -40,6 +40,7 @@ export const AWC_CACHE = 'https://aviationweather.gov/data/cache';
 export const AWC_API = 'https://aviationweather.gov/api/data';
 export const CFPS = 'https://plan.navcanada.ca/weather/api/alpha/';
 export const NOAA_RAW_US = 'https://tgftp.nws.noaa.gov/data/raw/us';
+export const NWS_API = 'https://api.weather.gov';
 
 /**
  * Every Canadian upper wind site, asked for in one request. The same list
@@ -90,12 +91,33 @@ export const SOUNDING_FILES = [
 ] as const;
 
 /**
+ * Alaska's balloons, by the location the NWS product API holds them under:
+ * they have no files of their own at NOAA. The same list as the stations
+ * with an `nwsLocation` in core — a test holds them together.
+ */
+export const ALASKA_SOUNDINGS = ['ADQ', 'AKN', 'ANC', 'ANN', 'BET', 'BRW', 'CDB', 'FAI', 'MCG', 'OME', 'OTZ', 'SNP', 'YAK'] as const;
+
+/**
  * NOAA has a file per balloon and the free plan allows fifty requests a
  * run, with the other products to fetch in the same one. So a run asks for
  * a third of them, the ones asked about longest ago, and three runs an hour
  * ask every balloon once.
  */
-const SOUNDINGS_PER_RUN = 23;
+const SOUNDINGS_PER_RUN = 27;
+
+/** One of the small files a rotating product is made of. */
+interface RotatingSource {
+  /** What it is held under in the copy. */
+  readonly key: string;
+  readonly url: string;
+  /** A plain file, or a product of the NWS API with the text and its date inside. */
+  readonly shape: 'file' | 'nws-product';
+}
+
+const SOUNDING_SOURCES: readonly RotatingSource[] = [
+  ...SOUNDING_FILES.map((key) => ({ key, url: `${NOAA_RAW_US}/${key}.txt`, shape: 'file' as const })),
+  ...ALASKA_SOUNDINGS.map((key) => ({ key, url: `${NWS_API}/products/types/MAN/locations/${key}/latest`, shape: 'nws-product' as const })),
+];
 
 export interface Product {
   /** The storage key, and the name the status page uses. */
@@ -115,7 +137,7 @@ export interface Product {
   /** For a JSON product, a refusal dressed as an answer: why it is not the product, or `null` when it is. */
   readonly refusal?: (text: string) => Refusal | null;
   /** Many small files rather than one: kept together in one copy, and asked for a few at a time. */
-  readonly rotating?: { readonly base: string; readonly files: readonly string[]; readonly perRun: number };
+  readonly rotating?: { readonly sources: readonly RotatingSource[]; readonly perRun: number };
 }
 
 /** One file of a rotating product, as the copy holds it. */
@@ -182,7 +204,7 @@ export const PRODUCTS: Readonly<Record<'metars' | 'tafs' | 'sigmet' | 'gairmet' 
     everyMs: 20 * MIN,
     contentType: 'application/json',
     gzip: false,
-    rotating: { base: NOAA_RAW_US, files: SOUNDING_FILES, perRun: SOUNDINGS_PER_RUN },
+    rotating: { sources: SOUNDING_SOURCES, perRun: SOUNDINGS_PER_RUN },
   },
 };
 
@@ -413,7 +435,7 @@ export class Relay {
    * way, or a file NOAA has removed would be first in it for ever.
    */
   private async fetchRotating(product: Product, held: Snapshot | null): Promise<Snapshot | { error: string }> {
-    const { base, files, perRun } = product.rotating!;
+    const { sources, perRun } = product.rotating!;
     let copy: Record<string, RotatingFile> = {};
     if (held) {
       try {
@@ -423,32 +445,36 @@ export class Relay {
       }
     }
     const askedAt = new Date(this.deps.now()).toISOString();
-    const turn = [...files].sort((a, b) => (copy[a]?.askedAt ?? '').localeCompare(copy[b]?.askedAt ?? '')).slice(0, perRun);
+    const turn = [...sources].sort((a, b) => (copy[a.key]?.askedAt ?? '').localeCompare(copy[b.key]?.askedAt ?? '')).slice(0, perRun);
     const failed: string[] = [];
     await Promise.all(
-      turn.map(async (file) => {
+      turn.map(async ({ key, url, shape }) => {
         let text: string | null = null;
         let modified: string | null = null;
         try {
-          const res = await this.deps.fetch(`${base}/${file}.txt`, { headers: { 'User-Agent': this.userAgent, Accept: 'text/plain' }, signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });
-          if (res.ok) {
+          const res = await this.deps.fetch(url, { headers: { 'User-Agent': this.userAgent, Accept: shape === 'file' ? 'text/plain' : 'application/ld+json' }, signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });
+          if (res.ok && shape === 'file') {
             text = await res.text();
             const stamp = res.headers.get('last-modified');
             modified = stamp ? new Date(stamp).toISOString() : null;
+          } else if (res.ok) {
+            const product = (await res.json()) as { productText?: unknown; issuanceTime?: unknown };
+            text = typeof product.productText === 'string' ? product.productText : null;
+            modified = typeof product.issuanceTime === 'string' ? new Date(product.issuanceTime).toISOString() : null;
           }
         } catch {
           // Counted below, with the ones that answered with something else.
         }
         // Kept only if it is a sounding, so an error page never replaces one.
         if (text === null || !text.includes('TTAA')) {
-          failed.push(file);
-          copy[file] = { askedAt, modified: copy[file]?.modified ?? null, text: copy[file]?.text ?? '' };
-        } else copy[file] = { askedAt, modified, text };
+          failed.push(key);
+          copy[key] = { askedAt, modified: copy[key]?.modified ?? null, text: copy[key]?.text ?? '' };
+        } else copy[key] = { askedAt, modified, text };
       }),
     );
-    if (failed.length === turn.length) return { error: `none of the ${turn.length} files asked for answered (${base})` };
+    if (failed.length === turn.length) return { error: `none of the ${turn.length} files asked for answered (${product.upstream})` };
     const body = new TextEncoder().encode(JSON.stringify(copy)).buffer as ArrayBuffer;
-    return this.keep(product, body, base, failed.length > 0 ? `no answer for ${failed.join(', ')}` : null);
+    return this.keep(product, body, product.upstream, failed.length > 0 ? `no answer for ${failed.join(', ')}` : null);
   }
 
   private async keep(product: Product, body: ArrayBuffer, upstream: string, note: string | null): Promise<Snapshot | { error: string }> {

@@ -10,8 +10,11 @@
  * The bulletin gives only a day of the month. `Last-Modified` says when NOAA
  * wrote the file, which is what dates it, and it stays right for a station
  * that has not flown for weeks and whose file has simply been left there.
+ *
+ * Alaska's stations have no files, so theirs come from the NWS product API:
+ * the same bulletin, as JSON, with the time it was issued.
  */
-import { soundingStationsNear } from '../domain/soundings.js';
+import { soundingStationsNear, type SoundingStation } from '../domain/soundings.js';
 import type { LatLon } from '../domain/geo.js';
 import { resolveDayTime } from '../domain/time.js';
 import { storeAndDecode, type IngestCounts } from '../store/decode.js';
@@ -20,6 +23,7 @@ import { decideFetch, DEFAULT_FRESHNESS_MS, recordFetchAttempt, type FreshnessDe
 import { expectOk, type HttpClient } from './response.js';
 
 export const NOAA_RAW_US_URL = 'https://tgftp.nws.noaa.gov/data/raw/us';
+export const NWS_API_URL = 'https://api.weather.gov';
 
 /** Marks a report as measured rather than forecast. */
 export const SOUNDING_SOURCE = 'noaa-sounding';
@@ -65,6 +69,7 @@ export class SoundingClient {
   constructor(
     private readonly http: HttpClient,
     private readonly baseUrl = NOAA_RAW_US_URL,
+    private readonly nwsUrl = NWS_API_URL,
   ) {}
 
   /** Every station at once, from the relay: `baseUrl` is the relay's route for them. */
@@ -95,6 +100,26 @@ export class SoundingClient {
     const report = soundingReport(res.body, modified ? new Date(modified) : now);
     return { request: url, reports: report ? [report] : [] };
   }
+
+  /** One Alaskan station's latest bulletin, from the NWS product API. */
+  async latestProduct(location: string, now: Date = new Date()): Promise<SoundingFetch> {
+    const url = `${this.nwsUrl}/products/types/MAN/locations/${location}/latest`;
+    const res = expectOk(url, await this.http.get(url, { headers: { Accept: 'application/ld+json' } }));
+    let product: { productText?: unknown; issuanceTime?: unknown };
+    try {
+      product = JSON.parse(res.body) as typeof product;
+    } catch {
+      throw new SoundingError('the NWS API did not send JSON', url);
+    }
+    if (typeof product.productText !== 'string') throw new SoundingError('the NWS API sent no bulletin', url);
+    const report = soundingReport(product.productText, typeof product.issuanceTime === 'string' ? new Date(product.issuanceTime) : now);
+    return { request: url, reports: report ? [report] : [] };
+  }
+
+  /** A station's sounding from wherever NOAA publishes it. */
+  async station(station: SoundingStation, now: Date = new Date()): Promise<SoundingFetch> {
+    return station.file ? this.file(station.file, now) : this.latestProduct(station.nwsLocation!, now);
+  }
 }
 
 export interface SoundingIngest {
@@ -111,22 +136,22 @@ export async function ingestSoundings(
   maxAgeMs: number = DEFAULT_FRESHNESS_MS.upperwind,
 ): Promise<SoundingIngest> {
   const now = (deps.now ?? (() => new Date()))();
-  const wanted = new Map<string, string>();
+  const wanted = new Map<string, SoundingStation>();
   for (const position of positions) {
     for (const { station } of soundingStationsNear(position, radiusNm).slice(0, SOUNDINGS_PER_POINT)) {
-      if (wanted.size < MAX_SOUNDING_SITES) wanted.set(station.id, station.file);
+      if (wanted.size < MAX_SOUNDING_SITES) wanted.set(station.id, station);
     }
   }
   const skipped: FreshnessDecision[] = [];
   const sites: string[] = [];
   let counts: IngestCounts = { fetched: 0, rawInserted: 0, decodedInserted: 0 };
-  for (const [id, file] of wanted) {
+  for (const [id, station] of wanted) {
     const decision = await decideFetch(deps.store, id, 'upperwind', now, maxAgeMs);
     if (!decision.fetched) {
       skipped.push(decision);
       continue;
     }
-    const fetched = await deps.soundings.file(file, now);
+    const fetched = await deps.soundings.station(station, now);
     await recordFetchAttempt(deps.store, id, 'upperwind', now, fetched.request);
     const c = await storeAndDecode(deps.store, fetched.reports, fetched.request, now);
     counts = { fetched: counts.fetched + c.fetched, rawInserted: counts.rawInserted + c.rawInserted, decodedInserted: counts.decodedInserted + c.decodedInserted };

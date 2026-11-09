@@ -15,7 +15,7 @@ export { parseCsv } from './csv.js';
 export type { IngestDeps, IngestResult } from './ingest.js';
 export { ingestUpperWinds, upperWindCandidates, MAX_UPPERWIND_SITES } from './winds.js';
 export type { UpperWindIngest } from './winds.js';
-export { ingestSoundings, MAX_SOUNDING_SITES, NOAA_RAW_US_URL, SOUNDING_SOURCE, SoundingClient, SoundingError, soundingReport } from './soundings.js';
+export { ingestSoundings, MAX_SOUNDING_SITES, NOAA_RAW_US_URL, NWS_API_URL, SOUNDING_SOURCE, SoundingClient, SoundingError, soundingReport } from './soundings.js';
 export type { HeldSounding, SoundingFetch, SoundingIngest } from './soundings.js';
 export { decideFetch, recordFetchAttempt, shouldFetch, DEFAULT_FRESHNESS_MS } from './freshness.js';
 export type { FreshnessDecision, FreshnessStore } from './freshness.js';
