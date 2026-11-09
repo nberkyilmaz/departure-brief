@@ -83,7 +83,7 @@ export { AWC_CACHE_BASE_URL, AwcCacheClient, GAIRMET_CACHE_FILE, METAR_CACHE_FIL
 export { CANADIAN_UPPERWIND_SITES, NAVCANADA_CFPS_BASE_URL, NavCanadaClient, NavCanadaError } from './fetch/navcanada.js';
 export type { CfpsFetch } from './fetch/navcanada.js';
 export { ELEVATION_BATCH, ElevationClient, ElevationError, OPEN_METEO_ELEVATION_URL } from './fetch/elevation.js';
-export { NOAA_RAW_US_URL, SOUNDING_SOURCE, SoundingClient, SoundingError, soundingReport } from './fetch/soundings.js';
+export { NOAA_RAW_US_URL, NWS_API_URL, SOUNDING_SOURCE, SoundingClient, SoundingError, soundingReport } from './fetch/soundings.js';
 export type { HeldSounding, SoundingFetch } from './fetch/soundings.js';
 export { recordFetchAttempt } from './fetch/freshness.js';
 // Carrying a store's contents somewhere with no database and no network.

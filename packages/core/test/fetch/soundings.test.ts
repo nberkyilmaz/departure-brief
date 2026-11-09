@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { recordFetchAttempt } from '../../src/fetch/freshness.js';
 import type { HttpClient } from '../../src/fetch/response.js';
-import { ingestSoundings, MAX_SOUNDING_SITES, NOAA_RAW_US_URL, SoundingClient, SoundingError, soundingReport, SOUNDING_SOURCE } from '../../src/fetch/soundings.js';
+import { ingestSoundings, MAX_SOUNDING_SITES, NOAA_RAW_US_URL, NWS_API_URL, SoundingClient, SoundingError, soundingReport, SOUNDING_SOURCE } from '../../src/fetch/soundings.js';
 import { SOUNDING_RADIUS_NM } from '../../src/resolve/wind.js';
 import { MemoryStore } from '../../src/store/memory.js';
 
@@ -59,12 +59,29 @@ describe('through the relay', () => {
   });
 });
 
+describe('from the NWS product API', () => {
+  const product = (location: string) => readFileSync(join(__dirname, '..', 'fixtures', 'fetch', 'noaa', 'alaska-2026-11-09', `${location}.json`), 'utf8');
+  const answering = (body: string): HttpClient => ({ get: async () => ({ status: 200, body, headers: {} }) });
+
+  it('reads the bulletin out of the product, dated by when it was issued', async () => {
+    const { request, reports } = await new SoundingClient(answering(product('ANC'))).latestProduct('ANC', NOW);
+    expect(request).toBe(`${NWS_API_URL}/products/types/MAN/locations/ANC/latest`);
+    expect(reports[0]).toMatchObject({ station: '70273', source: SOUNDING_SOURCE, issuedAt: new Date('2026-11-09T00:00:00Z') });
+  });
+
+  it('says so when what came back is not a product', async () => {
+    await expect(new SoundingClient(answering('<html></html>')).latestProduct('ANC', NOW)).rejects.toBeInstanceOf(SoundingError);
+    await expect(new SoundingClient(answering('{"title":"Not Found"}')).latestProduct('ANC', NOW)).rejects.toThrow(/no bulletin/);
+  });
+});
+
 describe('fetched for a route', () => {
   function recordedNoaa() {
     const asked: string[] = [];
     const http: HttpClient = {
       async get(url) {
         asked.push(url);
+        if (url.startsWith(NWS_API_URL)) return { status: 200, body: readFileSync(join(__dirname, '..', 'fixtures', 'fetch', 'noaa', 'alaska-2026-11-09', `${url.split('/').at(-2)}.json`), 'utf8'), headers: {} };
         const name = url.slice(NOAA_RAW_US_URL.length + 1);
         return { status: 200, body: file(name), headers: { 'last-modified': new Date(MODIFIED[name]!).toUTCString() } };
       },
@@ -79,6 +96,14 @@ describe('fetched for a route', () => {
     expect(asked.map((u) => u.slice(NOAA_RAW_US_URL.length + 1))).toEqual(['usus41.kaly.man.aly.txt', 'usus41.kokx.man.okx.txt']);
     expect(result.sites).toEqual(['72518', '72501']);
     expect((await store.listRaw({ station: '72518', kind: 'upperwind' }))[0]!.issuedAt).toEqual(new Date('2026-11-09T00:00:00Z'));
+  });
+
+  it('goes to the NWS API for an Alaskan balloon', async () => {
+    const { asked, soundings } = recordedNoaa();
+    const store = new MemoryStore();
+    await ingestSoundings({ store, soundings, now: () => NOW }, [{ lat: 61.174, lon: -149.998 }], SOUNDING_RADIUS_NM);
+    expect(asked[0]).toBe(`${NWS_API_URL}/products/types/MAN/locations/ANC/latest`);
+    expect((await store.listRaw({ station: '70273', kind: 'upperwind' }))).toHaveLength(1);
   });
 
   it('does not ask again within the hour', async () => {

@@ -9,7 +9,7 @@ import { decodeUpperWind } from '../../src/decode/upperwind/decode.js';
 import { freezingLevel, windAtAltitude } from '../../src/decode/upperwind/interpolate.js';
 import { sliceSpan } from '../../src/decode/span.js';
 import { SOUNDING_USE_HOURS } from '../../src/decode/upperwind/ttaa.js';
-import { SOUNDING_STATIONS } from '../../src/domain/soundings.js';
+import { SOUNDING_STATIONS, soundingStation } from '../../src/domain/soundings.js';
 
 const DIR = join(__dirname, '..', 'fixtures', 'fetch', 'noaa', 'soundings-2026-11-09');
 const text = (name: string) => readFileSync(join(DIR, name), 'latin1').trim();
@@ -60,6 +60,34 @@ describe('a sounding', () => {
   });
 });
 
+describe('an Alaskan sounding, from the NWS product API', () => {
+  const ALASKA = join(__dirname, '..', 'fixtures', 'fetch', 'noaa', 'alaska-2026-11-09');
+  const productText = (location: string) => (JSON.parse(readFileSync(join(ALASKA, `${location}.json`), 'utf8')) as { productText: string }).productText.trim();
+
+  it('reads the same, under the correction header and the wire number in front of it', () => {
+    const raw = productText('ANC');
+    expect(raw.startsWith('000')).toBe(true);
+    const d = decodeUpperWind(raw, WHEN);
+    expect(d.validAt!.value).toEqual(new Date('2026-11-09T00:00:00Z'));
+    expect(d.bulletin!.value).toBe('USAK18');
+    expect(d.issuer!.value).toBe('PAFC');
+    expect(d.levels[0]!.altitudeFt).toBe(soundingStation('70273')!.elevationFt);
+    expect(d.unparsed).toEqual([]);
+  });
+
+  it('decodes every station with nothing left over, and has one in the table for each', () => {
+    for (const location of readdirSync(ALASKA).map((n) => n.replace('.json', ''))) {
+      const d = decodeUpperWind(productText(location), WHEN);
+      expect(d.unparsed, location).toEqual([]);
+      expect(SOUNDING_STATIONS.some((s) => s.nwsLocation === location), location).toBe(true);
+    }
+  });
+
+  it('has no levels from a balloon that reported none', () => {
+    expect(decodeUpperWind(productText('BET'), WHEN).levels).toEqual([]);
+  });
+});
+
 describe('every file NOAA had', () => {
   it('decodes with nothing left over, climbing, and with believable numbers', () => {
     const empty: string[] = [];
@@ -88,7 +116,7 @@ describe('every file NOAA had', () => {
 
   it('has a station in the table for every balloon file but the Yuma range one', () => {
     const inFiles = REPORTS.filter((n) => !n.includes('1y7')).map((n) => n.replace('.txt', '')).sort();
-    expect(inFiles).toEqual(SOUNDING_STATIONS.map((s) => s.file).sort());
+    expect(inFiles).toEqual(SOUNDING_STATIONS.flatMap((s) => s.file ?? []).sort());
   });
 
   it('reads no wind above the level the bulletin says winds stop at', () => {

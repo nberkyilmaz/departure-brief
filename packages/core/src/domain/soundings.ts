@@ -8,8 +8,9 @@
  * the launch site rather than the nearest airport.
  *
  * One bulletin per station, in a file of its own at NOAA, named by the
- * forecast office that launches it. Alaska is not here: its stations are
- * published only in combined bulletins that are overwritten piecemeal.
+ * forecast office that launches it. Alaska's stations have no such files,
+ * only combined bulletins that are overwritten piecemeal, so theirs come
+ * from the NWS product API, which holds each one by a location code.
  */
 import { distanceNm, type LatLon } from './geo.js';
 
@@ -19,7 +20,9 @@ export interface SoundingStation {
   /** The place, as a pilot would say it: "the Albany balloon". */
   readonly name: string;
   /** NOAA's file for it, under `data/raw/us/`, without the `.txt`. */
-  readonly file: string;
+  readonly file?: string;
+  /** Where the NWS product API holds it, for a station with no file of its own. */
+  readonly nwsLocation?: string;
   readonly lat: number;
   readonly lon: number;
   readonly elevationFt: number;
@@ -94,6 +97,19 @@ export const SOUNDING_STATIONS: readonly SoundingStation[] = [
   { id: '72694', name: 'Salem', file: 'usus46.kpqr.man.sle', lat: 44.9092, lon: -123.008, elevationFt: 205 },
   { id: '72797', name: 'Quillayute', file: 'usus46.ksew.man.uil', lat: 47.9339, lon: -124.56, elevationFt: 186 },
   { id: '72293', name: 'San Diego', file: 'usus46.ksgx.man.nkx', lat: 32.8333, lon: -117.117, elevationFt: 438 },
+  { id: '70026', name: 'Utqiagvik', nwsLocation: 'BRW', lat: 71.2889, lon: -156.783, elevationFt: 39 },
+  { id: '70133', name: 'Kotzebue', nwsLocation: 'OTZ', lat: 66.8864, lon: -162.613, elevationFt: 16 },
+  { id: '70200', name: 'Nome', nwsLocation: 'OME', lat: 64.5072, lon: -165.435, elevationFt: 21 },
+  { id: '70219', name: 'Bethel', nwsLocation: 'BET', lat: 60.785, lon: -161.84, elevationFt: 108 },
+  { id: '70231', name: 'McGrath', nwsLocation: 'MCG', lat: 62.9583, lon: -155.598, elevationFt: 338 },
+  { id: '70261', name: 'Fairbanks', nwsLocation: 'FAI', lat: 64.8161, lon: -147.877, elevationFt: 439 },
+  { id: '70273', name: 'Anchorage', nwsLocation: 'ANC', lat: 61.1567, lon: -149.986, elevationFt: 171 },
+  { id: '70308', name: 'St. Paul Island', nwsLocation: 'SNP', lat: 57.15, lon: -170.217, elevationFt: 33 },
+  { id: '70316', name: 'Cold Bay', nwsLocation: 'CDB', lat: 55.2011, lon: -162.716, elevationFt: 83 },
+  { id: '70326', name: 'King Salmon', nwsLocation: 'AKN', lat: 58.6794, lon: -156.668, elevationFt: 28 },
+  { id: '70350', name: 'Kodiak', nwsLocation: 'ADQ', lat: 57.7431, lon: -152.487, elevationFt: 16 },
+  { id: '70361', name: 'Yakutat', nwsLocation: 'YAK', lat: 59.5167, lon: -139.667, elevationFt: 35 },
+  { id: '70398', name: 'Annette Island', nwsLocation: 'ANN', lat: 55.0389, lon: -131.578, elevationFt: 114 },
 ];
 
 const BY_ID = new Map(SOUNDING_STATIONS.map((s) => [s.id, s]));

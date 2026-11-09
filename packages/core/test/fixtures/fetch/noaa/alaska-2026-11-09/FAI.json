@@ -1,0 +1,14 @@
+{
+    "@context": {
+        "@version": "1.1",
+        "@vocab": "https://api.weather.gov/ontology#"
+    },
+    "@id": "https://api.weather.gov/products/be34ab90-05a6-4524-9dc8-eedc9ce005d0",
+    "id": "be34ab90-05a6-4524-9dc8-eedc9ce005d0",
+    "wmoCollectiveId": "USAK19",
+    "issuingOffice": "PAFA",
+    "issuanceTime": "2026-11-09T00:02:00+00:00",
+    "productCode": "MAN",
+    "productName": "Rawinsonde Observation Mandatory Levels",
+    "productText": "\n000\nUSAK19 PAFA 090002 COR\nMANFAI\n70261 TTAA  59001 70261\n99982 05150 00505 00509 ///// ///// 92605 04550 07015\n85267 07300 11518 70766 13119 13526 50525 29150 17017\n40680 41535 17533 30870 54934 20022 25984 61750 20016\n20126 51580 12515 15315 45385 15005 10585 46386 16509\n88255 62547 20025\n77999\n31313 44208 82302\n51515 10181=\n\n"
+}

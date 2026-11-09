@@ -15,6 +15,7 @@ import { storeAndDecode } from '../../src/store/decode.js';
 
 const FIXTURES = join(__dirname, '..', 'fixtures', 'fetch');
 const DIR = join(FIXTURES, 'noaa', 'soundings-2026-11-09');
+const ALASKA = join(FIXTURES, 'noaa', 'alaska-2026-11-09');
 const DEMO = join(__dirname, '..', '..', '..', '..', 'apps', 'web', 'public', 'demo', 'airports');
 const MODIFIED = JSON.parse(readFileSync(join(DIR, 'last-modified.json'), 'utf8')) as Record<string, string>;
 const RECORDED = new Date('2026-11-09T04:53:45Z');
@@ -27,7 +28,11 @@ async function seeded(skip: readonly string[] = []): Promise<CatalogStore> {
   const reports = readdirSync(DIR)
     .filter((n) => n.endsWith('.txt') && !skip.some((s) => n.includes(s)))
     .flatMap((n) => soundingReport(readFileSync(join(DIR, n), 'latin1'), new Date(MODIFIED[n] ?? RECORDED)) ?? []);
-  await storeAndDecode(store, reports, 'recorded', RECORDED);
+  const alaska = readdirSync(ALASKA).flatMap((n) => {
+    const product = JSON.parse(readFileSync(join(ALASKA, n), 'utf8')) as { productText: string; issuanceTime: string };
+    return soundingReport(product.productText, new Date(product.issuanceTime)) ?? [];
+  });
+  await storeAndDecode(store, [...reports, ...alaska], 'recorded', RECORDED);
   return store;
 }
 
@@ -63,7 +68,8 @@ describe('a US field', () => {
 
   it('has none out of reach of every balloon', async () => {
     const store = await seeded();
-    expect(await balloonWindAt(store, { lat: 61.2, lon: -149.9 }, 6500, SOON, RECORDED)).toBeNull();
+    // The middle of the North Pacific.
+    expect(await balloonWindAt(store, { lat: 40, lon: -160 }, 6500, SOON, RECORDED)).toBeNull();
     expect(SOUNDING_RADIUS_NM).toBe(200);
   });
 
@@ -82,6 +88,28 @@ describe('a US field', () => {
     const w = (await windAt(store, boston, 'KBOS', 6500, SOON, RECORDED))!;
     const [finding] = checkWindAloft({ waypoint: 'KBOS', at: SOON, cruiseAltitude: 6500 }, w);
     expect(finding!.summary).toMatch(/measured by the Gray balloon at 00Z, 97 nm away$/);
+  });
+});
+
+describe('an Alaskan field', () => {
+  it('reads an Alaskan balloon, from the API that carries them', async () => {
+    const store = await seeded();
+    const w = (await windAt(store, { lat: 61.174, lon: -149.998 }, 'PANC', 6500, SOON, RECORDED))!;
+    expect(w.station).toBe('70273');
+    expect(w.measured).toEqual({ by: 'Anchorage', at: new Date('2026-11-09T00:00:00Z') });
+  });
+
+  it('passes to the next balloon when the nearest reported nothing', async () => {
+    // King Salmon's 00Z bulletin holds no levels; Kodiak's does.
+    const store = await seeded();
+    const w = (await balloonWindAt(store, soundingStation('70326')!, 6500, SOON, RECORDED))!;
+    expect(w.measured?.by).toBe('Kodiak');
+  });
+
+  it('has none when no balloon in reach reported, which is a real answer out there', async () => {
+    // Bethel reported nothing that morning, and no balloon that did is within 200 nm of it.
+    const store = await seeded();
+    expect(await balloonWindAt(store, soundingStation('70219')!, 6500, SOON, RECORDED)).toBeNull();
   });
 });
 

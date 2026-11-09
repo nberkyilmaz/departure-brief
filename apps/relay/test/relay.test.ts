@@ -17,10 +17,12 @@ import {
 import { describe, expect, it } from 'vitest';
 import { MemoryKv } from '../src/memoryKv.js';
 import {
+  ALASKA_SOUNDINGS,
   AWC_API,
   CFPS,
   NOAA_RAW_US,
   NOTAM_FETCHES_PER_MINUTE,
+  NWS_API,
   PRODUCTS,
   Relay,
   SOUNDING_FILES,
@@ -40,6 +42,11 @@ const gairmetXml = readFileSync(join(FIXTURES, 'northeast-2026-11-09', 'gairmets
 const SOUNDINGS = join(FIXTURES, 'noaa', 'soundings-2026-11-09');
 const soundingFile = (name: string) => readFileSync(join(SOUNDINGS, `${name}.txt`), 'latin1');
 const modified = JSON.parse(readFileSync(join(SOUNDINGS, 'last-modified.json'), 'utf8')) as Record<string, string>;
+/** Alaska's balloons, as the NWS product API answered for each on the same morning. */
+const alaskaProduct = (location: string) => readFileSync(join(FIXTURES, 'noaa', 'alaska-2026-11-09', `${location}.json`), 'utf8');
+const alaskaUrl = (location: string) => `${NWS_API}/products/types/MAN/locations/${location}/latest`;
+const ALL_SOUNDINGS = SOUNDING_FILES.length + ALASKA_SOUNDINGS.length;
+const isBalloon = (url: string) => url.startsWith(NOAA_RAW_US) || url.startsWith(NWS_API);
 
 const PAGE = 'https://nberkyilmaz.github.io';
 const T0 = Date.parse('2026-10-20T05:00:00Z');
@@ -57,6 +64,7 @@ function upstream(overrides: Record<string, Answer> = {}) {
     [PRODUCTS.gairmet.upstream]: () => new Response(gzipSync(gairmetXml), { headers: { 'Content-Type': 'application/octet-stream' } }),
     [PRODUCTS.upperwind.upstream]: () => new Response(upperwinds),
     ...Object.fromEntries(SOUNDING_FILES.map((f) => [`${NOAA_RAW_US}/${f}.txt`, () => new Response(soundingFile(f), { headers: { 'Last-Modified': new Date(modified[`${f}.txt`]!).toUTCString() } })])),
+    ...Object.fromEntries(ALASKA_SOUNDINGS.map((l) => [alaskaUrl(l), () => new Response(alaskaProduct(l), { headers: { 'Content-Type': 'application/ld+json' } })])),
     [`${CFPS}?site=CYSN&alpha=notam`]: () => new Response('{"meta":{},"data":[{"type":"notam"}]}'),
     ...overrides,
   };
@@ -229,17 +237,18 @@ describe('the balloons, which are many small files', () => {
     await r.relay.refresh();
     // Everything due at once, on the first tick: the limit is fifty, and CFPS can take two.
     expect(r.up.calls.length).toBeLessThanOrEqual(49);
-    expect(r.up.calls.filter((u) => u.startsWith(NOAA_RAW_US))).toHaveLength(23);
+    expect(r.up.calls.filter(isBalloon)).toHaveLength(27);
   });
 
   it('has every balloon in core in its list, and asks each one within three runs', async () => {
-    expect([...SOUNDING_FILES].sort()).toEqual(SOUNDING_STATIONS.map((s) => s.file).sort());
+    expect([...SOUNDING_FILES].sort()).toEqual(SOUNDING_STATIONS.flatMap((s) => s.file ?? []).sort());
+    expect([...ALASKA_SOUNDINGS].sort()).toEqual(SOUNDING_STATIONS.flatMap((s) => s.nwsLocation ?? []).sort());
     const r = relayWith();
     for (let run = 0; run < 3; run++) {
       await r.relay.refresh();
       r.advance(20 * MIN);
     }
-    expect(new Set(r.up.calls.filter((u) => u.startsWith(NOAA_RAW_US))).size).toBe(SOUNDING_FILES.length);
+    expect(new Set(r.up.calls.filter(isBalloon)).size).toBe(ALL_SOUNDINGS);
   });
 
   it('gives the page every balloon the client can read, dated by NOAA', async () => {
@@ -250,10 +259,13 @@ describe('the balloons, which are many small files', () => {
     }
     const http: HttpClient = { get: async (url) => ({ status: 200, body: text(await r.get(url.replace('https://relay.example', ''))), headers: {} }) };
     const { reports } = await new SoundingClient(http, 'https://relay.example/noaa/soundings').relayed();
-    expect(reports).toHaveLength(SOUNDING_FILES.length);
+    expect(reports).toHaveLength(ALL_SOUNDINGS);
     const albany = reports.find((x) => x.station === '72518')!;
     expect(albany.issuedAt).toEqual(new Date('2026-11-09T00:00:00Z'));
     expect(albany.body).toBe(soundingFile('usus41.kaly.man.aly').trim());
+    const anchorage = reports.find((x) => x.station === '70273')!;
+    expect(anchorage.issuedAt).toEqual(new Date('2026-11-09T00:00:00Z'));
+    expect(anchorage.body).toBe((JSON.parse(alaskaProduct('ANC')) as { productText: string }).productText.trim());
   });
 
   it('keeps a balloon\'s last sounding when its file does not answer, and says which', async () => {
@@ -262,10 +274,12 @@ describe('the balloons, which are many small files', () => {
     const r = relayWith(upstream({ [`${NOAA_RAW_US}/${missing}.txt`]: () => (answering ? new Response(soundingFile(missing)) : new Response('gone', { status: 404 })) }));
     await r.relay.refresh();
     answering = false;
-    r.advance(60 * MIN);
-    await r.relay.refresh();
+    for (let run = 0; run < 2; run++) {
+      r.advance(20 * MIN);
+      await r.relay.refresh();
+    }
     r.advance(20 * MIN);
-    // The third run, which comes back round to the first file.
+    // The fourth run, which comes back round to the first file.
     const outcomes = await r.relay.refresh();
     expect(outcomes.find((o) => o.key === 'soundings')).toMatchObject({ state: 'refreshed' });
     const held = JSON.parse(text(await r.get('/noaa/soundings'))) as Record<string, { text: string }>;
@@ -285,7 +299,7 @@ describe('the balloons, which are many small files', () => {
     const none = Object.fromEntries(SOUNDING_FILES.map((f) => [`${NOAA_RAW_US}/${f}.txt`, () => new Response('down', { status: 503 })]));
     const r = relayWith(upstream(none));
     const outcomes = await r.relay.refresh();
-    expect(outcomes.find((o) => o.key === 'soundings')).toMatchObject({ state: 'failed', error: expect.stringContaining('none of the 23') });
+    expect(outcomes.find((o) => o.key === 'soundings')).toMatchObject({ state: 'failed', error: expect.stringContaining('none of the 27') });
     expect((await r.kv.getWithMetadata('soundings')).value).toBeNull();
   });
 
@@ -299,7 +313,19 @@ describe('the balloons, which are many small files', () => {
     expect(r.up.calls.filter((u) => u.includes(gone))).toHaveLength(1);
     r.advance(20 * MIN);
     await r.relay.refresh();
-    expect(new Set(r.up.calls.filter((u) => u.startsWith(NOAA_RAW_US))).size).toBe(SOUNDING_FILES.length);
+    expect(new Set(r.up.calls.filter(isBalloon)).size).toBe(ALL_SOUNDINGS);
+  });
+
+  it('asks the NWS API for Alaska, and keeps nothing from an answer with no bulletin in it', async () => {
+    const r = relayWith(upstream({ [alaskaUrl('ANC')]: () => new Response('{"title":"Not Found"}') }));
+    for (let run = 0; run < 3; run++) {
+      await r.relay.refresh();
+      r.advance(20 * MIN);
+    }
+    const held = JSON.parse(text(await r.get('/noaa/soundings'))) as Record<string, { text: string; modified: string | null }>;
+    expect(held['ANC']!.text).toBe('');
+    expect(held['FAI']!.text).toContain('70261 TTAA');
+    expect(held['FAI']!.modified).toBe('2026-11-09T00:02:00.000Z');
   });
 
   it('serves the G-AIRMET file compressed and labelled, for a browser to undo', async () => {
