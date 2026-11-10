@@ -41,8 +41,9 @@ and shows its working.
   ends cannot hide IFR or a thunderstorm half way.
 - **Checks** each point against personal minimums, Canadian VFR minima
   (CARs 602.114/115), US minima (FAR 91.155), crosswind per runway, daylight,
-  fuel reserve (CARs 602.88), hazard areas crossing the route, and the
-  temperature at cruise.
+  fuel reserve (CARs 602.88), hazard areas crossing the route, the
+  temperature at cruise, and the handbook's takeoff and landing distance
+  against every runway, with your own margin on top.
 - **Works the nav log**: the wind triangle leg by leg, from upper winds
   interpolated to the cruising altitude, and the fuel the way the
   handbook's own sample problem does it: the start and taxi allowance, the

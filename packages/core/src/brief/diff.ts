@@ -91,7 +91,7 @@ function basisKindOf(f: Finding): BasisKind {
   if (f.basis.startsWith('observed')) return 'observed';
   if (f.basis === 'forecast') return 'forecast';
   if (f.basis === 'time' || f.basis === 'daylight') return 'time';
-  if (f.basis === 'fuel') return 'plan';
+  if (f.basis === 'fuel' || f.basis === 'aircraft') return 'plan';
   if (f.basis === 'observation') return 'observed';
   if (f.basis.endsWith('upper wind')) return 'forecast';
   return 'overlay';

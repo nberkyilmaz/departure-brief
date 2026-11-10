@@ -230,7 +230,7 @@ function aircraftOf(file: string, plan: FlightPlan) {
   return existsSync(wb) ? withHandbookLimits(limits, JSON.parse(readFileSync(wb, 'utf8')) as WeightBalanceSpec) : limits;
 }
 
-/** The handbook's cruise and climb tables for the aircraft, when there are any. */
+/** The handbook's performance tables for the aircraft, when there are any. */
 function performanceOf(aircraft: { type: string } | null): PerformanceSpec | null {
   if (!aircraft) return null;
   const file = join('aircraft', `${aircraft.type.toLowerCase().replace(/[^a-z0-9-]/g, '')}.performance.json`);
@@ -241,7 +241,7 @@ async function briefCommand(args: string[]): Promise<void> {
   await withFlight(args, async ({ file, plan, resolved, store }) => {
     const profile = parsePilotProfile(readJsonRelative(file, plan.profile, 'profiles/default.json'));
     const aircraft = aircraftOf(file, plan);
-    const briefing = evaluateFlight(resolved, profile, aircraft);
+    const briefing = evaluateFlight(resolved, profile, aircraft, performanceOf(aircraft));
     // Record what the forecasts assert, so `depbrief verify` can check them once their moment passes.
     const recorded = await recordForecastChecks(store, resolved);
     if (recorded.recorded > 0) console.error(`recording ${recorded.recorded} forecast${recorded.recorded === 1 ? '' : 's'} to check later`);

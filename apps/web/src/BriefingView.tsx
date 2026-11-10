@@ -4,7 +4,7 @@ import { NotamPanel } from './NotamPanel.js';
 import { alongRowId } from './picture.js';
 import { aerodromeHref } from './router.js';
 import { SideView } from './SideView.js';
-import { alongTheWay, concernsOf, fieldCards, TOPIC_LABEL, type AlongLeg, type AlongStation, type Concern, type FieldCard } from './summary.js';
+import { alongTheWay, concernsOf, fieldCards, runwayEnds, TOPIC_LABEL, type AlongLeg, type AlongStation, type Concern, type FieldCard, type RunwayEnd } from './summary.js';
 import { hhmmZ, local, localClock, zulu } from './time.js';
 import type { Citation, Finding, RoutePicture, StoredBriefing } from './types.js';
 
@@ -191,6 +191,96 @@ export function FindingList({ findings, where = false }: { findings: readonly Fi
 }
 
 
+const ftText = (n: number): string => `${Math.round(n).toLocaleString('en')} ft`;
+const capitalised = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
+
+/** The wind along one end in words: what it adds, and how much of it is across. */
+function alongWords(r: RunwayEnd): { text: string; note: string | null } {
+  if (r.alongKt === null) return { text: 'not given', note: 'read for still air' };
+  const along = Math.round(Math.abs(r.alongKt));
+  const across = r.crosswindKt === null ? null : `${Math.round(r.crosswindKt)} kt across`;
+  if (along === 0) return { text: r.crosswindKt ? 'none along' : 'calm', note: r.crosswindKt ? across : null };
+  if (r.alongKt > 0) return { text: `${along} kt head`, note: ['no credit', across].filter(Boolean).join(', ') };
+  return { text: `${along} kt tail`, note: [r.windPercent ? `+${r.windPercent}%` : null, across].filter(Boolean).join(', ') };
+}
+
+const VERDICT: Readonly<Record<RunwayEnd['reasons'][number], string>> = { short: 'too short', margin: 'short of margin', crosswind: 'too much crosswind' };
+
+/**
+ * Every runway end, read for this takeoff or landing on the same forecast
+ * or observation as the card. Open when no runway fits, or rain puts the
+ * figures in doubt, so the reason is on the page rather than behind a tap.
+ */
+function RunwayTable({ f }: { f: Finding }) {
+  const ends = runwayEnds(f);
+  const margin = typeof f.values['marginPercent'] === 'number' ? f.values['marginPercent'] : 0;
+  const what = f.values['what'] === 'landing' ? 'landing' : 'takeoff';
+  const cell = f.values['cell'] as { pressureAltitudeFt: number; columnC: number } | null;
+  const pa = typeof f.values['pressureAltitudeFt'] === 'number' ? f.values['pressureAltitudeFt'] : null;
+  const temp = typeof f.values['tempC'] === 'number' ? f.values['tempC'] : null;
+  const from = f.values['tempFrom'] as { station: string; at: string | null } | null;
+  return (
+    <details className="runway-reading" open={f.attention === 'alert' || f.attention === 'caution'}>
+      <summary>
+        Each runway for the {what} ({ends.length} {ends.length === 1 ? 'end' : 'ends'})
+      </summary>
+      <p className="runway-reading-at">
+        {pa !== null && `${ftText(pa)} pressure altitude, ${temp !== null ? `${temp} °C` : 'no temperature reported'}${from ? ` (${from.station}${from.at ? ` ${hhmmZ(from.at)}` : ''})` : ''}. `}
+        {cell && `Read from the handbook's chart at ${cell.pressureAltitudeFt === 0 ? 'sea level' : ftText(cell.pressureAltitudeFt)} and ${cell.columnC} °C, 2,300 lb. `}
+        Wind from the {f.basisKind === 'observed' ? 'observation' : 'forecast for your time'}.
+      </p>
+      <table className="runway-table">
+        <thead>
+          <tr>
+            <th scope="col">Runway</th>
+            <th scope="col">Wind</th>
+            <th scope="col" className="num">
+              Needs
+            </th>
+            <th scope="col" className="num">
+              Has
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {ends.map((r) => {
+            const wind = alongWords(r);
+            const read = r.status === 'fits' || r.status === 'over';
+            return (
+              <tr key={`${r.runway}-${r.end}`} className={r.status}>
+                <th scope="row">
+                  {r.end}
+                  <small>{r.kind ?? r.surface ?? 'surface not recorded'}</small>
+                </th>
+                {read ? (
+                  <>
+                    <td>
+                      {wind.text}
+                      {wind.note && <small>{wind.note}</small>}
+                    </td>
+                    <td className="num">
+                      {ftText(r.neededFt!)}
+                      <small>{margin > 0 ? `${r.totalFt!.toLocaleString('en')} + ${margin}%` : 'handbook'}</small>
+                    </td>
+                    <td className="num">
+                      {ftText(r.availableFt!)}
+                      <small className="verdict">{r.status === 'fits' ? 'fits' : r.reasons.map((x) => VERDICT[x]).join(', ')}</small>
+                    </td>
+                  </>
+                ) : (
+                  <td colSpan={3} className="runway-problem">
+                    {capitalised(r.problem ?? 'no figure')}
+                  </td>
+                )}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </details>
+  );
+}
+
 /**
  * One field at the time you are there, in the numbers a pilot asks for
  * first. The checks behind them are under the card, each with its report.
@@ -238,6 +328,7 @@ function FieldCardView({ c, name }: { c: FieldCard; name: string | null }) {
       )}
       {c.source && <p className="field-source">{c.source}</p>}
       {c.now && <p className="field-source">{c.now}</p>}
+      {c.runways && <RunwayTable f={c.runways} />}
       <details className="met">
         <summary>Every check here, with its report ({p.findings.length})</summary>
         <FindingList findings={p.findings} />

@@ -56,7 +56,7 @@ function cite(ctx: CheckContext, span: Span | null): Citation {
   };
 }
 
-const profileCitation = (p: PilotProfile): Citation => ({
+export const profileCitation = (p: PilotProfile): Citation => ({
   kind: 'profile',
   station: null,
   raw: null,

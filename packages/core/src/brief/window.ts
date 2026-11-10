@@ -20,6 +20,7 @@
 import type { FlightCategory } from '../decode/metar/derive.js';
 import type { FlightPlan } from '../domain/flight.js';
 import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
+import type { PerformanceSpec } from '../perf/types.js';
 import { corridorOf } from '../resolve/enroute.js';
 import { resolveFlight } from '../resolve/flight.js';
 import { resolveRoute } from '../resolve/route.js';
@@ -99,6 +100,7 @@ export async function departureWindow(
   aircraft: AircraftLimits | null,
   asOf: Date,
   hours: number = WINDOW_HOURS,
+  performance: PerformanceSpec | null = null,
 ): Promise<DepartureSlot[]> {
   const first = Math.ceil(asOf.getTime() / HOUR_MS) * HOUR_MS;
   // Where the stations beside the route are does not move with the hour; only when you pass them does.
@@ -107,7 +109,7 @@ export async function departureWindow(
   for (let h = 0; h < hours; h++) {
     const departAt = new Date(first + h * HOUR_MS).toISOString();
     const resolved = await resolveFlight(store, { ...plan, departureTime: departAt }, asOf, corridor);
-    const judged = evaluateFlight(resolved, profile, aircraft);
+    const judged = evaluateFlight(resolved, profile, aircraft, performance);
     const ends = [0, resolved.points.length - 1];
     slots.push({
       departAt,

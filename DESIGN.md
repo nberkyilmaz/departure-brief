@@ -142,6 +142,14 @@ alone. Between printed rows and columns the fuel plan takes the highest
 burn printed either side, not the nearest figure the handbook's own example
 uses, because it feeds a legal reserve.
 
+The takeoff and landing tables are read the way the handbook says to, at
+the next printed altitude and temperature up, which for distances that only
+grow is also the longest figure either side. A headwind earns nothing,
+because the forecast wind need not be the one you get; a tailwind costs
+what the note says, worked on the gust. The margin on top is the pilot's,
+set with their minimums, and crossing it is an alert the same way a
+crosswind over their limit is.
+
 ## 8. Testing
 
 Every upstream client is tested against responses recorded from the real

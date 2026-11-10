@@ -12,7 +12,7 @@
  * measured.
  */
 import type { Altimeter } from '../decode/groups/pressure.js';
-import type { ClimbTable, CruiseTable } from './types.js';
+import type { ClimbTable, CruiseTable, DistanceTable } from './types.js';
 
 /** The standard atmosphere the handbook's columns are measured from: 15 °C at sea level, 2 °C colder a thousand feet. */
 export const standardTempC = (pressureAltitudeFt: number): number => 15 - (2 * pressureAltitudeFt) / 1000;
@@ -158,4 +158,88 @@ export function readClimb(table: ClimbTable, fromFt: number, toFt: number, devia
     nm: Math.round((to.nm - from.nm) * factor),
     minutes: Math.round((to.minutes - from.minutes) * factor),
   };
+}
+
+/** One printed distance cell, with what the scan made of it. */
+export interface DistanceCellRef {
+  readonly pressureAltitudeFt: number;
+  /** The column, in °C. */
+  readonly columnC: number;
+  readonly groundRollFt: number;
+  readonly totalFt: number;
+  /** Whether the scan's line for the row carries each figure. */
+  readonly scanned: { readonly groundRoll: boolean; readonly total: boolean };
+}
+
+export interface RunwayConditions {
+  readonly pressureAltitudeFt: number;
+  readonly tempC: number;
+  /** Along the runway, in knots: positive is a headwind, negative a tailwind. */
+  readonly windKt: number;
+  readonly surface: 'paved' | 'grass';
+}
+
+export type DistanceReading =
+  | {
+      /** The printed cell it was read at: the next row and column up. */
+      readonly cell: DistanceCellRef;
+      /** The wind note's correction in percent: below zero for a headwind, above for a tailwind. */
+      readonly windPercent: number;
+      /** Added for dry grass: the note's share of the printed ground roll. 0 on a paved runway. */
+      readonly grassFt: number;
+      readonly groundRollFt: number;
+      readonly totalFt: number;
+    }
+  | { readonly problem: string };
+
+/**
+ * A takeoff or landing distance the way the handbook's sample problem works
+ * it: "conservative distances can be established by reading the chart at
+ * the next higher value of weight, altitude and temperature", then the
+ * notes' corrections for wind and grass. Since every distance grows with
+ * altitude and temperature, the next printed value up is also the longest
+ * either side, the rule the fuel plan reads its table by.
+ *
+ * The notes say nothing about the order of wind and grass. A tailwind is
+ * worked on the grass increase as well as the printed figure, and a
+ * headwind on the printed figure alone, so neither order is kinder than
+ * the other. Increases round up to the foot; a headwind's decrease rounds
+ * as the handbook's example does, to the whole percent and then the foot.
+ */
+export function readDistance(table: DistanceTable, what: 'takeoff' | 'landing', c: RunwayConditions): DistanceReading {
+  const rows = [...table.rows].sort((a, b) => a.pressureAltitudeFt - b.pressureAltitudeFt);
+  const row = rows.find((r) => r.pressureAltitudeFt >= c.pressureAltitudeFt);
+  if (!row) return { problem: `${ft(Math.round(c.pressureAltitudeFt))} pressure altitude is above the handbook's ${what} table, which ends at ${ft(rows[rows.length - 1]!.pressureAltitudeFt)}` };
+  const k = table.columnsC.findIndex((col) => col >= c.tempC);
+  if (k < 0) return { problem: `${c.tempC} °C is hotter than the handbook's ${what} table, which ends at ${table.columnsC[table.columnsC.length - 1]} °C` };
+  const columnC = table.columnsC[k]!;
+  const at = `${row.pressureAltitudeFt === 0 ? 'sea level' : ft(row.pressureAltitudeFt)} and ${columnC} °C`;
+  const printed = row.cells[k];
+  if (!printed) {
+    const why = table.dashClimbBelowFpm ? `: climb after lift-off would be under ${table.dashClimbBelowFpm.value} fpm` : '';
+    return { problem: `the handbook's ${what} table prints no distance at ${at}${why}` };
+  }
+  const tailMax = table.tailwindMaxKt.value;
+  const tail = -c.windKt;
+  // Whole knots, unless rounding would make it read as the limit itself.
+  const said = Math.round(tail) > tailMax ? Math.round(tail) : Math.round(tail * 10) / 10;
+  if (tail > tailMax) return { problem: `${said} kt of tailwind is more than the ${tailMax} kt the handbook's ${what} table allows for` };
+
+  const missed = new Set(row.scan?.unconfirmed ?? []);
+  const scanned = row.scan !== null;
+  const cell: DistanceCellRef = {
+    pressureAltitudeFt: row.pressureAltitudeFt,
+    columnC,
+    groundRollFt: printed[0],
+    totalFt: printed[1],
+    scanned: { groundRoll: scanned && !missed.has(`${columnC}.roll`), total: scanned && !missed.has(`${columnC}.total`) },
+  };
+  const grassFt = c.surface === 'grass' ? Math.ceil((printed[0] * table.grassPercentOfGroundRoll.value) / 100) : 0;
+  const windPercent =
+    c.windKt > 0
+      ? -Math.round((c.windKt / table.headwindKtPer10Percent.value) * 10)
+      : Math.max(0, Math.ceil((-c.windKt / table.tailwindKtPer10Percent.value) * 10 - 1e-9));
+  const corrected = (x: number) =>
+    windPercent < 0 ? x - Math.round((x * -windPercent) / 100) + grassFt : x + grassFt + Math.ceil(((x + grassFt) * windPercent) / 100 - 1e-9);
+  return { cell, windPercent, grassFt, groundRollFt: corrected(printed[0]), totalFt: corrected(printed[1]) };
 }

@@ -40,7 +40,7 @@ function markOf(p: { findings: readonly Finding[] }): Mark {
   return p.findings.some((f) => f.attention === 'caution') ? 'caution' : null;
 }
 
-const TOPIC_ORDER: readonly Topic[] = ['weather', 'unread', 'wind', 'cloud', 'visibility', 'hazard', 'daylight', 'cruise', 'other'];
+const TOPIC_ORDER: readonly Topic[] = ['weather', 'unread', 'wind', 'runway', 'cloud', 'visibility', 'hazard', 'daylight', 'cruise', 'other'];
 
 /** The topics a set of findings is about, in the order the briefing reads them, each once. */
 function topics(findings: readonly Finding[]): string[] {

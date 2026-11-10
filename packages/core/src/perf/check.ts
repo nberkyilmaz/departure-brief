@@ -7,9 +7,9 @@
  * either of them needing the scan.
  */
 import { checkNote, checkRows, type PrintedRow, type RowCheck } from '../docs/extract/table.js';
-import type { DocumentOcr } from '../docs/types.js';
 import { columnName } from './read.js';
-import type { PerformanceSpec, RowScan } from './types.js';
+import type { DocumentOcr, PageOcr } from '../docs/types.js';
+import type { DistanceTable, NoteFigure, PerformanceSpec, RowScan } from './types.js';
 
 const scanOf = (c: RowCheck): RowScan => ({ text: c.text, box: c.box, unconfirmed: c.unconfirmed });
 
@@ -18,11 +18,66 @@ export interface CheckSummary {
   readonly unconfirmed: readonly string[];
 }
 
-export function checkPerformance(doc: DocumentOcr, spec: PerformanceSpec): { spec: PerformanceSpec; cruise: CheckSummary; climb: CheckSummary } {
-  const cruisePage = doc.pages[spec.cruise.page - 1];
-  const climbPage = doc.pages[spec.climb.page - 1];
-  if (!cruisePage || cruisePage.status !== 'read') throw new Error(`page ${spec.cruise.page} of ${doc.filename} has not been read`);
-  if (!climbPage || climbPage.status !== 'read') throw new Error(`page ${spec.climb.page} of ${doc.filename} has not been read`);
+function pageOf(doc: DocumentOcr, page: number): PageOcr {
+  const p = doc.pages[page - 1];
+  if (!p || p.status !== 'read') throw new Error(`page ${page} of ${doc.filename} has not been read`);
+  return p;
+}
+
+/**
+ * A distance table: the weight and its speeds are printed on the first row
+ * only, the altitude on every row but sea level's, and a dash is no figure.
+ */
+function checkDistances(doc: DocumentOcr, table: DistanceTable): { table: DistanceTable; summary: CheckSummary } {
+  const page = pageOf(doc, table.page);
+  const printed: PrintedRow[] = table.rows.map((r, i) => {
+    const values: number[] = [];
+    const names: string[] = [];
+    const add = (name: string, value: number) => {
+      values.push(value);
+      names.push(name);
+    };
+    if (i === 0) {
+      add('weight', table.weightLb);
+      if (table.liftOffKias !== null) add('liftOff', table.liftOffKias);
+      add('at50Ft', table.at50FtKias);
+    }
+    if (r.pressureAltitudeFt > 0) add('altitude', r.pressureAltitudeFt);
+    r.cells.forEach((cell, k) => {
+      if (!cell) return;
+      add(`${table.columnsC[k]}.roll`, cell[0]);
+      add(`${table.columnsC[k]}.total`, cell[1]);
+    });
+    return { values, names };
+  });
+  const rows = checkRows(page, printed);
+  const notes = (['headwindKtPer10Percent', 'tailwindKtPer10Percent', 'tailwindMaxKt', 'grassPercentOfGroundRoll', 'dashClimbBelowFpm'] as const).flatMap((key) => {
+    const n: NoteFigure | null = table[key];
+    return n ? [{ key, check: checkNote(page, n.printed, n.value, key) }] : [];
+  });
+  const checked: DistanceTable = {
+    ...table,
+    ...Object.fromEntries(notes.map(({ key, check }) => [key, { ...table[key]!, scan: scanOf(check) }])),
+    rows: table.rows.map((r, i) => ({ ...r, scan: scanOf(rows[i]!) })),
+  };
+  return {
+    table: checked,
+    summary: {
+      figures: printed.reduce((s, r) => s + r.values.length, 0) + notes.length,
+      unconfirmed: [
+        ...rows.flatMap((c, i) => c.unconfirmed.map((n) => `${table.rows[i]!.pressureAltitudeFt} ft ${n}`)),
+        ...notes.flatMap(({ check }) => check.unconfirmed.map((n) => `note ${n}`)),
+      ],
+    },
+  };
+}
+
+export function checkPerformance(
+  doc: DocumentOcr,
+  spec: PerformanceSpec,
+): { spec: PerformanceSpec; cruise: CheckSummary; climb: CheckSummary; takeoff: CheckSummary; landing: CheckSummary } {
+  const cruisePage = pageOf(doc, spec.cruise.page);
+  const climbPage = pageOf(doc, spec.climb.page);
 
   // The altitude is printed on the first row of each block only, and the climb's weight on its first row only.
   const cruiseRows: PrintedRow[] = spec.cruise.rows.map((r, i) => {
@@ -42,6 +97,9 @@ export function checkPerformance(doc: DocumentOcr, spec: PerformanceSpec): { spe
   const allowance = checkNote(climbPage, spec.climb.allowanceGal.printed, spec.climb.allowanceGal.value, 'allowance');
   const warm = checkNote(climbPage, spec.climb.warmPercentPer10C.printed, spec.climb.warmPercentPer10C.value, 'percent');
 
+  const takeoff = checkDistances(doc, spec.takeoff);
+  const landing = checkDistances(doc, spec.landing);
+
   const checked: PerformanceSpec = {
     ...spec,
     cruise: { ...spec.cruise, rows: spec.cruise.rows.map((r, i) => ({ ...r, scan: scanOf(cruise[i]!) })) },
@@ -51,6 +109,8 @@ export function checkPerformance(doc: DocumentOcr, spec: PerformanceSpec): { spe
       warmPercentPer10C: { ...spec.climb.warmPercentPer10C, scan: scanOf(warm) },
       rows: spec.climb.rows.map((r, i) => ({ ...r, scan: scanOf(climb[i]!) })),
     },
+    takeoff: takeoff.table,
+    landing: landing.table,
   };
   const label = (rows: readonly { pressureAltitudeFt: number; rpm?: number }[], checks: readonly RowCheck[]) =>
     checks.flatMap((c, i) => c.unconfirmed.map((n) => `${rows[i]!.pressureAltitudeFt} ft${rows[i]!.rpm ? ` ${rows[i]!.rpm} RPM` : ''} ${n}`));
@@ -61,6 +121,8 @@ export function checkPerformance(doc: DocumentOcr, spec: PerformanceSpec): { spe
       figures: climbRows.reduce((s, r) => s + r.values.length, 0) + 2,
       unconfirmed: [...label(spec.climb.rows, climb), ...allowance.unconfirmed.map((n) => `note 1 ${n}`), ...warm.unconfirmed.map((n) => `note 3 ${n}`)],
     },
+    takeoff: takeoff.summary,
+    landing: landing.summary,
   };
 }
 

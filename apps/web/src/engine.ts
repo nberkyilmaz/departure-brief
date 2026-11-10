@@ -42,6 +42,7 @@ import {
   SoundingClient,
   storeAndDecode,
   UnknownWaypointError,
+  WINDOW_HOURS,
   withHandbookLimits,
   type AirportCell,
   type AirportIndex,
@@ -546,7 +547,7 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
       const profile = parsePilotProfile(profileInput);
       const aircraft = withHandbookLimits(parseAircraftLimits(aircraftInput), wb as CoreWeightBalanceSpec | null);
       try {
-        return asJson<DepartureSlot[]>(await departureWindow(store, plan, profile, aircraft, asOf()));
+        return asJson<DepartureSlot[]>(await departureWindow(store, plan, profile, aircraft, asOf(), WINDOW_HOURS, performance));
       } catch (e) {
         if (e instanceof UnknownWaypointError) throw new NoDataError(e.id, aerodromes.map((a) => a.id));
         throw e;

@@ -1005,6 +1005,23 @@ summary:focus-visible,
 .field-card .finding .summary { grid-column: 1 / -1; }
 .field-card .detail { padding-left: 0; }
 
+/* Each runway for the takeoff or landing, in four columns that fit a phone. The verdict is in words; the colour only repeats it. */
+.runway-reading { margin-top: var(--s2); }
+.runway-reading > summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; padding: 0.3rem 0; }
+.runway-reading-at { margin: var(--s1) 0 var(--s2); font-size: 0.8rem; color: var(--muted); }
+.runway-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.runway-table th, .runway-table td { padding: 0.3rem 0.25rem; border-top: 1px solid var(--line); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+.runway-table thead th { border-top: 0; color: var(--muted); font-size: 0.75rem; font-weight: 600; }
+.runway-table th:first-child { padding-left: 0; width: 18%; }
+.runway-table th:nth-child(2) { width: 30%; }
+.runway-table td:last-child, .runway-table th:last-child { padding-right: 0; }
+.runway-table .num { text-align: right; }
+.runway-table small { display: block; color: var(--muted); font-size: 0.75rem; font-weight: 400; }
+.runway-table tr.over .verdict { color: var(--nogo); font-weight: 600; }
+.runway-table tr.fits .verdict { color: var(--ok); }
+.runway-problem { color: var(--muted); font-size: 0.8rem; }
+.runway-table tr.beyond .runway-problem { color: var(--nogo); }
+
 /* Worth a look: one line per field and topic, opening to the findings behind it. */
 .concerns { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
 .concern + .concern { border-top: 1px solid var(--line); }

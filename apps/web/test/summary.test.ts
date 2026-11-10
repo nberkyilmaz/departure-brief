@@ -10,8 +10,20 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import {
+  CatalogStore,
+  checkRunway,
+  decodeMetar,
+  metarConditions,
+  parsePilotProfile,
+  rawReport,
+  type AirportCell,
+  type AirportIndex,
+  type CheckContext,
+  type PerformanceSpec,
+} from '@depbrief/core/judge';
 import { describe, expect, it } from 'vitest';
-import { alongTheWay, concernsOf, fieldCards } from '../src/summary.js';
+import { alongTheWay, concernsOf, fieldCards, runwayEnds } from '../src/summary.js';
 import type { Attention, BasisKind, EnrouteReview, Finding, NavLogLeg, PointReview, StoredBriefing } from '../src/types.js';
 
 const f = (rule: string, attention: Attention, basisKind: BasisKind, basis: string, summary: string, values: Record<string, unknown> = {}): Finding => ({
@@ -257,5 +269,75 @@ describe('the recorded flight', () => {
 
   it('has nothing to look at on a quiet night, and says nothing', () => {
     expect(concernsOf(recorded)).toEqual([]);
+  });
+});
+
+describe('takeoff and landing', () => {
+  const recorded = JSON.parse(readFileSync(join(__dirname, '..', 'public', 'demo', 'briefing.json'), 'utf8')) as StoredBriefing;
+
+  it('puts the runway that fits best on each card: the takeoff at the departure, the landing at the others', () => {
+    const said = fieldCards(recorded).map((c) => [c.role, c.lines.find((l) => l.label === 'Takeoff' || l.label === 'Landing')]);
+    expect(said).toEqual([
+      ['Departure', { label: 'Takeoff', text: '06: 3,105 ft needed with your 50%, 5,000 ft available', over: false }],
+      ['Destination', { label: 'Landing', text: '08: 1,950 ft needed with your 50%, 7,003 ft available', over: false }],
+      ['Alternate', { label: 'Landing', text: '30: 2,106 ft needed with your 50%, 10,006 ft available', over: false }],
+    ]);
+  });
+
+  it('keeps every end for the table, read on the same forecast as the card', () => {
+    const [cysn] = fieldCards(recorded);
+    expect(cysn!.runways!.basisKind).toBe('prevailing');
+    // CYSN on the KIAG forecast's VRB04KT: 4 kt behind every end. 01/19 is 2,500 ft, 11/29 2,000.
+    expect(runwayEnds(cysn!.runways!).map((r) => `${r.end} ${r.status} ${r.reasons.join('+')}`.trim())).toEqual([
+      '01 over margin',
+      '19 over margin',
+      '06 fits',
+      '24 fits',
+      '11 over short',
+      '29 over short',
+    ]);
+  });
+
+  /*
+   * Sault Ste. Marie on the morning of 7 September, 07016G25KT: the long
+   * runway has 23 kt across it, and the short one too little room or too
+   * much tailwind at either end. Judged by the core from the recorded
+   * report and the airport record the page holds.
+   */
+  it('says when no runway fits as one line of its own, and the card says it too', async () => {
+    const root = join(__dirname, '..', '..', '..');
+    const demo = join(__dirname, '..', 'public', 'demo');
+    const read = <T,>(path: string): T => JSON.parse(readFileSync(path, 'utf8')) as T;
+    const airports = new CatalogStore(read<AirportIndex>(join(demo, 'airports', 'index.json')), async (cell) => read<AirportCell>(join(demo, 'airports', `${cell}.json`)));
+    const body = readFileSync(join(root, 'packages', 'core', 'test', 'fixtures', 'metar', 'awc-cache-2026-09-07.txt'), 'utf8')
+      .split('\n')
+      .find((l) => l.startsWith('METAR CYYN '))!;
+    const report = rawReport({ kind: 'metar', source: 'awc', station: 'CYYN', body, issuedAt: new Date('2026-09-07T11:00:00Z'), upstream: null });
+    const decoded = decodeMetar(body);
+    const profile = parsePilotProfile(read(join(root, 'profiles', 'default.json')));
+    const ctx: CheckContext = {
+      waypoint: 'CYYN',
+      at: new Date('2026-09-07T11:30:00Z'),
+      basis: 'observed 11:00Z',
+      basisKind: 'observed',
+      violation: 'alert',
+      source: { kind: 'metar', station: 'CYYN', raw: body, sha256: report.sha256 },
+      profile,
+      aircraft: null,
+      airport: await airports.getAirport('CYYN'),
+      airspace: null,
+      cruiseAltitude: 4500 as never,
+      night: false,
+    };
+    const observation = { station: 'CYYN', source: 'own' as const, distance: 0 as never, report, decoded, ageMinutes: 30, ownAsleep: false };
+    const found = checkRunway(ctx, metarConditions(decoded), { what: 'takeoff', handbook: read<PerformanceSpec>(join(demo, 'performance.json')), observation }) as unknown as Finding[];
+    expect(found.map((x) => x.attention)).toEqual(['alert']);
+
+    const briefing = stored([point('CYYN', found)]);
+    const [concern] = concernsOf(briefing);
+    expect(concern).toMatchObject({ topic: 'runway', attention: 'alert', headline: 'No runway fits your takeoff', when: ['observed 11:00Z'] });
+    const [card] = fieldCards(briefing);
+    expect(card!.lines.find((l) => l.label === 'Takeoff')).toEqual({ label: 'Takeoff', text: 'No runway fits', over: true });
+    expect(runwayEnds(card!.runways!).map((r) => r.reasons.join('+') || r.status)).toEqual(['margin', 'beyond', 'crosswind', 'beyond']);
   });
 });

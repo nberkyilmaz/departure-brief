@@ -1,6 +1,6 @@
 /**
  * Performance tables out of a POH: what the aeroplane burns at a power
- * setting, and what the climb to it takes.
+ * setting, what the climb to it takes, and the runway it needs at each end.
  *
  * Copied by hand from the page images, because a 1976 scan's OCR reads
  * these tables too poorly to lift numbers from: on the 172M's cruise page
@@ -82,6 +82,42 @@ export interface ClimbTable {
   readonly rows: readonly ClimbRow[];
 }
 
+/** `[ground roll, total to clear a 50 ft obstacle]` in feet; null where the handbook prints a dash. */
+export type DistanceCell = readonly [groundRollFt: number, totalFt: number] | null;
+
+export interface DistanceRow {
+  /** 0 for the row printed "S.L.". */
+  readonly pressureAltitudeFt: number;
+  /** One per column of `DistanceTable.columnsC`, coldest first. */
+  readonly cells: readonly DistanceCell[];
+  readonly scan: RowScan | null;
+}
+
+/** A takeoff or landing distance table, at one weight. */
+export interface DistanceTable {
+  readonly figure: string;
+  readonly page: number;
+  readonly printedPage: string;
+  readonly conditions: readonly string[];
+  readonly weightLb: number;
+  /** Takeoff only: the speed the table lifts off at. */
+  readonly liftOffKias: number | null;
+  readonly at50FtKias: number;
+  /** Each column's temperature, in °C as read on the field's thermometer, not from standard. */
+  readonly columnsC: readonly number[];
+  /** Distances come down 10% for each this many knots of headwind. */
+  readonly headwindKtPer10Percent: NoteFigure;
+  /** And go up 10% for each this many knots of tailwind... */
+  readonly tailwindKtPer10Percent: NoteFigure;
+  /** ...up to this many knots of it, past which the handbook says nothing. */
+  readonly tailwindMaxKt: NoteFigure;
+  /** On dry grass, both distances go up by this percent of the ground roll. */
+  readonly grassPercentOfGroundRoll: NoteFigure;
+  /** Takeoff only: why a figure is a dash. Climb after lift-off would be under this many feet a minute. */
+  readonly dashClimbBelowFpm: NoteFigure | null;
+  readonly rows: readonly DistanceRow[];
+}
+
 export interface PerformanceSpec {
   readonly version: 1;
   /** The type it applies to, as the aircraft settings name it. */
@@ -91,4 +127,6 @@ export interface PerformanceSpec {
   readonly source: { readonly documentSha256: string; readonly filename: string };
   readonly cruise: CruiseTable;
   readonly climb: ClimbTable;
+  readonly takeoff: DistanceTable;
+  readonly landing: DistanceTable;
 }

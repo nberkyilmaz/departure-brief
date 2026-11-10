@@ -357,7 +357,7 @@ export function App() {
                 </div>
                 <p className="limits-line">
                   Your minimums: ceiling {profile.ceilingAglFt.toLocaleString('en')} ft · visibility {profile.visibilitySm} SM · crosswind {profile.crosswindKt} kt
-                  {profile.crosswindIncludesGust ? ' including gusts' : ''}
+                  {profile.crosswindIncludesGust ? ' including gusts' : ''} · runway margin {profile.runwayMarginPercent}%
                   {profile.nightAllowed ? '' : ' · day only'} — <a href={hrefFor({ name: 'minimums' })}>change</a>
                 </p>
                 <div className="actions">

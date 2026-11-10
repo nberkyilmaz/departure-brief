@@ -8,6 +8,7 @@ export const defaultProfile: ProfileInput = {
   crosswindKt: 15,
   crosswindIncludesGust: true,
   nightAllowed: true,
+  runwayMarginPercent: 50,
 };
 
 export const defaultAircraft: AircraftInput = { type: 'C172', demonstratedCrosswindKt: null, cruiseFuelGph: null };
@@ -43,6 +44,13 @@ export function ProfileForm({
         <label className="check">
           <input type="checkbox" checked={profile.crosswindIncludesGust} onChange={(e) => set({ crosswindIncludesGust: e.target.checked })} />
           Judge crosswind on the gust
+        </label>
+        <label>
+          Runway margin (%)
+          <input type="number" step={5} min={0} value={profile.runwayMarginPercent} onChange={(e) => set({ runwayMarginPercent: Math.max(0, Number(e.target.value)) })} />
+          <span className="field-note-line">
+            <span className="field-note">added to the handbook&apos;s takeoff and landing distances before they are compared with the runway; 0 compares the handbook as printed</span>
+          </span>
         </label>
         <label className="check">
           <input type="checkbox" checked={profile.nightAllowed} onChange={(e) => set({ nightAllowed: e.target.checked })} />

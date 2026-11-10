@@ -25,6 +25,12 @@ export interface PilotProfile {
    */
   readonly maxWind: Knots | null;
   readonly nightAllowed: boolean;
+  /**
+   * Added to the handbook's takeoff and landing distances before they are
+   * compared with the runway, in percent. 0 compares the handbook's figure
+   * as printed.
+   */
+  readonly runwayMargin: number;
 }
 
 /** What the POH says. `null` until the figure is known — never guessed. */
@@ -55,6 +61,10 @@ export function parsePilotProfile(input: unknown): PilotProfile {
   if (input === null || typeof input !== 'object') throw new Error('profile must be a JSON object');
   const o = input as Record<string, unknown>;
   const spread = o['maxGustSpreadKt'];
+  const margin = o['runwayMarginPercent'];
+  if (margin !== undefined && margin !== null && !(typeof margin === 'number' && margin >= 0)) {
+    throw new Error('profile: "runwayMarginPercent" must be a number of percent, 0 or more');
+  }
   return {
     version: typeof o['version'] === 'number' ? o['version'] : 1,
     name: typeof o['name'] === 'string' ? o['name'] : 'unnamed',
@@ -65,6 +75,7 @@ export function parsePilotProfile(input: unknown): PilotProfile {
     maxGustSpread: typeof spread === 'number' && spread > 0 ? (spread as Knots) : null,
     maxWind: typeof o['maxWindKt'] === 'number' && (o['maxWindKt'] as number) > 0 ? (o['maxWindKt'] as Knots) : null,
     nightAllowed: o['nightAllowed'] !== false,
+    runwayMargin: typeof margin === 'number' ? margin : 0,
   };
 }
 
