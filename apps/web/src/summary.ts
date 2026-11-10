@@ -69,6 +69,8 @@ export interface FieldCard extends LabelledPoint {
   readonly now: string | null;
   /** Why there are no lines, when there are none. */
   readonly missing: string | null;
+  /** The takeoff or landing read runway by runway, on the same forecast or observation as the lines. */
+  readonly runways: Finding | null;
 }
 
 /** The surface wind in words; older briefings without a direction value fall back to the summary's. */
@@ -112,6 +114,51 @@ function runwayLine(f: Finding | undefined, demonstrated: Finding | undefined): 
   const demo = demonstrated && asking(demonstrated) ? num(demonstrated.values['demonstrated']) : null;
   if (demo !== null) text += `${over ? ' and' : ', over'} the aircraft's demonstrated ${demo} kt`;
   return { label: 'Runway', text, over: over || demo !== null };
+}
+
+/** One runway end as the takeoff and landing rule read it; the core's `RunwayDistance`. */
+export interface RunwayEnd {
+  readonly runway: string;
+  readonly end: string;
+  readonly surface: string | null;
+  readonly kind: 'paved' | 'grass' | null;
+  readonly availableFt: number | null;
+  readonly declared: boolean;
+  readonly alongKt: number | null;
+  readonly crosswindKt: number | null;
+  readonly windPercent: number | null;
+  readonly grassFt: number | null;
+  readonly totalFt: number | null;
+  readonly neededFt: number | null;
+  readonly status: 'fits' | 'over' | 'beyond' | 'unknown';
+  readonly reasons: readonly ('short' | 'margin' | 'crosswind')[];
+  readonly problem: string | null;
+}
+
+export const runwayEnds = (f: Finding): RunwayEnd[] => (Array.isArray(f.values['runways']) ? (f.values['runways'] as RunwayEnd[]) : []);
+
+/** "Light rain, and the figures are for a dry runway", or nothing. */
+const wetWords = (f: Finding): string | null => {
+  const wet = Array.isArray(f.values['wet']) ? (f.values['wet'] as string[]) : [];
+  return wet.length > 0 ? `${wet.join(', ')}, and the figures are for a dry runway` : null;
+};
+
+/** Takeoff at the departure, landing at the destination and alternate: the end that fits best, or that none does. */
+function runwayLengthLine(f: Finding | undefined): CardLine | null {
+  if (!f) return null;
+  const label = f.values['what'] === 'landing' ? 'Landing' : 'Takeoff';
+  const ends = runwayEnds(f);
+  // No handbook for the aircraft: the rule says so, and that is the line.
+  if (ends.length === 0) return { label, text: capital(f.summary), over: false };
+  const best = ends.find((r) => r.end === str(f.values['best']));
+  const margin = num(f.values['marginPercent']) ?? 0;
+  const text = best
+    ? `${best.end}: ${feet(best.neededFt!)} needed${margin > 0 ? ` with your ${margin}%` : ''}, ${feet(best.availableFt!)} available`
+    : ends.some((r) => r.status === 'over' || r.status === 'beyond')
+      ? 'No runway fits'
+      : 'No handbook figure for these runways';
+  const wet = wetWords(f);
+  return { label, text: wet ? `${text}; ${wet}` : text, over: asking(f) };
 }
 
 function ceilingLine(f: Finding | undefined): CardLine | null {
@@ -174,9 +221,11 @@ function card(lp: LabelledPoint, cruiseFt: number | null): FieldCard {
 
   const wind = windWords(pick('wind.surface'));
   const weather = main.filter((f) => f.rule === 'weather.present').map(weatherWords);
+  const runways = pick('runway.takeoff') ?? pick('runway.landing') ?? point.findings.find((f) => f.rule.startsWith('runway.') && f.basisKind === 'plan');
   const lines = [
     wind ? { label: 'Wind', text: capital(wind), over: false } : null,
     runwayLine(pick('crosswind.personal'), pick('crosswind.demonstrated')),
+    runwayLengthLine(runways),
     ceilingLine(pick('personal.ceiling')),
     visibilityLine(pick('personal.visibility')),
     weather.length > 0 ? { label: 'Weather', text: capital(weather.join(', ')), over: main.some((f) => f.rule === 'weather.present' && asking(f)) } : null,
@@ -213,6 +262,7 @@ function card(lp: LabelledPoint, cruiseFt: number | null): FieldCard {
     source,
     now,
     missing: main.length === 0 ? capital(coverage?.summary ?? 'nothing reported or forecast here') : null,
+    runways: runways && runwayEnds(runways).length > 0 ? runways : null,
   };
 }
 
@@ -275,16 +325,18 @@ export function alongTheWay(stored: StoredBriefing): AlongLeg[] {
 
 /* ----------------------------------------------------------- worth a look */
 
-export type Topic = 'wind' | 'cloud' | 'visibility' | 'weather' | 'unread' | 'hazard' | 'daylight' | 'cruise' | 'observation' | 'fuel' | 'other';
+export type Topic = 'wind' | 'runway' | 'cloud' | 'visibility' | 'weather' | 'unread' | 'hazard' | 'daylight' | 'cruise' | 'observation' | 'fuel' | 'other';
 
 /** The order lines are read in, among those that ask for the same attention at the same field. */
-const TOPICS: readonly Topic[] = ['weather', 'unread', 'wind', 'cloud', 'visibility', 'hazard', 'daylight', 'cruise', 'observation', 'fuel', 'other'];
+const TOPICS: readonly Topic[] = ['weather', 'unread', 'wind', 'runway', 'cloud', 'visibility', 'hazard', 'daylight', 'cruise', 'observation', 'fuel', 'other'];
 
 const TOPIC_OF: Readonly<Record<string, Topic>> = {
   'wind.surface': 'wind',
   'crosswind.personal': 'wind',
   'crosswind.demonstrated': 'wind',
   'wind.gustSpread': 'wind',
+  'runway.takeoff': 'runway',
+  'runway.landing': 'runway',
   'personal.ceiling': 'cloud',
   'vfr.ceiling': 'cloud',
   'vfr.cloudClearance': 'cloud',
@@ -304,6 +356,7 @@ const TOPIC_OF: Readonly<Record<string, Topic>> = {
 
 export const TOPIC_LABEL: Readonly<Record<Topic, string>> = {
   wind: 'Wind',
+  runway: 'Runway length',
   cloud: 'Cloud',
   visibility: 'Visibility',
   weather: 'Weather',
@@ -395,10 +448,23 @@ function visibilityHeadline(fs: readonly Finding[]): string {
   return parts.length > 0 ? capital(parts.join('; ')) : capital(fs[0]!.summary);
 }
 
+/** The runway, end by end, is on the card and behind the line; here it is whether any fits, and rain. */
+function runwayHeadline(fs: readonly Finding[]): string {
+  const worst = fs.find((f) => f.attention === 'alert') ?? fs[0]!;
+  const what = str(worst.values['what']) ?? 'takeoff';
+  const fits = str(worst.values['best']) !== null;
+  const wet = Array.isArray(worst.values['wet']) ? (worst.values['wet'] as string[]) : [];
+  if (!fits) return `No runway fits your ${what}${wet.length > 0 ? `, with ${wet.join(', ')} on top` : ''}`;
+  if (wet.length > 0) return `${capital(wet.join(', '))}, and the handbook's ${what} figures are for a dry runway`;
+  return capital(worst.summary);
+}
+
 function headline(topic: Topic, fs: readonly Finding[], all: readonly Finding[]): string {
   switch (topic) {
     case 'wind':
       return windHeadline(fs, all);
+    case 'runway':
+      return runwayHeadline(fs);
     case 'cloud':
       return cloudHeadline(fs);
     case 'visibility':

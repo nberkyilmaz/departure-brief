@@ -164,15 +164,21 @@ midnight Zulu for half the year.
 The document pipeline is built and proven on weight and balance. The same
 machinery reads:
 
-- **Takeoff and landing distance** — but not as first imagined. An audit of
-  the handbook's own OCR found that the extraction pipeline cannot verify a
-  positional table cell, that the charts have cells Cessna deliberately left
-  blank which interpolation would silently fill, and that the two pages
-  disagree about the headwind correction (2 knots on one, 8 on the other),
-  so at least one is a misread. The honest feature is: show the chart row as
-  printed, cited to a crop; use the density altitude the field itself
-  measured or none at all; print the notes verbatim and apply nothing; put
-  the runway length beside it and draw no conclusion.
+- ~~**Takeoff and landing distance.**~~ Done, for the 172M at 2,300 lb. An
+  earlier audit of the handbook's OCR found three problems, and each has an
+  answer. The extraction pipeline cannot verify a positional cell, so both
+  tables were copied by hand from the page images, as the cruise table was,
+  and held up against the scan row by row: 62 of the takeoff table's 94
+  printed figures and 64 of the landing table's 104 are borne out, and the
+  rest are marked as read from the image alone. Cessna left some cells
+  blank, so nothing is interpolated: the table is read at the next printed
+  altitude and temperature up, as the handbook's sample problem does, and a
+  blank cell stays blank and quotes note 4 on why. The two pages seemed to
+  disagree about the headwind note (2 knots and 8), but the page images
+  both say 9, and a headwind earns nothing here anyway. Each runway end
+  gets the tailwind and grass notes and then the pilot's own margin,
+  against its length; the field is fine when one end fits within the
+  crosswind limit, and each end that does not says why.
 - **Airworthiness dates**: annual, transponder, ELT, pitot-static. A flight
   can be legal on weather and illegal on paperwork.
 

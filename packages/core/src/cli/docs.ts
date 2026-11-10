@@ -306,6 +306,8 @@ export async function perfCommand(args: string[]): Promise<void> {
   for (const [name, table, summary] of [
     ['cruise', spec.cruise, checked.cruise],
     ['climb', spec.climb, checked.climb],
+    ['takeoff', spec.takeoff, checked.takeoff],
+    ['landing', spec.landing, checked.landing],
   ] as const) {
     const borne = summary.figures - summary.unconfirmed.length;
     console.log(`${name} (${table.figure}, p.${table.page}): ${borne} of ${summary.figures} figures borne out by the scan`);

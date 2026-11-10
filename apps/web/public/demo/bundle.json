@@ -27,7 +27,8 @@
     "ceilingAglFt": 2500,
     "visibilitySm": 5,
     "crosswindKt": 15,
-    "crosswindIncludesGust": true
+    "crosswindIncludesGust": true,
+    "runwayMarginPercent": 50
   },
   "aircraft": {
     "type": "C172",

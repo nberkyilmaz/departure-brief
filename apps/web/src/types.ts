@@ -118,6 +118,8 @@ export interface ProfileInput {
   crosswindKt: number;
   crosswindIncludesGust: boolean;
   nightAllowed: boolean;
+  /** Added to the handbook's takeoff and landing distances, in percent. */
+  runwayMarginPercent: number;
 }
 
 export interface AircraftInput {

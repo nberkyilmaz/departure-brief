@@ -109,5 +109,203 @@
       {"pressureAltitudeFt": 11000, "tempC": -7, "kias": 67, "fpm": 185, "minutes": 30, "gal": 5.2, "nm": 40, "scan": {"text": "11,000 -7 67 185 30 5.2 40", "box": {"x": 632, "y": 1878, "w": 960, "h": 32}, "unconfirmed": []}},
       {"pressureAltitudeFt": 12000, "tempC": -9, "kias": 66, "fpm": 145, "minutes": 36, "gal": 6.1, "nm": 48, "scan": {"text": "12000 | -9 66 145 | 38 6.1 a", "box": {"x": 632, "y": 1920, "w": 959, "h": 62}, "unconfirmed": ["minutes", "nm"]}}
     ]
+  },
+  "takeoff": {
+    "figure": "Figure 5-4, Takeoff Distance (Sheet 1 of 2)",
+    "page": 72,
+    "printedPage": "5-12",
+    "conditions": [
+      "Flaps Up",
+      "Full Throttle Prior to Brake Release",
+      "Paved, Level, Dry Runway",
+      "Zero Wind"
+    ],
+    "weightLb": 2300,
+    "liftOffKias": 52,
+    "at50FtKias": 59,
+    "columnsC": [
+      0,
+      10,
+      20,
+      30,
+      40
+    ],
+    "headwindKtPer10Percent": {
+      "value": 9,
+      "printed": "Decrease distances 10% for each 9 knots headwind.",
+      "scan": {
+        "text": "3 Decrease disiances 10% for gach 2 knots headwind, For operation with tailwinds up to 10 knots, increase distances by 10%",
+        "box": {
+          "x": 897,
+          "y": 374,
+          "w": 33,
+          "h": 1730
+        },
+        "unconfirmed": [
+          "headwindKtPer10Percent"
+        ]
+      }
+    },
+    "tailwindKtPer10Percent": {
+      "value": 2,
+      "printed": "For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.",
+      "scan": {
+        "text": "3 Decrease disiances 10% for gach 2 knots headwind, For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.",
+        "box": {
+          "x": 897,
+          "y": 374,
+          "w": 58,
+          "h": 1730
+        },
+        "unconfirmed": []
+      }
+    },
+    "tailwindMaxKt": {
+      "value": 10,
+      "printed": "For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.",
+      "scan": {
+        "text": "3 Decrease disiances 10% for gach 2 knots headwind, For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.",
+        "box": {
+          "x": 897,
+          "y": 374,
+          "w": 58,
+          "h": 1730
+        },
+        "unconfirmed": []
+      }
+    },
+    "grassPercentOfGroundRoll": {
+      "value": 15,
+      "printed": "For operation on a dry, grass runway, increase distances by 15% of the \"ground roll\" figure.",
+      "scan": {
+        "text": "5. For operation on a dry, grass runway, increase distances by 15% of the ‘ground roll” figure,",
+        "box": {
+          "x": 997,
+          "y": 801,
+          "w": 31,
+          "h": 1302
+        },
+        "unconfirmed": []
+      }
+    },
+    "dashClimbBelowFpm": {
+      "value": 150,
+      "printed": "Where distance value has been deleted, climb performance after lift-off is less than 150 fpm at takeoff speed.",
+      "scan": {
+        "text": "4. VWihere distance value has been deleted, climb performance after lift-off ix fess than 160 Tom at takeoff speed.",
+        "box": {
+          "x": 964,
+          "y": 580,
+          "w": 32,
+          "h": 1524
+        },
+        "unconfirmed": [
+          "dashClimbBelowFpm"
+        ]
+      }
+    },
+    "rows": [
+      {"pressureAltitudeFt": 0, "cells": [[775, 1380], [835, 1475], [895, 1575], [960, 1685], [1030, 1795]], "scan": {"text": "2300 52 | 59 { suf 778 1380 835 1475 895 { 1575 o60 | 1885 1030] 1798", "box": {"x": 1282, "y": 393, "w": 48, "h": 1669}, "unconfirmed": ["0.roll", "30.roll", "30.total", "40.total"]}},
+      {"pressureAltitudeFt": 1000, "cells": [[850, 1510], [915, 1615], [980, 1725], [1050, 1845], [1125, 1970]], "scan": {"text": "10001 850 1510 015 1616, 980 } 1725 J) 1050 { 1845 1925 1 1970", "box": {"x": 1316, "y": 393, "w": 50, "h": 1372}, "unconfirmed": ["altitude", "10.roll", "10.total", "40.roll"]}},
+      {"pressureAltitudeFt": 2000, "cells": [[930, 1650], [1000, 1770], [1075, 1895], [1155, 2030], [1235, 2170]], "scan": {"text": "2000 § 930 ¢ 1680 | 1000 1770 {1075 § 189% HES | 2030 1235 {2170", "box": {"x": 1351, "y": 392, "w": 48, "h": 1374}, "unconfirmed": ["0.total", "20.total", "30.roll"]}},
+      {"pressureAltitudeFt": 3000, "cells": [[1020, 1815], [1100, 1945], [1180, 2085], [1270, 2235], [1360, 2395]], "scan": {"text": "aon0 1020] 1835 | 1100 1945 111801 2085 1270 | 2235 1380 ¢ 2305", "box": {"x": 1385, "y": 394, "w": 49, "h": 1373}, "unconfirmed": ["altitude", "0.total", "20.roll", "40.roll", "40.total"]}},
+      {"pressureAltitudeFt": 4000, "cells": [[1125, 2000], [1210, 2145], [1300, 2305], [1395, 2475], [1495, 2655]], "scan": {"text": "4000} 1126 2000 | 1210{ 2146 {13601 2305 1385 | 247% 1495 | 2656", "box": {"x": 1419, "y": 393, "w": 50, "h": 1373}, "unconfirmed": ["0.roll", "10.total", "20.roll", "30.roll", "30.total", "40.total"]}},
+      {"pressureAltitudeFt": 5000, "cells": [[1235, 2210], [1330, 2375], [1430, 2555], [1540, 2750], [1650, 2960]], "scan": {"text": "5000 § 1235 1 2210 13301 2375 11430) 2885 1540 | 2750 1880 1 2080", "box": {"x": 1455, "y": 392, "w": 49, "h": 1374}, "unconfirmed": ["10.roll", "20.roll", "20.total", "40.roll", "40.total"]}},
+      {"pressureAltitudeFt": 6000, "cells": [[1365, 2450], [1470, 2640], [1580, 2850], [1700, 3070], null], "scan": {"text": "6000 § 1365] 2450 1470) 2640 | i580 2850 1700 | 3070 a", "box": {"x": 1488, "y": 395, "w": 46, "h": 1371}, "unconfirmed": ["20.roll"]}},
+      {"pressureAltitudeFt": 7000, "cells": [[1505, 2730], [1625, 2955], [1750, 3190], null, null], "scan": {"text": "7000 | 1505 § 2730 [18251 2865 (1750 1 3190 JU JRE EE", "box": {"x": 1522, "y": 395, "w": 44, "h": 1371}, "unconfirmed": ["10.roll", "10.total"]}},
+      {"pressureAltitudeFt": 8000, "cells": [[1665, 3065], [1800, 3320], null, null, null], "scan": {"text": "8000 | 1665] 3065 [1800 | 3320 f---1 --- UR I. RE Ea", "box": {"x": 1555, "y": 394, "w": 44, "h": 1372}, "unconfirmed": []}}
+    ]
+  },
+  "landing": {
+    "figure": "Figure 5-10, Landing Distance",
+    "page": 81,
+    "printedPage": "5-21",
+    "conditions": [
+      "Flaps 40°",
+      "Power Off",
+      "Maximum Braking",
+      "Paved, Level, Dry Runway",
+      "Zero Wind"
+    ],
+    "weightLb": 2300,
+    "liftOffKias": null,
+    "at50FtKias": 60,
+    "columnsC": [
+      0,
+      10,
+      20,
+      30,
+      40
+    ],
+    "headwindKtPer10Percent": {
+      "value": 9,
+      "printed": "Decrease distances 10% for each 9 knots headwind.",
+      "scan": {
+        "text": "2. Decrease distances 10% for each 8 knots headwind. For operation with tailwinds up to 10 knets, increase distances by 10%",
+        "box": {
+          "x": 879,
+          "y": 370,
+          "w": 32,
+          "h": 1664
+        },
+        "unconfirmed": [
+          "headwindKtPer10Percent"
+        ]
+      }
+    },
+    "tailwindKtPer10Percent": {
+      "value": 2,
+      "printed": "For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.",
+      "scan": {
+        "text": "2. Decrease distances 10% for each 8 knots headwind. For operation with tailwinds up to 10 knets, increase distances by 10% for each 2 knots.",
+        "box": {
+          "x": 879,
+          "y": 370,
+          "w": 58,
+          "h": 1664
+        },
+        "unconfirmed": []
+      }
+    },
+    "tailwindMaxKt": {
+      "value": 10,
+      "printed": "For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.",
+      "scan": {
+        "text": "2. Decrease distances 10% for each 8 knots headwind. For operation with tailwinds up to 10 knets, increase distances by 10% for each 2 knots.",
+        "box": {
+          "x": 879,
+          "y": 370,
+          "w": 58,
+          "h": 1664
+        },
+        "unconfirmed": []
+      }
+    },
+    "grassPercentOfGroundRoll": {
+      "value": 45,
+      "printed": "For operation on a dry, grass runway, increase distances by 45% of the \"ground roll\" figure.",
+      "scan": {
+        "text": "3. For operation on a dry, grass runway, increase distances by 45% of the “ground roll” figura,",
+        "box": {
+          "x": 946,
+          "y": 782,
+          "w": 33,
+          "h": 1252
+        },
+        "unconfirmed": []
+      }
+    },
+    "dashClimbBelowFpm": null,
+    "rows": [
+      {"pressureAltitudeFt": 0, "cells": [[495, 1205], [510, 1235], [530, 1265], [545, 1295], [565, 1330]], "scan": {"text": "2300 60 8.0. 495 1205 510 1236 530°. 1265 845 1295 585 1330", "box": {"x": 1272, "y": 340, "w": 40, "h": 1652}, "unconfirmed": ["10.total", "20.roll", "30.roll", "40.roll"]}},
+      {"pressureAltitudeFt": 1000, "cells": [[510, 1235], [530, 1265], [550, 1300], [565, 1330], [585, 1365]], "scan": {"text": "1000 | 510 1235 530 12685 550 1300 566 1330 586 1365", "box": {"x": 1306, "y": 341, "w": 40, "h": 1402}, "unconfirmed": ["10.total", "30.roll", "40.roll"]}},
+      {"pressureAltitudeFt": 2000, "cells": [[530, 1265], [550, 1300], [570, 1335], [590, 1370], [610, 1405]], "scan": {"text": "2000 § 830 1265 580 1300 570 1335 580 1370 190 1408", "box": {"x": 1339, "y": 341, "w": 42, "h": 1403}, "unconfirmed": ["0.roll", "10.roll", "30.roll", "40.roll", "40.total"]}},
+      {"pressureAltitudeFt": 3000, "cells": [[550, 1300], [570, 1335], [590, 1370], [610, 1405], [630, 1440]], "scan": {"text": "2000 { 580 1300 870 1335 590 1370 G10 1405 830 1440", "box": {"x": 1374, "y": 340, "w": 40, "h": 1404}, "unconfirmed": ["altitude", "0.roll", "10.roll", "30.roll", "40.roll"]}},
+      {"pressureAltitudeFt": 4000, "cells": [[570, 1335], [590, 1370], [615, 1410], [635, 1445], [655, 1480]], "scan": {"text": "4000 | B70 1335 580 1370 815 1410 635 1445 655 1480 HI", "box": {"x": 1397, "y": 185, "w": 49, "h": 1560}, "unconfirmed": ["0.roll", "10.roll", "20.roll"]}},
+      {"pressureAltitudeFt": 5000, "cells": [[590, 1370], [615, 1415], [635, 1450], [655, 1485], [680, 1525]], "scan": {"text": "£8-8)/18-§ 5000 | 890 1370 616 14158 635 1450 655 1485 £80 1525", "box": {"x": 1380, "y": 340, "w": 182, "h": 1811}, "unconfirmed": ["0.roll", "10.roll", "10.total", "40.roll"]}},
+      {"pressureAltitudeFt": 6000, "cells": [[615, 1415], [640, 1465], [660, 1490], [685, 1536], [705, 1570]], "scan": {"text": "", "box": null, "unconfirmed": ["altitude", "0.roll", "0.total", "10.roll", "10.total", "20.roll", "20.total", "30.roll", "30.total", "40.roll", "40.total"]}},
+      {"pressureAltitudeFt": 7000, "cells": [[640, 1455], [660, 1495], [685, 1535], [710, 1575], [730, 1615]], "scan": {"text": "7000 | 840 1455 660 1495 635 1535 710 1575 730 1615", "box": {"x": 1510, "y": 342, "w": 40, "h": 1402}, "unconfirmed": ["0.roll", "20.roll"]}},
+      {"pressureAltitudeFt": 8000, "cells": [[665, 1500], [690, 1540], [710, 1580], [735, 1620], [760, 1665]], "scan": {"text": "8000 | 665 1900 680 1540 710 1580 735 1620 760 1665 YE OILOES", "box": {"x": 1491, "y": 146, "w": 132, "h": 1599}, "unconfirmed": ["0.total", "10.roll"]}}
+    ]
   }
 }

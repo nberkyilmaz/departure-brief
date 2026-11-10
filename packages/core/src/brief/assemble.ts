@@ -74,9 +74,9 @@ function reportRefs(points: readonly (ResolvedPoint | EnrouteStation)[], notams:
  * Judge a resolved flight and wrap the result with everything it was made
  * from. Pure apart from `createdAt`, which is not part of the hash.
  *
- * `performance` is the handbook's cruise and climb tables, used only when
- * they are for the aircraft being flown. The briefing does not carry the
- * tables, only the figures read from them and where they are printed.
+ * `performance` is the handbook's tables, used only when they are for the
+ * aircraft being flown. The briefing does not carry the tables, only the
+ * figures read from them and where they are printed.
  */
 export function assembleBriefing(
   resolved: ResolvedFlight,
@@ -86,7 +86,7 @@ export function assembleBriefing(
   notams: NotamBriefing | null = null,
   performance: PerformanceSpec | null = null,
 ): StoredBriefing {
-  const evaluated = evaluateFlight(resolved, profile, aircraft);
+  const evaluated = evaluateFlight(resolved, profile, aircraft, performance);
   const navlog = navLog(resolved, aircraft?.cruiseFuelGph ?? null, aircraft ? performanceFor(aircraft, performance) : null);
   /*
    * Fuel is about the flight, not a point, but the reserve has to still be

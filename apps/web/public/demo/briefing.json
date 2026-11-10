@@ -1,5 +1,5 @@
 {
-  "sha256": "c2c0ece9a644c5b7412028a4f8b7cbbcb3843a798b2481a00b4a2fe2f326706c",
+  "sha256": "b2214fb91ba5ce27c01ed4616f4075a3acdc89c11aa491a66fa69e55311355a0",
   "flightKey": "2c8115094cbf5965b4acc3bb0482ba82f940c10935f36d80648410ed0541d0a8",
   "asOf": "2026-09-19T00:52:00.000Z",
   "createdAt": "2026-09-19T00:52:00.000Z",
@@ -33,7 +33,8 @@
       "crosswindIncludesGust": true,
       "maxGustSpread": null,
       "maxWind": null,
-      "nightAllowed": true
+      "nightAllowed": true,
+      "runwayMargin": 50
     },
     "aircraft": {
       "type": "C172",
@@ -48,7 +49,7 @@
     },
     "asOf": "2026-09-19T00:52:00.000Z",
     "versions": {
-      "rules": 13,
+      "rules": 14,
       "metarDecoder": 2,
       "tafDecoder": 1,
       "notamDecoder": 1,
@@ -1466,7 +1467,7 @@
       ]
     },
     "briefing": {
-      "rulesVersion": 13,
+      "rulesVersion": 14,
       "profile": {
         "name": "default",
         "version": 1
@@ -1830,6 +1831,223 @@
                   "raw": null,
                   "span": null,
                   "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "runway.takeoff",
+              "attention": "routine",
+              "summary": "takeoff on 06: 3,105 ft needed with your 50% margin (2,070 ft by the handbook, +20% for 4 kt of tailwind), 5,000 ft available; 01 and 19: needs 3,105 ft with your 50% margin (2,070 ft by the handbook, +20% for 4 kt of tailwind), has 2,500 ft; 11 and 29: needs 2,070 ft by the handbook (+20% for 4 kt of tailwind), has 2,000 ft — at 31 ft pressure altitude and 17 °C (CYSN, observed 00:00Z)",
+              "waypoint": "CYSN",
+              "basis": "prevailing (TAF KIAG, 11 nm away)",
+              "basisKind": "prevailing",
+              "at": "2026-09-19T04:00:00.000Z",
+              "values": {
+                "what": "takeoff",
+                "elevationFt": 321,
+                "pressureAltitudeFt": 31,
+                "altimeterFrom": "CYSN",
+                "tempC": 17,
+                "tempFrom": {
+                  "station": "CYSN",
+                  "at": "2026-09-19T00:00:00.000Z"
+                },
+                "cell": {
+                  "pressureAltitudeFt": 1000,
+                  "columnC": 20,
+                  "groundRollFt": 980,
+                  "totalFt": 1725
+                },
+                "problem": null,
+                "marginPercent": 50,
+                "crosswindLimit": 15,
+                "windKnown": true,
+                "wet": [],
+                "best": "06",
+                "runways": [
+                  {
+                    "runway": "01/19",
+                    "end": "01",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 2500,
+                    "declared": false,
+                    "alongKt": -4,
+                    "crosswindKt": 4,
+                    "windPercent": 20,
+                    "grassFt": 0,
+                    "groundRollFt": 1176,
+                    "totalFt": 2070,
+                    "neededFt": 3105,
+                    "status": "over",
+                    "reasons": [
+                      "margin"
+                    ],
+                    "problem": null
+                  },
+                  {
+                    "runway": "01/19",
+                    "end": "19",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 2500,
+                    "declared": false,
+                    "alongKt": -4,
+                    "crosswindKt": 4,
+                    "windPercent": 20,
+                    "grassFt": 0,
+                    "groundRollFt": 1176,
+                    "totalFt": 2070,
+                    "neededFt": 3105,
+                    "status": "over",
+                    "reasons": [
+                      "margin"
+                    ],
+                    "problem": null
+                  },
+                  {
+                    "runway": "06/24",
+                    "end": "06",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 5000,
+                    "declared": false,
+                    "alongKt": -4,
+                    "crosswindKt": 4,
+                    "windPercent": 20,
+                    "grassFt": 0,
+                    "groundRollFt": 1176,
+                    "totalFt": 2070,
+                    "neededFt": 3105,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  },
+                  {
+                    "runway": "06/24",
+                    "end": "24",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 5000,
+                    "declared": false,
+                    "alongKt": -4,
+                    "crosswindKt": 4,
+                    "windPercent": 20,
+                    "grassFt": 0,
+                    "groundRollFt": 1176,
+                    "totalFt": 2070,
+                    "neededFt": 3105,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  },
+                  {
+                    "runway": "11/29",
+                    "end": "11",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 2000,
+                    "declared": false,
+                    "alongKt": -4,
+                    "crosswindKt": 4,
+                    "windPercent": 20,
+                    "grassFt": 0,
+                    "groundRollFt": 1176,
+                    "totalFt": 2070,
+                    "neededFt": 3105,
+                    "status": "over",
+                    "reasons": [
+                      "short"
+                    ],
+                    "problem": null
+                  },
+                  {
+                    "runway": "11/29",
+                    "end": "29",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 2000,
+                    "declared": false,
+                    "alongKt": -4,
+                    "crosswindKt": 4,
+                    "windPercent": 20,
+                    "grassFt": 0,
+                    "groundRollFt": 1176,
+                    "totalFt": 2070,
+                    "neededFt": 3105,
+                    "status": "over",
+                    "reasons": [
+                      "short"
+                    ],
+                    "problem": null
+                  }
+                ]
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "KIAG",
+                  "raw": "TAF KIAG 182320Z 1900/1924 VRB04KT P6SM BKN200 FM190700 10007KT P6SM FEW090 BKN200",
+                  "span": {
+                    "start": 27,
+                    "end": 34
+                  },
+                  "text": "VRB04KT",
+                  "sha256": "5f555ded9e6ec03fbf668f62656c76d8abd336c3a47b1115db16066fab01a46b"
+                },
+                {
+                  "kind": "metar",
+                  "station": "CYSN",
+                  "raw": "METAR CYSN 190000Z 04006KT 15SM BKN150 17/10 A3021 RMK AC7 SLP233",
+                  "span": {
+                    "start": 39,
+                    "end": 44
+                  },
+                  "text": "17/10",
+                  "sha256": "6f6f0dcd1b30be188f8e530bcc2195e07ef111275447bbce9c9e573b6ad29d6e"
+                },
+                {
+                  "kind": "metar",
+                  "station": "CYSN",
+                  "raw": "METAR CYSN 190000Z 04006KT 15SM BKN150 17/10 A3021 RMK AC7 SLP233",
+                  "span": {
+                    "start": 45,
+                    "end": 50
+                  },
+                  "text": "A3021",
+                  "sha256": "6f6f0dcd1b30be188f8e530bcc2195e07ef111275447bbce9c9e573b6ad29d6e"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "C172MPOH.pdf p.72 (5-12), Figure 5-4, Takeoff Distance (Sheet 1 of 2), 2,300 lb (Flaps Up, Full Throttle Prior to Brake Release, Paved, Level, Dry Runway, Zero Wind): 1,000 ft, 20 °C: 980 ft ground roll, 1,725 ft to clear 50 ft",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "C172MPOH.pdf p.72 (5-12), note: \"For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.\"",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                },
+                {
+                  "kind": "airport",
+                  "station": "CYSN",
+                  "raw": null,
+                  "span": null,
+                  "text": "ourairports 2026-10-28",
+                  "sha256": null
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
                   "sha256": null
                 }
               ]
@@ -2225,6 +2443,223 @@
                   "raw": null,
                   "span": null,
                   "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "runway.takeoff",
+              "attention": "routine",
+              "summary": "takeoff on 06: 2,588 ft needed with your 50% margin (1,725 ft by the handbook), 5,000 ft available; 01: needs 2,588 ft with your 50% margin (1,725 ft by the handbook), has 2,500 ft; 19: needs 3,183 ft with your 50% margin (2,122 ft by the handbook, +23% for 4.5 kt of tailwind), has 2,500 ft; 11: needs 2,588 ft with your 50% margin (1,725 ft by the handbook), has 2,000 ft; 29: needs 2,019 ft by the handbook (+17% for 3.4 kt of tailwind), has 2,000 ft — at 31 ft pressure altitude and 17 °C (CYSN, observed 00:00Z)",
+              "waypoint": "CYSN",
+              "basis": "observed 00:00Z",
+              "basisKind": "observed",
+              "at": "2026-09-19T04:00:00.000Z",
+              "values": {
+                "what": "takeoff",
+                "elevationFt": 321,
+                "pressureAltitudeFt": 31,
+                "altimeterFrom": "CYSN",
+                "tempC": 17,
+                "tempFrom": {
+                  "station": "CYSN",
+                  "at": "2026-09-19T00:00:00.000Z"
+                },
+                "cell": {
+                  "pressureAltitudeFt": 1000,
+                  "columnC": 20,
+                  "groundRollFt": 980,
+                  "totalFt": 1725
+                },
+                "problem": null,
+                "marginPercent": 50,
+                "crosswindLimit": 15,
+                "windKnown": true,
+                "wet": [],
+                "best": "06",
+                "runways": [
+                  {
+                    "runway": "01/19",
+                    "end": "01",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 2500,
+                    "declared": false,
+                    "alongKt": 4.479829093712347,
+                    "crosswindKt": 3.991382127926166,
+                    "windPercent": 0,
+                    "grassFt": 0,
+                    "groundRollFt": 980,
+                    "totalFt": 1725,
+                    "neededFt": 2588,
+                    "status": "over",
+                    "reasons": [
+                      "margin"
+                    ],
+                    "problem": null
+                  },
+                  {
+                    "runway": "01/19",
+                    "end": "19",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 2500,
+                    "declared": false,
+                    "alongKt": -4.479829093712349,
+                    "crosswindKt": 3.991382127926166,
+                    "windPercent": 23,
+                    "grassFt": 0,
+                    "groundRollFt": 1206,
+                    "totalFt": 2122,
+                    "neededFt": 3183,
+                    "status": "over",
+                    "reasons": [
+                      "margin"
+                    ],
+                    "problem": null
+                  },
+                  {
+                    "runway": "06/24",
+                    "end": "06",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 5000,
+                    "declared": false,
+                    "alongKt": 5.85320726367514,
+                    "crosswindKt": 1.3190772261170256,
+                    "windPercent": 0,
+                    "grassFt": 0,
+                    "groundRollFt": 980,
+                    "totalFt": 1725,
+                    "neededFt": 2588,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  },
+                  {
+                    "runway": "06/24",
+                    "end": "24",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 5000,
+                    "declared": false,
+                    "alongKt": -5.85320726367514,
+                    "crosswindKt": 1.3190772261170216,
+                    "windPercent": 30,
+                    "grassFt": 0,
+                    "groundRollFt": 1274,
+                    "totalFt": 2243,
+                    "neededFt": 3365,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  },
+                  {
+                    "runway": "11/29",
+                    "end": "11",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 2000,
+                    "declared": false,
+                    "alongKt": 3.372500267112784,
+                    "crosswindKt": 4.962483445647371,
+                    "windPercent": 0,
+                    "grassFt": 0,
+                    "groundRollFt": 980,
+                    "totalFt": 1725,
+                    "neededFt": 2588,
+                    "status": "over",
+                    "reasons": [
+                      "margin"
+                    ],
+                    "problem": null
+                  },
+                  {
+                    "runway": "11/29",
+                    "end": "29",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 2000,
+                    "declared": false,
+                    "alongKt": -3.3725002671127857,
+                    "crosswindKt": 4.962483445647369,
+                    "windPercent": 17,
+                    "grassFt": 0,
+                    "groundRollFt": 1147,
+                    "totalFt": 2019,
+                    "neededFt": 3029,
+                    "status": "over",
+                    "reasons": [
+                      "short"
+                    ],
+                    "problem": null
+                  }
+                ]
+              },
+              "citations": [
+                {
+                  "kind": "metar",
+                  "station": "CYSN",
+                  "raw": "METAR CYSN 190000Z 04006KT 15SM BKN150 17/10 A3021 RMK AC7 SLP233",
+                  "span": {
+                    "start": 19,
+                    "end": 26
+                  },
+                  "text": "04006KT",
+                  "sha256": "6f6f0dcd1b30be188f8e530bcc2195e07ef111275447bbce9c9e573b6ad29d6e"
+                },
+                {
+                  "kind": "metar",
+                  "station": "CYSN",
+                  "raw": "METAR CYSN 190000Z 04006KT 15SM BKN150 17/10 A3021 RMK AC7 SLP233",
+                  "span": {
+                    "start": 39,
+                    "end": 44
+                  },
+                  "text": "17/10",
+                  "sha256": "6f6f0dcd1b30be188f8e530bcc2195e07ef111275447bbce9c9e573b6ad29d6e"
+                },
+                {
+                  "kind": "metar",
+                  "station": "CYSN",
+                  "raw": "METAR CYSN 190000Z 04006KT 15SM BKN150 17/10 A3021 RMK AC7 SLP233",
+                  "span": {
+                    "start": 45,
+                    "end": 50
+                  },
+                  "text": "A3021",
+                  "sha256": "6f6f0dcd1b30be188f8e530bcc2195e07ef111275447bbce9c9e573b6ad29d6e"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "C172MPOH.pdf p.72 (5-12), Figure 5-4, Takeoff Distance (Sheet 1 of 2), 2,300 lb (Flaps Up, Full Throttle Prior to Brake Release, Paved, Level, Dry Runway, Zero Wind): 1,000 ft, 20 °C: 980 ft ground roll, 1,725 ft to clear 50 ft",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "C172MPOH.pdf p.72 (5-12), note: \"For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.\"",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                },
+                {
+                  "kind": "airport",
+                  "station": "CYSN",
+                  "raw": null,
+                  "span": null,
+                  "text": "ourairports 2026-10-28",
+                  "sha256": null
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
                   "sha256": null
                 }
               ]
@@ -2661,6 +3096,179 @@
               ]
             },
             {
+              "rule": "runway.landing",
+              "attention": "routine",
+              "summary": "landing on 08: 1,950 ft needed with your 50% margin (1,300 ft by the handbook), 7,003 ft available — at 734 ft pressure altitude and 15 °C (CYKF, observed 00:00Z)",
+              "waypoint": "CYKF",
+              "basis": "prevailing",
+              "basisKind": "prevailing",
+              "at": "2026-09-19T04:31:30.378Z",
+              "values": {
+                "what": "landing",
+                "elevationFt": 1054,
+                "pressureAltitudeFt": 734,
+                "altimeterFrom": "CYKF",
+                "tempC": 15,
+                "tempFrom": {
+                  "station": "CYKF",
+                  "at": "2026-09-19T00:00:00.000Z"
+                },
+                "cell": {
+                  "pressureAltitudeFt": 1000,
+                  "columnC": 20,
+                  "groundRollFt": 550,
+                  "totalFt": 1300
+                },
+                "problem": null,
+                "marginPercent": 50,
+                "crosswindLimit": 15,
+                "windKnown": true,
+                "wet": [],
+                "best": "08",
+                "runways": [
+                  {
+                    "runway": "08/26",
+                    "end": "08",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 7003,
+                    "declared": false,
+                    "alongKt": 4.8296291314453415,
+                    "crosswindKt": 1.2940952255126037,
+                    "windPercent": 0,
+                    "grassFt": 0,
+                    "groundRollFt": 550,
+                    "totalFt": 1300,
+                    "neededFt": 1950,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  },
+                  {
+                    "runway": "08/26",
+                    "end": "26",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 7003,
+                    "declared": false,
+                    "alongKt": -4.829629131445342,
+                    "crosswindKt": 1.2940952255126017,
+                    "windPercent": 25,
+                    "grassFt": 0,
+                    "groundRollFt": 688,
+                    "totalFt": 1625,
+                    "neededFt": 2438,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  },
+                  {
+                    "runway": "14/32",
+                    "end": "14",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 4103,
+                    "declared": false,
+                    "alongKt": 1.0395584540887972,
+                    "crosswindKt": 4.890738003669028,
+                    "windPercent": 0,
+                    "grassFt": 0,
+                    "groundRollFt": 550,
+                    "totalFt": 1300,
+                    "neededFt": 1950,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  },
+                  {
+                    "runway": "14/32",
+                    "end": "32",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 4103,
+                    "declared": false,
+                    "alongKt": -1.039558454088799,
+                    "crosswindKt": 4.890738003669028,
+                    "windPercent": 6,
+                    "grassFt": 0,
+                    "groundRollFt": 583,
+                    "totalFt": 1378,
+                    "neededFt": 2067,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  }
+                ]
+              },
+              "citations": [
+                {
+                  "kind": "taf",
+                  "station": "CYKF",
+                  "raw": "TAF CYKF 181940Z 1820/1908 01008KT P6SM SCT040 FM182100 01007KT P6SM FEW040 BKN200 BECMG 1900/1902 06005KT FM190500 06005KT P6SM SKC RMK FCST BASED ON AUTO OBS. NXT FCST BY 190200Z",
+                  "span": {
+                    "start": 99,
+                    "end": 106
+                  },
+                  "text": "06005KT",
+                  "sha256": "0d15a62e6c9da7c19862ed546522297ae999e4c2327a8df16cdee3c586959a2b"
+                },
+                {
+                  "kind": "metar",
+                  "station": "CYKF",
+                  "raw": "METAR CYKF 190000Z AUTO 02008KT 9SM OVC160 15/07 A3024 RMK SLP244",
+                  "span": {
+                    "start": 43,
+                    "end": 48
+                  },
+                  "text": "15/07",
+                  "sha256": "cd249c4ec1042e4b86519d0a77d092a7724a3a2e9c4d4f4f0d1ac23c4cfc906f"
+                },
+                {
+                  "kind": "metar",
+                  "station": "CYKF",
+                  "raw": "METAR CYKF 190000Z AUTO 02008KT 9SM OVC160 15/07 A3024 RMK SLP244",
+                  "span": {
+                    "start": 49,
+                    "end": 54
+                  },
+                  "text": "A3024",
+                  "sha256": "cd249c4ec1042e4b86519d0a77d092a7724a3a2e9c4d4f4f0d1ac23c4cfc906f"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "C172MPOH.pdf p.81 (5-21), Figure 5-10, Landing Distance, 2,300 lb (Flaps 40°, Power Off, Maximum Braking, Paved, Level, Dry Runway, Zero Wind): 1,000 ft, 20 °C: 550 ft ground roll, 1,300 ft to clear 50 ft",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "C172MPOH.pdf p.81 (5-21), note: \"For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.\"",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                },
+                {
+                  "kind": "airport",
+                  "station": "CYKF",
+                  "raw": null,
+                  "span": null,
+                  "text": "ourairports 2026-10-28",
+                  "sha256": null
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
+                  "sha256": null
+                }
+              ]
+            },
+            {
               "rule": "observation.age",
               "attention": "routine",
               "summary": "CYKF observation issued 00:00Z, 52 min ago",
@@ -3019,6 +3627,179 @@
                   "raw": null,
                   "span": null,
                   "text": "CARs 602.114 (control zone)",
+                  "sha256": null
+                }
+              ]
+            },
+            {
+              "rule": "runway.landing",
+              "attention": "routine",
+              "summary": "landing on 08: 1,950 ft needed with your 50% margin (1,300 ft by the handbook), 7,003 ft available — at 734 ft pressure altitude and 15 °C (CYKF, observed 00:00Z)",
+              "waypoint": "CYKF",
+              "basis": "observed 00:00Z",
+              "basisKind": "observed",
+              "at": "2026-09-19T04:31:30.378Z",
+              "values": {
+                "what": "landing",
+                "elevationFt": 1054,
+                "pressureAltitudeFt": 734,
+                "altimeterFrom": "CYKF",
+                "tempC": 15,
+                "tempFrom": {
+                  "station": "CYKF",
+                  "at": "2026-09-19T00:00:00.000Z"
+                },
+                "cell": {
+                  "pressureAltitudeFt": 1000,
+                  "columnC": 20,
+                  "groundRollFt": 550,
+                  "totalFt": 1300
+                },
+                "problem": null,
+                "marginPercent": 50,
+                "crosswindLimit": 15,
+                "windKnown": true,
+                "wet": [],
+                "best": "08",
+                "runways": [
+                  {
+                    "runway": "08/26",
+                    "end": "08",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 7003,
+                    "declared": false,
+                    "alongKt": 4.588611490808368,
+                    "crosswindKt": 6.553216354311934,
+                    "windPercent": 0,
+                    "grassFt": 0,
+                    "groundRollFt": 550,
+                    "totalFt": 1300,
+                    "neededFt": 1950,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  },
+                  {
+                    "runway": "08/26",
+                    "end": "26",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 7003,
+                    "declared": false,
+                    "alongKt": -4.588611490808371,
+                    "crosswindKt": 6.553216354311933,
+                    "windPercent": 23,
+                    "grassFt": 0,
+                    "groundRollFt": 677,
+                    "totalFt": 1599,
+                    "neededFt": 2399,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  },
+                  {
+                    "runway": "14/32",
+                    "end": "14",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 4103,
+                    "declared": false,
+                    "alongKt": -3.7557725022871242,
+                    "crosswindKt": 7.063580742871417,
+                    "windPercent": 19,
+                    "grassFt": 0,
+                    "groundRollFt": 655,
+                    "totalFt": 1547,
+                    "neededFt": 2321,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  },
+                  {
+                    "runway": "14/32",
+                    "end": "32",
+                    "surface": "ASP",
+                    "kind": "paved",
+                    "availableFt": 4103,
+                    "declared": false,
+                    "alongKt": 3.7557725022871233,
+                    "crosswindKt": 7.063580742871417,
+                    "windPercent": 0,
+                    "grassFt": 0,
+                    "groundRollFt": 550,
+                    "totalFt": 1300,
+                    "neededFt": 1950,
+                    "status": "fits",
+                    "reasons": [],
+                    "problem": null
+                  }
+                ]
+              },
+              "citations": [
+                {
+                  "kind": "metar",
+                  "station": "CYKF",
+                  "raw": "METAR CYKF 190000Z AUTO 02008KT 9SM OVC160 15/07 A3024 RMK SLP244",
+                  "span": {
+                    "start": 24,
+                    "end": 31
+                  },
+                  "text": "02008KT",
+                  "sha256": "cd249c4ec1042e4b86519d0a77d092a7724a3a2e9c4d4f4f0d1ac23c4cfc906f"
+                },
+                {
+                  "kind": "metar",
+                  "station": "CYKF",
+                  "raw": "METAR CYKF 190000Z AUTO 02008KT 9SM OVC160 15/07 A3024 RMK SLP244",
+                  "span": {
+                    "start": 43,
+                    "end": 48
+                  },
+                  "text": "15/07",
+                  "sha256": "cd249c4ec1042e4b86519d0a77d092a7724a3a2e9c4d4f4f0d1ac23c4cfc906f"
+                },
+                {
+                  "kind": "metar",
+                  "station": "CYKF",
+                  "raw": "METAR CYKF 190000Z AUTO 02008KT 9SM OVC160 15/07 A3024 RMK SLP244",
+                  "span": {
+                    "start": 49,
+                    "end": 54
+                  },
+                  "text": "A3024",
+                  "sha256": "cd249c4ec1042e4b86519d0a77d092a7724a3a2e9c4d4f4f0d1ac23c4cfc906f"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "C172MPOH.pdf p.81 (5-21), Figure 5-10, Landing Distance, 2,300 lb (Flaps 40°, Power Off, Maximum Braking, Paved, Level, Dry Runway, Zero Wind): 1,000 ft, 20 °C: 550 ft ground roll, 1,300 ft to clear 50 ft",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "C172MPOH.pdf p.81 (5-21), note: \"For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.\"",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                },
+                {
+                  "kind": "airport",
+                  "station": "CYKF",
+                  "raw": null,
+                  "span": null,
+                  "text": "ourairports 2026-10-28",
+                  "sha256": null
+                },
+                {
+                  "kind": "profile",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "default v1",
                   "sha256": null
                 }
               ]
@@ -3500,6 +4281,179 @@
             ]
           },
           {
+            "rule": "runway.landing",
+            "attention": "routine",
+            "summary": "landing on 30: 2,106 ft needed with your 50% margin (1,404 ft by the handbook, +8% for 1.6 kt of tailwind), 10,006 ft available — at 480 ft pressure altitude and 16 °C (CYHM, observed 00:00Z)",
+            "waypoint": "CYHM",
+            "basis": "prevailing",
+            "basisKind": "prevailing",
+            "at": "2026-09-19T04:46:29.121Z",
+            "values": {
+              "what": "landing",
+              "elevationFt": 780,
+              "pressureAltitudeFt": 480,
+              "altimeterFrom": "CYHM",
+              "tempC": 16,
+              "tempFrom": {
+                "station": "CYHM",
+                "at": "2026-09-19T00:00:00.000Z"
+              },
+              "cell": {
+                "pressureAltitudeFt": 1000,
+                "columnC": 20,
+                "groundRollFt": 550,
+                "totalFt": 1300
+              },
+              "problem": null,
+              "marginPercent": 50,
+              "crosswindLimit": 15,
+              "windKnown": true,
+              "wet": [],
+              "best": "30",
+              "runways": [
+                {
+                  "runway": "06/24",
+                  "end": "06",
+                  "surface": "ASP",
+                  "kind": "paved",
+                  "availableFt": 6010,
+                  "declared": false,
+                  "alongKt": 6.618630029195218,
+                  "crosswindKt": 2.2789770812000967,
+                  "windPercent": 0,
+                  "grassFt": 0,
+                  "groundRollFt": 550,
+                  "totalFt": 1300,
+                  "neededFt": 1950,
+                  "status": "fits",
+                  "reasons": [],
+                  "problem": null
+                },
+                {
+                  "runway": "06/24",
+                  "end": "24",
+                  "surface": "ASP",
+                  "kind": "paved",
+                  "availableFt": 6010,
+                  "declared": false,
+                  "alongKt": -6.618630029195217,
+                  "crosswindKt": 2.278977081200097,
+                  "windPercent": 34,
+                  "grassFt": 0,
+                  "groundRollFt": 737,
+                  "totalFt": 1742,
+                  "neededFt": 2613,
+                  "status": "fits",
+                  "reasons": [],
+                  "problem": null
+                },
+                {
+                  "runway": "12/30",
+                  "end": "12",
+                  "surface": "ASP",
+                  "kind": "paved",
+                  "availableFt": 8406,
+                  "declared": false,
+                  "alongKt": 1.5746573804070545,
+                  "crosswindKt": 6.820590453496647,
+                  "windPercent": 0,
+                  "grassFt": 0,
+                  "groundRollFt": 550,
+                  "totalFt": 1300,
+                  "neededFt": 1950,
+                  "status": "fits",
+                  "reasons": [],
+                  "problem": null
+                },
+                {
+                  "runway": "12/30",
+                  "end": "30",
+                  "surface": "ASP",
+                  "kind": "paved",
+                  "availableFt": 10006,
+                  "declared": false,
+                  "alongKt": -1.5746573804070567,
+                  "crosswindKt": 6.820590453496646,
+                  "windPercent": 8,
+                  "grassFt": 0,
+                  "groundRollFt": 594,
+                  "totalFt": 1404,
+                  "neededFt": 2106,
+                  "status": "fits",
+                  "reasons": [],
+                  "problem": null
+                }
+              ]
+            },
+            "citations": [
+              {
+                "kind": "taf",
+                "station": "CYHM",
+                "raw": "TAF CYHM 182340Z 1900/1924 03007KT P6SM BKN160 FM191000 05007KT P6SM SCT140 FM191700 05012KT P6SM BKN140 BKN220 FM192000 05012KT P6SM -SHRA OVC100 BECMG 1922/1924 04008KT RMK NXT FCST BY 190600Z",
+                "span": {
+                  "start": 27,
+                  "end": 34
+                },
+                "text": "03007KT",
+                "sha256": "fb1a374f0ed4cedf5673e2b32ed2494c0d720fd91fd19cf378a935c9d5974d02"
+              },
+              {
+                "kind": "metar",
+                "station": "CYHM",
+                "raw": "METAR CYHM 190000Z 36008KT 15SM BKN140 BKN210 16/08 A3022 RMK AC6CI1 SLP239",
+                "span": {
+                  "start": 46,
+                  "end": 51
+                },
+                "text": "16/08",
+                "sha256": "e34a22c6129a955b027ccff38f090d7e7cef0122a789027f4c5d0e1a994434a3"
+              },
+              {
+                "kind": "metar",
+                "station": "CYHM",
+                "raw": "METAR CYHM 190000Z 36008KT 15SM BKN140 BKN210 16/08 A3022 RMK AC6CI1 SLP239",
+                "span": {
+                  "start": 52,
+                  "end": 57
+                },
+                "text": "A3022",
+                "sha256": "e34a22c6129a955b027ccff38f090d7e7cef0122a789027f4c5d0e1a994434a3"
+              },
+              {
+                "kind": "aircraft",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "C172MPOH.pdf p.81 (5-21), Figure 5-10, Landing Distance, 2,300 lb (Flaps 40°, Power Off, Maximum Braking, Paved, Level, Dry Runway, Zero Wind): 1,000 ft, 20 °C: 550 ft ground roll, 1,300 ft to clear 50 ft",
+                "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+              },
+              {
+                "kind": "aircraft",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "C172MPOH.pdf p.81 (5-21), note: \"For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.\"",
+                "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+              },
+              {
+                "kind": "airport",
+                "station": "CYHM",
+                "raw": null,
+                "span": null,
+                "text": "ourairports 2026-10-28",
+                "sha256": null
+              },
+              {
+                "kind": "profile",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "default v1",
+                "sha256": null
+              }
+            ]
+          },
+          {
             "rule": "observation.age",
             "attention": "routine",
             "summary": "CYHM observation issued 00:00Z, 52 min ago",
@@ -3894,6 +4848,179 @@
                 "raw": null,
                 "span": null,
                 "text": "CARs 602.114 (control zone)",
+                "sha256": null
+              }
+            ]
+          },
+          {
+            "rule": "runway.landing",
+            "attention": "routine",
+            "summary": "landing on 30: 1,950 ft needed with your 50% margin (1,300 ft by the handbook), 10,006 ft available — at 480 ft pressure altitude and 16 °C (CYHM, observed 00:00Z)",
+            "waypoint": "CYHM",
+            "basis": "observed 00:00Z",
+            "basisKind": "observed",
+            "at": "2026-09-19T04:46:29.121Z",
+            "values": {
+              "what": "landing",
+              "elevationFt": 780,
+              "pressureAltitudeFt": 480,
+              "altimeterFrom": "CYHM",
+              "tempC": 16,
+              "tempFrom": {
+                "station": "CYHM",
+                "at": "2026-09-19T00:00:00.000Z"
+              },
+              "cell": {
+                "pressureAltitudeFt": 1000,
+                "columnC": 20,
+                "groundRollFt": 550,
+                "totalFt": 1300
+              },
+              "problem": null,
+              "marginPercent": 50,
+              "crosswindLimit": 15,
+              "windKnown": true,
+              "wet": [],
+              "best": "30",
+              "runways": [
+                {
+                  "runway": "06/24",
+                  "end": "06",
+                  "surface": "ASP",
+                  "kind": "paved",
+                  "availableFt": 6010,
+                  "declared": false,
+                  "alongKt": 5.248472231924056,
+                  "crosswindKt": 6.037676641782177,
+                  "windPercent": 0,
+                  "grassFt": 0,
+                  "groundRollFt": 550,
+                  "totalFt": 1300,
+                  "neededFt": 1950,
+                  "status": "fits",
+                  "reasons": [],
+                  "problem": null
+                },
+                {
+                  "runway": "06/24",
+                  "end": "24",
+                  "surface": "ASP",
+                  "kind": "paved",
+                  "availableFt": 6010,
+                  "declared": false,
+                  "alongKt": -5.24847223192406,
+                  "crosswindKt": 6.037676641782174,
+                  "windPercent": 27,
+                  "grassFt": 0,
+                  "groundRollFt": 699,
+                  "totalFt": 1651,
+                  "neededFt": 2477,
+                  "status": "fits",
+                  "reasons": [],
+                  "problem": null
+                },
+                {
+                  "runway": "12/30",
+                  "end": "12",
+                  "surface": "ASP",
+                  "kind": "paved",
+                  "availableFt": 8406,
+                  "declared": false,
+                  "alongKt": -2.338973637781897,
+                  "crosswindKt": 7.650438047704283,
+                  "windPercent": 12,
+                  "grassFt": 0,
+                  "groundRollFt": 616,
+                  "totalFt": 1456,
+                  "neededFt": 2184,
+                  "status": "fits",
+                  "reasons": [],
+                  "problem": null
+                },
+                {
+                  "runway": "12/30",
+                  "end": "30",
+                  "surface": "ASP",
+                  "kind": "paved",
+                  "availableFt": 10006,
+                  "declared": false,
+                  "alongKt": 2.338973637781894,
+                  "crosswindKt": 7.6504380477042835,
+                  "windPercent": 0,
+                  "grassFt": 0,
+                  "groundRollFt": 550,
+                  "totalFt": 1300,
+                  "neededFt": 1950,
+                  "status": "fits",
+                  "reasons": [],
+                  "problem": null
+                }
+              ]
+            },
+            "citations": [
+              {
+                "kind": "metar",
+                "station": "CYHM",
+                "raw": "METAR CYHM 190000Z 36008KT 15SM BKN140 BKN210 16/08 A3022 RMK AC6CI1 SLP239",
+                "span": {
+                  "start": 19,
+                  "end": 26
+                },
+                "text": "36008KT",
+                "sha256": "e34a22c6129a955b027ccff38f090d7e7cef0122a789027f4c5d0e1a994434a3"
+              },
+              {
+                "kind": "metar",
+                "station": "CYHM",
+                "raw": "METAR CYHM 190000Z 36008KT 15SM BKN140 BKN210 16/08 A3022 RMK AC6CI1 SLP239",
+                "span": {
+                  "start": 46,
+                  "end": 51
+                },
+                "text": "16/08",
+                "sha256": "e34a22c6129a955b027ccff38f090d7e7cef0122a789027f4c5d0e1a994434a3"
+              },
+              {
+                "kind": "metar",
+                "station": "CYHM",
+                "raw": "METAR CYHM 190000Z 36008KT 15SM BKN140 BKN210 16/08 A3022 RMK AC6CI1 SLP239",
+                "span": {
+                  "start": 52,
+                  "end": 57
+                },
+                "text": "A3022",
+                "sha256": "e34a22c6129a955b027ccff38f090d7e7cef0122a789027f4c5d0e1a994434a3"
+              },
+              {
+                "kind": "aircraft",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "C172MPOH.pdf p.81 (5-21), Figure 5-10, Landing Distance, 2,300 lb (Flaps 40°, Power Off, Maximum Braking, Paved, Level, Dry Runway, Zero Wind): 1,000 ft, 20 °C: 550 ft ground roll, 1,300 ft to clear 50 ft",
+                "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+              },
+              {
+                "kind": "aircraft",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "C172MPOH.pdf p.81 (5-21), note: \"For operation with tailwinds up to 10 knots, increase distances by 10% for each 2 knots.\"",
+                "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+              },
+              {
+                "kind": "airport",
+                "station": "CYHM",
+                "raw": null,
+                "span": null,
+                "text": "ourairports 2026-10-28",
+                "sha256": null
+              },
+              {
+                "kind": "profile",
+                "station": null,
+                "raw": null,
+                "span": null,
+                "text": "default v1",
                 "sha256": null
               }
             ]

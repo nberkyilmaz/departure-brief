@@ -3,6 +3,8 @@ import { ceilingOf, flightCategory, flightCategoryOf, visibilityStatuteMiles, ty
 import type { AircraftLimits, PilotProfile } from '../domain/profile.js';
 import { isNight } from '../domain/sun.js';
 import { toZulu } from '../domain/time.js';
+import { performanceFor } from '../perf/aircraft.js';
+import type { PerformanceSpec } from '../perf/types.js';
 import { ON_TRACK_NM, type EnrouteStation } from '../resolve/enroute.js';
 import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
 import type { Overlay, ResolvedForecast } from '../resolve/taf.js';
@@ -10,6 +12,7 @@ import { checkCeiling, checkConditions, checkNight, checkVisibility, checkWeathe
 import { checkDaylight } from './daylight.js';
 import { checkHazards, type TripLeg } from './hazards.js';
 import { ageText, checkObservation } from './observation.js';
+import { checkRunway, noRunwayHandbook } from './runway.js';
 import { checkUnread } from './unread.js';
 import { checkWindAloft } from './windAloft.js';
 import { RULES_VERSION, type Briefing, type EnrouteReview, type Finding, type PointReview } from './types.js';
@@ -58,12 +61,24 @@ function tripLegs(flight: ResolvedFlight): TripLeg[] {
   return alternate ? [...trip, { from: alternate.leg.from.position, to: alternate.leg.to.position, startNm: total, distanceNm: alternate.leg.distance }] : trip;
 }
 
+/**
+ * The runway a point is read for: the takeoff at the departure, the
+ * landing at the destination and the alternate, none at a point the
+ * flight only passes.
+ */
+interface RunwayUse {
+  readonly what: 'takeoff' | 'landing';
+  /** The handbook's tables, when there are some for the aircraft being flown. */
+  readonly handbook: PerformanceSpec | null;
+}
+
 function evaluatePoint(
   p: ResolvedPoint,
   flight: ResolvedFlight,
   profile: PilotProfile,
   aircraft: AircraftLimits | null,
   previous: ResolvedPoint | null,
+  use: RunwayUse | null,
 ): PointReview {
   const w = p.point.waypoint;
   const at = p.point.eta;
@@ -80,15 +95,25 @@ function evaluatePoint(
   };
   const findings: Finding[] = [];
 
+  /*
+   * Every set of conditions the crosswind is judged on is judged for the
+   * runway too, as the wind along it is what changes; the temperature and
+   * altimeter setting are always the latest observation's.
+   */
+  const handbook = use?.handbook ?? null;
+  const runway = use && handbook ? { what: use.what, handbook, observation: p.metar } : null;
+  const judge = (ctx: CheckContext, c: Conditions): Finding[] => [...checkConditions(ctx, c), ...(runway ? checkRunway(ctx, c, runway) : [])];
+  if (use && !handbook && aircraft && w.airport) findings.push(noRunwayHandbook(w.id, at, use.what, aircraft.type));
+
   if (p.forecast) {
     const f = p.forecast.resolved;
     const source = { kind: 'taf' as const, station: p.forecast.station, raw: f.raw, sha256: p.forecast.report.sha256 };
     const borrowed = p.forecast.source === 'nearby' ? ` (TAF ${p.forecast.station}, ${Math.round(p.forecast.distance)} nm away)` : '';
     const reportElevation = p.forecast.source === 'nearby' ? (p.forecast.stationElevation ?? null) : null;
     if (f.prevailing) {
-      findings.push(...checkConditions({ ...base, basis: `prevailing${borrowed}`, basisKind: 'prevailing', violation: 'alert', source, reportElevation }, f.prevailing.conditions));
+      findings.push(...judge({ ...base, basis: `prevailing${borrowed}`, basisKind: 'prevailing', violation: 'alert', source, reportElevation }, f.prevailing.conditions));
       for (const o of f.overlays) {
-        findings.push(...checkConditions({ ...base, basis: `${overlayLabel(o)}${borrowed}`, basisKind: 'overlay', violation: 'caution', source, reportElevation }, o.conditions));
+        findings.push(...judge({ ...base, basis: `${overlayLabel(o)}${borrowed}`, basisKind: 'overlay', violation: 'caution', source, reportElevation }, o.conditions));
       }
     } else {
       findings.push({
@@ -151,7 +176,7 @@ function evaluatePoint(
       source: { kind: 'metar', station: p.metar.decoded.station?.value ?? null, raw: p.metar.report.body, sha256: p.metar.report.sha256 },
       reportElevation: p.metar.source === 'nearby' ? (p.metar.stationElevation ?? null) : null,
     };
-    findings.push(...checkConditions(ctx, metarConditions(p.metar.decoded)));
+    findings.push(...judge(ctx, metarConditions(p.metar.decoded)));
     findings.push(...checkUnread(ctx, p.metar.decoded.unparsed));
   }
 
@@ -266,10 +291,18 @@ function evaluateEnroute(s: EnrouteStation, flight: ResolvedFlight, profile: Pil
  * Judge a resolved flight against a profile. Pure and deterministic: the
  * same inputs always give the same briefing, and every finding carries the
  * report text and span it came from.
+ *
+ * `performance` is the handbook's tables, read for the runways only when
+ * they are for the aircraft being flown.
  */
-export function evaluateFlight(flight: ResolvedFlight, profile: PilotProfile, aircraft: AircraftLimits | null): Briefing {
-  const points = flight.points.map((p, i) => evaluatePoint(p, flight, profile, aircraft, i > 0 ? (flight.points[i - 1] ?? null) : null));
-  const alternate = flight.alternate ? evaluatePoint(flight.alternate, flight, profile, aircraft, flight.points[flight.points.length - 1] ?? null) : null;
+export function evaluateFlight(flight: ResolvedFlight, profile: PilotProfile, aircraft: AircraftLimits | null, performance: PerformanceSpec | null = null): Briefing {
+  const handbook = aircraft ? performanceFor(aircraft, performance) : null;
+  const last = flight.points.length - 1;
+  const useAt = (i: number): RunwayUse | null => (i === 0 ? { what: 'takeoff', handbook } : i === last ? { what: 'landing', handbook } : null);
+  const points = flight.points.map((p, i) => evaluatePoint(p, flight, profile, aircraft, i > 0 ? (flight.points[i - 1] ?? null) : null, useAt(i)));
+  const alternate = flight.alternate
+    ? evaluatePoint(flight.alternate, flight, profile, aircraft, flight.points[flight.points.length - 1] ?? null, { what: 'landing', handbook })
+    : null;
   return {
     rulesVersion: RULES_VERSION,
     profile: { name: profile.name, version: profile.version },

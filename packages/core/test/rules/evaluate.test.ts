@@ -12,6 +12,7 @@ import { isNight, solarElevation } from '../../src/domain/sun.js';
 import { AWC_BASE_URL, AwcClient } from '../../src/fetch/awc.js';
 import { storeAndDecode } from '../../src/store/decode.js';
 import { readNasrDirectory } from '../../src/fetch/nasr.js';
+import type { PerformanceSpec } from '../../src/perf/types.js';
 import { resolveFlight } from '../../src/resolve/flight.js';
 import { briefingText } from '../../src/rules/describe.js';
 import { evaluateFlight } from '../../src/rules/evaluate.js';
@@ -22,6 +23,7 @@ const root = join(__dirname, '..', '..', '..', '..');
 const plan = parseFlightPlan(JSON.parse(readFileSync(join(root, 'flights', 'demo-kteb-khpn.json'), 'utf8')));
 const profile = parsePilotProfile(JSON.parse(readFileSync(join(root, 'profiles', 'default.json'), 'utf8')));
 const aircraft = parseAircraftLimits(JSON.parse(readFileSync(join(root, 'aircraft', 'c172.json'), 'utf8')));
+const spec = JSON.parse(readFileSync(join(root, 'aircraft', 'c172.performance.json'), 'utf8')) as PerformanceSpec;
 
 async function seededStore(): Promise<MemoryStore> {
   const store = new MemoryStore();
@@ -57,12 +59,16 @@ describe('solar elevation', () => {
 
 describe('profile and aircraft parsing', () => {
   it('reads the default profile', () => {
-    expect(profile).toEqual({ version: 1, name: 'default', ceiling: 2500, visibility: 5, crosswind: 15, crosswindIncludesGust: true, maxGustSpread: null, maxWind: null, nightAllowed: true });
+    expect(profile).toEqual({ version: 1, name: 'default', ceiling: 2500, visibility: 5, crosswind: 15, crosswindIncludesGust: true, maxGustSpread: null, maxWind: null, nightAllowed: true, runwayMargin: 50 });
     expect(aircraft).toEqual({ type: 'C172', demonstratedCrosswind: null, demonstratedCrosswindSource: null, cruiseFuelGph: null });
   });
   it('rejects nonsense with a message naming the field', () => {
     expect(() => parsePilotProfile({ ceilingAglFt: -1 })).toThrow('ceilingAglFt');
     expect(() => parseAircraftLimits({})).toThrow('"type"');
+    expect(() => parsePilotProfile({ ceilingAglFt: 2500, visibilitySm: 5, crosswindKt: 15, runwayMarginPercent: -10 })).toThrow('runwayMarginPercent');
+  });
+  it('compares the handbook as printed when a profile sets no runway margin', () => {
+    expect(parsePilotProfile({ ceilingAglFt: 2500, visibilitySm: 5, crosswindKt: 15 }).runwayMargin).toBe(0);
   });
 });
 
@@ -71,7 +77,7 @@ describe('evaluateFlight', () => {
     const store = await seededStore();
     const resolved = await resolveFlight(store, plan, new Date('2026-09-07T12:30:00Z'));
     const b = evaluateFlight(resolved, profile, aircraft);
-    expect(b.rulesVersion).toBe(13);
+    expect(b.rulesVersion).toBe(14);
     expect(b.profile).toEqual({ name: 'default', version: 1 });
     expect(b.aircraft).toBe('C172');
     expect(b.points.map((p) => p.waypoint)).toEqual(['KTEB', 'N07', 'KHPN']);
@@ -120,6 +126,36 @@ describe('evaluateFlight', () => {
     expect(f.basis).toBe('prevailing');
     expect(f.citations[0]!.kind).toBe('taf');
     expect(f.citations[0]!.text).toMatch(/^\d{5}KT$/);
+  });
+
+  it('reads the takeoff at the departure and the landing at the destination and alternate, from the declared distances where the FAA publishes them', async () => {
+    const store = await seededStore();
+    const resolved = await resolveFlight(store, plan, new Date('2026-09-07T12:30:00Z'));
+    const b = evaluateFlight(resolved, profile, aircraft, spec);
+    const rules = (p: { findings: readonly { rule: string }[] }) => new Set(p.findings.map((f) => f.rule).filter((r) => r.startsWith('runway.')));
+    expect(b.points.map(rules)).toEqual([new Set(['runway.takeoff']), new Set(), new Set(['runway.landing'])]);
+    expect(rules(b.alternate!)).toEqual(new Set(['runway.landing']));
+    // Read on the same forecast and observation the crosswind is: one line for each.
+    const kteb = b.points[0]!.findings;
+    expect(kteb.filter((f) => f.rule === 'runway.takeoff').map((f) => f.basisKind)).toEqual(kteb.filter((f) => f.rule === 'crosswind.personal').map((f) => f.basisKind));
+    // KHPN 29 lands past a 1,292 ft displaced threshold, with 3,159 ft declared.
+    const khpn = b.points[2]!.findings.find((f) => f.rule === 'runway.landing' && f.basisKind === 'prevailing')!;
+    const ends = khpn.values['runways'] as { end: string; availableFt: number; declared: boolean }[];
+    expect(ends.find((r) => r.end === '29')).toMatchObject({ availableFt: 3159, declared: true });
+    expect(khpn.attention).toBe('routine');
+    expect(khpn.citations.find((c) => c.kind === 'airport')!.text).toMatch(/^nasr /);
+  });
+
+  it('says so at each end when there is no handbook for the aircraft, rather than passing in silence', async () => {
+    const store = await seededStore();
+    const resolved = await resolveFlight(store, plan, new Date('2026-09-07T12:30:00Z'));
+    const b = evaluateFlight(resolved, profile, { ...aircraft, type: 'PA28' }, spec);
+    const said = [...b.points, b.alternate!].flatMap((p) => p.findings.filter((f) => f.rule.startsWith('runway.')).map((f) => `${f.attention}: ${f.summary}`));
+    expect(said).toEqual([
+      'note: no handbook takeoff table for the PA28, so runway lengths were not checked',
+      'note: no handbook landing table for the PA28, so runway lengths were not checked',
+      'note: no handbook landing table for the PA28, so runway lengths were not checked',
+    ]);
   });
 
   it('with nothing known as of an early time, every point says so rather than passing quietly', async () => {

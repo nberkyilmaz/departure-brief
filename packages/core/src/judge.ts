@@ -40,7 +40,7 @@ export * from './hash/sha256.js';
 export * from './wb/compute.js';
 export { withHandbookLimits } from './wb/aircraft.js';
 export { assembleWeightBalance, isCgPointName, missingFrom } from './wb/assemble.js';
-// The handbook's cruise and climb tables, read for a flight.
+// The handbook's performance tables, read for a flight.
 export * from './perf/index.js';
 export type { CgEnvelope, DocumentCitation, Figure, Loading, LoadingResult, LoadingRow, ReviewItem, Station, StationKind, WbFinding, WeightBalanceSpec } from './wb/types.js';
 export type * from './store/types.js';

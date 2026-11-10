@@ -80,7 +80,9 @@ describe('the copied tables', () => {
   it('keeps one printed row to a line, and reads back as it was written', () => {
     const text = readFileSync(FILE, 'utf8');
     expect(formatPerformance(spec)).toBe(text);
-    expect(text.split('\n').filter((l) => l.includes('"pressureAltitudeFt"'))).toHaveLength(spec.cruise.rows.length + spec.climb.rows.length);
+    expect(text.split('\n').filter((l) => l.includes('"pressureAltitudeFt"'))).toHaveLength(
+      spec.cruise.rows.length + spec.climb.rows.length + spec.takeoff.rows.length + spec.landing.rows.length,
+    );
   });
 });
 
