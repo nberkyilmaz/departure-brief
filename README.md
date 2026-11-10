@@ -16,7 +16,7 @@ aeroplane field in Canada and the United States — 17,647 of them.
 > official weather briefing. It does not decide whether to fly — that is the
 > pilot's call. Always get an official briefing from an approved source.
 
-![A briefing of CYSN to CYKF on live weather](docs/img/briefing.png)
+![A briefing of CYSN to CYKF: the flight, when you could go, and each field at the time you are there](docs/img/briefing.png)
 
 ## Why I built it
 
@@ -58,13 +58,21 @@ and shows its working.
   hours you might leave, the destination at the time you would arrive and
   the stations along the way when you would pass them, so an earlier or
   later departure can be compared at a glance and briefed with a tap.
-- **Puts the route on a map**, with every station along it at the time you
-  would pass it and the advisories you would be inside.
-- **Draws the route from the side**: the ground at each station, the cloud
-  bases forecast for when you pass it, SIGMETs where you would be inside
-  them, and the freezing level, with what it cannot know said on the chart.
-- **Reads weight and balance out of a scanned 1976 handbook** with OCR, and
-  only uses a figure once it has been found on the page.
+- **Puts the route on a chart**: a map drawn in a sectional's colours, with
+  the hills shaded, your route in magenta and dashed on to the alternate,
+  every station along it at the time you would pass it, the aerodromes
+  around it, the advisories you would be inside, pilot reports, and the US
+  airspace the line goes through. At night it is printed dark.
+- **Draws the route from the side**: the terrain under the line, the cloud
+  bases forecast for when you pass each station, SIGMETs where you would be
+  inside them, airspace, pilot reports and the freezing level, with what it
+  cannot know said on the chart.
+- **Reads the aircraft's own handbook**, a scanned 1976 Cessna 172M POH:
+  weight and balance found on the page by OCR and used only once verified
+  there, and the cruise, climb, takeoff and landing tables copied by hand
+  and held up against the scan, figure by figure.
+
+![The route map: Buffalo to Rochester with the alternate across the lake, the Class C rings, and the aerodromes around it](docs/img/map.png)
 
 ![The field page for Hamilton (CYHM)](docs/img/field.png)
 
@@ -114,7 +122,7 @@ More on the decisions behind this, and the trade-offs, in
 - **Zulu internally**, local time only at the display edge.
 - **Reproducible.** Raw reports are append-only and content-addressed, so
   what was known at any moment can be reconstructed exactly.
-- **Tested on real data.** About 900 tests, run in CI on Node 20 and 22
+- **Tested on real data.** About 1,400 tests, run in CI on Node 20 and 22
   against a real Postgres, all replaying recorded upstream responses — no
   test touches the network, and no fixture is invented.
 
@@ -157,18 +165,20 @@ npm run db:up && npm run build -w apps/web && npm start
 Deploying the relay and the API is covered in **[docs/deploy.md](docs/deploy.md)**;
 what comes next is in **[docs/roadmap.md](docs/roadmap.md)**.
 
-**Stack:** TypeScript throughout · React + Vite · Fastify · Postgres/PostGIS ·
-Cloudflare Workers + KV · Vitest · GitHub Actions · pdf.js + Tesseract for
-OCR · Ollama for the optional local models.
+**Stack:** TypeScript throughout · React + Vite · MapLibre · Fastify ·
+Postgres/PostGIS · Cloudflare Workers + KV · Vitest · GitHub Actions ·
+pdf.js + Tesseract for OCR · Ollama for the optional local models.
 
 ## Data sources
 
-All public, with no redistribution restrictions:
+All public. Those that ask to be credited are, here and, for the maps, on
+the map itself:
 
 - [aviationweather.gov](https://aviationweather.gov/) (NOAA/AWC) — METAR, TAF, SIGMET, G-AIRMET and pilot reports. Its US winds aloft (the FB bulletin) were read too, until NOAA discontinued them on 3 November 2026
 - NOAA upper-air bulletins ([tgftp.nws.noaa.gov/data/raw/us](https://tgftp.nws.noaa.gov/data/raw/us/), and [api.weather.gov](https://api.weather.gov/) for Alaska) — US upper winds and freezing levels as the balloons measured them, with NCEI's IGRA station list for where each one goes up (public domain)
 - NAV CANADA CFPS — Canadian NOTAMs and upper winds (the endpoint behind plan.navcanada.ca; unofficial, so the client fails loudly if its shape changes)
 - FAA NASR — US airports, runways, magnetic variation
+- The FAA's [Aeronautical Data Delivery Service](https://adds-faa.opendata.arcgis.com/) — the Class B, C and D and special use airspace a route goes through, fetched by the page itself (public domain)
 - Copernicus DEM GLO-90, through Open-Meteo — the terrain under a route on the side view (CC BY 4.0)
 - OpenStreetMap, through [OpenFreeMap](https://openfreemap.org/) — the land, water, towns and roads on every map, drawn here in a sectional's colours (ODbL; credited on the map)
 - The [terrain tiles](https://registry.opendata.aws/terrain-tiles/) on AWS's open data registry — the hill shading on the maps, from USGS 3DEP, SRTM and GMTED2010, NOAA ETOPO1, ArcticDEM and Canadian data under the Open Government Licence – Canada
