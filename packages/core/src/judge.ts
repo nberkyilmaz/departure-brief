@@ -82,6 +82,8 @@ export type { AwcFetch } from './fetch/awc.js';
 export { AWC_CACHE_BASE_URL, AIRCRAFT_REPORT_CACHE_FILE, AwcCacheClient, GAIRMET_CACHE_FILE, METAR_CACHE_FILE, parseAircraftReportCache, parseGairmetCache, parseMetarCache, parseTafCache, TAF_CACHE_FILE } from './fetch/awcCache.js';
 export { CANADIAN_UPPERWIND_SITES, NAVCANADA_CFPS_BASE_URL, NavCanadaClient, NavCanadaError } from './fetch/navcanada.js';
 export type { CfpsFetch } from './fetch/navcanada.js';
+export { AirspaceClient, AirspaceError, FAA_AIRSPACE_URL } from './fetch/airspace.js';
+export type { AirspaceRecord } from './fetch/airspace.js';
 export { ELEVATION_BATCH, ElevationClient, ElevationError, OPEN_METEO_ELEVATION_URL } from './fetch/elevation.js';
 export { NOAA_RAW_US_URL, NWS_API_URL, SOUNDING_SOURCE, SoundingClient, SoundingError, soundingReport } from './fetch/soundings.js';
 export type { HeldSounding, SoundingFetch } from './fetch/soundings.js';

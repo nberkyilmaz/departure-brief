@@ -6,8 +6,9 @@
  */
 import { alongTheWay, fieldCards } from './summary.js';
 import { clock24, hhmmZ } from './time.js';
+import type { AirspaceState } from './airspace.js';
 import type { TerrainState } from './terrain.js';
-import type { FlightCategory, PictureFreezing, PictureHazard, PictureHazardBase, PictureHazardMissed, PictureLayer, PicturePirep, PictureStation, RoutePicture, RouteTerrain, StoredBriefing } from './types.js';
+import type { AirspaceArea, AirspaceKind, AirspaceLimit, FlightCategory, PictureFreezing, PictureHazard, PictureHazardBase, PictureHazardMissed, PictureLayer, PicturePirep, PictureStation, RoutePicture, RouteTerrain, StoredBriefing } from './types.js';
 
 export interface Column {
   readonly station: PictureStation;
@@ -194,8 +195,130 @@ function groundNote(picture: RoutePicture, terrain: TerrainState, empty: readonl
   return `The shaded ground is the terrain under your line, every ${terrain.spacingNm < 3 ? Math.round(terrain.spacingNm) : terrain.spacingNm.toFixed(1)} nm. Its highest point is ${feet(ft)} ft at ${Math.round(nm)} nm, ${againstCruise(ft, picture.cruiseFt)}. These are spot heights on the centre line, so a peak between them or beside the line is not on it: this is not a clearance.${empty.join('')}`;
 }
 
+/**
+ * How each kind is drawn, after the charts a pilot already reads: Class B
+ * solid blue, Class C solid magenta, Class D dashed blue, special use in the
+ * colour it has there. The line and the tag carry it, so colour never does
+ * so alone.
+ */
+export const AIRSPACE_STYLE: Readonly<Record<AirspaceKind, { readonly tag: string; readonly name: string; readonly hue: 'blue' | 'magenta'; readonly line: 'solid' | 'dashed' | 'dotted' }>> = {
+  'class-b': { tag: 'B', name: 'Class B', hue: 'blue', line: 'solid' },
+  'class-c': { tag: 'C', name: 'Class C', hue: 'magenta', line: 'solid' },
+  'class-d': { tag: 'D', name: 'Class D', hue: 'blue', line: 'dashed' },
+  prohibited: { tag: 'P', name: 'Prohibited area', hue: 'blue', line: 'dotted' },
+  restricted: { tag: 'R', name: 'Restricted area', hue: 'blue', line: 'dotted' },
+  warning: { tag: 'W', name: 'Warning area', hue: 'blue', line: 'dotted' },
+  danger: { tag: 'DA', name: 'Danger area', hue: 'blue', line: 'dotted' },
+  moa: { tag: 'MOA', name: 'Military operations area', hue: 'magenta', line: 'dotted' },
+  alert: { tag: 'A', name: 'Alert area', hue: 'magenta', line: 'dotted' },
+};
+
+function limitWords(limit: AirspaceLimit, above: string): string {
+  if (limit.reference === 'surface') return 'surface';
+  if (limit.reference === 'none' || limit.ft === null) return above === 'above' ? 'no stated floor' : 'no stated top';
+  const value = limit.reference === 'fl' ? `FL${Math.round(limit.ft / 100)}` : limit.reference === 'agl' ? `${feet(limit.ft)} ft above the ground` : `${feet(limit.ft)} ft`;
+  return limit.excluded ? `${above} ${value}` : value;
+}
+
+const rangeWords = (a: AirspaceArea): string => `${limitWords(a.floor, 'above')} to ${limitWords(a.ceiling, 'below')}`;
+
+export interface AirspaceLine {
+  readonly kind: AirspaceKind;
+  readonly name: string;
+  /** Every shape of it the route goes through. */
+  readonly areas: readonly AirspaceArea[];
+  /** Its limits and where along the route. */
+  readonly words: string;
+}
+
+/** The airspace in words: one line for each name, however many shelves of it the route goes through. */
+export function airspaceLines(areas: readonly AirspaceArea[]): AirspaceLine[] {
+  const groups = new Map<string, AirspaceArea[]>();
+  for (const a of areas) groups.set(`${a.kind}|${a.name}`, [...(groups.get(`${a.kind}|${a.name}`) ?? []), a]);
+  return [...groups.values()].map((group) => {
+    const parts = new Map<string, string[]>();
+    for (const a of group) parts.set(rangeWords(a), [...(parts.get(rangeWords(a)) ?? []), ...a.stretches.map((s) => `${Math.round(s.fromNm)} to ${Math.round(s.toNm)} nm`)]);
+    // Two records of the same limits over the same stretch are said once.
+    const limits = [...parts].map(([range, where]) => `${range}, ${[...new Set(where)].join(' and ')}`).join('; ');
+    const hours = [...new Set(group.flatMap((a) => a.hours ?? []))];
+    const excludes = [...new Set(group.flatMap((a) => a.excludes ?? []))];
+    const extra = [...(hours.length > 0 ? [`Published hours: ${hours.join('; ')}.`] : []), ...excludes.map((e) => `${e}.`)];
+    return { kind: group[0]!.kind, name: group[0]!.name, areas: group, words: [`${limits}.`, ...extra].join(' ') };
+  });
+}
+
+export interface AirspaceBlock {
+  readonly key: string;
+  readonly kind: AirspaceKind;
+  /** The shape on the chart, along the ground where a limit is measured from it. */
+  readonly path: string;
+  readonly label: { readonly x: number; readonly y: number; readonly text: string } | null;
+}
+
+/** Narrower than this and its letters would be on its neighbours. */
+const AIRSPACE_LABEL_PX = 18;
+/** Under the tags advisories put along the top of the chart. */
+const OPEN_LABEL_OFFSET_PX = 42;
+
+function groundAt(terrain: RouteTerrain, nm: number): number {
+  const after = terrain.samples.findIndex((s) => s.nm >= nm);
+  if (after <= 0) return (terrain.samples[after === -1 ? terrain.samples.length - 1 : 0]!).ft;
+  const [a, b] = [terrain.samples[after - 1]!, terrain.samples[after]!];
+  return a.ft + ((b.ft - a.ft) * (nm - a.nm)) / (b.nm - a.nm);
+}
+
+/**
+ * The blocks on the side view. A limit measured from the ground follows the
+ * terrain under it, and until the terrain has arrived such a block is left
+ * off rather than drawn at the wrong height: the list says it either way.
+ * Only the widest block of each name is lettered.
+ */
+export function airspaceBlocks(areas: readonly AirspaceArea[], top: number, terrain: RouteTerrain | null, xAt: (nm: number) => number, yOf: (ft: number) => number): AirspaceBlock[] {
+  const px = (n: number) => n.toFixed(1);
+  const widest = new Map<string, { width: number; block: number }>();
+  const made: (AirspaceBlock & { readonly name: string })[] = [];
+  areas.forEach((a, i) => {
+    const followsGround = a.floor.reference === 'agl' || a.ceiling.reference === 'agl';
+    if (followsGround && !terrain) return;
+    const heightOf = (limit: AirspaceLimit, nm: number): number => (limit.ft === null ? top : Math.min(top, limit.reference === 'agl' ? groundAt(terrain!, nm) + limit.ft : limit.ft));
+    a.stretches.forEach((s, j) => {
+      const nms = [s.fromNm, ...(followsGround ? terrain!.samples.filter((t) => t.nm > s.fromNm && t.nm < s.toNm).map((t) => t.nm) : []), s.toNm];
+      const floors = nms.map((nm) => heightOf(a.floor, nm));
+      if (floors.every((ft) => ft >= top)) return;
+      const left = xAt(s.fromNm);
+      // Wide enough to be seen, for a line that only clips a corner.
+      const xs = nms.map((nm, n) => (n === nms.length - 1 ? Math.max(xAt(nm), left + 2) : xAt(nm)));
+      const upper = xs.map((x, n) => `${n === 0 ? 'M' : 'L'}${px(x)} ${px(yOf(heightOf(a.ceiling, nms[n]!)))}`).join('');
+      const lower = [...xs].reverse().map((x, n) => `L${px(x)} ${px(yOf(floors[floors.length - 1 - n]!))}`).join('');
+      const width = xs[xs.length - 1]! - left;
+      const name = `${a.kind}|${a.name}`;
+      if ((widest.get(name)?.width ?? 0) < width) widest.set(name, { width, block: made.length });
+      const open = a.ceiling.ft === null || heightOf(a.ceiling, s.fromNm) >= top;
+      made.push({
+        key: `${i}-${j}`,
+        name,
+        kind: a.kind,
+        path: `${upper}${lower}Z`,
+        label: { x: left + 3, y: open ? yOf(top) + OPEN_LABEL_OFFSET_PX : yOf(heightOf(a.ceiling, s.fromNm)) + 11, text: `${AIRSPACE_STYLE[a.kind].tag}${open ? '↑' : ''}` },
+      });
+    });
+  });
+  return made.map((b, n) => ({ key: b.key, kind: b.kind, path: b.path, label: widest.get(b.name)?.block === n && widest.get(b.name)!.width >= AIRSPACE_LABEL_PX ? b.label : null }));
+}
+
+/** What the airspace on the chart is, and how far it goes, or why there is none. */
+function airspaceNote(picture: RoutePicture, airspace: AirspaceState): string | null {
+  const canada = picture.overUS === 'part' ? ' Only the part of this route over the United States is covered: none is drawn over Canada, which does not mean there is none.' : '';
+  if (airspace === 'loading') return null;
+  if (airspace === 'not-asked') return 'No airspace is drawn, because the shapes used here only cover the United States. That does not mean there is none.';
+  if (airspace === 'failed') return 'The airspace along your line could not be fetched from the FAA just now, so none is drawn. That does not mean there is none.';
+  const covers = "Class B, C and D and special use areas your line goes through, from the FAA's published shapes, up to 3,000 ft above your cruise";
+  if (airspace.areas.length === 0) return `Your line goes through none of the airspace this looks for: ${covers}. Class A and E are not drawn, and neither is anything beside your line.${canada}`;
+  return `Airspace: ${covers}. Class A and E are not drawn, and neither is anything beside your line. It is a picture to plan with, and nothing here has been checked against your flight or says you may or may not enter: use the current chart. Hours are as published, and whether a special use area is in use on the day is for a NOTAM or ATC to say.${canada}`;
+}
+
 /** Everything the chart cannot show and will not pretend to, in the order a pilot would want to be told. */
-export function notesOf(picture: RoutePicture, columns: readonly Column[], spreadApart: boolean, terrain: TerrainState = 'loading'): string[] {
+export function notesOf(picture: RoutePicture, columns: readonly Column[], spreadApart: boolean, terrain: TerrainState = 'loading', airspace: AirspaceState = 'loading'): string[] {
   const empty = emptyStretches(columns).map((g) => ` Nothing reports for ${Math.round(g.nm)} nm between ${g.from} and ${g.to}.`);
   const freezing = picture.freezing;
   const bound = freezing.some((f) => f.belowFt !== null && !f.measuredAt);
@@ -207,6 +330,7 @@ export function notesOf(picture: RoutePicture, columns: readonly Column[], sprea
     freezing.length > 0
       ? `Freezing level, ${measured ? 'measured, not forecast for the time you pass' : 'forecast for the time you pass'}: ${freezing.map(freezingText).join('; ')}. Between those points it is not known.${bound ? ' "Below" is as far as that forecast goes: it has no temperature under that height.' : ''}`
       : 'No upper-air temperatures reach this route, so no freezing level is drawn.',
+    ...[airspaceNote(picture, airspace)].filter((n): n is string => n !== null),
     `Times are at your planned ${picture.tasKt} kt with no wind, as in Along the way, by this device's clock.`,
     ...(picture.pirepsHeld > 0 ? [pirepNote(picture)] : []),
     ...(spreadApart ? ['Stations close together are spread apart so each can be read: go by the miles printed, not the gaps.'] : []),

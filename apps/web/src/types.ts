@@ -463,6 +463,8 @@ export interface RoutePicture {
   pireps: PicturePirep[];
   /** How many reports were held for anywhere. None means there are none to go by, not that the sky is empty. */
   pirepsHeld: number;
+  /** How much of the line is over the United States, which is as far as the FAA's airspace shapes speak for. */
+  overUS: 'all' | 'part' | 'none';
 }
 
 /** Spot heights along the centre line, from an elevation model. */
@@ -470,6 +472,30 @@ export interface RouteTerrain {
   readonly spacingNm: number;
   readonly samples: readonly { readonly nm: number; readonly ft: number }[];
   readonly highest: { readonly nm: number; readonly ft: number };
+}
+
+export type AirspaceKind = 'class-b' | 'class-c' | 'class-d' | 'prohibited' | 'restricted' | 'warning' | 'danger' | 'moa' | 'alert';
+
+export interface AirspaceLimit {
+  readonly ft: number | null;
+  readonly reference: 'surface' | 'msl' | 'agl' | 'fl' | 'none';
+  readonly excluded: boolean;
+}
+
+/** One published shape the route goes through. */
+export interface AirspaceArea {
+  readonly kind: AirspaceKind;
+  readonly name: string;
+  readonly floor: AirspaceLimit;
+  readonly ceiling: AirspaceLimit;
+  readonly hours: string | null;
+  readonly excludes: string | null;
+  readonly rings: readonly (readonly { readonly lat: number; readonly lon: number }[])[];
+  readonly stretches: readonly { readonly fromNm: number; readonly toNm: number }[];
+}
+
+export interface RouteAirspace {
+  readonly areas: readonly AirspaceArea[];
 }
 
 export interface DocumentCitation {

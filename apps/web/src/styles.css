@@ -38,6 +38,8 @@
    */
   --ok: #2f7a37;
   --advisory: #3f6493;
+  --air-blue: #1d63c7;
+  --air-magenta: #a3239b;
   --marginal: #a35c00;
   --nogo: #b3261e;
   --mark: #ffe680;
@@ -89,6 +91,8 @@
     --brand-ink: #121417;
     --ok: #6fbf73;
     --advisory: #7da7dd;
+    --air-blue: #4b95de;
+    --air-magenta: #d9629f;
     --marginal: #e0a145;
     --nogo: #f0736a;
     --mark: #6b5d1f;
@@ -1081,6 +1085,11 @@ summary:focus-visible,
 .sv-cloud-outline { fill: none; stroke: var(--muted); stroke-width: 1.25; }
 .sv-overlay { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 4 3; }
 .sv-freezing { stroke: var(--advisory); stroke-width: 2; }
+.sv-air { stroke-width: 1.5; }
+.sv-air.blue { stroke: var(--air-blue); fill: color-mix(in srgb, var(--air-blue) 13%, transparent); }
+.sv-air.magenta { stroke: var(--air-magenta); fill: color-mix(in srgb, var(--air-magenta) 13%, transparent); }
+.sv-air.dashed { stroke-dasharray: 6 4; }
+.sv-air.dotted { stroke-dasharray: 1.5 3.5; stroke-linecap: round; }
 .sv-hatch { stroke-width: 1.5; stroke-opacity: 0.45; }
 .sv-hatch.sigmet, .sv-band.sigmet .sv-band-edge { stroke: var(--nogo); }
 .sv-hatch.airmet, .sv-band.airmet .sv-band-edge { stroke: var(--marginal); }
@@ -1112,6 +1121,9 @@ summary:focus-visible,
 .side-pirep-tag { display: inline-block; box-sizing: border-box; min-width: 1.25rem; line-height: 1.25rem; text-align: center; font-weight: 700; border-radius: 50%; background: var(--fg); color: var(--surface); }
 .side-pirep-tag.hollow { background: var(--surface); color: var(--fg); box-shadow: inset 0 0 0 1.5px var(--fg); }
 .side-pirep-text { display: block; margin-top: 0.15rem; color: var(--muted); overflow-wrap: anywhere; }
+.side-air-tag { display: inline-block; min-width: 1.15rem; text-align: center; font-weight: 600; border: 1.5px solid var(--line-strong); border-radius: 3px; background: var(--surface); }
+.side-air-tag.blue { border-color: var(--air-blue); }
+.side-air-tag.magenta { border-color: var(--air-magenta); }
 .side-hazard-tag { display: inline-block; min-width: 1.15rem; text-align: center; font-weight: 600; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--surface); }
 .side-hazard-tag.sigmet { border-color: var(--nogo); }
 .side-hazard-tag.airmet { border-color: var(--marginal); }
