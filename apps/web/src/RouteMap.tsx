@@ -77,9 +77,11 @@ function markElement(m: Mark): HTMLElement {
 
 const nothing = { type: 'FeatureCollection' as const, features: [] };
 
-function draw(container: HTMLElement, stored: StoredBriefing, picture: RoutePicture, nameOf: (id: string) => string | null, aerodromes: readonly Aerodrome[]): MapLibreMap {
+function draw(container: HTMLElement, stored: StoredBriefing, picture: RoutePicture, nameOf: (id: string) => string | null, aerodromes: readonly Aerodrome[], leaveLeft: number): MapLibreMap {
   const scheme = schemeNow();
-  const map = baseMap(container, { bounds: routeBounds(picture), padding: 24 }, scheme);
+  // Framed in the part of the map no card covers.
+  const padding = leaveLeft > 0 ? { top: 32, bottom: 32, left: leaveLeft, right: 56 } : 24;
+  const map = baseMap(container, { bounds: routeBounds(picture), padding }, scheme);
   const shapes = routeShapes(picture);
   map.on('load', () => {
     map.addSource('airspace', { type: 'geojson', data: nothing });
@@ -139,11 +141,14 @@ export default function RouteMap({
   picture,
   nameOf = NO_NAMES,
   aerodromes = NO_AERODROMES,
+  leaveLeft = 0,
 }: {
   stored: StoredBriefing;
   picture: RoutePicture;
   nameOf?: ((id: string) => string | null) | undefined;
   aerodromes?: readonly Aerodrome[] | undefined;
+  /** Pixels on the left a card covers, which the route is framed clear of. */
+  leaveLeft?: number;
 }) {
   const el = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);
@@ -155,7 +160,7 @@ export default function RouteMap({
     let drawn: MapLibreMap | null = null;
     try {
       setFailed(false);
-      drawn = draw(el.current, stored, picture, nameOf, aerodromes);
+      drawn = draw(el.current, stored, picture, nameOf, aerodromes, leaveLeft);
       setMap(drawn);
     } catch {
       // A map that cannot be drawn is a missing picture, not a broken page.
@@ -169,7 +174,7 @@ export default function RouteMap({
         // Already gone with its container.
       }
     };
-  }, [stored, picture, nameOf, aerodromes]);
+  }, [stored, picture, nameOf, aerodromes, leaveLeft]);
 
   useEffect(() => {
     if (map && typeof airspace === 'object' && airspace.areas.length > 0) showAirspace(map, airspace.areas);

@@ -25,7 +25,11 @@ export const schemeNow = (): Scheme => (window.matchMedia?.('(prefers-color-sche
  */
 export const gesturesFor = (touch: boolean): Pick<MapOptions, 'cooperativeGestures' | 'scrollZoom'> => ({ cooperativeGestures: touch, scrollZoom: false });
 
-export function baseMap(container: HTMLElement, view: { bounds: LngLatBoundsLike; padding?: number } | { center: [number, number]; zoom: number }, scheme: Scheme = schemeNow()): MapLibreMap {
+export function baseMap(
+  container: HTMLElement,
+  view: { bounds: LngLatBoundsLike; padding?: number | { top: number; bottom: number; left: number; right: number } } | { center: [number, number]; zoom: number },
+  scheme: Scheme = schemeNow(),
+): MapLibreMap {
   const touch = isTouch();
   const map = new MapLibreMap({
     container,
