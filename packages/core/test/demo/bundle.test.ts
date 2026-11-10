@@ -20,6 +20,7 @@ import { parseFlightPlan } from '../../src/domain/flight.js';
 import { parseAircraftLimits, parsePilotProfile } from '../../src/domain/profile.js';
 import type { LLMProvider } from '../../src/llm/provider.js';
 import { notamsForFlight } from '../../src/notam/flight.js';
+import type { PerformanceSpec } from '../../src/perf/types.js';
 import { withHandbookLimits } from '../../src/wb/aircraft.js';
 import type { WeightBalanceSpec } from '../../src/wb/types.js';
 import { resolveFlight } from '../../src/resolve/flight.js';
@@ -54,7 +55,8 @@ async function rebuild(bundle: DemoBundle): Promise<StoredBriefing> {
   const asOf = new Date(bundle.asOf);
   const resolved = await resolveFlight(store, plan, asOf);
   const notams = await notamsForFlight({ store, navcanada: null, provider: noModel, model: bundle.model, now: () => asOf }, resolved, aircraft.type);
-  return assembleBriefing(resolved, profile, aircraft, asOf, notams);
+  // And the handbook's cruise and climb tables, published beside it the same way.
+  return assembleBriefing(resolved, profile, aircraft, asOf, notams, read<PerformanceSpec>('performance.json'));
 }
 
 describe('the demo bundle', () => {

@@ -25,6 +25,7 @@ import { NAVCANADA_CFPS_BASE_URL, NavCanadaClient } from '../src/fetch/navcanada
 import { FixtureProvider, RecordingProvider } from '../src/llm/fixture.js';
 import { OllamaProvider } from '../src/llm/ollama.js';
 import { notamsForFlight } from '../src/notam/flight.js';
+import type { PerformanceSpec } from '../src/perf/types.js';
 import { resolveFlight } from '../src/resolve/flight.js';
 import type { RawReport } from '../src/store/types.js';
 import { withHandbookLimits } from '../src/wb/aircraft.js';
@@ -157,6 +158,8 @@ let aircraft = parseAircraftLimits(aircraftJson);
 const wbPath = join(root, 'aircraft', 'c172.wb.json');
 const wb = existsSync(wbPath) ? (JSON.parse(readFileSync(wbPath, 'utf8')) as WeightBalanceSpec) : null;
 aircraft = withHandbookLimits(aircraft, wb);
+const performancePath = join(root, 'aircraft', 'c172.performance.json');
+const performance = existsSync(performancePath) ? (JSON.parse(readFileSync(performancePath, 'utf8')) as PerformanceSpec) : null;
 
 /*
  * The NOTAMs, fetched here rather than left to the briefing so the bundle
@@ -209,7 +212,7 @@ const notams = await notamsForFlight(
   aircraft.type,
 );
 
-const briefing = assembleBriefing(resolved, profile, aircraft, AS_OF, notams);
+const briefing = assembleBriefing(resolved, profile, aircraft, AS_OF, notams, performance);
 
 /*
  * The same inputs, for the page to work from. The briefing above is what
@@ -233,6 +236,7 @@ mkdirSync(out, { recursive: true });
 writeFileSync(join(out, 'briefing.json'), JSON.stringify(briefing, null, 2) + '\n');
 writeFileSync(join(out, 'bundle.json'), JSON.stringify(bundle, null, 2) + '\n');
 if (wb) writeFileSync(join(out, 'wb.json'), JSON.stringify(wb, null, 2) + '\n');
+if (performance) writeFileSync(join(out, 'performance.json'), JSON.stringify(performance) + '\n');
 
 const counts = briefing.document.notams?.counts;
 console.log(`demo written to ${out}`);

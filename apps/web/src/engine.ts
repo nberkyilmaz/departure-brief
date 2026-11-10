@@ -51,6 +51,7 @@ import {
   type HttpClient,
   type LLMProvider,
   type NotamSource,
+  type PerformanceSpec,
   type RawReport,
   type WeightBalanceSpec as CoreWeightBalanceSpec,
 } from '@depbrief/core/judge';
@@ -194,6 +195,8 @@ export interface LocalEngine {
   readonly aircraft: AircraftInput;
   /** The handbook data published beside the reports, in the shape the API serves it. */
   readonly wb: WeightBalanceSpec | null;
+  /** The handbook's cruise and climb tables, for the power setting and the fuel plan. */
+  readonly performance: PerformanceSpec | null;
   /** Which model ranked the NOTAMs, if any: the recorded one, or none when live. */
   readonly model: string | null;
   /**
@@ -361,12 +364,19 @@ async function fetchLive(store: CatalogStore, relay: string, hold: (reports: rea
  * is why the page can recompute as the form is typed in.
  */
 export async function loadEngine(base: string, relay: string | null = null): Promise<LocalEngine> {
-  const [bundleRes, wbRes, indexRes] = await Promise.all([fetch(`${base}demo/bundle.json`), fetch(`${base}demo/wb.json`), fetch(`${base}demo/airports/index.json`)]);
+  const [bundleRes, wbRes, performanceRes, indexRes] = await Promise.all([
+    fetch(`${base}demo/bundle.json`),
+    fetch(`${base}demo/wb.json`),
+    fetch(`${base}demo/performance.json`),
+    fetch(`${base}demo/airports/index.json`),
+  ]);
   if (!bundleRes.ok) throw new Error(`the recorded reports could not be loaded (HTTP ${bundleRes.status})`);
   if (!indexRes.ok) throw new Error(`the list of aerodromes could not be loaded (HTTP ${indexRes.status})`);
   const bundle = (await bundleRes.json()) as DemoBundle;
   const index = (await indexRes.json()) as AirportIndex;
   const wb = wbRes.ok ? ((await wbRes.json()) as WeightBalanceSpec) : null;
+  // Without the tables the fuel plan asks for a typed burn, as it did before there were any.
+  const performance = performanceRes.ok ? ((await performanceRes.json()) as PerformanceSpec) : null;
 
   /*
    * A square of full aerodrome records is fetched the first time a question
@@ -486,6 +496,7 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
     profile: asJson<ProfileInput>(bundle.profile),
     aircraft: asJson<AircraftInput>(bundle.aircraft),
     wb,
+    performance,
     model: live ? null : bundle.model,
     get reports() {
       return [...held.values()];
@@ -512,7 +523,7 @@ export async function loadEngine(base: string, relay: string | null = null): Pro
       const notams = live
         ? await notamsForFlight({ store, navcanada: live.notams, provider: null, model: null }, resolved, aircraft.type)
         : await notamsForFlight({ store, navcanada: recordedNotams, provider: noModel, model: bundle.model, now: () => recordedAsOf }, resolved, aircraft.type);
-      const briefing = assembleBriefing(resolved, profile, aircraft, at, notams);
+      const briefing = assembleBriefing(resolved, profile, aircraft, at, notams, performance);
       /*
        * What moved since the last briefing of this flight. The API answers
        * the same question from the database; here the store is the session,

@@ -44,7 +44,10 @@ and shows its working.
   fuel reserve (CARs 602.88), hazard areas crossing the route, and the
   temperature at cruise.
 - **Works the nav log**: the wind triangle leg by leg, from upper winds
-  interpolated to the cruising altitude.
+  interpolated to the cruising altitude, and the fuel the way the
+  handbook's own sample problem does it: the start and taxi allowance, the
+  climb from its table, and the cruise at the burn its table prints for
+  the power setting you choose.
 - **Ranks NOTAMs** for the flight: deterministic rules where there is one
   right answer, an optional local model for the rest, gated by an
   evaluation harness that fails the build.

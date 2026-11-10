@@ -14,6 +14,7 @@ const leg = (from: string, to: string, minutes: number | null, fuelGal: number |
   from,
   to,
   distanceNm: 50,
+  climbNm: 0,
   trueCourse: 270,
   variation: null,
   magneticCourse: null,
@@ -24,21 +25,25 @@ const leg = (from: string, to: string, minutes: number | null, fuelGal: number |
   groundspeedKt: minutes === null ? null : 100,
   minutes,
   cumulativeMinutes: minutes,
+  burn: fuelGal === null ? null : { gph: 8, source: 'aircraft', handbook: null },
   fuelGal,
   cumulativeFuelGal: fuelGal,
   gaps: minutes === null ? ['no wind for this leg'] : [],
 });
 
-/** Sixty minutes at eight gallons an hour, with an optional alternate. */
+/** Sixty minutes at eight gallons an hour, typed in, with an optional alternate and no handbook. */
 const log = (over: Partial<NavLog> = {}): NavLog => ({
-  version: 1,
+  version: 3,
   tas: 105,
   altitudeFt: 3500,
+  rpm: null,
   fuelGph: 8,
+  handbook: null,
   legs: [leg('CYSN', 'CYKF', 60, 8)],
   totalDistanceNm: 50,
   totalMinutes: 60,
   totalFuelGal: 8,
+  fuelProblem: null,
   alternate: null,
   ...over,
 });

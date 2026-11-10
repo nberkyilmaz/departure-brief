@@ -1,3 +1,4 @@
+import { performanceFor } from '@depbrief/core/judge';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { About } from './About.js';
 import { BriefingView } from './BriefingView.js';
@@ -331,6 +332,8 @@ export function App() {
                   lookup={engine ? engine.airport : DEMO ? untilLoaded : null}
                   aerodromes={engine?.aerodromes ?? []}
                   live={isLive || !DEMO}
+                  handbook={performanceFor(aircraft, engine?.performance ?? null)}
+                  typedGph={aircraft.cruiseFuelGph}
                 />
                 <div className="actions">
                   <button type="submit" disabled={draftProblems.length > 0}>

@@ -38,6 +38,12 @@ export interface FlightPlan {
   readonly cruise: {
     readonly tas: Knots;
     readonly altitude: FeetMsl;
+    /**
+     * The power setting, which is what the handbook's cruise table is read
+     * by. Absent rather than null when not chosen, so a plan written before
+     * there was a choice is still the same flight.
+     */
+    readonly rpm?: number;
   };
   /** Airspace class by waypoint id, when the pilot supplies it. */
   readonly airspace: Readonly<Record<string, AirspaceClass>> | null;
@@ -78,6 +84,10 @@ export function parseFlightPlan(input: unknown): FlightPlan {
   const c = cruise as Record<string, unknown>;
   if (typeof c['tas'] !== 'number' || !(c['tas'] > 0)) throw new Error('flight plan: "cruise.tas" must be a positive number of knots');
   if (typeof c['altitude'] !== 'number') throw new Error('flight plan: "cruise.altitude" must be a number of feet MSL');
+  const rpm = c['rpm'];
+  if (rpm !== undefined && rpm !== null && !(typeof rpm === 'number' && Number.isInteger(rpm) && rpm >= 1000 && rpm <= 3500)) {
+    throw new Error('flight plan: "cruise.rpm" must be a whole number of RPM, or omitted');
+  }
   const fuel = o['fuelAboardGal'];
   if (fuel !== undefined && fuel !== null && !(typeof fuel === 'number' && Number.isFinite(fuel) && fuel >= 0)) {
     throw new Error('flight plan: "fuelAboardGal" must be a number of US gallons, or omitted');
@@ -101,7 +111,7 @@ export function parseFlightPlan(input: unknown): FlightPlan {
     // Upper-cased like every other identifier here; a `lat,lon` pair is unaffected.
     route: route.map((r) => (r as string).trim().toUpperCase()),
     departureTime: new Date(departureTime).toISOString(),
-    cruise: { tas: c['tas'] as Knots, altitude: c['altitude'] as FeetMsl },
+    cruise: { tas: c['tas'] as Knots, altitude: c['altitude'] as FeetMsl, ...(typeof rpm === 'number' ? { rpm } : {}) },
     fuelAboardGal: typeof fuel === 'number' ? fuel : null,
     airspace,
     profile: path('profile'),

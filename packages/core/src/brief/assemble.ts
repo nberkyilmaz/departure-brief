@@ -11,6 +11,8 @@ import type { ResolvedFlight, ResolvedPoint } from '../resolve/flight.js';
 import { fuelPlan } from '../navlog/fuel.js';
 import { checkFuel } from '../rules/fuel.js';
 import { navLog } from '../navlog/compute.js';
+import { performanceFor } from '../perf/aircraft.js';
+import type { PerformanceSpec } from '../perf/types.js';
 import { evaluateFlight } from '../rules/evaluate.js';
 import { jurisdictionOf } from '../rules/vfrMinima.js';
 import { RULES_VERSION, type Briefing } from '../rules/types.js';
@@ -71,6 +73,10 @@ function reportRefs(points: readonly (ResolvedPoint | EnrouteStation)[], notams:
 /**
  * Judge a resolved flight and wrap the result with everything it was made
  * from. Pure apart from `createdAt`, which is not part of the hash.
+ *
+ * `performance` is the handbook's cruise and climb tables, used only when
+ * they are for the aircraft being flown. The briefing does not carry the
+ * tables, only the figures read from them and where they are printed.
  */
 export function assembleBriefing(
   resolved: ResolvedFlight,
@@ -78,9 +84,10 @@ export function assembleBriefing(
   aircraft: AircraftLimits | null,
   createdAt: Date = new Date(),
   notams: NotamBriefing | null = null,
+  performance: PerformanceSpec | null = null,
 ): StoredBriefing {
   const evaluated = evaluateFlight(resolved, profile, aircraft);
-  const navlog = navLog(resolved, aircraft?.cruiseFuelGph ?? null);
+  const navlog = navLog(resolved, aircraft?.cruiseFuelGph ?? null, aircraft ? performanceFor(aircraft, performance) : null);
   /*
    * Fuel is about the flight, not a point, but the reserve has to still be
    * in the tanks at the destination, so that is where the line goes. Night
@@ -98,7 +105,7 @@ export function assembleBriefing(
         ...evaluated,
         points: evaluated.points.map((p, i) =>
           i === evaluated.points.length - 1
-            ? { ...p, findings: [...p.findings, ...checkFuel({ waypoint: p.waypoint, at: new Date(p.at), nightAt: nightPoint?.waypoint ?? null }, fuel)] }
+            ? { ...p, findings: [...p.findings, ...checkFuel({ waypoint: p.waypoint, at: new Date(p.at), nightAt: nightPoint?.waypoint ?? null }, fuel, navlog)] }
             : p,
         ),
       }

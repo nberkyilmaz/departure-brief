@@ -10,6 +10,8 @@
  *   depbrief wb <spec.json> --empty <lb> --empty-moment <per1000> [--front 340] [--rear 0]
  *                [--bag1 0] [--bag2 0] [--fuel 38] [--utility]
  *                                                       compute a loading against the extracted limits
+ *   depbrief perf check aircraft/c172.performance.json
+ *                                                       hold the hand-copied performance tables up against the scan
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename } from 'node:path';
@@ -20,6 +22,8 @@ import type { DocumentOcr } from '../docs/types.js';
 import { llmFromEnv } from '../llm/env.js';
 import { requestKey } from '../llm/provider.js';
 import { assembleWeightBalance, isCgPointName, missingFrom, type NamedFigure } from '../wb/assemble.js';
+import { checkPerformance, formatPerformance } from '../perf/check.js';
+import type { PerformanceSpec } from '../perf/types.js';
 import { computeLoading, IncompleteSpecError, loadingText } from '../wb/compute.js';
 import type { DocumentCitation, Loading, ReviewItem, WeightBalanceSpec } from '../wb/types.js';
 
@@ -91,6 +95,7 @@ function usage(): never {
       '  depbrief wb <spec.json> --empty <lb> --empty-moment <per1000> [--front lb] [--rear lb] [--bag1 lb] [--bag2 lb] [--fuel gal] [--utility] [--json]',
       '  depbrief wb confirm <spec.json> <field>=<value> [...] [--pages 17,18] [--on-my-word]',
       '        a CG limit point is written weight@arm, such as cgForwardNormal[1]=2300@38.5',
+      '  depbrief perf check <performance.json>',
     ].join('\n'),
   );
   process.exit(2);
@@ -279,6 +284,34 @@ async function confirmFigures(args: string[]): Promise<void> {
   const missing = missingFrom(next);
   console.log(`${changed} confirmed; ${next.figures.length} figures now, ${next.review.length} still in review. Written to ${file}.`);
   console.log(missing.length === 0 ? 'The loading computation now has everything it needs.' : `Still missing:\n${missing.map((m) => `  - ${m}`).join('\n')}`);
+}
+
+/**
+ * Hold the hand-copied performance tables up against the scan and write
+ * down what it bears out. The figures themselves are never changed here:
+ * they were copied from the page image, which is legible where the OCR is
+ * not, and a figure the scan cannot corroborate stays, named as such.
+ */
+export async function perfCommand(args: string[]): Promise<void> {
+  const [sub, file] = args;
+  if (sub !== 'check' || !file || !existsSync(file)) usage();
+  const spec = JSON.parse(readFileSync(file, 'utf8')) as PerformanceSpec;
+  const doc = readCachedDocument(CACHE_DIR, spec.source.documentSha256);
+  if (!doc) {
+    console.error(`${spec.source.filename} is not in ${CACHE_DIR}; run "depbrief doc ingest ${spec.source.filename}" first`);
+    process.exit(2);
+  }
+  const checked = checkPerformance(doc, spec);
+  writeFileSync(file, formatPerformance(checked.spec));
+  for (const [name, table, summary] of [
+    ['cruise', spec.cruise, checked.cruise],
+    ['climb', spec.climb, checked.climb],
+  ] as const) {
+    const borne = summary.figures - summary.unconfirmed.length;
+    console.log(`${name} (${table.figure}, p.${table.page}): ${borne} of ${summary.figures} figures borne out by the scan`);
+    for (const u of summary.unconfirmed) console.log(`  ?? ${u}`);
+  }
+  console.log(`Written to ${file}. Figures marked ?? were read from the page image alone: check them against the handbook.`);
 }
 
 export async function wbCommand(args: string[]): Promise<void> {

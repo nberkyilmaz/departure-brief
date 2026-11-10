@@ -1,6 +1,6 @@
 import { hrefFor } from './router.js';
 import { measuredWords } from './summary.js';
-import type { FuelPlan, NavLog, NavLogLeg, StoredBriefing } from './types.js';
+import type { CruiseCellRef, FuelPlan, NavLog, NavLogHandbook, NavLogLeg, StoredBriefing } from './types.js';
 
 /**
  * The nav log: the arithmetic a pilot does on the kitchen table, laid out
@@ -30,6 +30,41 @@ export const variationText = (v: number | null): string => {
   return d === 0 ? '0°' : `${d}°${v < 0 ? 'W' : 'E'}`;
 };
 
+const feet = (n: number): string => `${n.toLocaleString('en')} ft`;
+
+/** A temperature column of the cruise table, in words. */
+const columnWords = (c: number): string => (c === 0 ? 'standard' : `${Math.abs(c)} °C ${c > 0 ? 'above' : 'below'}`);
+
+const UNSCANNED = 'read from the page image; the scan does not show it, so check it against your handbook';
+
+/** "a, b and c" */
+const listed = (items: readonly string[]): string => (items.length < 2 ? (items[0] ?? '') : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`);
+
+/**
+ * Where a leg's burn came from: the printed figures either side of the
+ * flight it was the highest of, so the reader can find them on the page.
+ */
+export function burnNote(leg: NavLogLeg): string | null {
+  const h = leg.burn?.handbook;
+  if (!leg.burn || !h) return null;
+  const altitudes = [...new Set(h.around.map((c: CruiseCellRef) => c.pressureAltitudeFt))].map(feet);
+  const columns = [...new Set(h.around.map((c: CruiseCellRef) => c.columnC))].map(columnWords);
+  const where = h.deviationC === null ? `${listed(altitudes)}, every temperature column, there being no temperature at cruise` : `${listed(altitudes)}, ${listed(columns)}`;
+  const printed = h.around.map((c: CruiseCellRef) => String(c.gph));
+  const figures = printed.length === 1 ? `the handbook's figure` : `the highest of the handbook's ${listed(printed)}`;
+  return `${leg.burn.gph} gal/h: ${figures} for ${h.rpm} RPM at ${where}${h.burnCell.scanned.gph ? '' : ` — ${UNSCANNED}`}`;
+}
+
+/** What the handbook added before the first leg, and where it prints it. */
+export function beforeNote(h: NavLogHandbook): string {
+  const c = h.climb;
+  const climb = c
+    ? `, and its climb from ${c.fromRowFt === 0 ? 'sea level' : feet(c.fromRowFt)} to ${feet(c.toRowFt)}: ${c.nm} nm and ${c.minutes} min${c.percent > 0 ? `, ${c.percent}% more for ${c.deviationC} °C above standard` : ''}. The climb's distance comes off the first leg's cruise; the leg's time is left as it was`
+    : '';
+  const notes = h.notes.map((n) => `; ${n}`).join('');
+  return `${h.model} handbook, ${h.climbTable.figure} (page ${h.climbTable.printedPage}): note 1's start, taxi and takeoff allowance${h.allowance.scanned ? '' : ` (${UNSCANNED})`}${climb}${notes}.`;
+}
+
 /**
  * CARs 602.88 as a short table: the trip, the reserve the regulation adds,
  * the sum, and what the pilot said is aboard. A row that cannot be filled
@@ -37,7 +72,7 @@ export const variationText = (v: number | null): string => {
  * at. The regulation is a floor, and the table says nothing about whether
  * to go: that is what the margin row is for the pilot to read.
  */
-function Fuel({ plan }: { plan: FuelPlan | undefined }) {
+function Fuel({ plan, gph }: { plan: FuelPlan | undefined; gph: number | null }) {
   if (!plan) return null;
   const short = plan.marginGal !== null && plan.marginGal < 0;
   return (
@@ -49,9 +84,30 @@ function Fuel({ plan }: { plan: FuelPlan | undefined }) {
               <td>Trip, departure to destination</td>
               <td>{gal(plan.tripGal)}</td>
             </tr>
+            {plan.allowanceGal !== null && (
+              <>
+                <tr className="part">
+                  <td>start, taxi and takeoff</td>
+                  <td>{gal(plan.allowanceGal)}</td>
+                </tr>
+                {plan.climbGal !== null && (
+                  <tr className="part">
+                    <td>climb</td>
+                    <td>{gal(plan.climbGal)}</td>
+                  </tr>
+                )}
+                <tr className="part">
+                  <td>cruise</td>
+                  <td>{gal(plan.cruiseGal)}</td>
+                </tr>
+              </>
+            )}
             <tr>
               <td>
-                Reserve, {plan.reserve.minutes} min at cruise <span className="muted">({plan.reserve.rule}, {plan.reserve.basis})</span>
+                Reserve, {plan.reserve.minutes} min at cruise{gph !== null ? `, ${gph} gal/h` : ''}{' '}
+                <span className="muted">
+                  ({plan.reserve.rule}, {plan.reserve.basis})
+                </span>
               </td>
               <td>{gal(plan.reserve.gal)}</td>
             </tr>
@@ -91,7 +147,8 @@ function Fuel({ plan }: { plan: FuelPlan | undefined }) {
 }
 
 function Leg({ leg, label }: { leg: NavLogLeg; label?: string }) {
-  const notes = [...leg.gaps, ...(leg.wind?.measured ? [measuredWords(leg.wind.measured.by, leg.wind.measured.at, leg.wind.distanceNm)] : [])];
+  const burn = burnNote(leg);
+  const notes = [...leg.gaps, ...(leg.wind?.measured ? [measuredWords(leg.wind.measured.by, leg.wind.measured.at, leg.wind.distanceNm)] : []), ...(burn ? [burn] : [])];
   return (
     <>
       <tr>
@@ -146,8 +203,8 @@ export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
     <section className="navlog-page">
       <h2>Nav log</h2>
       <p className="explain">
-        {log.tas} kt true at {log.altitudeFt.toLocaleString('en')} ft. Each leg uses the wind where it ends, forecast in Canada and measured by the nearest balloon in the US, and the variation where it begins,
-        from NOAA&apos;s World Magnetic Model for the day you fly.
+        {log.tas} kt true at {log.altitudeFt.toLocaleString('en')} ft{log.rpm !== null ? `, ${log.rpm} RPM` : ''}. Each leg uses the wind where it ends, forecast in Canada and measured by the nearest balloon in the US, and
+        the variation where it begins, from NOAA&apos;s World Magnetic Model for the day you fly.
       </p>
 
       <div className="table-scroll">
@@ -170,6 +227,28 @@ export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
             </tr>
           </thead>
           <tbody>
+            {/* Before the first leg, as the handbook's own sample problem lists them. */}
+            {log.handbook && (
+              <>
+                <tr className="before">
+                  <td className="leg-name">Start, taxi and takeoff</td>
+                  <td colSpan={11}></td>
+                  <td data-label="Fuel">{log.handbook.allowance.gal}</td>
+                </tr>
+                {log.handbook.climb && (
+                  <tr className="before">
+                    <td className="leg-name">Climb to {feet(log.handbook.climb.toRowFt)}</td>
+                    <td colSpan={11}></td>
+                    <td data-label="Fuel">{log.handbook.climb.gal}</td>
+                  </tr>
+                )}
+                <tr className="leg-gaps">
+                  <td colSpan={13}>
+                    <span className="field-note">{beforeNote(log.handbook)}</span>
+                  </td>
+                </tr>
+              </>
+            )}
             {log.legs.map((leg) => (
               <Leg key={`${leg.from}-${leg.to}`} leg={leg} />
             ))}
@@ -186,15 +265,23 @@ export function NavLogPage({ briefing }: { briefing: StoredBriefing | null }) {
         </table>
       </div>
 
-      {log.fuelGph === null && (
-        <p className="field-note">
-          No fuel figures yet: add your cruise burn from the handbook under <a href={hrefFor({ name: 'minimums' })}>Your minimums</a> and they are worked
-          out here. Nothing guesses one for you.
-        </p>
-      )}
+      {log.fuelGph === null &&
+        (log.handbook && log.rpm === null ? (
+          <p className="field-note">
+            No fuel figures yet: choose a power setting with the flight and the {log.handbook.model} handbook&apos;s cruise table gives the burn, or type your own under{' '}
+            <a href={hrefFor({ name: 'minimums' })}>Your minimums</a>. Nothing guesses one for you.
+          </p>
+        ) : log.fuelProblem ? (
+          <p className="field-note">No fuel figures: {log.fuelProblem}.</p>
+        ) : (
+          <p className="field-note">
+            No fuel figures yet: add your cruise burn from the handbook under <a href={hrefFor({ name: 'minimums' })}>Your minimums</a> and they are worked
+            out here. Nothing guesses one for you.
+          </p>
+        ))}
 
       <h3>Fuel</h3>
-      <Fuel plan={briefing.document.fuel} />
+      <Fuel plan={briefing.document.fuel} gph={log.fuelGph} />
     </section>
   );
 }

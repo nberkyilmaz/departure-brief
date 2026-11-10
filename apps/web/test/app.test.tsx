@@ -263,7 +263,10 @@ describe('moving around it', () => {
     expect(await screen.findByRole('heading', { level: 2, name: /Nav log/i })).toBeTruthy();
 
     const rows = [...document.querySelectorAll('.navlog-table .leg-name')].map((c) => c.textContent);
-    expect(rows[0]).toBe('CYSN → CYKF');
+    // The handbook's allowance and climb come first, as its own sample problem lists them, then the legs.
+    expect(rows[0]).toBe('Start, taxi and takeoff');
+    expect(rows[1]).toMatch(/^Climb to [\d,]+ ft$/);
+    expect(rows[2]).toBe('CYSN → CYKF');
     expect(rows.some((r) => r?.includes('alternate'))).toBe(true);
 
     // Every leg either has a groundspeed or says why it has not.
@@ -438,13 +441,44 @@ describe('fuel', () => {
     expect(table).toMatch(/Required at departure/);
 
     /*
-     * Neither the burn rate nor the fuel aboard is in the repository, so
-     * every figure is a dash and the reason is printed underneath. A
+     * Neither a power setting nor the fuel aboard is in the recorded plan,
+     * so every figure is a dash and the reason is printed underneath. A
      * plausible number here would be the one thing this must never do.
      */
     const section = document.querySelector('.navlog-page')!.textContent ?? '';
-    expect(section).toMatch(/no cruise burn rate in the aircraft file/i);
+    expect(section).toMatch(/no power setting chosen for the Cessna 172M, 1976 cruise table and no cruise burn typed in/i);
     expect(section).toMatch(/no fuel aboard given in the flight plan/i);
+  });
+
+  it('takes the burn from the handbook at the power setting chosen, and shows what the trip is made of', async () => {
+    render(<App />);
+    await briefed();
+    const form = await changeFlight();
+    const power = within(form).getByLabelText(/Power setting/i) as HTMLSelectElement;
+    // At 3,500 ft the table prints 2200 to 2550 at 2,000 ft and 2200 to 2600 at 4,000 ft: only the settings printed at both.
+    expect([...power.options].map((o) => o.value)).toEqual(['', '2500', '2400', '2300', '2200']);
+    fireEvent.change(power, { target: { value: '2400' } });
+    // The lowest speed printed either side, in any temperature column, goes in the airspeed box.
+    expect((within(form).getByLabelText(/True airspeed/i) as HTMLInputElement).value).toBe('104');
+    expect(form.textContent).toMatch(/6\.7–7\.5 gal\/h by temperature, 104 kt or more, from the handbook/);
+    fireEvent.change(within(form).getByLabelText(/Fuel aboard/i), { target: { value: '38' } });
+    fireEvent.click(within(form).getByRole('button', { name: /Brief this flight/i }));
+    await briefed();
+
+    window.location.hash = '#/navlog';
+    await waitFor(() => expect(document.querySelector('.navlog-page .fuel')).not.toBeNull(), { timeout: 10_000 });
+    const page = document.querySelector('.navlog-page')!.textContent ?? '';
+    expect(page).toMatch(/104 kt true at 3,500 ft, 2400 RPM/);
+    // Where the leg's burn came from: the printed figures either side of the flight it was the highest of.
+    expect(page).toMatch(/gal\/h: the highest of the handbook's [\d., and]+ for 2400 RPM at 2,000 ft and 4,000 ft/);
+    expect(page).toMatch(/Figure 5-6, Time, Fuel, and Distance to Climb \(page 5-15\): note 1's start, taxi and takeoff allowance/);
+    const fuel = document.querySelector('.fuel')!.textContent ?? '';
+    expect(fuel).toMatch(/start, taxi and takeoff1\.1 gal/);
+    expect(fuel).toMatch(/climb[\d.]+ gal/);
+    expect(fuel).toMatch(/Aboard, as you entered it38 gal/);
+    expect(fuel).toMatch(/To spare[\d.]+ gal/);
+    // The plan above is kept for a reload; the tests after this one arrive as strangers.
+    window.localStorage.clear();
   });
 });
 
