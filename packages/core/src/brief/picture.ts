@@ -169,6 +169,8 @@ export interface RoutePicture {
   readonly pirepsHeld: number;
   /** How much of the line is over the United States, which is as far as the FAA's airspace shapes speak for. */
   readonly overUS: 'all' | 'part' | 'none';
+  /** The way on to the alternate, drawn apart from the route, which ends at the destination. */
+  readonly alternate: { readonly id: string; readonly line: readonly LatLon[]; readonly nm: number } | null;
 }
 
 function layersOf(sky: readonly Sourced<SkyCondition>[], elevation: number | null): PictureLayer[] {
@@ -449,5 +451,8 @@ export async function routePicture(store: Store, flight: ResolvedFlight): Promis
     freezing: await freezingOf(store, flight),
     pireps,
     pirepsHeld: held,
+    alternate: flight.route.alternate
+      ? { id: flight.route.alternate.point.waypoint.id, line: pathOf(flight.route.alternate.leg), nm: flight.route.alternate.leg.distance }
+      : null,
   };
 }

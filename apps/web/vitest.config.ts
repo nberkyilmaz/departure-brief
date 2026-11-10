@@ -12,5 +12,6 @@ export default defineConfig({
     env: { VITE_DEMO: '1' },
     // Rendering the page and judging a flight in jsdom is not instant.
     testTimeout: 20_000,
+    setupFiles: ['./test/setup.ts'],
   },
 });

@@ -490,7 +490,20 @@ function WorthALook({ concerns }: { concerns: readonly Concern[] }) {
   );
 }
 
-export function BriefingView({ stored, picture, nameOf, whenCanIGo }: { stored: StoredBriefing; picture?: RoutePicture | null; nameOf?: (id: string) => string | null; whenCanIGo?: ReactNode }) {
+export function BriefingView({
+  stored,
+  picture,
+  nameOf,
+  aerodromes,
+  whenCanIGo,
+}: {
+  stored: StoredBriefing;
+  picture?: RoutePicture | null;
+  nameOf?: (id: string) => string | null;
+  /** Every aerodrome the page knows, so the map can show the ones around the route. */
+  aerodromes?: readonly { id: string; lat: number; lon: number }[] | undefined;
+  whenCanIGo?: ReactNode;
+}) {
   const b = stored.document.briefing;
   const cards = fieldCards(stored);
   return (
@@ -517,12 +530,12 @@ export function BriefingView({ stored, picture, nameOf, whenCanIGo }: { stored: 
         <section className="route-map" aria-labelledby="route-map-title">
           <h3 id="route-map-title">Route map</h3>
           <p className="explain">
-            Your route and the {CORRIDOR_NM} nm either side of it that is searched for reports. Each letter is a station at the time you would pass it: filled is
-            forecast for then, hollow is observed now. Tap one for its line in Along the way, or a field you named for its page.
+            Your route in magenta, dashed on to the alternate, and the {CORRIDOR_NM} nm either side of it that is searched for reports. Each letter is a station
+            at the time you would pass it: filled is forecast for then, hollow is observed now. Tap one for its line in Along the way, or a field for its page.
           </p>
           <MapBoundary message="The map could not be loaded. The side view and the list below have every station.">
             <Suspense fallback={<div className="wx-map wx-map-loading route-map-canvas">Loading the map…</div>}>
-              <RouteMap stored={stored} picture={picture} />
+              <RouteMap stored={stored} picture={picture} nameOf={nameOf} aerodromes={aerodromes} />
             </Suspense>
           </MapBoundary>
         </section>

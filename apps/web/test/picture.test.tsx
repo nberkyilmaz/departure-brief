@@ -11,15 +11,12 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import { BriefingView } from '../src/BriefingView.js';
 import { loadEngine, type LocalBriefing } from '../src/engine.js';
 import { alongRowId, altitudeTicks, chartTop, COLUMN_PX, columnsOf, emptyStretches, layersToLabel, notesOf, spread, xOfNm } from '../src/picture.js';
+import { gesturesFor } from '../src/mapBase.js';
 import RouteMap from '../src/RouteMap.js';
+import { nearbyAirports, routeMarks, routeShapes, type Mark } from '../src/routeLayers.js';
 import { SideView } from '../src/SideView.js';
 import { alongTheWay, fieldCards } from '../src/summary.js';
 import type { FlightPlanInput } from '../src/types.js';
-
-// Leaflet decides whether it can draw shapes by asking for this, which the test browser does not have.
-vi.hoisted(() => {
-  window.SVGSVGElement.prototype.createSVGRect = () => ({}) as DOMRect;
-});
 
 const DEMO = join(__dirname, '..', 'public', 'demo');
 const SNAPSHOT = join(__dirname, '..', '..', '..', 'packages', 'core', 'test', 'fixtures', 'fetch', 'rockies-2026-11-08');
@@ -252,63 +249,104 @@ describe('the route map', () => {
     window.matchMedia = ((query: string) => ({ matches: coarse && query.includes('coarse') })) as unknown as typeof window.matchMedia;
   };
   afterEach(() => touchscreen(false));
+  const stationsOf = (marks: readonly Mark[]) => marks.filter((m) => m.kind === 'field' || m.kind === 'station');
 
   it('has every station, with the letter the list gives it, hollow where the list says observed', async () => {
     const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
-    const { container } = render(<RouteMap stored={r.briefing} picture={r.picture} />);
+    const marks = stationsOf(routeMarks(r.briefing, r.picture));
     const columns = columnsOf(r.briefing, r.picture);
-    const dots = [...container.querySelectorAll('.rm-dot')];
-    expect(dots).toHaveLength(columns.length);
+    expect(marks).toHaveLength(columns.length);
     for (const c of columns) {
-      const dot = dots.find((d) => d.getAttribute('title')?.startsWith(`${c.station.id},`))!;
-      expect(dot.textContent).toBe(c.category ? c.category[0] : '–');
-      expect(dot.classList.contains('hollow')).toBe(c.from !== 'forecast');
+      const mark = marks.find((m) => m.title.startsWith(`${c.station.id},`))!;
+      expect(mark.text).toBe(c.category ? c.category[0] : '–');
+      expect(mark.className.split(' ').includes('hollow')).toBe(c.from !== 'forecast');
     }
   });
 
-  it('names the fields the flight names', async () => {
+  it("names the fields the flight names, under a chart's aerodrome symbol", async () => {
     const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
-    const { container } = render(<RouteMap stored={r.briefing} picture={r.picture} />);
-    expect([...container.querySelectorAll('.rm-label')].map((l) => l.textContent)).toEqual(['CYVR', 'CYYC']);
+    const names = new Map([['CYVR', 'Vancouver International Airport']]);
+    const marks = routeMarks(r.briefing, r.picture, (id) => names.get(id) ?? null);
+    // Shortened as a chart prints it.
+    expect(marks.filter((m) => m.kind === 'field').map((m) => [m.label, m.name])).toEqual([
+      ['CYVR', 'Vancouver Intl'],
+      ['CYYC', null],
+    ]);
+    // Five stations beside the route: few enough to name each.
+    expect(marks.filter((m) => m.kind === 'station').map((m) => m.label)).toEqual(['CYXX', 'CYHE', 'CYDC', 'CYLW', 'CYBW']);
+  });
+
+  it('draws the route in one line, and nothing to an alternate the flight does not have', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const shapes = routeShapes(r.picture);
+    expect(shapes.route.features).toHaveLength(1);
+    expect(shapes.alternate.features).toEqual([]);
+    expect(shapes.corridor.features).toHaveLength(1);
+    // Its distance printed once, at the middle, along the line: Vancouver to Calgary climbs about 18° from east on the map.
+    expect(shapes.labels.features).toHaveLength(1);
+    const [label] = shapes.labels.features;
+    expect(label!.properties).toMatchObject({ label: `${Math.round(r.picture.totalNm)} NM`, kind: 'route' });
+    expect(label!.properties!['rotate']).toBeLessThan(-14);
+    expect(label!.properties!['rotate']).toBeGreaterThan(-22);
+    const [lon, lat] = label!.geometry.coordinates;
+    const [vancouver, calgary] = [r.picture.line[0]!, r.picture.line[r.picture.line.length - 1]!];
+    expect(lon!).toBeGreaterThan(Math.min(vancouver.lon, calgary.lon));
+    expect(lon!).toBeLessThan(Math.max(vancouver.lon, calgary.lon));
+    expect(Math.abs(lon! - (vancouver.lon + calgary.lon) / 2)).toBeLessThan(0.3);
+    expect(lat!).toBeGreaterThan(49);
   });
 
   it('draws the advisories you would be inside, with the letters the side view uses', async () => {
     const r = await briefed('CYYC', 'CYLW', '2026-11-09T01:30:00Z');
-    const { container } = render(<RouteMap stored={r.briefing} picture={r.picture} />);
-    expect([...container.querySelectorAll('.rm-tag')].map((t) => t.textContent)).toEqual(['A', 'B']);
+    expect(routeMarks(r.briefing, r.picture).filter((m) => m.kind === 'hazard').map((m) => m.text)).toEqual(['A', 'B']);
+    expect(routeShapes(r.picture).hazards.features.map((f) => f.properties!['letter'])).toEqual(['A', 'B']);
   });
 
   it('draws none that will be over before you reach them', async () => {
     const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
-    const { container } = render(<RouteMap stored={r.briefing} picture={r.picture} />);
-    expect(container.querySelectorAll('.rm-tag')).toHaveLength(0);
+    expect(routeMarks(r.briefing, r.picture).filter((m) => m.kind === 'hazard')).toHaveLength(0);
+    expect(routeShapes(r.picture).hazards.features).toHaveLength(0);
   });
 
-  it('opens a station\'s line in Along the way when it is tapped', async () => {
+  it("opens a station's line in Along the way when it is tapped", async () => {
     const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
-    const { container } = render(<BriefingView stored={r.briefing} picture={r.picture} />);
-    const dot = await waitFor(() => {
-      const found = [...container.querySelectorAll('.rm-dot')].find((d) => d.getAttribute('title')?.startsWith('CYHE,'));
-      expect(found).toBeDefined();
-      return found!;
-    });
+    render(<BriefingView stored={r.briefing} picture={r.picture} />);
+    const mark = routeMarks(r.briefing, r.picture).find((m) => m.title.startsWith('CYHE,'))!;
     const row = document.getElementById(alongRowId('CYHE'))!.querySelector('details')!;
     expect(row.open).toBe(false);
-    fireEvent.click(dot);
+    mark.open!();
     expect(row.open).toBe(true);
   });
 
-  it('leaves one finger to the page on a touch screen', async () => {
+  it('shows the aerodromes around the route that the flight does not name', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const engine = await loadEngine('/', RELAY);
+    const nearby = nearbyAirports(engine.aerodromes, r.picture).features.map((f) => f.properties!['id'] as string);
+    expect(nearby.length).toBeGreaterThan(20);
+    expect(nearby).toContain('CYKA');
+    expect(nearby).not.toContain('CYVR');
+    expect(nearby).not.toContain('CYHE');
+    // Toronto is nowhere near this flight.
+    expect(nearby).not.toContain('CYYZ');
+  });
+
+  it('leaves one finger to the page on a touch screen, and the wheel to the page until the map is clicked', async () => {
+    expect(gesturesFor(true)).toEqual({ cooperativeGestures: true, scrollZoom: false });
+    expect(gesturesFor(false)).toEqual({ cooperativeGestures: false, scrollZoom: false });
     const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
     touchscreen(true);
     const onPhone = render(<RouteMap stored={r.briefing} picture={r.picture} />);
-    expect(onPhone.container.querySelector('.wx-map')?.classList.contains('leaflet-grab')).toBe(false);
     expect(onPhone.container.textContent).toContain('One finger scrolls the page');
     onPhone.unmount();
     touchscreen(false);
     const onDesktop = render(<RouteMap stored={r.briefing} picture={r.picture} />);
-    expect(onDesktop.container.querySelector('.wx-map')?.classList.contains('leaflet-grab')).toBe(true);
     expect(onDesktop.container.textContent).not.toContain('One finger scrolls the page');
+  });
+
+  it('says so in place of the map where the browser cannot draw one', async () => {
+    const r = await briefed('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
+    const { container } = render(<RouteMap stored={r.briefing} picture={r.picture} />);
+    expect(container.textContent).toContain('The map could not be drawn here. The side view and the list below have every station.');
   });
 });
 

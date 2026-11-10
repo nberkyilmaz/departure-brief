@@ -170,6 +170,8 @@ All public, with no redistribution restrictions:
 - NAV CANADA CFPS — Canadian NOTAMs and upper winds (the endpoint behind plan.navcanada.ca; unofficial, so the client fails loudly if its shape changes)
 - FAA NASR — US airports, runways, magnetic variation
 - Copernicus DEM GLO-90, through Open-Meteo — the terrain under a route on the side view (CC BY 4.0)
+- OpenStreetMap, through [OpenFreeMap](https://openfreemap.org/) — the land, water, towns and roads on every map, drawn here in a sectional's colours (ODbL; credited on the map)
+- The [terrain tiles](https://registry.opendata.aws/terrain-tiles/) on AWS's open data registry — the hill shading on the maps, from USGS 3DEP, SRTM and GMTED2010, NOAA ETOPO1, ArcticDEM and Canadian data under the Open Government Licence – Canada
 - OurAirports — airports and runways; the public site's whole set of Canadian and American fields (public domain)
 - NOAA/NCEI World Magnetic Model (WMM2025) — magnetic variation anywhere, for the date flown (public domain)
 

@@ -222,6 +222,20 @@ describe('the route on a map', () => {
     expect(new Set(p.line.map((q) => `${q.lat},${q.lon}`)).size).toBe(p.line.length);
   });
 
+  it('draws the way on to the alternate apart from the route, which still ends at the destination', async () => {
+    const store = await seeded();
+    const withAlternate = parseFlightPlan({ departure: 'CYVR', destination: 'CYYC', alternate: 'CYQL', route: [], departureTime: '2026-11-09T03:00:00Z', cruise: { tas: 110, altitude: 11500 }, airspace: null });
+    const flight = await resolveFlight(store, withAlternate, RECORDED);
+    const p = await routePicture(store, flight);
+    const [destination, alternate] = [flight.route.points[1]!.waypoint.position, flight.route.alternate!.point.waypoint.position];
+    expect(p.line[p.line.length - 1]).toEqual(destination);
+    expect(p.alternate!.id).toBe('CYQL');
+    expect(p.alternate!.line[0]).toEqual(destination);
+    expect(p.alternate!.line[p.alternate!.line.length - 1]).toEqual(alternate);
+    expect(p.alternate!.nm).toBeCloseTo(distanceNm(destination, alternate), 0);
+    expect((await picture('CYVR', 'CYYC', '2026-11-09T03:00:00Z')).picture.alternate).toBeNull();
+  });
+
   it('draws the strip the stations were searched in, square to the track and no further than its ends', async () => {
     const { picture: p, flight } = await picture('CYVR', 'CYYC', '2026-11-09T03:00:00Z');
     const leg = flight.route.legs[0]!;

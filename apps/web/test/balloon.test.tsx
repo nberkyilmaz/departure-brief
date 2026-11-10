@@ -11,13 +11,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest
 import { loadEngine, type LocalBriefing } from '../src/engine.js';
 import { NavLogPage } from '../src/NavLogPage.js';
 import { columnsOf, hazardKey, notesOf } from '../src/picture.js';
-import RouteMap from '../src/RouteMap.js';
+import { routeMarks, routeShapes } from '../src/routeLayers.js';
 import { SideView } from '../src/SideView.js';
 import { fieldCards, measuredWords } from '../src/summary.js';
-
-vi.hoisted(() => {
-  window.SVGSVGElement.prototype.createSVGRect = () => ({}) as DOMRect;
-});
 
 const DEMO = join(__dirname, '..', 'public', 'demo');
 const FETCH = join(__dirname, '..', '..', '..', 'packages', 'core', 'test', 'fixtures', 'fetch');
@@ -109,10 +105,9 @@ describe('the picture of an American flight', () => {
     const side = render(<SideView stored={briefing} picture={picture} />);
     expect(side.container.querySelectorAll('.sv-band.airmet')).toHaveLength(2);
     side.unmount();
-    const { container } = render(<RouteMap stored={briefing} picture={picture} />);
-    // Two hazards, one of them under two pictures, and the route's own line and corridor around them.
-    await waitFor(() => expect(container.querySelectorAll('path.leaflet-interactive').length).toBeGreaterThanOrEqual(3));
-    expect(container.querySelectorAll('.rm-tag.airmet').length).toBe(2);
+    // Two hazards, one of them under two pictures: three areas on the map, and a letter where the route is inside each.
+    expect(routeShapes(picture).hazards.features).toHaveLength(3);
+    expect(routeMarks(briefing, picture).filter((m) => m.className === 'rm-tag airmet')).toHaveLength(2);
   });
 });
 
