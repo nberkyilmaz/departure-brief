@@ -527,6 +527,8 @@ export interface RoutePicture {
   pirepsHeld: number;
   /** How much of the line is over the United States, which is as far as the FAA's airspace shapes speak for. */
   overUS: 'all' | 'part' | 'none';
+  /** The way on to the alternate, drawn apart from the route, which ends at the destination. */
+  alternate: { id: string; line: { lat: number; lon: number }[]; nm: number } | null;
 }
 
 /** Spot heights along the centre line, from an elevation model. */

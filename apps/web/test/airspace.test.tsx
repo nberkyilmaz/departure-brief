@@ -11,12 +11,8 @@ import { AirspaceClient, ElevationClient, routeAirspace, routeTerrain, type Http
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { loadEngine, type LocalBriefing } from '../src/engine.js';
 import { airspaceBlocks, airspaceLines, columnsOf, notesOf } from '../src/picture.js';
-import RouteMap from '../src/RouteMap.js';
+import { airspaceShapes, routeLayers } from '../src/routeLayers.js';
 import { SideView } from '../src/SideView.js';
-
-vi.hoisted(() => {
-  window.SVGSVGElement.prototype.createSVGRect = () => ({}) as DOMRect;
-});
 
 const DEMO = join(__dirname, '..', 'public', 'demo');
 const FETCH = join(__dirname, '..', '..', '..', 'packages', 'core', 'test', 'fixtures', 'fetch');
@@ -196,10 +192,21 @@ describe('on the side view', () => {
 });
 
 describe('on the map', () => {
-  it('draws each shape in its own layer, under the route', async () => {
+  it('draws each shape, in the line a chart draws its kind with, saying what it is when tapped', async () => {
     const b = await briefed('KALB', 'KPIT', 6500);
-    const { container } = render(<RouteMap stored={b.briefing} picture={b.picture} />);
-    await waitFor(() => expect(container.querySelector('.leaflet-airspace-pane path')).not.toBeNull());
-    expect(container.querySelectorAll('.leaflet-airspace-pane path')).toHaveLength(6);
+    const shapes = airspaceShapes(await areasOf(b, 6500)).features;
+    expect(shapes).toHaveLength(6);
+    const pittsburgh = shapes.filter((f) => f.properties!['title'] === 'B PITTSBURGH CLASS B');
+    expect(pittsburgh).toHaveLength(3);
+    expect(pittsburgh.every((f) => f.properties!['hue'] === 'blue' && f.properties!['line'] === 'solid')).toBe(true);
+    expect(shapes.find((f) => f.properties!['tag'] === 'MOA')!.properties).toMatchObject({ hue: 'magenta', line: 'dotted', words: '8,000 ft to below FL180, 192 to 204 nm. Published hours: 1000 - 1500, DAILY; OTHER TIMES BY NOTAM.' });
+  });
+
+  it('puts the airspace under the route, since it arrives after it', () => {
+    for (const scheme of ['day', 'night'] as const) {
+      const ids = routeLayers(scheme).map((l) => l.id);
+      expect(ids.indexOf('airspace-fill')).toBeLessThan(ids.indexOf('corridor-fill'));
+      expect(Math.max(...ids.filter((id) => id.startsWith('airspace')).map((id) => ids.indexOf(id)))).toBeLessThan(ids.indexOf('route'));
+    }
   });
 });

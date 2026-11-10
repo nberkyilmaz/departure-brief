@@ -1,142 +1,161 @@
 /**
- * The flight on a map: where it goes, the strip beside it that was searched
- * for reports, every station in that strip at the time you would pass it,
- * and the advisories you would be inside while they are in force.
+ * The flight on a chart: where it goes and on to the alternate, the strip
+ * beside it that was searched for reports, every station in that strip at
+ * the time you would pass it, the advisories you would be inside while they
+ * are in force, the airspace the line goes through, and the aerodromes
+ * around it.
  *
- * Loaded only once there is a flight to draw. Every station is shown, worst
- * on top, each with its letter so the category never rests on colour. A
- * hollow letter is an observation from now, as on the side view, and comes
- * from the same code as the list below.
+ * Loaded only once there is a flight to draw. What it draws is worked out
+ * in `routeLayers`, where it is tested; this hands it to the map library.
+ * Every station is a button with its letter, so the category never rests on
+ * colour, and a hollow letter is an observation from now, as on the side
+ * view and in the list.
  *
  * On a phone this sits in the middle of a long page, so one finger scrolls
  * the page and two move the map. A map that caught every thumb passing over
  * it would make the rest of the briefing hard to reach.
  */
-import L from 'leaflet';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Marker, type GeoJSONSource, type Map as MapLibreMap } from 'maplibre-gl';
+import { useEffect, useRef, useState } from 'react';
 import { useAirspace } from './airspace.js';
-import { baseMap, isTouch } from './mapBase.js';
-import { AIRSPACE_STYLE, airspaceLines, columnLabel, columnsOf, hazardKey, hazardLetter, labelOf, pirepWords, type Column } from './picture.js';
-import { openColumn, opens } from './stationLink.js';
-import { CATEGORY_LETTER } from './summary.js';
+import { baseMap, isTouch, popupWith, schemeNow } from './mapBase.js';
+import { airspaceShapes, nearbyAirports, routeBounds, routeLayers, routeMarks, routeShapes, type Mark } from './routeLayers.js';
+import { aerodromeHref } from './router.js';
 import type { AirspaceArea, RoutePicture, StoredBriefing } from './types.js';
 
-/** Drawn on top of one another in this order, so a red dot is never hidden under a green one. */
-const DRAW_ORDER: Readonly<Record<string, number>> = { unknown: 0, vfr: 1, mvfr: 2, ifr: 3, lifr: 4 };
-const FIELD_PX = 28;
-const STATION_PX = 22;
-/** Past this many, the stations are drawn smaller: they still overlap on a phone until the map is zoomed, but less. */
-const CROWDED_AT = 16;
-const CROWDED_PX = 16;
-const TAG_PX = 18;
-const PIREP_PX = 20;
+const SVG = 'http://www.w3.org/2000/svg';
 
-const escapeHtml = (s: string): string => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-const latLng = (p: { lat: number; lon: number }): L.LatLngTuple => [p.lat, p.lon];
-
-function dot(c: Column, crowded: boolean): L.Marker {
-  const category = (c.category ?? 'unknown').toLowerCase();
-  const named = c.station.role !== 'along';
-  const small = crowded && !named;
-  const size = named ? FIELD_PX : small ? CROWDED_PX : STATION_PX;
-  const marker = L.marker(latLng(c.station), {
-    icon: L.divIcon({
-      className: `rm-dot ${category}${c.from === 'forecast' ? '' : ' hollow'}${named ? ' named' : ''}${small ? ' crowded' : ''}`,
-      html: c.category ? CATEGORY_LETTER[c.category] : '–',
-      iconSize: [size, size],
-    }),
-    title: columnLabel(c),
-    // The fields you named stay on top of what lies between them.
-    zIndexOffset: (DRAW_ORDER[category] ?? 0) * 100 + (named ? 1000 : 0),
-    interactive: opens(c),
-    keyboard: opens(c),
-  });
-  if (named) marker.bindTooltip(labelOf(c.station.id), { permanent: true, direction: 'top', offset: [0, -FIELD_PX / 2], className: 'rm-label' });
-  return opens(c) ? marker.on('click', () => openColumn(c)) : marker;
+/** A chart's symbol for an aerodrome with services: a ring with four ticks, around the field's category. */
+function chartRing(): SVGSVGElement {
+  const svg = document.createElementNS(SVG, 'svg');
+  svg.setAttribute('viewBox', '0 0 40 40');
+  svg.setAttribute('class', 'rm-ring');
+  svg.setAttribute('aria-hidden', 'true');
+  const ring = document.createElementNS(SVG, 'circle');
+  ring.setAttribute('cx', '20');
+  ring.setAttribute('cy', '20');
+  ring.setAttribute('r', '13.5');
+  const ticks = document.createElementNS(SVG, 'path');
+  ticks.setAttribute('d', 'M20 2.5v4M20 33.5v4M2.5 20h4M33.5 20h4');
+  svg.append(ring, ticks);
+  return svg;
 }
 
-function draw(container: HTMLElement, columns: readonly Column[], picture: RoutePicture): L.Map {
-  // Drawn as shapes rather than on a canvas: there are only a handful, and each of them can be tapped.
-  const map = baseMap(container, { dragging: !isTouch(), preferCanvas: false });
-  const css = getComputedStyle(document.documentElement);
-  const token = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
-  const fg = token('--fg', '#16191c');
-  const surface = token('--surface', '#ffffff');
-  const advisory = token('--advisory', '#3f6493');
+function markElement(m: Mark): HTMLElement {
+  const wrap = document.createElement('div');
+  wrap.className = `rm-mark rm-${m.kind}`;
+  wrap.style.zIndex = String(m.z);
+  const tappable = m.open !== null || m.popup !== null;
+  const face = document.createElement(tappable ? 'button' : 'span');
+  if (face instanceof HTMLButtonElement) face.type = 'button';
+  face.className = m.className;
+  face.textContent = m.text;
+  face.title = m.title;
+  face.setAttribute('aria-label', m.title);
+  if (m.open) {
+    const open = m.open;
+    face.addEventListener('click', (e) => {
+      e.stopPropagation();
+      open();
+    });
+  }
+  if (m.kind === 'field') wrap.append(chartRing());
+  wrap.append(face);
+  if (m.label) {
+    const label = document.createElement('span');
+    label.className = 'rm-label';
+    label.textContent = m.label;
+    if (m.name) {
+      const name = document.createElement('small');
+      name.textContent = m.name;
+      label.append(name);
+    }
+    wrap.append(label);
+  }
+  return wrap;
+}
 
-  // One outline per leg, wound the same way, so where two legs overlap at a turn the shading does not double.
-  const strips: L.LatLngTuple[][][] = picture.corridor.map((strip) => [strip.map(latLng)]);
-  L.polygon(strips, { color: advisory, weight: 1, opacity: 0.6, fillColor: advisory, fillOpacity: 0.12, fillRule: 'nonzero', interactive: false }).addTo(map);
+const nothing = { type: 'FeatureCollection' as const, features: [] };
 
-  picture.hazards.forEach((h, i) => {
-    const colour = token(h.kind === 'airmet' ? '--marginal' : '--nogo', '#b3261e');
-    const words = `<b>${hazardLetter(i)}</b> ${escapeHtml(hazardKey(h))}`;
-    for (const area of [h.area, ...h.laterAreas]) L.polygon(area.map(latLng), { color: colour, weight: 1.5, dashArray: '5 4', fillColor: colour, fillOpacity: 0.16 }).bindPopup(words).addTo(map);
-    for (const s of h.stretches) {
-      L.marker(latLng(s.middle), {
-        // Side by side, since two advisories on one stretch would otherwise put their letters in the same place.
-        icon: L.divIcon({ className: `rm-tag ${h.kind}`, html: hazardLetter(i), iconSize: [TAG_PX, TAG_PX], iconAnchor: [TAG_PX / 2 - i * (TAG_PX + 2), TAG_PX / 2] }),
-        title: hazardKey(h),
-        zIndexOffset: 2000,
-      })
-        .bindPopup(words)
+function draw(container: HTMLElement, stored: StoredBriefing, picture: RoutePicture, nameOf: (id: string) => string | null, aerodromes: readonly Aerodrome[]): MapLibreMap {
+  const scheme = schemeNow();
+  const map = baseMap(container, { bounds: routeBounds(picture), padding: 24 }, scheme);
+  const shapes = routeShapes(picture);
+  map.on('load', () => {
+    map.addSource('airspace', { type: 'geojson', data: nothing });
+    map.addSource('corridor', { type: 'geojson', data: shapes.corridor });
+    map.addSource('nearby', { type: 'geojson', data: nearbyAirports(aerodromes, picture) });
+    map.addSource('hazards', { type: 'geojson', data: shapes.hazards });
+    map.addSource('alternate', { type: 'geojson', data: shapes.alternate });
+    map.addSource('route', { type: 'geojson', data: shapes.route });
+    map.addSource('labels', { type: 'geojson', data: shapes.labels });
+    for (const layer of routeLayers(scheme)) map.addLayer(layer);
+
+    // An area says what it is when tapped: the advisory first where both are under the finger, since it is the one in force.
+    map.on('click', (e) => {
+      const [hit] = map.queryRenderedFeatures(e.point, { layers: ['hazard-fill', 'airspace-fill'] }).sort((a, b) => (a.layer.id === 'hazard-fill' ? -1 : 0) - (b.layer.id === 'hazard-fill' ? -1 : 0));
+      if (!hit) return;
+      const p = hit.properties as Record<string, string>;
+      popupWith({ title: p['letter'] ?? p['title'] ?? '', text: p['words'] ?? '', code: null })
+        .setLngLat(e.lngLat)
         .addTo(map);
+    });
+    map.on('click', 'nearby', (e) => {
+      const id = e.features?.[0]?.properties?.['id'];
+      if (typeof id === 'string') window.location.hash = aerodromeHref(id);
+    });
+    for (const id of ['hazard-fill', 'airspace-fill', 'nearby']) {
+      map.on('mouseenter', id, () => (map.getCanvas().style.cursor = 'pointer'));
+      map.on('mouseleave', id, () => (map.getCanvas().style.cursor = ''));
     }
   });
-
-  const line = picture.line.map(latLng);
-  L.polyline(line, { color: surface, weight: 6, opacity: 0.85, interactive: false }).addTo(map);
-  L.polyline(line, { color: fg, weight: 2.5, interactive: false }).addTo(map);
-
-  for (const c of columns) dot(c, columns.length > CROWDED_AT).addTo(map);
-
-  picture.pireps.forEach((p, i) => {
-    L.marker(latLng(p), {
-      icon: L.divIcon({ className: `rm-pirep${p.speaksForThen ? '' : ' hollow'}`, html: String(i + 1), iconSize: [PIREP_PX, PIREP_PX] }),
-      title: pirepWords(p),
-      zIndexOffset: 3000,
-    })
-      .bindPopup(`<b>${i + 1}</b> ${escapeHtml(pirepWords(p))}<br><code>${escapeHtml(p.text)}</code>`)
-      .addTo(map);
-  });
-
-  // Reports reach further from the line than the stations do, and one off the edge of the map might as well not be there.
-  map.fitBounds(L.latLngBounds([...picture.corridor.flatMap((strip) => strip.map(latLng)), ...picture.pireps.map(latLng)]), { padding: [10, 10], maxZoom: 9 });
+  for (const m of routeMarks(stored, picture, nameOf)) {
+    const marker = new Marker({ element: markElement(m), offset: [m.shiftPx, 0] }).setLngLat([m.lon, m.lat]);
+    if (m.popup) marker.setPopup(popupWith(m.popup));
+    marker.addTo(map);
+  }
   return map;
 }
 
-const AIRSPACE_DASH: Readonly<Record<'solid' | 'dashed' | 'dotted', string | undefined>> = { solid: undefined, dashed: '7 5', dotted: '2 5' };
-
-/** Under the advisories and the route, which are what the map is for, in a layer of its own because it arrives after them. */
-function drawAirspace(map: L.Map, areas: readonly AirspaceArea[]): L.LayerGroup {
-  const pane = map.getPane('airspace') ?? map.createPane('airspace');
-  pane.style.zIndex = '350';
-  const css = getComputedStyle(document.documentElement);
-  const group = L.layerGroup();
-  for (const line of airspaceLines(areas)) {
-    const style = AIRSPACE_STYLE[line.kind];
-    const colour = css.getPropertyValue(`--air-${style.hue}`).trim() || '#1d63c7';
-    const words = `<b>${style.tag}</b> ${escapeHtml(line.name)}<br>${escapeHtml(line.words)}`;
-    for (const area of line.areas) {
-      L.polygon(area.rings.map((ring) => ring.map(latLng)), { pane: 'airspace', color: colour, weight: 1.5, dashArray: AIRSPACE_DASH[style.line], fillColor: colour, fillOpacity: 0.07 }).bindPopup(words).addTo(group);
-    }
-  }
-  return group.addTo(map);
+/** Arrives after the map is drawn, and may arrive before its style has loaded. */
+function showAirspace(map: MapLibreMap, areas: readonly AirspaceArea[]): void {
+  const put = () => (map.getSource('airspace') as GeoJSONSource | undefined)?.setData(airspaceShapes(areas));
+  if (map.getSource('airspace')) put();
+  else map.once('load', put);
 }
 
-export default function RouteMap({ stored, picture }: { stored: StoredBriefing; picture: RoutePicture }) {
+export interface Aerodrome {
+  readonly id: string;
+  readonly lat: number;
+  readonly lon: number;
+}
+
+// Stable, so a page that passes neither does not redraw the map on every render.
+const NO_NAMES = (): string | null => null;
+const NO_AERODROMES: readonly Aerodrome[] = [];
+
+export default function RouteMap({
+  stored,
+  picture,
+  nameOf = NO_NAMES,
+  aerodromes = NO_AERODROMES,
+}: {
+  stored: StoredBriefing;
+  picture: RoutePicture;
+  nameOf?: ((id: string) => string | null) | undefined;
+  aerodromes?: readonly Aerodrome[] | undefined;
+}) {
   const el = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);
-  const [map, setMap] = useState<L.Map | null>(null);
-  const columns = useMemo(() => columnsOf(stored, picture), [stored, picture]);
+  const [map, setMap] = useState<MapLibreMap | null>(null);
   const airspace = useAirspace(picture);
 
   useEffect(() => {
     if (!el.current) return;
-    let drawn: L.Map | null = null;
+    let drawn: MapLibreMap | null = null;
     try {
       setFailed(false);
-      drawn = draw(el.current, columns, picture);
+      drawn = draw(el.current, stored, picture, nameOf, aerodromes);
       setMap(drawn);
     } catch {
       // A map that cannot be drawn is a missing picture, not a broken page.
@@ -150,14 +169,10 @@ export default function RouteMap({ stored, picture }: { stored: StoredBriefing; 
         // Already gone with its container.
       }
     };
-  }, [columns, picture]);
+  }, [stored, picture, nameOf, aerodromes]);
 
   useEffect(() => {
-    if (!map || typeof airspace !== 'object' || airspace.areas.length === 0) return;
-    const layer = drawAirspace(map, airspace.areas);
-    return () => {
-      layer.remove();
-    };
+    if (map && typeof airspace === 'object' && airspace.areas.length > 0) showAirspace(map, airspace.areas);
   }, [map, airspace]);
 
   return (

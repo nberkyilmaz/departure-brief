@@ -9,13 +9,9 @@ import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { loadEngine, type LocalBriefing } from '../src/engine.js';
 import { columnsOf, notesOf, pirepTag, pirepWords, placePireps } from '../src/picture.js';
-import RouteMap from '../src/RouteMap.js';
+import { routeMarks } from '../src/routeLayers.js';
 import { SideView } from '../src/SideView.js';
 import type { PicturePirep } from '../src/types.js';
-
-vi.hoisted(() => {
-  window.SVGSVGElement.prototype.createSVGRect = () => ({}) as DOMRect;
-});
 
 const DEMO = join(__dirname, '..', 'public', 'demo');
 const FETCH = join(__dirname, '..', '..', '..', 'packages', 'core', 'test', 'fixtures', 'fetch');
@@ -144,9 +140,10 @@ describe('the side view', () => {
 describe('the map', () => {
   it('puts a numbered mark on each, the same numbers as the list', async () => {
     const { briefing, picture } = await briefed();
-    const { container } = render(<RouteMap stored={briefing} picture={picture} />);
-    await waitFor(() => expect(container.querySelectorAll('.rm-pirep')).toHaveLength(2));
-    expect([...container.querySelectorAll('.rm-pirep')].map((m) => m.textContent)).toEqual(['1', '2']);
-    expect(container.querySelectorAll('.rm-pirep.hollow')).toHaveLength(2);
+    const marks = routeMarks(briefing, picture).filter((m) => m.kind === 'pirep');
+    expect(marks.map((m) => m.text)).toEqual(['1', '2']);
+    expect(marks.every((m) => m.className === 'rm-pirep hollow')).toBe(true);
+    // Tapped, each says what it is and shows the report it came from.
+    expect(marks.map((m) => m.popup!.code)).toEqual(picture.pireps.map((p) => p.text));
   });
 });

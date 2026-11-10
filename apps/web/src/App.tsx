@@ -402,6 +402,7 @@ export function App() {
                 stored={briefing}
                 picture={picture}
                 nameOf={nameOf}
+                aerodromes={engine?.aerodromes}
                 whenCanIGo={slots.length > 0 ? <WhenCanIGo slots={slots} departure={plan.departureTime} onPick={pickHour} /> : null}
               />
             ) : (
