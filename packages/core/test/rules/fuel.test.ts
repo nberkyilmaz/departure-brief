@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import type { NavLog } from '../../src/navlog/compute.js';
 import type { FuelPlan } from '../../src/navlog/fuel.js';
-import { checkFuel } from '../../src/rules/fuel.js';
+import { checkFuel as checkFuelWith, type FuelContext } from '../../src/rules/fuel.js';
 
 /**
  * The fuel line on the destination.
@@ -13,8 +14,32 @@ import { checkFuel } from '../../src/rules/fuel.js';
 const AT = new Date('2026-09-14T16:00:00Z');
 const ctx = { waypoint: 'CYKF', at: AT, nightAt: null };
 
+/*
+ * A nav log with nothing in it but where the plan came from: no handbook
+ * and no legs, so the line below is about the plan's own numbers. The
+ * handbook's part is tested on a real flight, in perf/fuel.test.ts.
+ */
+const bare: NavLog = {
+  version: 3,
+  tas: 105,
+  altitudeFt: 3500,
+  rpm: null,
+  fuelGph: 8,
+  handbook: null,
+  legs: [],
+  totalDistanceNm: 50,
+  totalMinutes: 60,
+  totalFuelGal: 8,
+  fuelProblem: null,
+  alternate: null,
+};
+const checkFuel = (c: FuelContext, p: FuelPlan) => checkFuelWith(c, p, bare);
+
 const plan = (over: Partial<FuelPlan> = {}): FuelPlan => ({
   tripGal: 8,
+  allowanceGal: null,
+  climbGal: null,
+  cruiseGal: 8,
   alternateGal: null,
   reserve: { minutes: 30, basis: 'day', rule: 'CARs 602.88(3)', gal: 4 },
   requiredGal: 12,

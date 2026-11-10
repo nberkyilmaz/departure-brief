@@ -86,7 +86,8 @@ export interface FlightPlanInput {
   alternate: string | null;
   route: string[];
   departureTime: string;
-  cruise: { tas: number; altitude: number };
+  /** `rpm` is the power setting the handbook's cruise table is read by; absent when not chosen. */
+  cruise: { tas: number; altitude: number; rpm?: number };
   /** US gallons in the tanks at departure, as the pilot states it; null when not given. */
   fuelAboardGal?: number | null;
   airspace: Record<string, AirspaceClass> | null;
@@ -95,6 +96,10 @@ export interface FlightPlanInput {
 /** Trip, reserve and what is aboard, against CARs 602.88 or FAR 91.151. Every null has a reason in `gaps`. */
 export interface FuelPlan {
   tripGal: number | null;
+  /** What the trip is made of, when the handbook supplied the allowance and the climb. */
+  allowanceGal: number | null;
+  climbGal: number | null;
+  cruiseGal: number | null;
   alternateGal: number | null;
   reserve: { minutes: 30 | 45; basis: 'day' | 'night'; rule: string; gal: number | null };
   requiredGal: number | null;
@@ -237,10 +242,57 @@ export interface NavLogWind {
   measured?: { by: string; at: string };
 }
 
+/** One printed cell of the handbook's cruise table, and whether the scan bears out its speed and burn. */
+export interface CruiseCellRef {
+  pressureAltitudeFt: number;
+  rpm: number;
+  /** Degrees from standard. */
+  columnC: number;
+  bhp: number;
+  ktas: number;
+  gph: number;
+  scanned: { ktas: boolean; gph: boolean };
+}
+
+/** The burn a leg is flown at: typed into the aircraft settings, or the handbook's. */
+export interface LegBurn {
+  gph: number;
+  source: 'aircraft' | 'handbook';
+  handbook: { rpm: number; deviationC: number | null; burnCell: CruiseCellRef; speedCell: CruiseCellRef; around: CruiseCellRef[] } | null;
+}
+
+export interface NavLogClimb {
+  fromFt: number;
+  toFt: number;
+  fromRowFt: number;
+  toRowFt: number;
+  deviationC: number | null;
+  percent: number;
+  gal: number;
+  nm: number;
+  minutes: number;
+}
+
+/** What the handbook added before the first leg, and where it prints it. */
+export interface NavLogHandbook {
+  model: string;
+  filename: string;
+  sha256: string;
+  cruiseTable: { figure: string; page: number; printedPage: string };
+  climbTable: { figure: string; page: number; printedPage: string };
+  pressureAltitudeFt: number;
+  altimeterFrom: string | null;
+  allowance: { gal: number; printed: string; scanned: boolean };
+  climb: NavLogClimb | null;
+  notes: string[];
+}
+
 export interface NavLogLeg {
   from: string;
   to: string;
   distanceNm: number;
+  /** The part of the leg spent climbing, whose fuel is the climb's. */
+  climbNm: number;
   trueCourse: number;
   /** Degrees east positive, where the leg begins; null outside the magnetic model's years. */
   variation: number | null;
@@ -252,7 +304,10 @@ export interface NavLogLeg {
   groundspeedKt: number | null;
   minutes: number | null;
   cumulativeMinutes: number | null;
+  burn: LegBurn | null;
+  /** The leg's cruise fuel, after the climb. */
   fuelGal: number | null;
+  /** Everything used by the end of the leg, the allowance and the climb included. */
   cumulativeFuelGal: number | null;
   /** Why a number is missing, in words. */
   gaps: string[];
@@ -262,11 +317,16 @@ export interface NavLog {
   version: number;
   tas: number;
   altitudeFt: number;
+  rpm: number | null;
+  /** The highest burn of any leg: what the reserve is flown at. */
   fuelGph: number | null;
+  handbook: NavLogHandbook | null;
   legs: NavLogLeg[];
   totalDistanceNm: number;
   totalMinutes: number | null;
   totalFuelGal: number | null;
+  /** Why there is no fuel figure, when the reason is not a missing time. */
+  fuelProblem: string | null;
   alternate: NavLogLeg | null;
 }
 

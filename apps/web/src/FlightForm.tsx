@@ -1,3 +1,4 @@
+import { cruiseAtAnyTemperature, rpmsAt, type PerformanceSpec } from '@depbrief/core/judge';
 import { useMemo } from 'react';
 import { AerodromeField, lookupViaApi, type AirportLookup } from './AerodromeField.js';
 import type { Aerodrome } from './engine.js';
@@ -70,6 +71,36 @@ export function zuluFromInput(value: string): string | null {
 }
 
 /**
+ * What the power setting control offers and says at the plan's altitude.
+ * The settings are the ones the cruise table prints at the rows either side
+ * of it; the speed is the lowest the table prints there in any temperature
+ * column, since the form does not know the temperature yet. The briefing
+ * reads the table again for each leg's.
+ */
+export function powerSetting(
+  handbook: PerformanceSpec,
+  altitudeFt: number,
+  rpm: number | null,
+  typedGph: number | null,
+): { options: number[]; note: string; ktas: number | null } {
+  const offered = rpmsAt(handbook, altitudeFt);
+  const options = rpm !== null && !offered.includes(rpm) ? [...offered, rpm].sort((a, b) => b - a) : offered;
+  const read = rpm === null ? null : cruiseAtAnyTemperature(handbook, altitudeFt, rpm);
+  const ktas = read && !('problem' in read) ? read.ktas : null;
+  if (typedGph !== null) return { options, ktas, note: `your ${typedGph} gal/h under Your minimums is used instead; the climb is still the handbook's` };
+  if (read === null) {
+    return {
+      options,
+      ktas,
+      note: offered.length > 0 ? `sets the burn from the ${handbook.model} handbook's cruise table` : `the handbook's cruise table does not reach ${altitudeFt.toLocaleString('en')} ft`,
+    };
+  }
+  if ('problem' in read) return { options, ktas, note: read.problem };
+  const burn = read.gphLow === read.gphHigh ? `${read.gphLow}` : `${read.gphLow}–${read.gphHigh}`;
+  return { options, ktas, note: `${burn} gal/h by temperature, ${read.ktas} kt or more, from the handbook` };
+}
+
+/**
  * The flight, asked the way you would say it: from, to, when.
  *
  * Those three are all a briefing needs; everything else has a sensible
@@ -84,6 +115,8 @@ export function FlightForm({
   lookup,
   aerodromes = [],
   live = false,
+  handbook = null,
+  typedGph = null,
 }: {
   plan: FlightPlanInput;
   onChange: (p: FlightPlanInput) => void;
@@ -93,8 +126,21 @@ export function FlightForm({
   aerodromes?: readonly Aerodrome[];
   /** Live weather: the departure is checked against the clock. */
   live?: boolean;
+  /** The handbook's cruise and climb tables, when they are for the aircraft being flown. */
+  handbook?: PerformanceSpec | null;
+  /** A burn typed into the aircraft settings, which the briefing uses instead of the table. */
+  typedGph?: number | null;
 }) {
   const set = (patch: Partial<FlightPlanInput>) => onChange({ ...plan, ...patch });
+  const power = handbook ? powerSetting(handbook, plan.cruise.altitude, plan.cruise.rpm ?? null, typedGph) : null;
+  /** Choosing a setting puts the table's speed in the airspeed box; it can still be overwritten. */
+  const setPower = (rpm: number | null) => {
+    const { rpm: _previous, ...rest } = plan.cruise;
+    if (rpm === null || !handbook) return set({ cruise: rest });
+    const read = cruiseAtAnyTemperature(handbook, plan.cruise.altitude, rpm);
+    set({ cruise: { ...rest, rpm, ...('problem' in read ? {} : { tas: read.ktas }) } });
+  };
+  const fasterThanHandbook = power?.ktas != null && plan.cruise.tas > power.ktas;
   const ask = lookup ?? lookupViaApi;
   const search = useMemo(() => (aerodromes.length > 0 ? aerodromeSearch(aerodromes) : undefined), [aerodromes]);
   const ids = [plan.departure, ...plan.route, plan.destination, plan.alternate]
@@ -142,7 +188,7 @@ export function FlightForm({
       </label>
 
       <details className="plan-more">
-        <summary>Alternate, route, speed, altitude and fuel</summary>
+        <summary>Alternate, route, speed, altitude, power and fuel</summary>
         <div className="grid">
           <AerodromeField
             label="Alternate"
@@ -170,7 +216,11 @@ export function FlightForm({
             True airspeed
             <input type="number" min={1} inputMode="numeric" value={plan.cruise.tas} onChange={(e) => set({ cruise: { ...plan.cruise, tas: Number(e.target.value) } })} />
             <span className="field-note-line">
-              <span className="field-note">knots — sets the time at each waypoint</span>
+              <span className="field-note">
+                {fasterThanHandbook
+                  ? `knots — faster than the ${power!.ktas} kt the handbook gives at ${plan.cruise.rpm} RPM here, so times and fuel come out short`
+                  : 'knots — sets the time at each waypoint'}
+              </span>
             </span>
           </label>
           <label>
@@ -187,6 +237,22 @@ export function FlightForm({
               <span className="field-note">feet above sea level</span>
             </span>
           </label>
+          {power && (
+            <label>
+              Power setting
+              <select value={plan.cruise.rpm ?? ''} onChange={(e) => setPower(e.target.value === '' ? null : Number(e.target.value))}>
+                <option value="">not chosen</option>
+                {power.options.map((rpm) => (
+                  <option key={rpm} value={rpm}>
+                    {rpm} RPM
+                  </option>
+                ))}
+              </select>
+              <span className="field-note-line">
+                <span className="field-note">{power.note}</span>
+              </span>
+            </label>
+          )}
           <label>
             Fuel aboard
             <input

@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "aircraftType": "C172",
+  "model": "Cessna 172M, 1976",
+  "source": {
+    "documentSha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+    "filename": "C172MPOH.pdf"
+  },
+  "cruise": {
+    "figure": "Figure 5-7, Cruise Performance",
+    "page": 76,
+    "printedPage": "5-16",
+    "conditions": [
+      "Recommended Lean Mixture",
+      "2300 Pounds"
+    ],
+    "columnsC": [
+      -20,
+      0,
+      20
+    ],
+    "rows": [
+      {"pressureAltitudeFt": 2000, "rpm": 2550, "cells": [[80, 114, 8.8], [75, 113, 8.2], [71, 113, 7.8]], "scan": {"text": "2000 28501 80 114 8.5 5 13 8.2 71 113 7.8", "box": {"x": 466, "y": 770, "w": 1168, "h": 29}, "unconfirmed": ["rpm", "-20.gph", "0.bhp", "0.ktas"]}},
+      {"pressureAltitudeFt": 2000, "rpm": 2500, "cells": [[76, 111, 8.3], [71, 111, 7.8], [67, 111, 7.5]], "scan": {"text": "BOGE 78 111 83 71 111 78 67 113 75", "box": {"x": 587, "y": 803, "w": 1046, "h": 30}, "unconfirmed": ["rpm", "-20.bhp", "-20.gph", "0.gph", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 2000, "rpm": 2400, "cells": [[68, 107, 7.5], [64, 107, 7.2], [61, 106, 6.9]], "scan": {"text": "2000 88 107 7.5 G4 107 7.2 G1 108 6g", "box": {"x": 587, "y": 836, "w": 1045, "h": 40}, "unconfirmed": ["rpm", "-20.bhp", "0.bhp", "+20.bhp", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 2000, "rpm": 2300, "cells": [[61, 102, 6.9], [58, 101, 6.7], [55, 99, 6.5]], "scan": {"text": "2300 1 102 5.8 58 101 e7 55 98 85", "box": {"x": 586, "y": 870, "w": 1046, "h": 30}, "unconfirmed": ["-20.bhp", "-20.gph", "0.gph", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 2000, "rpm": 2200, "cells": [[55, 96, 6.4], [52, 95, 6.2], [49, 93, 6.1]], "scan": {"text": "2200, 85 o8 8.4 52 95 6.2 49 83 8.1", "box": {"x": 584, "y": 905, "w": 1041, "h": 26}, "unconfirmed": ["-20.bhp", "-20.ktas", "-20.gph", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 4000, "rpm": 2600, "cells": [[80, 116, 8.8], [75, 116, 8.3], [71, 116, 7.8]], "scan": {"text": "4600 12600 80 116 as 75 118 § 83 71 11g 738", "box": {"x": 463, "y": 958, "w": 1167, "h": 42}, "unconfirmed": ["altitude", "rpm", "-20.gph", "0.ktas", "0.gph", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 4000, "rpm": 2500, "cells": [[72, 111, 7.9], [68, 111, 7.5], [64, 110, 7.2]], "scan": {"text": "BOG) 72 i 7.8 gg 113 7.5 84 110 7.2", "box": {"x": 585, "y": 992, "w": 1045, "h": 42}, "unconfirmed": ["rpm", "-20.ktas", "-20.gph", "0.bhp", "0.ktas", "+20.bhp"]}},
+      {"pressureAltitudeFt": 4000, "rpm": 2400, "cells": [[65, 107, 7.3], [61, 106, 6.9], [58, 104, 6.7]], "scan": {"text": "2400¢ @5 107 7.3 §1 108 839 58 04 a7", "box": {"x": 584, "y": 1026, "w": 1044, "h": 30}, "unconfirmed": ["-20.bhp", "0.bhp", "0.ktas", "0.gph", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 4000, "rpm": 2300, "cells": [[58, 101, 6.7], [55, 100, 6.5], [53, 98, 6.3]], "scan": {"text": "2300) 58 107 6.7 55 wo | 85 53 28 83", "box": {"x": 584, "y": 1059, "w": 1047, "h": 43}, "unconfirmed": ["-20.ktas", "0.ktas", "0.gph", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 4000, "rpm": 2200, "cells": [[52, 95, 6.3], [49, 93, 6.1], [47, 92, 5.9]], "scan": {"text": "2200 2 o5 5.3 42 93 | 6.1 43 92 5.2", "box": {"x": 583, "y": 1090, "w": 1047, "h": 44}, "unconfirmed": ["-20.bhp", "-20.ktas", "-20.gph", "0.bhp", "+20.bhp", "+20.gph"]}},
+      {"pressureAltitudeFt": 6000, "rpm": 2650, "cells": [[80, 118, 8.8], [75, 118, 8.2], [71, 118, 7.8]], "scan": {"text": "8000 12680; 80 118 8.8 75 118 8.2 71 118 7.8", "box": {"x": 461, "y": 1146, "w": 1168, "h": 30}, "unconfirmed": ["altitude", "rpm"]}},
+      {"pressureAltitudeFt": 6000, "rpm": 2600, "cells": [[76, 116, 8.3], [71, 116, 7.9], [68, 115, 7.5]], "scan": {"text": "26008 76 118 8.3 H 118 7.9 88 115 iB", "box": {"x": 582, "y": 1178, "w": 1046, "h": 43}, "unconfirmed": ["rpm", "-20.ktas", "0.bhp", "0.ktas", "+20.bhp", "+20.gph"]}},
+      {"pressureAltitudeFt": 6000, "rpm": 2500, "cells": [[69, 111, 7.6], [65, 110, 7.2], [62, 109, 7]], "scan": {"text": "2800 | 48 111 7.8 65 110 7.2 62 109 7.0", "box": {"x": 581, "y": 1209, "w": 1046, "h": 40}, "unconfirmed": ["rpm", "-20.bhp", "-20.gph"]}},
+      {"pressureAltitudeFt": 6000, "rpm": 2400, "cells": [[62, 106, 7], [59, 104, 6.7], [56, 103, 6.5]], "scan": {"text": "2400) 62 106 7.0 58 104 8.7 56 103 6.5", "box": {"x": 581, "y": 1244, "w": 1046, "h": 39}, "unconfirmed": ["0.bhp", "0.gph"]}},
+      {"pressureAltitudeFt": 6000, "rpm": 2300, "cells": [[56, 100, 6.5], [53, 98, 6.3], [50, 97, 6.1]], "scan": {"text": "2300) s8 100 6.5 . B53 08 8.3 50 @7 &.1", "box": {"x": 581, "y": 1279, "w": 1042, "h": 39}, "unconfirmed": ["-20.bhp", "0.bhp", "0.ktas", "0.gph", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 6000, "rpm": 2200, "cells": [[50, 94, 6.1], [47, 92, 5.9], [45, 91, 5.8]], "scan": {"text": "2200] 50 9é 8.1 &7 92 5.9 45 a1 5.8", "box": {"x": 580, "y": 1313, "w": 1047, "h": 30}, "unconfirmed": ["-20.ktas", "-20.gph", "0.bhp", "+20.ktas"]}},
+      {"pressureAltitudeFt": 8000, "rpm": 2700, "cells": [[80, 120, 8.8], [75, 120, 8.3], [71, 120, 7.8]], "scan": {"text": "BOD 12700} 80 120 8.8 7% 120 8.3 71 120 7.8", "box": {"x": 457, "y": 1366, "w": 1170, "h": 30}, "unconfirmed": ["altitude", "rpm", "0.bhp"]}},
+      {"pressureAltitudeFt": 8000, "rpm": 2600, "cells": [[72, 116, 8], [68, 115, 7.5], [65, 114, 7.3]], "scan": {"text": "26001 72 118 8.0 £8 115 7.5 as 144 7.3", "box": {"x": 580, "y": 1401, "w": 1046, "h": 39}, "unconfirmed": ["rpm", "-20.ktas", "0.bhp", "+20.bhp", "+20.ktas"]}},
+      {"pressureAltitudeFt": 8000, "rpm": 2500, "cells": [[65, 111, 7.3], [62, 109, 7], [59, 108, 6.8]], "scan": {"text": "2500) 65 117 7.3 62 108 7.0 59 108 6.8", "box": {"x": 579, "y": 1434, "w": 1047, "h": 40}, "unconfirmed": ["-20.ktas", "0.ktas"]}},
+      {"pressureAltitudeFt": 8000, "rpm": 2400, "cells": [[59, 105, 6.8], [56, 103, 6.6], [53, 101, 6.3]], "scan": {"text": "2400) 59 105 6.8 58 103 6.6 53 101 8.3", "box": {"x": 579, "y": 1468, "w": 1047, "h": 29}, "unconfirmed": ["0.bhp", "+20.gph"]}},
+      {"pressureAltitudeFt": 8000, "rpm": 2300, "cells": [[54, 99, 6.4], [51, 97, 6.2], [48, 96, 6]], "scan": {"text": "2300§ B34 99 8.4 51 97 6.2 48 28 5.0", "box": {"x": 578, "y": 1501, "w": 1046, "h": 41}, "unconfirmed": ["-20.bhp", "-20.gph", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 8000, "rpm": 2200, "cells": [[48, 93, 6], [45, 91, 5.8], [43, 90, 5.7]], "scan": {"text": "2200) 4B 83 8.0 45 91 5.8 43 €0 57", "box": {"x": 578, "y": 1534, "w": 1045, "h": 41}, "unconfirmed": ["-20.ktas", "-20.gph", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 10000, "rpm": 2700, "cells": [[76, 120, 8.4], [72, 120, 7.9], [68, 119, 7.6]], "scan": {"text": "10,000 [27000 76 120 8.4 7Z 120 | 78 a8 i§8 7.8", "box": {"x": 431, "y": 1587, "w": 1193, "h": 41}, "unconfirmed": ["rpm", "0.bhp", "0.gph", "+20.bhp", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 10000, "rpm": 2600, "cells": [[69, 115, 7.6], [65, 114, 7.3], [62, 112, 7]], "scan": {"text": "28007 62 115 1.8 8% 114 | 7.3 82 112 7.0", "box": {"x": 577, "y": 1622, "w": 1049, "h": 41}, "unconfirmed": ["rpm", "-20.bhp", "-20.gph", "0.bhp", "+20.bhp"]}},
+      {"pressureAltitudeFt": 10000, "rpm": 2500, "cells": [[63, 110, 7.1], [59, 108, 6.8], [56, 106, 6.6]], "scan": {"text": "26500) ©3 110 7.1 8g 108 a.8 56 108 6.6", "box": {"x": 576, "y": 1657, "w": 1048, "h": 28}, "unconfirmed": ["rpm", "-20.bhp", "0.bhp", "0.gph", "+20.ktas"]}},
+      {"pressureAltitudeFt": 10000, "rpm": 2400, "cells": [[57, 104, 6.6], [54, 102, 6.4], [51, 100, 6.2]], "scan": {"text": "24004 §7 104 6.6 54 102 8.4 51 100 6.2", "box": {"x": 575, "y": 1689, "w": 1048, "h": 28}, "unconfirmed": ["rpm", "-20.bhp", "0.gph"]}},
+      {"pressureAltitudeFt": 10000, "rpm": 2300, "cells": [[51, 97, 6.2], [48, 96, 6], [46, 95, 5.8]], "scan": {"text": "2300) 51 97 6.2 48 88 60 48 a5 58", "box": {"x": 575, "y": 1721, "w": 1047, "h": 39}, "unconfirmed": ["0.ktas", "0.gph", "+20.bhp", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 10000, "rpm": 2200, "cells": [[46, 92, 5.8], [43, 90, 5.7], [41, 89, 5.5]], "scan": {"text": "2200) 4B 92 5.8 43 90 | | B57 41 88 55", "box": {"x": 575, "y": 1753, "w": 1047, "h": 39}, "unconfirmed": ["-20.bhp", "0.gph", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 12000, "rpm": 2650, "cells": [[69, 117, 7.6], [65, 116, 7.3], [62, 114, 7]], "scan": {"text": "12000 (2680) 69 117 7.8 65 118 7.3 82 114 7.0", "box": {"x": 428, "y": 1803, "w": 1196, "h": 29}, "unconfirmed": ["rpm", "-20.gph", "0.ktas", "+20.bhp"]}},
+      {"pressureAltitudeFt": 12000, "rpm": 2600, "cells": [[66, 114, 7.4], [62, 113, 7], [59, 111, 6.8]], "scan": {"text": "2800¢ 68 114 7.4 62 113 70 59 111 5.8", "box": {"x": 574, "y": 1837, "w": 1048, "h": 29}, "unconfirmed": ["rpm", "-20.bhp", "0.gph", "+20.gph"]}},
+      {"pressureAltitudeFt": 12000, "rpm": 2500, "cells": [[60, 108, 6.8], [57, 106, 6.6], [54, 105, 6.4]], "scan": {"text": "2500) 80 108 6.8 57 106 6.6 54 108 8.4", "box": {"x": 573, "y": 1870, "w": 1050, "h": 29}, "unconfirmed": ["-20.bhp", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 12000, "rpm": 2400, "cells": [[54, 102, 6.4], [51, 100, 6.2], [49, 99, 6]], "scan": {"text": "25003 54 102 6.4 51 00 8.2 49 98 8.0", "box": {"x": 572, "y": 1903, "w": 1050, "h": 40}, "unconfirmed": ["rpm", "0.ktas", "0.gph", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 12000, "rpm": 2300, "cells": [[49, 96, 6], [46, 95, 5.9], [43, 94, 5.7]], "scan": {"text": "", "box": null, "unconfirmed": ["rpm", "-20.bhp", "-20.ktas", "-20.gph", "0.bhp", "0.ktas", "0.gph", "+20.bhp", "+20.ktas", "+20.gph"]}},
+      {"pressureAltitudeFt": 12000, "rpm": 2200, "cells": [[44, 91, 5.7], [41, 89, 5.5], [38, 88, 5.3]], "scan": {"text": "2200] 44 91 8.7 41 8g 55 38 28 5.3", "box": {"x": 572, "y": 1971, "w": 1050, "h": 40}, "unconfirmed": ["-20.gph", "0.ktas", "0.gph", "+20.ktas"]}}
+    ]
+  },
+  "climb": {
+    "figure": "Figure 5-6, Time, Fuel, and Distance to Climb",
+    "page": 75,
+    "printedPage": "5-15",
+    "conditions": [
+      "Flaps Up",
+      "Full Throttle",
+      "Standard Temperature"
+    ],
+    "weightLb": 2300,
+    "allowanceGal": {
+      "value": 1.1,
+      "printed": "Add 1.1 gallons of fuel for engine start, taxi and takeoff allowance.",
+      "scan": {
+        "text": "Add 1.1 gallons of fuel for engine start, taxi and takeoff allowance.",
+        "box": {
+          "x": 503,
+          "y": 718,
+          "w": 905,
+          "h": 34
+        },
+        "unconfirmed": []
+      }
+    },
+    "warmPercentPer10C": {
+      "value": 10,
+      "printed": "Increase time, fuel and distance by 10% for each 10°C above standard temperature.",
+      "scan": {
+        "text": "3. Increase time, fuel and distance by 10% for each 10°C above standard temperature,",
+        "box": {
+          "x": 434,
+          "y": 826,
+          "w": 1189,
+          "h": 40
+        },
+        "unconfirmed": []
+      }
+    },
+    "rows": [
+      {"pressureAltitudeFt": 0, "tempC": 15, "kias": 78, "fpm": 645, "minutes": 0, "gal": 0, "nm": 0, "scan": {"text": "2300 St. 16 78 645 [4] 0.0 a", "box": {"x": 470, "y": 1208, "w": 1130, "h": 43}, "unconfirmed": ["temp", "minutes", "gal"]}},
+      {"pressureAltitudeFt": 1000, "tempC": 13, "kias": 77, "fpm": 605, "minutes": 2, "gal": 0.3, "nm": 2, "scan": {"text": "1000 13 77 505 2 0.3 2", "box": {"x": 664, "y": 1267, "w": 934, "h": 40}, "unconfirmed": ["fpm"]}},
+      {"pressureAltitudeFt": 2000, "tempC": 11, "kias": 76, "fpm": 560, "minutes": 3, "gal": 0.7, "nm": 4, "scan": {"text": "2000 11 76 560 3 0.7 4", "box": {"x": 662, "y": 1330, "w": 936, "h": 40}, "unconfirmed": []}},
+      {"pressureAltitudeFt": 3000, "tempC": 9, "kias": 75, "fpm": 520, "minutes": 5, "gal": 1.1, "nm": 7, "scan": {"text": "3000 9 7% 520 5 1.1 7", "box": {"x": 661, "y": 1396, "w": 935, "h": 30}, "unconfirmed": ["kias"]}},
+      {"pressureAltitudeFt": 4000, "tempC": 7, "kias": 74, "fpm": 480, "minutes": 7, "gal": 1.5, "nm": 9, "scan": {"text": "4000 7 74 480 7 1.5 3", "box": {"x": 660, "y": 1451, "w": 936, "h": 40}, "unconfirmed": ["nm"]}},
+      {"pressureAltitudeFt": 5000, "tempC": 5, "kias": 73, "fpm": 435, "minutes": 9, "gal": 1.9, "nm": 12, "scan": {"text": "5000 5 73 435 2] 1.8 12", "box": {"x": 659, "y": 1511, "w": 936, "h": 45}, "unconfirmed": ["minutes", "gal"]}},
+      {"pressureAltitudeFt": 6000, "tempC": 3, "kias": 72, "fpm": 395, "minutes": 12, "gal": 2.3, "nm": 16, "scan": {"text": "6000 3 72 385 12 2.3 18", "box": {"x": 659, "y": 1577, "w": 936, "h": 32}, "unconfirmed": ["fpm", "nm"]}},
+      {"pressureAltitudeFt": 7000, "tempC": 1, "kias": 71, "fpm": 355, "minutes": 15, "gal": 2.8, "nm": 19, "scan": {"text": "7000 § 71 355% 15 28 1", "box": {"x": 659, "y": 1637, "w": 934, "h": 40}, "unconfirmed": ["temp", "fpm", "gal", "nm"]}},
+      {"pressureAltitudeFt": 8000, "tempC": -1, "kias": 70, "fpm": 315, "minutes": 18, "gal": 3.3, "nm": 23, "scan": {"text": "8000 -1 0 315 18 33 23", "box": {"x": 658, "y": 1693, "w": 935, "h": 40}, "unconfirmed": ["kias", "gal"]}},
+      {"pressureAltitudeFt": 9000, "tempC": -3, "kias": 69, "fpm": 270, "minutes": 21, "gal": 3.9, "nm": 28, "scan": {"text": "8000 -3 68 279 21 38 28", "box": {"x": 655, "y": 1757, "w": 939, "h": 32}, "unconfirmed": ["altitude", "kias", "fpm", "gal"]}},
+      {"pressureAltitudeFt": 10000, "tempC": -5, "kias": 68, "fpm": 230, "minutes": 25, "gal": 4.5, "nm": 33, "scan": {"text": "10,000 -5 £8 230 25 4.5 33", "box": {"x": 633, "y": 1818, "w": 960, "h": 31}, "unconfirmed": ["kias"]}},
+      {"pressureAltitudeFt": 11000, "tempC": -7, "kias": 67, "fpm": 185, "minutes": 30, "gal": 5.2, "nm": 40, "scan": {"text": "11,000 -7 67 185 30 5.2 40", "box": {"x": 632, "y": 1878, "w": 960, "h": 32}, "unconfirmed": []}},
+      {"pressureAltitudeFt": 12000, "tempC": -9, "kias": 66, "fpm": 145, "minutes": 36, "gal": 6.1, "nm": 48, "scan": {"text": "12000 | -9 66 145 | 38 6.1 a", "box": {"x": 632, "y": 1920, "w": 959, "h": 62}, "unconfirmed": ["minutes", "nm"]}}
+    ]
+  }
+}

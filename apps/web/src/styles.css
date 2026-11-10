@@ -793,6 +793,9 @@ summary:focus-visible,
 .runways td { white-space: nowrap; }
 .runways .runway-end { display: block; }
 .fuel .over td { color: var(--nogo); font-weight: 600; }
+/* What the trip is made of, under it and quieter than it. */
+.fuel .part td { color: var(--muted); }
+.fuel .part td:first-child { padding-left: var(--s4); }
 
 /* Live weather: stated as plainly as frozen weather, in a calmer colour. */
 .frozen.live {

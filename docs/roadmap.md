@@ -42,7 +42,7 @@ official briefing.
 | **Forecast verification** | Did the TAF turn out to be right, and which way was it wrong. |
 | **Winds and temperatures aloft** | Canada's from NAV CANADA at all ninety-seven aerodromes it publishes them for, interpolated to the altitude flown; the temperature at cruise as the first question about icing. The United States has had no official winds aloft forecast since NOAA discontinued its FB bulletin on 3 November 2026, so a US field reads the nearest balloon within 200 nm instead, labelled as measured with the station and its age. |
 | **Daylight** | Last light on arrival and how much of it is left, from the same solar arithmetic the night rules use. |
-| **Nav log** | The wind triangle leg by leg, true and magnetic, with a blank and a reason wherever a number cannot be had. |
+| **Nav log** | The wind triangle leg by leg, true and magnetic, with a blank and a reason wherever a number cannot be had. Fuel from the handbook's cruise and climb tables at the power setting chosen, every figure cited to its page. |
 | **Magnetic variation** | NOAA's World Magnetic Model, checked against all hundred of its published test values, so a Canadian field gets a magnetic heading as readily as an American one. |
 | **Hazard advisories** | SIGMETs and AIRMETs that are in force, at your altitude, and across your route, with the American AIRMETs from the G-AIRMET and each hazard's three-hourly pictures taken as one. |
 | **The site** | Five pages, running the whole pipeline in the browser over reports it carries. |
@@ -140,9 +140,17 @@ data source: OurAirports publishes no variation and NASR's is decades old
 at many fields. The variation is taken where each leg begins, for the date
 flown, and the aerodrome page gives every runway end in both.
 
-Still wanted: **fuel reserve** against fuel aboard, which needs the
-handbook's burn table read out the way the weight-and-balance figures
-were.
+~~**Fuel from the handbook.**~~ Done, for the 172M. The cruise and climb
+tables were copied by hand from the page images, because the scan's OCR
+reads them too poorly to lift numbers from, and each row was then held up
+against the scan: 189 of the cruise table's 346 printed figures and 70 of
+the climb table's 93 are borne out by it, and every one that is not is
+marked as read from the image alone. The pilot chooses a power setting;
+each leg is flown at the highest burn the table prints either side of its
+altitude and temperature, the climb comes from the climb table with the
+handbook's warm-day increase, and the start, taxi and takeoff allowance is
+added, as the handbook's own sample problem does. Outside the table there
+is no figure, and the log says why.
 
 ### 4. Daylight — done
 

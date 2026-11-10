@@ -20,6 +20,7 @@ export * from './notam/index.js';
 export * from './docs/index.js';
 export * from './wb/index.js';
 export * from './navlog/index.js';
+export * from './perf/index.js';
 // Everything about one field, arranged around the place rather than a route.
 export * from './aerodrome/index.js';
 export * from './verify/index.js';

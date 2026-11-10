@@ -32,6 +32,7 @@ import {
   type ConfiguredLLM,
   type Loading,
   type NavCanadaClient,
+  type PerformanceSpec,
   type SoundingClient,
   type Store,
   type WeightBalanceSpec,
@@ -249,9 +250,9 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
   const aircraftDir = deps.aircraftDir ?? 'aircraft';
   const docCacheDir = deps.docCacheDir ?? 'data/docs';
   /** Everything but letters, digits and a dash is dropped, so the type can never walk out of the directory. */
-  const specPath = (type: string) => {
+  const specPath = (type: string, kind: 'wb' | 'performance' = 'wb') => {
     const safe = type.toLowerCase().replace(/[^a-z0-9-]/g, '');
-    return safe.length > 0 ? join(aircraftDir, `${safe}.wb.json`) : null;
+    return safe.length > 0 ? join(aircraftDir, `${safe}.${kind}.json`) : null;
   };
 
   app.get<{ Params: { id: string } }>('/api/airports/:id', async (req, reply) => {
@@ -285,14 +286,17 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
     }
     const body = req.body ?? ({} as BriefRequestBody);
     let plan, profile, aircraft, asOf: Date;
+    let performance: PerformanceSpec | null = null;
     try {
       plan = parseFlightPlan(body.plan);
       profile = parsePilotProfile(body.profile ?? defaultProfile());
       aircraft = body.aircraft === undefined || body.aircraft === null ? null : parseAircraftLimits(body.aircraft);
-      // Fill a missing demonstrated crosswind from the type's handbook data.
+      // Fill a missing demonstrated crosswind from the type's handbook data, and find its cruise and climb tables.
       if (aircraft) {
         const wb = specPath(aircraft.type);
         if (wb && existsSync(wb)) aircraft = withHandbookLimits(aircraft, JSON.parse(readFileSync(wb, 'utf8')) as WeightBalanceSpec);
+        const perf = specPath(aircraft.type, 'performance');
+        if (perf && existsSync(perf)) performance = JSON.parse(readFileSync(perf, 'utf8')) as PerformanceSpec;
       }
       asOf = body.asOf === undefined ? new Date() : new Date(body.asOf);
       if (Number.isNaN(asOf.getTime())) throw new Error('"asOf" must be an ISO instant');
@@ -434,7 +438,7 @@ export function buildServer(deps: ServerDeps): FastifyInstance {
     }
     // What the forecasts assert, so it can be checked once the moment passes.
     await recordForecastChecks(store, resolved);
-    const briefing = assembleBriefing(resolved, profile, aircraft, new Date(), notams);
+    const briefing = assembleBriefing(resolved, profile, aircraft, new Date(), notams, performance);
     const { inserted } = await store.putBriefing(briefing);
     // The flight laid out for drawing travels beside the briefing, so it is no part of what the hash covers.
     return reply.code(inserted ? 201 : 200).send({ ...briefing, picture: await routePicture(store, resolved) });

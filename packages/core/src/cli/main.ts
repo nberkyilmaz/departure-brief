@@ -18,6 +18,7 @@
  *   depbrief doc ingest|find|page|wb <pdf> ...   read a scanned POH into word boxes; extract weight-and-balance data
  *   depbrief wb <spec.json> --empty <lb> --empty-moment <n> [--front lb] [--rear lb] [--bag1 lb] [--fuel gal]
  *                                                 a loading against the extracted limits, every limit cited to its page
+ *   depbrief perf check <performance.json>       hold the hand-copied cruise and climb tables up against the scan
  *   depbrief decode "<METAR or TAF text>"         print the decoded JSON
  *
  * Reads `.env` if present. Uses Postgres at DATABASE_URL (default: the
@@ -50,7 +51,8 @@ import { matchOutstanding, outstandingChecks, recordForecastChecks } from '../ve
 import { reliabilityOf, reliabilityText, scorePair } from '../verify/score.js';
 import { withHandbookLimits } from '../wb/aircraft.js';
 import type { WeightBalanceSpec } from '../wb/types.js';
-import { docCommand, wbCommand } from './docs.js';
+import type { PerformanceSpec } from '../perf/types.js';
+import { docCommand, perfCommand, wbCommand } from './docs.js';
 import { notamBriefingText, notamDocument } from '../notam/describe.js';
 import { notamsForFlight, type NotamBriefing } from '../notam/flight.js';
 import { FaaNotamClient } from '../fetch/notam.js';
@@ -64,7 +66,7 @@ const USER_AGENT = process.env.DEPBRIEF_USER_AGENT ?? 'depbrief/0.1 (+https://gi
 
 function usage(): never {
   console.error(
-    'usage: depbrief fetch <ICAO...> [--memory] | depbrief nasr <dir> | depbrief ourairports <dir> [--country XX] | depbrief airport <id> | depbrief verify [--fetch] [--station X] | depbrief resolve|brief|notams|diff <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams] [--against <sha256>] | depbrief doc ingest|find|page|wb <pdf> ... | depbrief wb <spec.json> ... | depbrief decode "<report>"',
+    'usage: depbrief fetch <ICAO...> [--memory] | depbrief nasr <dir> | depbrief ourairports <dir> [--country XX] | depbrief airport <id> | depbrief verify [--fetch] [--station X] | depbrief resolve|brief|notams|diff <flight.json> [--fetch] [--as-of <ISO>] [--json] [--notams] [--against <sha256>] | depbrief doc ingest|find|page|wb <pdf> ... | depbrief wb <spec.json> ... | depbrief perf check <performance.json> | depbrief decode "<report>"',
   );
   process.exit(2);
 }
@@ -228,6 +230,13 @@ function aircraftOf(file: string, plan: FlightPlan) {
   return existsSync(wb) ? withHandbookLimits(limits, JSON.parse(readFileSync(wb, 'utf8')) as WeightBalanceSpec) : limits;
 }
 
+/** The handbook's cruise and climb tables for the aircraft, when there are any. */
+function performanceOf(aircraft: { type: string } | null): PerformanceSpec | null {
+  if (!aircraft) return null;
+  const file = join('aircraft', `${aircraft.type.toLowerCase().replace(/[^a-z0-9-]/g, '')}.performance.json`);
+  return existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as PerformanceSpec) : null;
+}
+
 async function briefCommand(args: string[]): Promise<void> {
   await withFlight(args, async ({ file, plan, resolved, store }) => {
     const profile = parsePilotProfile(readJsonRelative(file, plan.profile, 'profiles/default.json'));
@@ -251,7 +260,7 @@ async function diffCommand(args: string[]): Promise<void> {
     const profile = parsePilotProfile(readJsonRelative(file, plan.profile, 'profiles/default.json'));
     const aircraft = aircraftOf(file, plan);
     const notams = args.includes('--notams') ? await notamsFor(args, store, resolved, aircraft?.type ?? 'unknown') : null;
-    const now = assembleBriefing(resolved, profile, aircraft, new Date(), notams);
+    const now = assembleBriefing(resolved, profile, aircraft, new Date(), notams, performanceOf(aircraft));
     await store.putBriefing(now);
 
     const againstSha = option(args, '--against');
@@ -359,6 +368,9 @@ switch (command) {
     break;
   case 'wb':
     await wbCommand(rest);
+    break;
+  case 'perf':
+    await perfCommand(rest);
     break;
   case 'decode':
     decodeCommand(rest);

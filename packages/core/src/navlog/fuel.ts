@@ -7,12 +7,17 @@
  * arithmetic: trip fuel out of the nav log, the reserve out of the burn
  * rate, the sum against what the pilot says is in the tanks.
  *
- * Three numbers come from the pilot and none are invented here. The burn
- * rate is in the aircraft file because the handbook prints it against
- * power setting and altitude and only the pilot knows which row they fly.
- * The fuel aboard is in the flight plan because only the person who
- * dipped the tanks knows it. When either is missing the plan says so, in
- * words, in the place the number would have gone.
+ * The burn is the handbook's, read from its cruise table for the power
+ * setting the pilot chose, or a figure the pilot typed in, which wins. The
+ * trip is what the nav log adds up: the handbook's start, taxi and takeoff
+ * allowance, its climb, and each leg's cruise. The fuel aboard is in the
+ * flight plan because only the person who dipped the tanks knows it. When
+ * any of it is missing the plan says so, in words, in the place the number
+ * would have gone.
+ *
+ * The reserve is flown at the highest burn of any leg: thirty minutes "at
+ * normal cruising speed" after the destination, and the burn there is the
+ * last leg's or near it, so the highest is the figure that is never short.
  *
  * An alternate is not part of the regulation for VFR — 602.88(3) and (4)
  * name the destination only — but a pilot who planned one wants to know
@@ -36,8 +41,12 @@ const RESERVE_RULE = {
 } as const;
 
 export interface FuelPlan {
-  /** From the nav log's legs, departure to destination. */
+  /** From the nav log, departure to destination: the allowance, the climb and the legs. */
   readonly tripGal: number | null;
+  /** What the trip is made of, when the handbook supplied the first two. */
+  readonly allowanceGal: number | null;
+  readonly climbGal: number | null;
+  readonly cruiseGal: number | null;
   /** The alternate leg on its own, when one is planned. Not part of `requiredGal`. */
   readonly alternateGal: number | null;
   readonly reserve: {
@@ -78,22 +87,32 @@ export function fuelPlan(log: NavLog, aboardGal: number | null, night: boolean, 
   const reserveMinutes = night ? RESERVE_MINUTES.night : RESERVE_MINUTES.day;
   const rule = RESERVE_RULE[jurisdiction][night ? 'night' : 'day'];
 
-  if (gph === null) gaps.push('no cruise burn rate in the aircraft file, so neither the trip fuel nor the reserve can be worked out');
-  if (log.totalFuelGal === null && gph !== null) gaps.push('a leg has no time, so the trip fuel cannot be totalled');
+  if (gph === null) gaps.push(`${log.fuelProblem ?? 'no cruise burn rate in the aircraft file'}, so neither the trip fuel nor the reserve can be worked out`);
+  if (log.totalFuelGal === null && gph !== null) {
+    gaps.push(log.legs.some((l) => l.minutes === null) ? 'a leg has no time, so the trip fuel cannot be totalled' : `${log.fuelProblem ?? 'a leg has no fuel figure'}, so the trip fuel cannot be totalled`);
+  }
   if (aboardGal === null) gaps.push('no fuel aboard given in the flight plan');
 
   const reserveGal = gph === null ? null : round1((reserveMinutes / 60) * gph);
   const tripGal = log.totalFuelGal;
+  const allowanceGal = log.handbook && tripGal !== null ? log.handbook.allowance.gal : null;
+  const climbGal = log.handbook?.climb && tripGal !== null ? log.handbook.climb.gal : null;
+  const cruiseGal = tripGal === null ? null : round1(tripGal - (allowanceGal ?? 0) - (climbGal ?? 0));
   const alternateGal = log.alternate?.fuelGal ?? null;
   const requiredGal = tripGal !== null && reserveGal !== null ? round1(tripGal + reserveGal) : null;
   const withAlternateGal = requiredGal !== null && log.alternate ? (alternateGal !== null ? round1(requiredGal + alternateGal) : null) : null;
-  if (log.alternate && alternateGal === null && gph !== null) gaps.push('the alternate leg has no time, so the fuel to reach it is unknown');
+  if (log.alternate && alternateGal === null && gph !== null) {
+    gaps.push(log.alternate.minutes === null ? 'the alternate leg has no time, so the fuel to reach it is unknown' : 'the alternate leg has no burn, so the fuel to reach it is unknown');
+  }
 
   const marginGal = aboardGal !== null && requiredGal !== null ? round1(aboardGal - requiredGal) : null;
   const marginMinutes = marginGal !== null && gph !== null && gph > 0 ? Math.round((marginGal / gph) * 60) : null;
 
   return {
     tripGal,
+    allowanceGal,
+    climbGal,
+    cruiseGal,
     alternateGal,
     reserve: { minutes: reserveMinutes, basis: night ? 'night' : 'day', rule, gal: reserveGal },
     requiredGal,

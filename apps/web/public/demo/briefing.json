@@ -1,5 +1,5 @@
 {
-  "sha256": "3fe5dd6211e403a2fb0c53303eae7269996844a1792bfc2cf7592cca242d4894",
+  "sha256": "c2c0ece9a644c5b7412028a4f8b7cbbcb3843a798b2481a00b4a2fe2f326706c",
   "flightKey": "2c8115094cbf5965b4acc3bb0482ba82f940c10935f36d80648410ed0541d0a8",
   "asOf": "2026-09-19T00:52:00.000Z",
   "createdAt": "2026-09-19T00:52:00.000Z",
@@ -48,7 +48,7 @@
     },
     "asOf": "2026-09-19T00:52:00.000Z",
     "versions": {
-      "rules": 12,
+      "rules": 13,
       "metarDecoder": 2,
       "tafDecoder": 1,
       "notamDecoder": 1,
@@ -1466,7 +1466,7 @@
       ]
     },
     "briefing": {
-      "rulesVersion": 12,
+      "rulesVersion": 13,
       "profile": {
         "name": "default",
         "version": 1
@@ -3123,14 +3123,30 @@
                   "span": null,
                   "text": "CARs 602.88(4): 45 min at cruise after the destination (night at CYSN)",
                   "sha256": null
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "C172MPOH.pdf p.75 (5-15), Figure 5-6, Time, Fuel, and Distance to Climb: sea level to 4,000 ft, 1.5 gal with 2% for 2 °C above standard",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
+                },
+                {
+                  "kind": "aircraft",
+                  "station": null,
+                  "raw": null,
+                  "span": null,
+                  "text": "C172MPOH.pdf p.75 (5-15), note 1: \"Add 1.1 gallons of fuel for engine start, taxi and takeoff allowance.\"",
+                  "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446"
                 }
               ],
               "rule": "fuel.inputs",
               "attention": "note",
-              "summary": "no fuel plan: no cruise burn rate in the aircraft file, so neither the trip fuel nor the reserve can be worked out; no fuel aboard given in the flight plan",
+              "summary": "no fuel plan: no power setting chosen for the Cessna 172M, 1976 cruise table and no cruise burn typed in, so neither the trip fuel nor the reserve can be worked out; no fuel aboard given in the flight plan",
               "values": {
                 "gaps": [
-                  "no cruise burn rate in the aircraft file, so neither the trip fuel nor the reserve can be worked out",
+                  "no power setting chosen for the Cessna 172M, 1976 cruise table and no cruise burn typed in, so neither the trip fuel nor the reserve can be worked out",
                   "no fuel aboard given in the flight plan"
                 ],
                 "tripGal": null,
@@ -4413,15 +4429,51 @@
       ]
     },
     "navlog": {
-      "version": 2,
+      "version": 3,
       "tas": 105,
       "altitudeFt": 3500,
+      "rpm": null,
       "fuelGph": null,
+      "handbook": {
+        "model": "Cessna 172M, 1976",
+        "filename": "C172MPOH.pdf",
+        "sha256": "a87f58e0f28c7ad0ffb0512249d10e44ee23199f01e6c3f2f9f1b1d698bb4446",
+        "cruiseTable": {
+          "figure": "Figure 5-7, Cruise Performance",
+          "page": 76,
+          "printedPage": "5-16"
+        },
+        "climbTable": {
+          "figure": "Figure 5-6, Time, Fuel, and Distance to Climb",
+          "page": 75,
+          "printedPage": "5-15"
+        },
+        "pressureAltitudeFt": 3210,
+        "altimeterFrom": "CYSN",
+        "allowance": {
+          "gal": 1.1,
+          "printed": "Add 1.1 gallons of fuel for engine start, taxi and takeoff allowance.",
+          "scanned": true
+        },
+        "climb": {
+          "fromFt": 31,
+          "toFt": 3210,
+          "deviationC": 2,
+          "fromRowFt": 0,
+          "toRowFt": 4000,
+          "percent": 2,
+          "gal": 1.5,
+          "nm": 9,
+          "minutes": 7
+        },
+        "notes": []
+      },
       "legs": [
         {
           "from": "CYSN",
           "to": "CYKF",
           "distanceNm": 55.1,
+          "climbNm": 9,
           "trueCourse": 287,
           "variation": -10.2,
           "magneticCourse": 298,
@@ -4438,6 +4490,7 @@
           "magneticHeading": 297,
           "groundspeedKt": 116,
           "minutes": 29,
+          "burn": null,
           "fuelGal": null,
           "gaps": [],
           "cumulativeMinutes": 29,
@@ -4447,10 +4500,12 @@
       "totalDistanceNm": 55.1,
       "totalMinutes": 29,
       "totalFuelGal": null,
+      "fuelProblem": "no power setting chosen for the Cessna 172M, 1976 cruise table and no cruise burn typed in",
       "alternate": {
         "from": "CYKF",
         "to": "CYHM",
         "distanceNm": 26.2,
+        "climbNm": 0,
         "trueCourse": 131,
         "variation": -9.5,
         "magneticCourse": 141,
@@ -4467,6 +4522,7 @@
         "magneticHeading": 139,
         "groundspeedKt": 94.7,
         "minutes": 17,
+        "burn": null,
         "fuelGal": null,
         "gaps": [],
         "cumulativeMinutes": null,
@@ -4475,6 +4531,9 @@
     },
     "fuel": {
       "tripGal": null,
+      "allowanceGal": null,
+      "climbGal": null,
+      "cruiseGal": null,
       "alternateGal": null,
       "reserve": {
         "minutes": 45,
@@ -4488,7 +4547,7 @@
       "marginGal": null,
       "marginMinutes": null,
       "gaps": [
-        "no cruise burn rate in the aircraft file, so neither the trip fuel nor the reserve can be worked out",
+        "no power setting chosen for the Cessna 172M, 1976 cruise table and no cruise burn typed in, so neither the trip fuel nor the reserve can be worked out",
         "no fuel aboard given in the flight plan"
       ]
     }

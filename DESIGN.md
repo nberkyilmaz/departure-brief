@@ -131,6 +131,17 @@ Two things use a model, both optional and both local through Ollama:
   else goes to a review queue. Precision is the hard gate, because these
   numbers feed a weight-and-balance calculation.
 
+The handbook's performance tables use no model. A table cell has no label
+beside it, only a place, and the scan reads the 172M's cruise table at 70 %
+confidence, so the tables were copied by hand from the page images. Each
+row is then matched to the scanned line that carries the most of its
+figures in order, and every figure that line doesn't carry is named in the
+file. Those figures are still used, since the page image is legible where
+the OCR isn't, but anything citing one says it was read from the image
+alone. Between printed rows and columns the fuel plan takes the highest
+burn printed either side, not the nearest figure the handbook's own example
+uses, because it feeds a legal reserve.
+
 ## 8. Testing
 
 Every upstream client is tested against responses recorded from the real

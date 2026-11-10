@@ -63,7 +63,10 @@ export function ProfileForm({
             onChange={(e) => onAircraft({ ...aircraft, cruiseFuelGph: e.target.value === '' ? null : Number(e.target.value) })}
           />
           <span className="field-note-line">
-            <span className="field-note">fills in the nav log's fuel column; nothing here will guess it</span>
+            <span className="field-note">
+              leave empty to use the handbook&apos;s cruise table, where there is one for this aircraft, at the power setting chosen with the flight; a figure here is
+              used instead
+            </span>
           </span>
         </label>
         <label>
