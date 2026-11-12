@@ -475,9 +475,8 @@ function AlongTheWay({ legs, nameOf }: { legs: readonly AlongLeg[]; nameOf: ((id
  * findings and reports behind it.
  */
 function WorthALook({ concerns }: { concerns: readonly Concern[] }) {
-  if (concerns.length === 0) {
-    return <p className="why-none">Nothing crossed your limits at any field. Each card below has every check, with the report it came from.</p>;
-  }
+  // When nothing crossed a limit, the answer above says so.
+  if (concerns.length === 0) return null;
   return (
     <div className="why">
       <h3>Worth a look</h3>
@@ -487,6 +486,85 @@ function WorthALook({ concerns }: { concerns: readonly Concern[] }) {
         ))}
       </ul>
     </div>
+  );
+}
+
+const COUNT_WORDS = ['Nothing', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+
+/** On a screen this wide the answer sits on the map; narrower, it follows it. The stylesheet changes the layout at the same width. */
+const BESIDE_MAP = '(min-width: 47.5rem)';
+/** How much of the map the card covers there, and room for a field's name beside it, so the route is framed in the rest. */
+const CARD_PX = 470;
+
+/**
+ * The answer first, on a chart of the flight: how many things want a look,
+ * if any, over the map of where you are going. The map is the picture and
+ * the card is the words, which are what a screen reader and a printed page
+ * get, and what is left when the map cannot be drawn.
+ */
+function Hero({
+  stored,
+  picture,
+  concerns,
+  nameOf,
+  aerodromes,
+}: {
+  stored: StoredBriefing;
+  picture: RoutePicture | null;
+  concerns: readonly Concern[];
+  nameOf: ((id: string) => string | null) | undefined;
+  aerodromes: readonly { id: string; lat: number; lon: number }[] | undefined;
+}) {
+  const b = stored.document.briefing;
+  const plan = stored.document.plan;
+  const log = stored.document.navlog;
+  const departs = b.points[0]?.at ?? null;
+  const n = concerns.length;
+  const title = n === 0 ? 'Nothing crosses your limits.' : `${COUNT_WORDS[n] ?? n} ${n === 1 ? 'thing' : 'things'} to look at.`;
+  const minutes = log.totalMinutes;
+  const altitude = plan.cruise?.altitude;
+  const lede = `${plan.departure} to ${plan.destination}${b.aircraft ? ` in the ${b.aircraft}` : ''}: ${Math.round(log.totalDistanceNm)} nm${minutes !== null ? `, ${minutes} minutes` : ''}${
+    altitude ? ` at ${altitude.toLocaleString('en')} ft` : ''
+  }${plan.alternate ? `, with ${plan.alternate} as the alternate` : ''}.`;
+  const beside = window.matchMedia?.(BESIDE_MAP).matches ?? false;
+  return (
+    <section className={`hero${picture ? '' : ' no-map'}`} aria-labelledby="hero-title">
+      {picture && (
+        <MapBoundary message="The map could not be loaded. The side view and the list below have every station.">
+          <Suspense fallback={<div className="wx-map wx-map-loading route-map-canvas">Loading the map…</div>}>
+            <RouteMap stored={stored} picture={picture} nameOf={nameOf} aerodromes={aerodromes} leaveLeft={beside ? CARD_PX : 0} />
+          </Suspense>
+        </MapBoundary>
+      )}
+      <div className="hero-card">
+        {departs && (
+          <p className="hero-kicker">
+            Departs {localClock(departs)} · {hhmmZ(departs)}
+          </p>
+        )}
+        <h2 id="hero-title" className="hero-title">
+          {title}
+        </h2>
+        <p className="hero-lede">{lede}</p>
+        <ul className="hero-fields" aria-label="Flight category at each field at your time">
+          {fieldCards(stored).map((c) => (
+            <li key={`${c.role}-${c.point.waypoint}`} title={c.role}>
+              <b>{c.point.waypoint}</b>
+              <span className={`category ${(c.category ?? 'unknown').toLowerCase()}`}>{c.category ?? '—'}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="hero-meta">
+          Checked against your minimums; whether to go stays with you. Weather as of <Zulu iso={b.asOf} />.
+        </p>
+      </div>
+      {picture && (
+        <p className="hero-key">
+          Your route in magenta, dashed on to the alternate, and the {CORRIDOR_NM} nm either side of it searched for reports. Each letter is a station at the time
+          you would pass it: filled is forecast for then, hollow is observed now. Tap one for its line in Along the way, or a field for its page.
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -506,18 +584,13 @@ export function BriefingView({
 }) {
   const b = stored.document.briefing;
   const cards = fieldCards(stored);
+  const concerns = concernsOf(stored);
   return (
     <section className="briefing" id="verdict">
-      <h2>
-        <span className="briefing-title">Your briefing</span>
-        <span className="meta">
-          weather as of <Zulu iso={b.asOf} />
-        </span>
-      </h2>
-      <p className="explain briefing-lede">Checked against your minimums. Whether to go stays with you.</p>
+      <Hero stored={stored} picture={picture ?? null} concerns={concerns} nameOf={nameOf} aerodromes={aerodromes} />
 
       {/* Adverse conditions first, as a standard briefing gives them; then the hours either side; then each field; then what it could not see. */}
-      <WorthALook concerns={concernsOf(stored)} />
+      <WorthALook concerns={concerns} />
       {whenCanIGo}
 
       <div className="field-cards">
@@ -526,20 +599,6 @@ export function BriefingView({
         ))}
       </div>
 
-      {picture && (
-        <section className="route-map" aria-labelledby="route-map-title">
-          <h3 id="route-map-title">Route map</h3>
-          <p className="explain">
-            Your route in magenta, dashed on to the alternate, and the {CORRIDOR_NM} nm either side of it that is searched for reports. Each letter is a station
-            at the time you would pass it: filled is forecast for then, hollow is observed now. Tap one for its line in Along the way, or a field for its page.
-          </p>
-          <MapBoundary message="The map could not be loaded. The side view and the list below have every station.">
-            <Suspense fallback={<div className="wx-map wx-map-loading route-map-canvas">Loading the map…</div>}>
-              <RouteMap stored={stored} picture={picture} nameOf={nameOf} aerodromes={aerodromes} />
-            </Suspense>
-          </MapBoundary>
-        </section>
-      )}
       {picture && <SideView stored={stored} picture={picture} />}
       <AlongTheWay legs={alongTheWay(stored)} nameOf={nameOf} />
 

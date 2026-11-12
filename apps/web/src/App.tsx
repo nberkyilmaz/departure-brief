@@ -6,7 +6,7 @@ import { DiffPanel } from './DiffPanel.js';
 import { loadEngine, type LocalEngine } from './engine.js';
 import { FlightForm, defaultDeparture, defaultPlan, departureTimeNote, planProblems } from './FlightForm.js';
 import { FlightLine } from './FlightLine.js';
-import { Nav } from './Nav.js';
+import { Nav, TabBar, usePhone } from './Nav.js';
 import { NavLogPage } from './NavLogPage.js';
 import { ProfileForm, defaultAircraft, defaultProfile } from './ProfileForm.js';
 import { ReportsPage } from './ReportsPage.js';
@@ -268,38 +268,34 @@ export function App() {
     document.querySelector('main')?.scrollIntoView?.({ block: 'start' });
   }
 
+  const phone = usePhone();
+  const attention = attentionOf(briefing);
   const names = useMemo(() => new Map((engine?.aerodromes ?? []).map((a) => [a.id, a.name])), [engine]);
   const nameOf = useCallback((id: string) => names.get(id) ?? null, [names]);
 
   return (
     <>
-      <div className="banner" role="alert">
-        <strong>Not for operational use.</strong>{' '}
-        <span className="banner-long">
-          Departure Brief is a study and planning aid, not an official weather briefing or weight-and-balance computation. Obtain an official briefing from an
-          approved source before any flight.
-        </span>
-        <span className="banner-short">A study aid, not an official briefing.</span>
-      </div>
       {/* Keyboard and screen reader users should not have to walk the form to reach the answer. */}
       <a className="skip" href="#verdict">
         Skip to the verdict
       </a>
       <header className="masthead">
         <div className="masthead-inner">
-          <div className="brand">
-            <span className="sign" aria-hidden="true">
-              DB
-            </span>
-            <div>
-              <h1>
-                <a href={hrefFor({ name: 'home' })}>Departure Brief</a>
-              </h1>
-              <p className="tagline">Stop before the line and brief before you cross it.</p>
-            </div>
-          </div>
-          <Nav route={route} attention={attentionOf(briefing)} />
+          <h1>
+            <a className="brand" href={hrefFor({ name: 'home' })}>
+              {/* A chart's symbol for an aerodrome with services. */}
+              <svg viewBox="0 0 30 30" aria-hidden="true">
+                <circle cx="15" cy="15" r="8" fill="none" stroke="currentColor" strokeWidth="3" />
+                <path d="M15 2v5M15 23v5M2 15h5M23 15h5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+              </svg>
+              <span className="brand-name">Departure Brief</span>
+            </a>
+          </h1>
+          {!phone && <Nav route={route} attention={attention} />}
         </div>
+        <p className="disclaimer" role="note">
+          <strong>Not for operational use.</strong> A study aid, not an official briefing: get one from an approved source before you fly.
+        </p>
       </header>
       <main>
 
@@ -448,6 +444,7 @@ export function App() {
         {route.name === 'about' && <About weather={weather} aerodromes={engine?.aerodromes ?? []} />}
 
         <footer>
+          <p className="footer-tagline">Stop before the line and brief before you cross it.</p>
           <p>
             Departure Brief is a study and planning aid. Nothing here is an official weather briefing, an official weight-and-balance computation, or a substitute
             for either. <a href="https://github.com/nberkyilmaz/departure-brief">Source code</a>. Built by{' '}
@@ -455,6 +452,7 @@ export function App() {
           </p>
         </footer>
       </main>
+      {phone && <TabBar route={route} attention={attention} />}
     </>
   );
 }

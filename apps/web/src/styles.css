@@ -1,32 +1,27 @@
 /*
- * Two kinds of colour, kept apart. The frame (masthead, navigation,
- * buttons) is airport signage: asphalt, sign yellow, and the hold-short
- * marking a pilot stops at before a runway — this project's first name, and
- * the line its tagline is about. Inside the briefing it still reads like a
- * briefing document: one column, generous line length, colour used only
- * where it carries meaning — a verdict, a severity, a cited span. Anything
- * that merely decorates there would compete with the one thing a pilot is
- * here to read.
+ * A briefing printed like a VFR chart: paper, ink, and the chart's own
+ * colours used where a chart uses them. Magenta marks your route and where
+ * you are; chart blue names a place you can go to, as it names an
+ * aerodrome on the map. Every other colour on the page carries meaning — a
+ * flight category, an attention level, a cited span — and nothing merely
+ * decorates, because it would compete with the one thing a pilot is here
+ * to read.
  */
 :root {
-  /* Ink and paper: concrete grey, near-black ink. */
-  --bg: #f1f2f0;
-  --surface: #ffffff;
-  --surface-sunk: #eceeeb;
-  --fg: #16191c;
-  --muted: #59616a;
-  --line: #dadddb;
-  --line-strong: #bfc4c4;
+  /* Paper and ink. */
+  --bg: #f4f0e6;
+  --surface: #fffdf8;
+  --surface-sunk: #efe9db;
+  --fg: #1e2a38;
+  --muted: #5b6573;
+  --line: #ddd5c3;
+  --line-strong: #b9b09b;
 
-  /*
-   * The frame: a location sign, yellow on black. Sign yellow only ever sits
-   * on asphalt, never on the paper, where it could not be read and could be
-   * taken for a caution.
-   */
-  --asphalt: #1d2125;
-  --sign: #ffcc00;
-  --brand: var(--asphalt);
-  --brand-ink: var(--sign);
+  /* A button is ink on the paper. Your route, and where you are, are magenta. */
+  --brand: #1e2a38;
+  --brand-ink: #fffdf8;
+  --accent: #9c2a74;
+  --link: #1d4f91;
 
   /*
    * Meaning. Each one is an attention level or a flight category; none is
@@ -60,12 +55,12 @@
   --s5: 1.5rem;
   --s6: 2.25rem;
   --radius: 6px;
-  --shadow: 0 1px 2px rgb(22 25 28 / 6%), 0 2px 8px rgb(22 25 28 / 5%);
-  --shadow-lift: 0 2px 4px rgb(22 25 28 / 8%), 0 10px 24px rgb(22 25 28 / 10%);
+  --shadow: 0 1px 2px rgb(30 42 56 / 6%), 0 2px 8px rgb(30 42 56 / 5%);
+  --shadow-lift: 0 2px 4px rgb(30 42 56 / 8%), 0 10px 24px rgb(30 42 56 / 10%);
 
-  --sans: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  /* The signs: the masthead, the tabs, the buttons and the headings. */
-  --display: "Barlow Condensed", "Barlow", system-ui, sans-serif;
+  --sans: "Source Sans 3", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Headings, the way a chart titles its sheets. */
+  --display: "Source Serif 4", Georgia, "Times New Roman", serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   font-family: var(--sans);
@@ -76,22 +71,23 @@
 }
 
 /*
- * A briefing at five in the morning, or in a dark hangar. The same palette
- * with ink and paper exchanged; the meaning colours are lifted only enough
+ * A briefing at five in the morning, or in a dark hangar: the same chart
+ * printed dark, as the map is. The meaning colours are lifted only enough
  * to hold their contrast.
  */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #121417;
-    --surface: #1a1e22;
-    --surface-sunk: #21262b;
-    --fg: #eceeef;
-    --muted: #a2a9b0;
-    --line: #2b3137;
-    --line-strong: #3d454d;
-    /* At night the page is the asphalt, so the buttons become the sign. */
-    --brand: var(--sign);
-    --brand-ink: #121417;
+    --bg: #14181d;
+    --surface: #1b2128;
+    --surface-sunk: #222932;
+    --fg: #e7e9ec;
+    --muted: #a3acb6;
+    --line: #2c343d;
+    --line-strong: #414b56;
+    --brand: #e7e9ec;
+    --brand-ink: #14181d;
+    --accent: #e07ab8;
+    --link: #8fbaf0;
     --ok: #6fbf73;
     --advisory: #7da7dd;
     --air-blue: #4b95de;
@@ -114,119 +110,103 @@
 body { margin: 0; }
 
 /*
- * The one thing on the page that must never be scrolled past unread. It
- * stays at the top, and it is the only place colour is used loudly.
+ * The warning, on every page, said once and plainly under the masthead in
+ * the voice of a chart's own small print rather than of an error. The full
+ * wording is in the footer and on the About page.
  */
-.banner {
-  background: var(--nogo);
-  color: #fff;
-  padding: var(--s2) var(--s4);
-  font-size: 0.9rem;
-  line-height: 1.4;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 18%);
+.disclaimer { max-width: 62rem; margin: 0 auto; padding: var(--s2) var(--s4); border-top: 1px solid var(--line); font-family: var(--display); font-style: italic; font-size: 0.92rem; line-height: 1.4; color: var(--muted); }
+.disclaimer strong { font-family: var(--sans); font-style: normal; font-weight: 700; color: var(--fg); }
+@media (max-width: 40rem) {
+  .disclaimer { font-size: 0.84rem; padding: 0.4rem var(--s4); }
 }
 
 main { max-width: 62rem; margin: 0 auto; padding: var(--s5) var(--s4) var(--s6); }
 
 /*
- * The masthead is the taxiway: asphalt, a location sign for a name, and the
- * hold-short marking along its lower edge — two solid lines on this side,
- * two dashed on the far one, as painted before every runway. The briefing
- * is on the far side. It looks the same by day and by night.
+ * The masthead is a chart's title block: the name in the serif with an
+ * aerodrome symbol beside it, and the sections in small capitals, the one
+ * you are in underlined in magenta.
  */
-.masthead { color: #fff; background: var(--asphalt); }
-.masthead::after {
-  content: '';
-  display: block;
-  height: 30px;
-  background:
-    linear-gradient(var(--sign), var(--sign)) 0 5px / 100% 3px no-repeat,
-    linear-gradient(var(--sign), var(--sign)) 0 11px / 100% 3px no-repeat,
-    repeating-linear-gradient(90deg, var(--sign) 0 22px, transparent 22px 36px) 0 17px / 100% 3px no-repeat,
-    repeating-linear-gradient(90deg, var(--sign) 0 22px, transparent 22px 36px) 0 23px / 100% 3px no-repeat;
-}
-.masthead-inner { max-width: 62rem; margin: 0 auto; padding: var(--s5) var(--s4) var(--s3); }
-.brand { display: flex; align-items: center; gap: var(--s3); }
-/* A location sign: yellow letters and a yellow border on black, with the black rim outside it. */
-.sign {
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  min-width: 3rem;
-  height: 3rem;
-  padding: 0 0.35rem;
-  box-sizing: border-box;
-  font-family: var(--display);
-  font-size: 1.55rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--sign);
-  background: #000;
-  border: 2px solid var(--sign);
-  border-radius: 4px;
-  box-shadow: 0 0 0 2px #000;
-}
-.masthead h1 {
-  margin: 0;
-  font-family: var(--display);
-  font-size: clamp(1.7rem, 1.3rem + 1.8vw, 2.3rem);
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  line-height: 1;
-}
-.masthead h1 a { color: inherit; text-decoration: none; }
-.masthead h1 a:hover { color: var(--sign); }
-.tagline { margin: 0.3rem 0 0; color: #b9bfc5; font-size: 1rem; }
-/* On a phone the masthead gives way to the page: the name stays, the motto goes. */
+.masthead { background: var(--bg); border-bottom: 1px solid var(--line); }
+.masthead-inner { max-width: 62rem; margin: 0 auto; padding: var(--s3) var(--s4); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s2) var(--s5); }
+.masthead h1 { margin: 0; }
+.brand { display: flex; align-items: center; gap: 0.6rem; color: var(--fg); text-decoration: none; }
+.brand svg { flex: none; width: 2rem; height: 2rem; color: var(--chart-blue); }
+.brand-name { font-family: var(--display); font-size: clamp(1.45rem, 1.2rem + 1vw, 1.75rem); font-weight: 700; letter-spacing: -0.005em; line-height: 1; }
+.brand:hover .brand-name { color: var(--accent); }
 @media (max-width: 40rem) {
-  .masthead-inner { padding: var(--s3) var(--s4) var(--s2); }
-  .tagline { display: none; }
-  .sign { min-width: 2.5rem; height: 2.5rem; }
+  .masthead-inner { padding: var(--s2) var(--s4); min-height: 2.75rem; }
+  .brand svg { width: 1.7rem; height: 1.7rem; }
 }
 
 /*
- * The things this does. A row of tabs rather than a menu, because six is
- * few enough to show all of them, and a reader should be able to see what
- * else is here without opening anything.
+ * The things this does. A row of section names rather than a menu, because
+ * six is few enough to show all of them. On a phone they move to a bar at
+ * the bottom of the screen, under the thumb.
  */
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s3);
-  margin-top: var(--s4);
-}
-.nav ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s1);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
+.nav { display: flex; align-items: center; gap: var(--s4); }
+.nav ul { display: flex; flex-wrap: wrap; gap: 0.15rem 1.25rem; list-style: none; margin: 0; padding: 0; }
 .nav a {
   display: block;
-  padding: 0.3rem 0.7rem;
-  border-radius: 4px;
-  color: #c9ced3;
+  padding: 0.35rem 0;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
   text-decoration: none;
-  font-family: var(--display);
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
-.nav a:hover { color: #fff; background: rgb(255 255 255 / 8%); }
-/* Where you are is the sign that is lit. */
-.nav a[aria-current='page'] { color: #000; background: var(--sign); }
-.nav a:focus-visible { outline: 2px solid var(--sign); outline-offset: 2px; }
-/* The answer, still visible from wherever the reader has wandered to. */
-.nav .nav-verdict { border: 0; margin-bottom: 0; padding: 0.2rem 0.55rem; font-size: 0.78rem; font-weight: 600; color: #fff; }
-.nav .nav-verdict:hover { opacity: 0.85; }
+.nav a:hover { color: var(--fg); }
+.nav a[aria-current='page'] { color: var(--fg); border-bottom-color: var(--accent); }
+.nav a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.tabbar { display: none; }
+@media (max-width: 40rem) {
+  .masthead .nav { display: none; }
+  body { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+  .tabbar {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -2px 10px rgb(30 42 56 / 7%);
+  }
+  .tab, .tabbar summary {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 3.6rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    list-style: none;
+    cursor: pointer;
+  }
+  .tabbar summary::-webkit-details-marker { display: none; }
+  .tab[aria-current='page'], .tabbar details.here > summary { color: var(--accent); }
+  .tabbar svg { width: 22px; height: 22px; }
+  /* What is waiting on the briefing, from wherever you are. */
+  .tab-count { position: absolute; top: 0.35rem; left: calc(50% + 4px); min-width: 1.1rem; padding: 0 0.25rem; border-radius: 999px; background: var(--marginal); color: #fff; font-size: 0.65rem; line-height: 1.1rem; letter-spacing: 0; text-align: center; }
+  .tab-count.alert { background: var(--nogo); }
+  .tabbar details { position: relative; }
+  .tabbar details ul { position: absolute; right: var(--s2); bottom: calc(100% + var(--s2)); min-width: 12rem; margin: 0; padding: var(--s1) 0; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-lift); }
+  .tabbar details a { display: block; padding: 0.75rem var(--s4); color: var(--fg); text-decoration: none; font-weight: 600; }
+  .tabbar details a[aria-current='page'] { color: var(--accent); }
+}
 
 /* Everything the briefing could see, in the words it arrived in. */
 .reports-page h2 { font-size: 1.3rem; margin: 0 0 var(--s2); }
@@ -246,7 +226,7 @@ main { max-width: 62rem; margin: 0 auto; padding: var(--s5) var(--s4) var(--s6);
 .routine-checks, .nearby-quiet { margin: var(--s2) 0; }
 .routine-checks > summary, .nearby-quiet > summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; padding: 0.3rem 0; }
 
-a { color: var(--advisory); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a { color: var(--link); text-decoration-thickness: 1px; text-underline-offset: 2px; }
 
 /* Every panel is the same card, so the page has one rhythm rather than five. */
 fieldset {
@@ -257,19 +237,20 @@ fieldset {
   background: var(--surface);
   box-shadow: var(--shadow);
 }
+/* A panel's name, as a chart labels its insets: small capitals, magenta. */
 legend {
   padding: 0 var(--s2);
   margin-left: calc(var(--s2) * -1);
-  color: var(--fg);
-  font-family: var(--display);
-  font-size: 0.98rem;
+  color: var(--accent);
+  font-family: var(--sans);
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-/* Headings set in the signs' face; the reading under them stays in the regular cut. */
+/* Headings in the serif; the reading under them stays in the sans. */
 main h2,
-.aerodrome-page h3 { font-family: var(--display); font-weight: 700; letter-spacing: 0.01em; }
+.aerodrome-page h3 { font-family: var(--display); font-weight: 700; letter-spacing: -0.005em; }
 main h2 .meta { font-family: var(--sans); font-weight: 400; letter-spacing: normal; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: var(--s3) var(--s4); }
 label { display: flex; flex-direction: column; font-size: 0.82rem; color: var(--muted); gap: var(--s1); }
@@ -288,16 +269,13 @@ input:focus-visible, select:focus-visible { border-color: var(--brand); }
 .airspace { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1); }
 .hint { font-size: 0.8rem; color: var(--muted); width: 100%; }
 .actions { display: flex; align-items: center; gap: var(--s4); flex-wrap: wrap; min-height: 2.2rem; }
-/* A button is a sign too: yellow on asphalt by day, asphalt on yellow by night. */
+/* A button is ink on the paper, by night paper on the ink. */
 button {
   font: inherit;
-  font-family: var(--display);
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   padding: 0.5rem 1.2rem;
-  border-radius: 4px;
+  border-radius: 999px;
   border: 1px solid var(--brand);
   background: var(--brand);
   color: var(--brand-ink);
@@ -308,8 +286,8 @@ button:hover { filter: brightness(1.2); }
 button:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
 /* A second action that should not compete with the reading. */
 button.quiet {
-  background: transparent; color: var(--muted); border-color: var(--line-strong); padding: 0.35rem 0.8rem;
-  font-family: var(--sans); font-size: 0.85rem; font-weight: 500; letter-spacing: normal; text-transform: none;
+  background: transparent; color: var(--muted); border-color: var(--line-strong); padding: 0.35rem 0.85rem;
+  font-size: 0.85rem; font-weight: 500;
 }
 button.quiet:hover { color: var(--fg); border-color: var(--fg); filter: none; }
 .error { color: var(--nogo); margin: 0; font-weight: 500; }
@@ -322,8 +300,47 @@ footer {
   font-size: 0.85rem;
 }
 footer p { margin: 0; max-width: 46rem; }
+.footer-tagline { margin-bottom: var(--s2) !important; font-family: var(--display); font-style: italic; color: var(--fg); }
 
 .briefing h2 { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; font-size: 1.2rem; }
+
+/*
+ * The top of a briefing: the chart of the flight, and on it a card with the
+ * answer in words. On a phone the card follows the map rather than covering
+ * half of it.
+ */
+.hero { position: relative; margin: 0 0 var(--s5); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
+/* The map's marks stack among themselves, under the card. */
+.hero .wx-map.route-map-canvas { height: clamp(24rem, 62vh, 34rem); border: 0; border-radius: 0; isolation: isolate; }
+.hero-card {
+  position: absolute;
+  top: var(--s4);
+  left: var(--s4);
+  z-index: 2;
+  width: min(22.5rem, calc(100% - 2rem));
+  box-sizing: border-box;
+  padding: var(--s5);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lift);
+}
+.hero.no-map .hero-card { position: static; width: auto; border: 0; box-shadow: none; }
+.hero-kicker { margin: 0; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+.briefing .hero-title { display: block; margin: 0.45rem 0 0.6rem; font-family: var(--display); font-size: clamp(1.85rem, 1.4rem + 1.5vw, 2.4rem); font-weight: 700; line-height: 1.06; letter-spacing: -0.012em; }
+.hero-lede { margin: 0; font-size: 1rem; }
+.hero-fields { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.9rem 0 0; padding: 0; list-style: none; }
+.hero-fields li { display: flex; align-items: center; gap: 0.4rem; padding: 0.15rem 0.5rem; border: 1px solid var(--line); border-radius: 4px; font-size: 0.92rem; }
+.hero-fields .category { font-size: 0.72rem; }
+.hero-meta { margin: 0.85rem 0 0; font-size: 0.82rem; color: var(--muted); }
+.hero-key { margin: 0; padding: var(--s2) var(--s4); border-top: 1px solid var(--line); font-size: 0.8rem; color: var(--muted); }
+.hero .route-map-hint { margin: 0; padding: var(--s2) var(--s4) 0; }
+/* Narrower, the answer comes first and the map under it, so a phone shows the words without scrolling past a picture. */
+@media (max-width: 47.49rem) {
+  .hero { display: flex; flex-direction: column; }
+  .hero-card { order: -1; position: static; width: auto; padding: var(--s4); border: 0; border-bottom: 1px solid var(--line); border-radius: 0; box-shadow: none; background: var(--surface); }
+  .hero .wx-map.route-map-canvas { height: 21rem; }
+}
 .meta { font-weight: normal; font-size: 0.85rem; color: var(--muted); }
 .explain { color: var(--muted); font-size: 0.9rem; }
 .verdict { padding: 0.15rem 0.5rem; border-radius: 4px; color: #fff; font-size: 0.85rem; letter-spacing: 0.04em; }
@@ -497,7 +514,7 @@ summary:focus-visible,
  * on top of one of them takes dark text rather than white.
  */
 @media (prefers-color-scheme: dark) {
-  .verdict, .badge, .banner { color: #15151a; }
+  .verdict, .badge { color: #15151a; }
   .night { background: var(--surface-sunk); color: var(--fg); }
 }
 
@@ -533,12 +550,10 @@ summary:focus-visible,
  */
 @media print {
   :root { --bg: #fff; --surface: #fff; --surface-sunk: #f4f4f0; --fg: #000; --muted: #444; --line: #bbb; }
-  .nav, .skip, .about, button.quiet, .flight-bar .actions, .plan-card, .masthead::after { display: none !important; }
+  .nav, .tabbar, .skip, .about, button.quiet, .flight-bar .actions, .plan-card { display: none !important; }
   .masthead { background: none; color: #000; }
-  .sign { display: none; }
   .masthead-inner { padding: 0 0 var(--s3); }
-  .tagline { color: #444; }
-  .banner { position: static; color: #000; background: #fff; border: 2px solid #000; font-weight: 600; }
+  .disclaimer { color: #000; border: 2px solid #000; font-style: normal; font-weight: 600; }
   details { display: block; }
   details > summary { display: none; }
   .finding .detail, .met > *, details > * { display: block !important; }
@@ -708,26 +723,20 @@ summary:focus-visible,
 .start-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-lift); }
 .start-card b {
   display: flex; justify-content: space-between; align-items: center; gap: var(--s2);
-  font-family: var(--display); font-size: 1.3rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase;
+  font-family: var(--display); font-size: 1.3rem; font-weight: 700;
 }
-/* A direction sign's arrow: black on a yellow plate. */
 .start-card b::after {
   content: '→';
-  display: grid;
-  place-items: center;
-  width: 1.7rem;
-  height: 1.7rem;
-  border-radius: 3px;
-  background: var(--sign);
-  color: #000;
+  color: var(--accent);
   font-family: var(--sans);
-  font-size: 1rem;
+  font-size: 1.2rem;
   transition: transform 0.15s ease;
 }
 .start-card .muted { color: var(--muted); font-size: 0.92rem; }
-/* The main way on is a location sign, like the one in the masthead. */
-.start-card.primary { color: var(--sign); background: #000; border: 2px solid var(--sign); box-shadow: 0 0 0 2px #000, var(--shadow); }
-.start-card.primary .muted { color: #c9ced3; }
+/* The main way on is printed in ink. */
+.start-card.primary { color: var(--brand-ink); background: var(--brand); border-color: var(--brand); }
+.start-card.primary .muted { color: color-mix(in srgb, var(--brand-ink) 78%, transparent); }
+.start-card.primary b::after { color: var(--brand-ink); }
 @media (prefers-reduced-motion: no-preference) {
   .start-card:hover { transform: translateY(-2px); }
   .start-card:hover b::after { transform: translateX(3px); }
@@ -891,17 +900,7 @@ summary:focus-visible,
   .limits-line a, .wx-card { display: none !important; }
 }
 
-/*
- * On a phone the warning is said in one line and scrolls away with the page:
- * pinned at full length it took a fifth of the screen from the briefing it
- * is warning about. The full wording is in the footer and on the About page.
- */
-.banner-short { display: none; }
 @media (max-width: 40rem) {
-  .banner { position: static; font-size: 0.85rem; }
-  .banner-long { display: none; }
-  .banner-short { display: inline; }
-  .nav ul { justify-content: flex-start; }
   .start .lede { font-size: 1rem; }
 }
 
