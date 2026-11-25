@@ -1,5 +1,5 @@
-# Watch the live site: is the relay still taking the weather, and does the
-# page still load?
+# Watch the live site: is the relay still taking the weather, does the page
+# still load, and is the API on its own server answering?
 #
 # The relay keeps the last good copy when a service fails, and says how old
 # it is, so nothing on the page breaks when a feed stops — it just gets
@@ -50,3 +50,17 @@ jobs:
           curl -sSf --max-time 60 -o /dev/null https://nberkyilmaz.com/departure-brief/ || { echo "::error::nberkyilmaz.com/departure-brief did not load"; exit 1; }
           curl -sSf --max-time 60 -o /dev/null https://nberkyilmaz.com/departure-brief/demo/airports/index.json || { echo "::error::The aerodrome index did not load"; exit 1; }
           echo "The page and its aerodrome index load."
+
+      - name: The API
+        # Asked from outside, because the server's own check can't say
+        # anything when the whole server is down. Skipped until the DNS
+        # record for its name exists.
+        run: |
+          host=depbrief-api.nberkyilmaz.com
+          if ! getent hosts "$host" >/dev/null; then
+            echo "::notice::$host has no DNS record yet, so the API wasn't asked."
+            exit 0
+          fi
+          body=$(curl -sS --max-time 60 "https://$host/api/health") || { echo "::error::https://$host/api/health did not answer"; exit 1; }
+          echo "$body"
+          grep -q '"ok":true' <<<"$body" || { echo "::error::The API answered, but says it isn't ready"; exit 1; }

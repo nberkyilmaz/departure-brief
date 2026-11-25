@@ -6,7 +6,7 @@ server runs another, unrelated job from cron, outside Docker; everything here is
 from it and capped so it can't starve it.
 
 ```sh
-ssh root@5.75.174.24    
+ssh root@5.75.174.24    # with the key the server was set up with
 ```
 
 ## What runs where
