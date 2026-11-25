@@ -147,4 +147,10 @@ The copies grow with the stored briefings. If 90 of them ever approach 1 GB, kee
 
 ## The other job's 7:00 run
 
-_Checked after its first runs this morning; see below._
+It ran at 7:00, 7:07 and 7:15 as usual, and each run finished normally with no errors. The 7:07
+run had two things to push to your phone, so you should have that notification as a check. At
+7:00 one of the sites it reads didn't answer, as happened once yesterday evening too; at 7:15 it
+read every one.
+
+Memory after those runs: 618 MB of 3.8 GB in use, and the swap file untouched. The API was using
+135 MB, Postgres 57 MB and Caddy 51 MB.
