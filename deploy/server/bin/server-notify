@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# server-notify TITLE MESSAGE [PRIORITY] [TAG]
+#
+# One push to the phone through ntfy.sh: a JSON POST to https://ntfy.sh/
+# naming the topic, the same way the server's other cron job sends its own.
+# The topic is read from /etc/server-check/ntfy-topic (root only; set it
+# with server-ntfy-topic). Without it the message only goes to the log.
+set -uo pipefail
+topic_file=/etc/server-check/ntfy-topic
+log=/var/log/server-check.log
+title=${1:?title} message=${2:?message} priority=${3:-4} tag=${4:-warning}
+
+printf '%s push [%s] %s: %s\n' "$(date '+%F %T')" "$priority" "$title" "${message//$'\n'/ / }" >>"$log"
+if [ ! -s "$topic_file" ]; then
+  printf '%s no ntfy topic yet (server-ntfy-topic sets it), so nothing was sent\n' "$(date '+%F %T')" >>"$log"
+  exit 0
+fi
+
+# The body goes in on stdin, so the topic never appears in a process list.
+code=$(jq -n --arg topic "$(head -n 1 "$topic_file")" --arg title "$title" --arg message "$message" \
+  --argjson priority "$priority" --arg tag "$tag" \
+  '{topic: $topic, title: $title, message: $message, priority: $priority, tags: [$tag]}' |
+  curl -sS -m 20 -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' --data-binary @- https://ntfy.sh/ 2>>"$log")
+if [ "$code" != 200 ]; then
+  printf '%s the push failed (HTTP %s)\n' "$(date '+%F %T')" "${code:-none}" >>"$log"
+  exit 1
+fi

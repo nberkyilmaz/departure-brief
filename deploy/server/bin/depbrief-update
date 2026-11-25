@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Brings the server up to date with master: the API (rebuilt from source),
+# the database and Caddy images, and the files in deploy/server. Run as root:
+#   depbrief-update
+#
+# The API image it replaces is kept as depbrief-api:previous. To go back:
+#   docker tag depbrief-api:previous depbrief-api:latest
+#   docker compose -f /opt/depbrief/src/deploy/server/compose.yml up -d api
+#
+# Building takes a few minutes and most of a core; it is niced, but best run
+# outside the other cron job's hours (7 am to 11 pm, server time).
+set -euo pipefail
+src=/opt/depbrief/src
+compose=(docker compose -f "$src/deploy/server/compose.yml")
+
+git -C "$src" fetch -q origin master
+git -C "$src" reset -q --hard origin/master # deploy-only checkout; nothing is edited here
+echo "master is $(git -C "$src" log -1 --format='%h %s')"
+
+bash "$src/deploy/server/install.sh"
+
+if docker image inspect depbrief-api:latest >/dev/null 2>&1; then
+  docker tag depbrief-api:latest depbrief-api:previous
+fi
+nice -n 10 "${compose[@]}" build --pull api
+"${compose[@]}" pull -q db
+"${compose[@]}" up -d
+docker compose -f /opt/caddy/compose.yml pull -q
+docker compose -f /opt/caddy/compose.yml up -d
+
+echo "waiting for the API to say it's healthy..."
+for _ in $(seq 1 60); do
+  if curl -sf -m 5 http://127.0.0.1:3000/api/health; then
+    echo
+    exit 0
+  fi
+  sleep 5
+done
+echo "The API didn't come up healthy in five minutes. Its log:"
+"${compose[@]}" logs --tail 40 api
+exit 1

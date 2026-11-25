@@ -1,0 +1,7 @@
+depbrief-api.nberkyilmaz.com {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000"
+	# Caddy replaces any X-Forwarded-For the caller sent with the address it
+	# actually sees, so the API's per-visitor limit counts real addresses.
+	reverse_proxy depbrief-api:3000
+}

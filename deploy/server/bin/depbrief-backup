@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+# Nightly, from /etc/cron.d/depbrief: a copy of the Departure Brief database,
+# kept off the server in the private repository
+# nberkyilmaz/departure-brief-backups, as the branch copy/YYYY-MM-DD.
+#
+#   1. pg_dump, custom format, from the database container.
+#   2. The copy is restored into a scratch database beside the live one, and
+#      the rows in every table are counted. A copy that won't restore stops
+#      here, and nothing is pushed.
+#   3. The copy and a MANIFEST (checksum, row counts) are pushed with a
+#      deploy key that can write to that one repository and nothing else.
+#      A workflow there restores the newest copy again every day, checks it
+#      against the manifest, deletes copies older than 90 days, and fails
+#      (GitHub emails the owner) if the newest copy is missing or wrong.
+#
+# Seven days are also kept on the server, in /var/backups/depbrief. A failure
+# is pushed to the phone (server-notify) and written to the log.
+set -euo pipefail
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+remote=git@github-depbrief-backups:nberkyilmaz/departure-brief-backups.git
+dir=/var/backups/depbrief
+log=/var/log/depbrief-backup.log
+compose=(docker compose -f /opt/depbrief/src/deploy/server/compose.yml)
+day=$(date -u +%F)
+work=$(mktemp -d)
+
+exec >>"$log" 2>&1
+say() { printf '%s %s\n' "$(date '+%F %T')" "$*"; }
+step=starting
+finish() {
+  status=$?
+  rm -rf "$work"
+  "${compose[@]}" exec -T db dropdb -U depbrief --if-exists restore_check >/dev/null 2>&1 || true
+  if [ "$status" -ne 0 ]; then
+    say "FAILED while $step"
+    server-notify "Backup failed" "Departure Brief's nightly copy failed while $step. See $log on the server." 4 warning || true
+  fi
+}
+trap finish EXIT
+
+say "copy of $day"
+install -d -m 700 "$dir"
+dump=$dir/depbrief-$day.dump
+
+step="dumping the database"
+"${compose[@]}" exec -T db pg_dump -U depbrief -d depbrief --format=custom >"$dump.part"
+mv "$dump.part" "$dump"
+
+step="restoring the copy into a scratch database"
+"${compose[@]}" exec -T db dropdb -U depbrief --if-exists restore_check
+"${compose[@]}" exec -T db createdb -U depbrief restore_check
+"${compose[@]}" exec -T db pg_restore -U depbrief -d restore_check --no-owner --exit-on-error <"$dump"
+
+step="counting the restored rows"
+# Exact counts of every table, as "rows <table> <count>" lines.
+rows=$("${compose[@]}" exec -T db psql -U depbrief -d restore_check -At -F ' ' -c "
+  select 'rows', table_name,
+         (xpath('/row/c/text()', query_to_xml(format('select count(*) as c from public.%I', table_name), false, true, '')))[1]::text
+  from information_schema.tables
+  where table_schema = 'public' and table_type = 'BASE TABLE'
+  order by table_name")
+[ -n "$rows" ] || { step="counting the restored rows (no tables came back)"; exit 1; }
+"${compose[@]}" exec -T db dropdb -U depbrief restore_check
+
+step="writing the manifest"
+cp "$dump" "$work/depbrief.dump"
+{
+  echo "made $(date -u +%FT%TZ)"
+  echo "app $(git -C /opt/depbrief/src rev-parse --short HEAD)"
+  echo "postgres $("${compose[@]}" exec -T db postgres --version | awk '{print $NF}')"
+  echo "bytes $(stat -c %s "$dump")"
+  echo "sha256 $(sha256sum "$dump" | cut -d' ' -f1)"
+  echo "$rows"
+} >"$work/MANIFEST"
+
+step="pushing the copy to GitHub"
+git -C "$work" init -q -b "copy/$day"
+git -C "$work" add depbrief.dump MANIFEST
+git -C "$work" -c user.name="Departure Brief server" -c user.email="backup@depbrief.invalid" commit -q -m "Copy of $day"
+git -C "$work" remote add origin "$remote"
+# Forced, so running it twice in a day replaces that day's copy.
+git -C "$work" push -q --force origin "copy/$day"
+
+find "$dir" -name 'depbrief-*.dump' -mtime +6 -delete
+touch /var/lib/server-check/last-backup-ok
+say "ok: $(stat -c %s "$dump") bytes, $(grep -c '^rows ' "$work/MANIFEST") tables, pushed as copy/$day"

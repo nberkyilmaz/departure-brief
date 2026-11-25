@@ -1,0 +1,8 @@
+// Security updates already install themselves every day (Ubuntu's default,
+// in 20auto-upgrades and 50unattended-upgrades). Some, like a new kernel,
+// only take effect after a restart, so restart when one asks for it, at
+// 04:30 server time (Toronto): after the 03:23 backup and outside the hours
+// the other cron job runs. Docker brings every container back by itself.
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
+Unattended-Upgrade::Automatic-Reboot-Time "04:30";

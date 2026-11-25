@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# Every five minutes from /etc/cron.d/depbrief: is everything on this server
+# that should answer, answering?
+#
+#   - the Departure Brief API, on the server itself
+#   - the same through Caddy over HTTPS, from the moment the DNS record for
+#     its name points here, and the certificate's expiry
+#   - the disk, and the age of the last good backup
+#
+# A problem has to show on two runs in a row before it's pushed to the phone
+# (server-notify), so a restart or one slow minute wakes nobody. Then there's
+# one push when it starts, one when it clears, and a reminder every six hours
+# while it lasts.
+set -uo pipefail
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export LC_ALL=C # sort and join must agree on order
+
+name=depbrief-api.nberkyilmaz.com
+state=/var/lib/server-check
+log=/var/log/server-check.log
+mkdir -p "$state"
+now=$(date +%s)
+say() { printf '%s %s\n' "$(date '+%F %T')" "$*" >>"$log"; }
+
+problems=() # "key|what's wrong"; the key is what has to repeat, the text can change
+
+# 1. The API itself, on loopback.
+if ! body=$(curl -sS -m 20 http://127.0.0.1:3000/api/health 2>&1) || ! grep -q '"ok":true' <<<"$body"; then
+  body=$(tr '\n' ' ' <<<"$body")
+  problems+=("api|The Departure Brief API isn't healthy on the server: ${body:0:160}")
+fi
+
+# 2. HTTPS through Caddy. Asked of Caddy on this machine with the real name,
+# so the certificate is checked, and without the local resolver, which may
+# still hold the "no such name" it cached before the record existed.
+https_ok() {
+  curl -sS -m 20 -o /dev/null -w '%{http_code}' --resolve "$name:443:127.0.0.1" "https://$name/api/health" 2>/dev/null | grep -q '^200$'
+}
+me=$(ip -4 -o addr show scope global | awk '{print $4}' | cut -d/ -f1 | head -n 1)
+dns=$(dig +short +time=5 +tries=2 A "$name" @1.1.1.1 2>/dev/null | tail -n 1)
+if [ "$dns" = "$me" ] || [ -e "$state/https-live" ]; then
+  if ! https_ok && [ "$dns" = "$me" ] && [ ! -e "$state/caddy-kicked" ]; then
+    # The record has just appeared. Caddy has been asking for the certificate
+    # since it started, backing off up to hours between tries; a restart
+    # makes it ask now.
+    touch "$state/caddy-kicked"
+    say "the DNS record for $name now points here; restarting Caddy so it asks for the certificate now"
+    docker restart caddy >/dev/null
+    for _ in $(seq 1 18); do sleep 10; https_ok && break; done
+  fi
+  if https_ok; then
+    if [ ! -e "$state/https-live" ]; then
+      touch "$state/https-live"
+      say "https://$name is live"
+      server-notify "HTTPS is live" "https://$name/api/health answers, with a real certificate." 3 white_check_mark
+    fi
+    end=$(echo | openssl s_client -connect 127.0.0.1:443 -servername "$name" 2>/dev/null | openssl x509 -noout -enddate 2>/dev/null | cut -d= -f2)
+    if [ -n "$end" ]; then
+      days=$((($(date -d "$end" +%s) - now) / 86400))
+      [ "$days" -lt 10 ] && problems+=("cert|The certificate for $name runs out in $days days and hasn't been renewed")
+    fi
+  else
+    problems+=("https|https://$name/api/health doesn't answer 200 through Caddy (docker logs caddy)")
+  fi
+fi
+
+# 3. The disk.
+used=$(df --output=pcent / | tail -n 1 | tr -dc 0-9)
+[ "$used" -ge 85 ] && problems+=("disk|The disk is ${used}% full")
+
+# 4. The nightly copy of the database.
+if [ -e "$state/last-backup-ok" ]; then
+  hours=$(((now - $(stat -c %Y "$state/last-backup-ok")) / 3600))
+  [ "$hours" -ge 30 ] && problems+=("backup|No good backup for $hours hours (/var/log/depbrief-backup.log)")
+fi
+
+# What's wrong now, what was wrong last run, and what's already been pushed.
+current=$state/current previous=$state/previous alerting=$state/alerting
+touch "$previous" "$alerting"
+if [ ${#problems[@]} -gt 0 ]; then printf '%s\n' "${problems[@]}"; fi | sort -t'|' -k1,1 -u >"$current"
+[ -s "$current" ] && say "seen: $(cut -d'|' -f2- "$current" | paste -sd ';' -)"
+confirmed=$(join -t'|' -o 1.1,1.2 "$current" <(cut -d'|' -f1 "$previous" | sort -u) 2>/dev/null)
+
+if [ "$(cut -d'|' -f1 <<<"$confirmed")" != "$(cut -d'|' -f1 "$alerting")" ]; then
+  if [ -n "$confirmed" ]; then
+    server-notify "Server problem" "$(cut -d'|' -f2- <<<"$confirmed")" 4 warning
+  else
+    server-notify "Server OK again" "Cleared: $(cut -d'|' -f2- "$alerting" | paste -sd ';' -)" 3 white_check_mark
+  fi
+  printf '%s' "${confirmed:+$confirmed$'\n'}" >"$alerting"
+  touch "$state/last-push"
+elif [ -n "$confirmed" ] && [ $((now - $(stat -c %Y "$state/last-push" 2>/dev/null || echo 0))) -ge 21600 ]; then
+  server-notify "Server problem, still" "$(cut -d'|' -f2- <<<"$confirmed")" 4 warning
+  touch "$state/last-push"
+fi
+mv "$current" "$previous"
+touch "$state/last-run"

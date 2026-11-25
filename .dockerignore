@@ -13,3 +13,4 @@ docs
 !.env.example
 coverage
 **/*.tsbuildinfo
+deploy

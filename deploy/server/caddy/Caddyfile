@@ -1,0 +1,9 @@
+{
+	# Only TCP 80 and 443 are open, so no HTTP/3 (it would want UDP 443).
+	servers {
+		protocols h1 h2
+	}
+}
+
+# One file per site, so another project can add its own beside this one.
+import /etc/caddy/sites/*.caddy

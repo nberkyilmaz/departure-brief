@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Saves the ntfy topic the server's alerts go to, readable by root only, and
+# sends a test push. Run as root:  server-ntfy-topic
+# What's typed isn't shown. Running it again replaces the topic.
+set -euo pipefail
+[ "$(id -u)" = 0 ] || { echo "Run it as root."; exit 1; }
+install -d -m 700 /etc/server-check
+read -r -s -p "ntfy topic: " topic
+echo
+[ -n "$topic" ] || { echo "Nothing typed, so nothing changed."; exit 1; }
+(umask 077 && printf '%s\n' "$topic" >/etc/server-check/ntfy-topic)
+if /usr/local/sbin/server-notify "Server alerts connected" "The server's checks will push here when something stops answering, and again when it's back." 3 white_check_mark; then
+  echo "Saved. A test push is on its way to the phone."
+else
+  echo "Saved, but the test push failed; see /var/log/server-check.log."
+  exit 1
+fi

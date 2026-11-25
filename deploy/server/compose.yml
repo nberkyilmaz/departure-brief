@@ -1,0 +1,89 @@
+# The API and its database on the Hetzner server (ARM64, 2 vCPU, 4 GB).
+#
+# Run from a checkout of this repository at /opt/depbrief/src by
+# /usr/local/sbin/depbrief-update; see deploy/server/README.md. Secrets are
+# not here: /etc/depbrief/db.env and /etc/depbrief/api.env are made on the
+# server, readable by root only.
+#
+# The server also runs another job from cron, outside Docker. Everything
+# here is capped so it can't take that job's memory or CPU: hard limits on
+# memory (no swap), a CPU ceiling, a low CPU weight so the other job wins
+# when both want the processor, and a high OOM score so the kernel picks
+# these first if memory ever runs out.
+
+name: depbrief
+
+services:
+  db:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    env_file: /etc/depbrief/db.env
+    environment:
+      POSTGRES_USER: depbrief
+      POSTGRES_DB: depbrief
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [internal]
+    shm_size: 128m
+    mem_limit: 512m
+    memswap_limit: 512m
+    cpus: 0.75
+    cpu_shares: 256
+    pids_limit: 200
+    oom_score_adj: 500
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U depbrief -d depbrief']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    image: depbrief-api:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    # DATABASE_URL, with the password from db.env.
+    env_file: /etc/depbrief/api.env
+    environment:
+      PORT: '3000'
+      HOST: 0.0.0.0
+      DEPBRIEF_USER_AGENT: depbrief/0.1 (+https://github.com/nberkyilmaz/departure-brief; contact@nberkyilmaz.com)
+      # Caddy's fixed address on the edge network, and nobody else's: only
+      # Caddy's X-Forwarded-For is believed, and Caddy writes it itself.
+      TRUST_PROXY: 172.30.0.2
+      DEPBRIEF_ALLOWED_ORIGINS: https://nberkyilmaz.com,https://nberkyilmaz.github.io
+      NODE_OPTIONS: --max-old-space-size=512
+    # Loopback only, for the health check on the server. The public way in
+    # is Caddy, over the edge network.
+    ports:
+      - '127.0.0.1:3000:3000'
+    networks:
+      internal: {}
+      edge:
+        aliases: [depbrief-api]
+    mem_limit: 768m
+    memswap_limit: 768m
+    cpus: 1.0
+    cpu_shares: 256
+    pids_limit: 200
+    oom_score_adj: 500
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      # The first boot on an empty database loads 27,000 aerodromes.
+      start_period: 300s
+
+volumes:
+  pgdata:
+
+networks:
+  internal:
+  # Shared with Caddy (/opt/caddy), created once by install.sh.
+  edge:
+    external: true

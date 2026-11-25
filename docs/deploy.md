@@ -15,9 +15,13 @@ reads that copy on every load and judges it itself. It holds no logic about
 weather — it moves bytes and says when it fetched them. **This is the
 recommended way to put live weather on the site**, and it costs nothing.
 
-**The API** (Render and Neon) fetches too, and also remembers: stored
-briefings, "what changed since last time" across visits, and forecast
-verification. It is the full server, and the free tier sleeps; see below.
+**The API** fetches too, and also remembers: stored briefings, "what changed
+since last time" across visits, and forecast verification. It is the full
+server. It runs, always on, on a small Hetzner server with its own Postgres,
+at `https://depbrief-api.nberkyilmaz.com`; how that is set up, updated,
+watched and backed up is in [`deploy/server/README.md`](../deploy/server/README.md).
+Render and Neon, on free plans that sleep, are described below as the other
+way to run it.
 
 Where "free" has a catch, the catch is written down.
 
@@ -30,8 +34,8 @@ You have to create these yourself; nothing here can do it for you.
 | | What | Cost | Why |
 |---|---|---|---|
 | 1 | [Cloudflare](https://dash.cloudflare.com/sign-up) | free | Runs the relay. 100,000 requests a day, 1,000 storage writes a day (the relay uses about 600), and it does not sleep. |
-| 2 | [Neon](https://neon.tech) | free tier | Only for the API. Postgres that does not expire. Render's own free Postgres is deleted after 30 days, which would take every stored briefing with it. |
-| 3 | [Render](https://render.com) | free tier, or $7/month always on | Only for the API. The free tier sleeps after 15 minutes idle and the next request waits ~50 s. |
+| 2 | [Hetzner](https://www.hetzner.com/cloud) | CAX11, about €6.50/month with its IPv4 address (2026 prices, before tax) | Runs the API and its database, always on. Shared with another job on the same server, so the API adds nothing to the bill. See [`deploy/server`](../deploy/server/README.md). |
+| 3 | [Neon](https://neon.tech) and [Render](https://render.com) | free tiers, or $7/month always on | Only to run the API there instead. Render's free tier sleeps after 15 minutes idle and the next request waits ~50 s; its own free Postgres is deleted after 30 days, which is why the database would be Neon's. |
 | 4 | A domain | ~$10/year | Registered: `nberkyilmaz.com`, at Cloudflare. See [the domain](#the-domain). |
 
 ---
@@ -121,7 +125,10 @@ VITE_DEMO=1 VITE_RELAY=http://127.0.0.1:8787 npm run dev -w apps/web
 
 ---
 
-## The API, step by step
+## The API on Render, step by step
+
+The live API runs on its own server instead ([`deploy/server`](../deploy/server/README.md));
+this is the free, sleeping way to run it.
 
 ### 1. A database
 
@@ -304,9 +311,9 @@ alone, `https://nberkyilmaz.com`:
 1. **`ALLOWED_ORIGINS`** in [`apps/relay/wrangler.toml`](../apps/relay/wrangler.toml).
    Already set. A page the relay does not name cannot read its answers, and
    falls back to the recorded weather.
-2. **`DEPBRIEF_ALLOWED_ORIGINS`** on the Render service, from
-   [`render.yaml`](../render.yaml). Already set there for when the API is
-   deployed.
+2. **`DEPBRIEF_ALLOWED_ORIGINS`** for the API, in
+   [`deploy/server/compose.yml`](../deploy/server/compose.yml) (and
+   [`render.yaml`](../render.yaml) for Render). Already set.
 
 ### DNS
 
@@ -337,17 +344,21 @@ cannot be claimed by another account's repository if it is ever detached
 from this one, which is the takeover that unverified Pages domains are
 known for.
 
-The API, if it is deployed, goes on a subdomain named for the project, so
-that the domain can carry other projects' services beside it:
+The API goes on a subdomain named for the project, so that the domain can
+carry other projects' services beside it. It points straight at the server:
 
 ```
-CNAME depbrief-api   <your-service>.onrender.com.
+A     depbrief-api   5.75.174.24
 ```
 
-Add `depbrief-api.nberkyilmaz.com` in Render (Settings → Custom Domains)
-**first** — it shows you the exact target — then create the CNAME, then
-Verify. Render issues and renews the certificate. Leave this record DNS
-only as well: proxying breaks Render's hostname validation.
+**DNS only** (grey cloud), TTL Auto. Caddy on the server gets the
+certificate from Let's Encrypt by answering on port 80, and renews it; it
+cannot while Cloudflare's proxy answers in its place. The server notices the
+record within five minutes, asks for the certificate at once, and pushes
+"HTTPS is live" to the phone when it has it.
+
+(On Render instead: add the name in Render's Settings → Custom Domains
+first, then `CNAME depbrief-api <your-service>.onrender.com.`, DNS only.)
 
 Then tick **Enforce HTTPS** on the user site once the certificate has been
 issued. Until it has, the domain answers with GitHub's certificate for

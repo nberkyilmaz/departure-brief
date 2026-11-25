@@ -1,0 +1,40 @@
+# Caddy, in front of everything on the server that answers on the web.
+#
+# Installed at /opt/caddy by deploy/server/install.sh. It gets and renews the
+# certificates itself (Let's Encrypt, HTTP challenge), so ports 80 and 443
+# must reach it and each name's DNS must point straight at the server (DNS
+# only, not proxied by Cloudflare).
+
+name: caddy
+
+services:
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      # conf/Caddyfile and conf/sites/*.caddy, put there by install.sh.
+      - ./conf:/etc/caddy:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      edge:
+        # Fixed, because the API believes X-Forwarded-For from this address only.
+        ipv4_address: 172.30.0.2
+    mem_limit: 128m
+    memswap_limit: 128m
+    cpus: 0.5
+    cpu_shares: 256
+    pids_limit: 100
+    oom_score_adj: 500
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  edge:
+    external: true

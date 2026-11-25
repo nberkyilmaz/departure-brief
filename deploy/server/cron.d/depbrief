@@ -1,0 +1,9 @@
+# Departure Brief on this server. Times are the server's own (Toronto).
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Is everything answering? Pushes to the phone when it isn't.
+*/5 * * * * root /usr/local/sbin/server-check
+
+# The nightly copy of the database, kept off the server.
+23 3 * * * root /usr/local/sbin/depbrief-backup
